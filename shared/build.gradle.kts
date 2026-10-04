@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace = "com.vitahealth.tata.shared"
-    compileSdk = 37
+    compileSdk = 36
 
     defaultConfig {
         minSdk = 29
