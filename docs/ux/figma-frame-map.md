@@ -4,7 +4,7 @@ This file is the implementation traceability map between UX states, User Stories
 
 | UX area/state | Bounded Context | Planned screen/state |
 | --- | --- | --- |
-| Onboarding, registration, verification | identity | onboarding / registration state |
+| Onboarding, registration, verification | identity | `CaregiverRegistrationScreen` + account / verification / verification-expired / complete states |
 | PIN access, incorrect PIN, temporary lockout | identity | `PinAccessScreen` + state |
 | Link & consent, invalid code, consent required | carelink | link/consent screens + state |
 | Medications, details, add medication, create/manage treatment | treatment | treatment presentation package |
