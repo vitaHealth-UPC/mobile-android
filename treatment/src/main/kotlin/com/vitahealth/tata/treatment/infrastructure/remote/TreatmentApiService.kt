@@ -32,7 +32,7 @@ data class TreatmentResponse(
     val medicationId: String?,
     val dose: String?,
     val frequency: String?,
-    val scheduledTime: String?,
+    val scheduledTimes: List<String>?,
     val instructions: String?,
     val reminderLeadMinutes: Int?,
 )

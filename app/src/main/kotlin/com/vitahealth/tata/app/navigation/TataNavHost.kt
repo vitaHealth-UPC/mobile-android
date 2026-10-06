@@ -14,6 +14,7 @@ import com.vitahealth.tata.identity.presentation.registration.CaregiverRegistrat
 import com.vitahealth.tata.treatment.presentation.medication.MedicationRegistrationRoute
 import com.vitahealth.tata.treatment.presentation.treatment.TreatmentCreationRoute
 import com.vitahealth.tata.treatment.presentation.treatment.TreatmentDoseFrequencyRoute
+import com.vitahealth.tata.treatment.presentation.treatment.TreatmentScheduleInstructionsRoute
 
 @Composable
 fun TataNavHost(
@@ -203,6 +204,81 @@ fun TataNavHost(
                     medicationLabel = medicationLabel,
                     treatmentId = treatmentId,
                     treatmentName = treatmentName,
+                ),
+                onCompleted = { basics ->
+                    navController.navigate(
+                        RootDestination.TreatmentScheduleInstructions.createRoute(
+                            caregiverId = caregiverId,
+                            olderAdultId = olderAdultId,
+                            olderAdultName = olderAdultName,
+                            medicationId = medicationId,
+                            medicationLabel = medicationLabel,
+                            treatmentId = treatmentId,
+                            treatmentName = treatmentName,
+                            dosage = basics.dosage.value,
+                            frequency = basics.frequency.value,
+                        ),
+                    ) {
+                        popUpTo(RootDestination.TreatmentDoseFrequency.route) { inclusive = true }
+                    }
+                },
+            )
+        }
+
+        composable(
+            route = RootDestination.TreatmentScheduleInstructions.route,
+            arguments = listOf(
+                navArgument(RootDestination.TreatmentScheduleInstructions.caregiverIdArgument) { type = NavType.StringType },
+                navArgument(RootDestination.TreatmentScheduleInstructions.olderAdultIdArgument) { type = NavType.StringType },
+                navArgument(RootDestination.TreatmentScheduleInstructions.olderAdultNameArgument) { type = NavType.StringType },
+                navArgument(RootDestination.TreatmentScheduleInstructions.medicationIdArgument) { type = NavType.StringType },
+                navArgument(RootDestination.TreatmentScheduleInstructions.medicationLabelArgument) { type = NavType.StringType },
+                navArgument(RootDestination.TreatmentScheduleInstructions.treatmentIdArgument) { type = NavType.StringType },
+                navArgument(RootDestination.TreatmentScheduleInstructions.treatmentNameArgument) { type = NavType.StringType },
+                navArgument(RootDestination.TreatmentScheduleInstructions.dosageArgument) { type = NavType.StringType },
+                navArgument(RootDestination.TreatmentScheduleInstructions.frequencyArgument) { type = NavType.StringType },
+            ),
+        ) { backStackEntry ->
+            val app = androidx.compose.ui.platform.LocalContext.current.applicationContext as TataApplication
+            val caregiverId = requireNotNull(
+                backStackEntry.arguments?.getString(RootDestination.TreatmentScheduleInstructions.caregiverIdArgument),
+            )
+            val olderAdultId = requireNotNull(
+                backStackEntry.arguments?.getString(RootDestination.TreatmentScheduleInstructions.olderAdultIdArgument),
+            )
+            val olderAdultName = requireNotNull(
+                backStackEntry.arguments?.getString(RootDestination.TreatmentScheduleInstructions.olderAdultNameArgument),
+            )
+            val medicationId = requireNotNull(
+                backStackEntry.arguments?.getString(RootDestination.TreatmentScheduleInstructions.medicationIdArgument),
+            )
+            val medicationLabel = requireNotNull(
+                backStackEntry.arguments?.getString(RootDestination.TreatmentScheduleInstructions.medicationLabelArgument),
+            )
+            val treatmentId = requireNotNull(
+                backStackEntry.arguments?.getString(RootDestination.TreatmentScheduleInstructions.treatmentIdArgument),
+            )
+            val treatmentName = requireNotNull(
+                backStackEntry.arguments?.getString(RootDestination.TreatmentScheduleInstructions.treatmentNameArgument),
+            )
+            val dosage = requireNotNull(
+                backStackEntry.arguments?.getString(RootDestination.TreatmentScheduleInstructions.dosageArgument),
+            )
+            val frequency = requireNotNull(
+                backStackEntry.arguments?.getString(RootDestination.TreatmentScheduleInstructions.frequencyArgument),
+            )
+
+            TreatmentScheduleInstructionsRoute(
+                factory = app.container.treatmentScheduleInstructionsViewModelFactory(
+                    caregiverId = caregiverId,
+                    olderAdultId = olderAdultId,
+                    olderAdultName = olderAdultName,
+                    medicationId = medicationId,
+                    medicationLabel = medicationLabel,
+                    treatmentId = treatmentId,
+                    treatmentName = treatmentName,
+                    dosage = dosage,
+                    frequency = frequency,
                 ),
             )
         }

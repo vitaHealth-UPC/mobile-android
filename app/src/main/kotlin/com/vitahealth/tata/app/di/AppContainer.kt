@@ -15,11 +15,13 @@ import com.vitahealth.tata.identity.presentation.registration.CaregiverRegistrat
 import com.vitahealth.tata.treatment.application.handlers.CreateTreatmentCommandHandler
 import com.vitahealth.tata.treatment.application.handlers.RegisterMedicationCommandHandler
 import com.vitahealth.tata.treatment.application.handlers.SetDoseFrequencyCommandHandler
+import com.vitahealth.tata.treatment.application.handlers.SetScheduleInstructionsCommandHandler
 import com.vitahealth.tata.treatment.infrastructure.remote.RemoteTreatmentRepository
 import com.vitahealth.tata.treatment.infrastructure.remote.TreatmentApiService
 import com.vitahealth.tata.treatment.presentation.medication.MedicationRegistrationViewModel
 import com.vitahealth.tata.treatment.presentation.treatment.TreatmentCreationViewModel
 import com.vitahealth.tata.treatment.presentation.treatment.TreatmentDoseFrequencyViewModel
+import com.vitahealth.tata.treatment.presentation.treatment.TreatmentScheduleInstructionsViewModel
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
@@ -96,5 +98,28 @@ class AppContainer(
         treatmentId = treatmentId,
         treatmentName = treatmentName,
         handler = SetDoseFrequencyCommandHandler(),
+    )
+
+    fun treatmentScheduleInstructionsViewModelFactory(
+        caregiverId: String,
+        olderAdultId: String,
+        olderAdultName: String,
+        medicationId: String,
+        medicationLabel: String,
+        treatmentId: String,
+        treatmentName: String,
+        dosage: String,
+        frequency: String,
+    ) = TreatmentScheduleInstructionsViewModel.Factory(
+        caregiverId = caregiverId,
+        olderAdultId = olderAdultId,
+        olderAdultName = olderAdultName,
+        medicationId = medicationId,
+        medicationLabel = medicationLabel,
+        treatmentId = treatmentId,
+        treatmentName = treatmentName,
+        dosage = dosage,
+        frequency = frequency,
+        handler = SetScheduleInstructionsCommandHandler(),
     )
 }
