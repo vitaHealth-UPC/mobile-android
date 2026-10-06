@@ -80,6 +80,8 @@ class TreatmentCreationViewModel(
                 "Completa el nombre del tratamiento."
             "CARE_LINK_NOT_AUTHORIZED" ->
                 "El vínculo de cuidado ya no está activo. Vuelve a vincular al adulto mayor."
+            "INVALID_INITIAL_TREATMENT_STATE", "INVALID_TREATMENT_STATE" ->
+                "El tratamiento debe permanecer como borrador hasta completar su pauta."
             "NETWORK_UNAVAILABLE" ->
                 "No hay conexión. Inténtalo nuevamente."
             else -> failure.message

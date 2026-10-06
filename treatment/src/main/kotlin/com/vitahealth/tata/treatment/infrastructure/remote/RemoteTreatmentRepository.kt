@@ -61,15 +61,22 @@ class RemoteTreatmentRepository(
             )
             val body = response.body()
             if (response.isSuccessful && body != null) {
-                AppResult.Success(
-                    Treatment(
-                        id = body.id,
-                        olderAdultId = body.olderAdultId,
-                        name = body.name,
-                        status = runCatching { TreatmentStatus.valueOf(body.status) }
-                            .getOrDefault(TreatmentStatus.INCOMPLETE),
-                    ),
-                )
+                val status = runCatching { TreatmentStatus.valueOf(body.status) }.getOrNull()
+                if (status == null) {
+                    AppResult.Failure(
+                        message = "El servicio devolvió un estado de tratamiento no reconocido.",
+                        code = "INVALID_TREATMENT_STATE",
+                    )
+                } else {
+                    AppResult.Success(
+                        Treatment(
+                            id = body.id,
+                            olderAdultId = body.olderAdultId,
+                            name = body.name,
+                            status = status,
+                        ),
+                    )
+                }
             } else {
                 AppResult.Failure(
                     message = treatmentMessage(response.code()),
