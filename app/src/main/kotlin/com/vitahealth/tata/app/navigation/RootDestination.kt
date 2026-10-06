@@ -224,4 +224,26 @@ sealed interface RootDestination {
             reminderDelay.toString()
     }
 
+
+    data object TreatmentDetail : RootDestination {
+        const val caregiverIdArgument = "caregiverId"
+        const val olderAdultNameArgument = "olderAdultName"
+        const val treatmentIdArgument = "treatmentId"
+        const val medicationLabelHintArgument = "medicationLabelHint"
+
+        override val route: String =
+            "treatment-detail/{$caregiverIdArgument}/{$olderAdultNameArgument}/{$treatmentIdArgument}/{$medicationLabelHintArgument}"
+
+        fun createRoute(
+            caregiverId: String,
+            olderAdultName: String,
+            treatmentId: String,
+            medicationLabelHint: String,
+        ): String = "treatment-detail/" +
+            Uri.encode(caregiverId) + "/" +
+            Uri.encode(olderAdultName) + "/" +
+            Uri.encode(treatmentId) + "/" +
+            Uri.encode(medicationLabelHint.ifBlank { " " })
+    }
+
 }

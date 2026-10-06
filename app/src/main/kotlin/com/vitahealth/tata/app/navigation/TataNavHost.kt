@@ -17,6 +17,7 @@ import com.vitahealth.tata.treatment.presentation.treatment.TreatmentDoseFrequen
 import com.vitahealth.tata.treatment.presentation.treatment.TreatmentScheduleInstructionsRoute
 import com.vitahealth.tata.treatment.presentation.treatment.TreatmentReminderRoute
 import com.vitahealth.tata.treatment.presentation.treatment.TreatmentLifecycleRoute
+import com.vitahealth.tata.treatment.presentation.treatment.TreatmentDetailRoute
 import java.time.format.DateTimeFormatter
 
 @Composable
@@ -466,6 +467,50 @@ fun TataNavHost(
                     instructions = instructions,
                     reminderDelayMinutes = reminderDelay,
                 ),
+                onOpenDetail = {
+                    navController.navigate(
+                        RootDestination.TreatmentDetail.createRoute(
+                            caregiverId = caregiverId,
+                            olderAdultName = olderAdultName,
+                            treatmentId = treatmentId,
+                            medicationLabelHint = medicationLabel,
+                        ),
+                    )
+                },
+            )
+        }
+
+        composable(
+            route = RootDestination.TreatmentDetail.route,
+            arguments = listOf(
+                navArgument(RootDestination.TreatmentDetail.caregiverIdArgument) { type = NavType.StringType },
+                navArgument(RootDestination.TreatmentDetail.olderAdultNameArgument) { type = NavType.StringType },
+                navArgument(RootDestination.TreatmentDetail.treatmentIdArgument) { type = NavType.StringType },
+                navArgument(RootDestination.TreatmentDetail.medicationLabelHintArgument) { type = NavType.StringType },
+            ),
+        ) { backStackEntry ->
+            val app = androidx.compose.ui.platform.LocalContext.current.applicationContext as TataApplication
+            val caregiverId = requireNotNull(
+                backStackEntry.arguments?.getString(RootDestination.TreatmentDetail.caregiverIdArgument),
+            )
+            val olderAdultName = requireNotNull(
+                backStackEntry.arguments?.getString(RootDestination.TreatmentDetail.olderAdultNameArgument),
+            )
+            val treatmentId = requireNotNull(
+                backStackEntry.arguments?.getString(RootDestination.TreatmentDetail.treatmentIdArgument),
+            )
+            val medicationLabelHint = requireNotNull(
+                backStackEntry.arguments?.getString(RootDestination.TreatmentDetail.medicationLabelHintArgument),
+            ).trim()
+
+            TreatmentDetailRoute(
+                factory = app.container.treatmentDetailViewModelFactory(
+                    caregiverId = caregiverId,
+                    olderAdultName = olderAdultName,
+                    treatmentId = treatmentId,
+                    medicationLabelHint = medicationLabelHint,
+                ),
+                onBack = { navController.popBackStack() },
             )
         }
     }
