@@ -6,4 +6,8 @@ sealed interface RootDestination {
     data object Onboarding : RootDestination {
         override val route: String = "onboarding"
     }
+
+    data object CaregiverRegistration : RootDestination {
+        override val route: String = "caregiver-registration"
+    }
 }
