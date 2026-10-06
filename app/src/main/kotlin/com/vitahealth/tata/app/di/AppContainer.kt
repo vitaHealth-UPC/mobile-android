@@ -12,9 +12,12 @@ import com.vitahealth.tata.identity.application.handlers.VerifyCaregiverEmailCom
 import com.vitahealth.tata.identity.infrastructure.remote.IdentityApiService
 import com.vitahealth.tata.identity.infrastructure.remote.RemoteIdentityRepository
 import com.vitahealth.tata.identity.presentation.registration.CaregiverRegistrationViewModel
+import com.vitahealth.tata.intake.application.handlers.GetDoseDetailQueryHandler
 import com.vitahealth.tata.intake.application.handlers.GetNextDoseQueryHandler
 import com.vitahealth.tata.intake.infrastructure.remote.IntakeApiService
+import com.vitahealth.tata.intake.infrastructure.remote.RemoteDoseDetailRepository
 import com.vitahealth.tata.intake.infrastructure.remote.RemoteNextDoseRepository
+import com.vitahealth.tata.intake.presentation.detail.DoseDetailViewModel
 import com.vitahealth.tata.intake.presentation.home.NextDoseHomeViewModel
 import com.vitahealth.tata.treatment.application.handlers.CreateTreatmentCommandHandler
 import com.vitahealth.tata.treatment.application.handlers.GetTreatmentDetailQueryHandler
@@ -55,6 +58,7 @@ class AppContainer(
 
     private val intakeApi: IntakeApiService = retrofit.create(IntakeApiService::class.java)
     private val nextDoseRepository = RemoteNextDoseRepository(intakeApi)
+    private val doseDetailRepository = RemoteDoseDetailRepository(intakeApi)
 
     val caregiverRegistrationViewModelFactory = CaregiverRegistrationViewModel.Factory(
         registerHandler = RegisterCaregiverCommandHandler(identityRepository),
@@ -216,6 +220,11 @@ class AppContainer(
         olderAdultId = olderAdultId,
         olderAdultName = olderAdultName,
         handler = GetNextDoseQueryHandler(nextDoseRepository),
+    )
+
+    fun doseDetailViewModelFactory(intakeId: String) = DoseDetailViewModel.Factory(
+        intakeId = intakeId,
+        handler = GetDoseDetailQueryHandler(doseDetailRepository),
     )
 
 }
