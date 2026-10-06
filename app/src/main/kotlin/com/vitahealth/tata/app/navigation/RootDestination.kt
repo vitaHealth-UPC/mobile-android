@@ -261,4 +261,12 @@ sealed interface RootDestination {
             Uri.encode(olderAdultName)
     }
 
+    data object DoseDetail : RootDestination {
+        const val intakeIdArgument = "intakeId"
+        override val route: String = "dose-detail/{$intakeIdArgument}"
+
+        fun createRoute(intakeId: String): String =
+            "dose-detail/" + Uri.encode(intakeId)
+    }
+
 }

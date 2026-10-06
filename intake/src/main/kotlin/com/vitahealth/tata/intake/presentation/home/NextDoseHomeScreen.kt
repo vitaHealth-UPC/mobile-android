@@ -1,6 +1,7 @@
 package com.vitahealth.tata.intake.presentation.home
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -43,6 +44,7 @@ import java.util.Locale
 @Composable
 fun NextDoseHomeRoute(
     factory: NextDoseHomeViewModel.Factory,
+    onOpenDoseDetail: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val viewModel: NextDoseHomeViewModel = viewModel(factory = factory)
@@ -50,6 +52,7 @@ fun NextDoseHomeRoute(
     NextDoseHomeScreen(
         state = state,
         onRetry = viewModel::retry,
+        onOpenDoseDetail = onOpenDoseDetail,
         modifier = modifier,
     )
 }
@@ -58,6 +61,7 @@ fun NextDoseHomeRoute(
 fun NextDoseHomeScreen(
     state: NextDoseHomeUiState,
     onRetry: () -> Unit,
+    onOpenDoseDetail: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -83,7 +87,10 @@ fun NextDoseHomeScreen(
 
         when (state) {
             NextDoseHomeUiState.Loading -> LoadingCard()
-            is NextDoseHomeUiState.NextDoseAvailable -> NextDoseCard(state.dose)
+            is NextDoseHomeUiState.NextDoseAvailable -> NextDoseCard(
+                dose = state.dose,
+                onOpenDoseDetail = onOpenDoseDetail,
+            )
             is NextDoseHomeUiState.NoNextDose -> NoNextDoseCard()
             is NextDoseHomeUiState.Error -> ErrorCard(state.message, onRetry)
         }
@@ -111,12 +118,16 @@ private fun LoadingCard() {
 }
 
 @Composable
-private fun NextDoseCard(dose: NextDoseReadModel) {
+private fun NextDoseCard(
+    dose: NextDoseReadModel,
+    onOpenDoseDetail: (String) -> Unit,
+) {
     TataCard(
         containerColor = TataLavender,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 20.dp),
+            .padding(top = 20.dp)
+            .clickable { onOpenDoseDetail(dose.id) },
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),

@@ -21,4 +21,9 @@ interface IntakeApiService {
     suspend fun getNextDose(
         @Path("olderAdultId") olderAdultId: String,
     ): Response<IntakeResponse>
+
+    @GET("api/v1/intakes/{intakeId}")
+    suspend fun getDoseDetail(
+        @Path("intakeId") intakeId: String,
+    ): Response<IntakeResponse>
 }
