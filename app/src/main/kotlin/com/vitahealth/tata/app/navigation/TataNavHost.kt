@@ -538,6 +538,20 @@ fun TataNavHost(
                 onOpenDoseDetail = { intakeId ->
                     navController.navigate(RootDestination.DoseDetail.createRoute(intakeId))
                 },
+                onOpenAgenda = { navController.navigate(RootDestination.IntakeAgenda.createRoute(olderAdultId)) },
+            )
+        }
+
+        composable(
+            route = RootDestination.IntakeAgenda.route,
+            arguments = listOf(navArgument(RootDestination.IntakeAgenda.olderAdultIdArgument) { type = NavType.StringType }),
+        ) { backStackEntry ->
+            val app = androidx.compose.ui.platform.LocalContext.current.applicationContext as TataApplication
+            val olderAdultId = requireNotNull(backStackEntry.arguments?.getString(RootDestination.IntakeAgenda.olderAdultIdArgument))
+            com.vitahealth.tata.intake.presentation.agenda.IntakeAgendaRoute(
+                factory = app.container.intakeAgendaViewModelFactory(olderAdultId),
+                onOpenDose = { navController.navigate(RootDestination.DoseDetail.createRoute(it)) },
+                onHome = { navController.popBackStack() },
             )
         }
 
