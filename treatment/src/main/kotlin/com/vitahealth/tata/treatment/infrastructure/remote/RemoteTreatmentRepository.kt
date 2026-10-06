@@ -2,13 +2,14 @@ package com.vitahealth.tata.treatment.infrastructure.remote
 
 import com.vitahealth.tata.shared.common.result.AppResult
 import com.vitahealth.tata.treatment.application.TreatmentRepository
+import com.vitahealth.tata.treatment.application.TreatmentLifecycleRepository
 import com.vitahealth.tata.treatment.domain.model.Medication
 import com.vitahealth.tata.treatment.domain.model.Treatment
 import com.vitahealth.tata.treatment.domain.model.TreatmentStatus
 
 class RemoteTreatmentRepository(
     private val api: TreatmentApiService,
-) : TreatmentRepository {
+) : TreatmentRepository, TreatmentLifecycleRepository {
     override suspend fun registerMedication(
         caregiverId: String,
         olderAdultId: String,
@@ -77,6 +78,81 @@ class RemoteTreatmentRepository(
                         ),
                     )
                 }
+            } else {
+                AppResult.Failure(
+                    message = treatmentMessage(response.code()),
+                    code = treatmentCode(response.code()),
+                )
+            }
+        } catch (exception: Exception) {
+            networkFailure(exception)
+        }
+    }
+
+
+    override suspend fun configureTreatment(
+        caregiverId: String,
+        treatmentId: String,
+        medicationId: String,
+        dose: String,
+        frequency: String,
+        scheduledTimes: List<String>,
+        instructions: String,
+        reminderLeadMinutes: Int,
+    ): AppResult<Treatment> =
+        treatmentRequest {
+            api.configureTreatment(
+                treatmentId = treatmentId,
+                request = ConfigureTreatmentRequest(
+                    caregiverId = caregiverId,
+                    medicationId = medicationId,
+                    dose = dose,
+                    frequency = frequency,
+                    scheduledTimes = scheduledTimes,
+                    instructions = instructions,
+                    reminderLeadMinutes = reminderLeadMinutes,
+                ),
+            )
+        }
+
+    override suspend fun activateTreatment(
+        caregiverId: String,
+        treatmentId: String,
+    ): AppResult<Treatment> =
+        treatmentRequest { api.activateTreatment(treatmentId, caregiverId) }
+
+    override suspend fun pauseTreatment(
+        caregiverId: String,
+        treatmentId: String,
+    ): AppResult<Treatment> =
+        treatmentRequest { api.pauseTreatment(treatmentId, caregiverId) }
+
+    override suspend fun resumeTreatment(
+        caregiverId: String,
+        treatmentId: String,
+    ): AppResult<Treatment> =
+        treatmentRequest { api.resumeTreatment(treatmentId, caregiverId) }
+
+    private suspend fun treatmentRequest(
+        request: suspend () -> retrofit2.Response<TreatmentResponse>,
+    ): AppResult<Treatment> {
+        return try {
+            val response = request()
+            val body = response.body()
+            if (response.isSuccessful && body != null) {
+                val status = runCatching { TreatmentStatus.valueOf(body.status) }.getOrNull()
+                    ?: return AppResult.Failure(
+                        message = "El servicio devolvió un estado de tratamiento no reconocido.",
+                        code = "INVALID_TREATMENT_STATE",
+                    )
+                AppResult.Success(
+                    Treatment(
+                        id = body.id,
+                        olderAdultId = body.olderAdultId,
+                        name = body.name,
+                        status = status,
+                    ),
+                )
             } else {
                 AppResult.Failure(
                     message = treatmentMessage(response.code()),

@@ -16,6 +16,7 @@ import com.vitahealth.tata.treatment.presentation.treatment.TreatmentCreationRou
 import com.vitahealth.tata.treatment.presentation.treatment.TreatmentDoseFrequencyRoute
 import com.vitahealth.tata.treatment.presentation.treatment.TreatmentScheduleInstructionsRoute
 import com.vitahealth.tata.treatment.presentation.treatment.TreatmentReminderRoute
+import com.vitahealth.tata.treatment.presentation.treatment.TreatmentLifecycleRoute
 import java.time.format.DateTimeFormatter
 
 @Composable
@@ -371,6 +372,99 @@ fun TataNavHost(
                     frequency = frequency,
                     scheduleText = scheduleText,
                     instructions = instructions,
+                ),
+                onCompleted = { policy ->
+                    navController.navigate(
+                        RootDestination.TreatmentLifecycle.createRoute(
+                            caregiverId = caregiverId,
+                            olderAdultId = olderAdultId,
+                            olderAdultName = olderAdultName,
+                            medicationId = medicationId,
+                            medicationLabel = medicationLabel,
+                            treatmentId = treatmentId,
+                            treatmentName = treatmentName,
+                            dosage = dosage,
+                            frequency = frequency,
+                            scheduleText = scheduleText,
+                            instructions = instructions,
+                            reminderDelay = policy.followUpDelayMinutes.value,
+                        ),
+                    ) {
+                        popUpTo(RootDestination.TreatmentReminders.route) { inclusive = true }
+                    }
+                },
+            )
+        }
+
+        composable(
+            route = RootDestination.TreatmentLifecycle.route,
+            arguments = listOf(
+                navArgument(RootDestination.TreatmentLifecycle.caregiverIdArgument) { type = NavType.StringType },
+                navArgument(RootDestination.TreatmentLifecycle.olderAdultIdArgument) { type = NavType.StringType },
+                navArgument(RootDestination.TreatmentLifecycle.olderAdultNameArgument) { type = NavType.StringType },
+                navArgument(RootDestination.TreatmentLifecycle.medicationIdArgument) { type = NavType.StringType },
+                navArgument(RootDestination.TreatmentLifecycle.medicationLabelArgument) { type = NavType.StringType },
+                navArgument(RootDestination.TreatmentLifecycle.treatmentIdArgument) { type = NavType.StringType },
+                navArgument(RootDestination.TreatmentLifecycle.treatmentNameArgument) { type = NavType.StringType },
+                navArgument(RootDestination.TreatmentLifecycle.dosageArgument) { type = NavType.StringType },
+                navArgument(RootDestination.TreatmentLifecycle.frequencyArgument) { type = NavType.StringType },
+                navArgument(RootDestination.TreatmentLifecycle.scheduleTextArgument) { type = NavType.StringType },
+                navArgument(RootDestination.TreatmentLifecycle.instructionsArgument) { type = NavType.StringType },
+                navArgument(RootDestination.TreatmentLifecycle.reminderDelayArgument) { type = NavType.IntType },
+            ),
+        ) { backStackEntry ->
+            val app = androidx.compose.ui.platform.LocalContext.current.applicationContext as TataApplication
+            val caregiverId = requireNotNull(
+                backStackEntry.arguments?.getString(RootDestination.TreatmentLifecycle.caregiverIdArgument),
+            )
+            val olderAdultId = requireNotNull(
+                backStackEntry.arguments?.getString(RootDestination.TreatmentLifecycle.olderAdultIdArgument),
+            )
+            val olderAdultName = requireNotNull(
+                backStackEntry.arguments?.getString(RootDestination.TreatmentLifecycle.olderAdultNameArgument),
+            )
+            val medicationId = requireNotNull(
+                backStackEntry.arguments?.getString(RootDestination.TreatmentLifecycle.medicationIdArgument),
+            )
+            val medicationLabel = requireNotNull(
+                backStackEntry.arguments?.getString(RootDestination.TreatmentLifecycle.medicationLabelArgument),
+            )
+            val treatmentId = requireNotNull(
+                backStackEntry.arguments?.getString(RootDestination.TreatmentLifecycle.treatmentIdArgument),
+            )
+            val treatmentName = requireNotNull(
+                backStackEntry.arguments?.getString(RootDestination.TreatmentLifecycle.treatmentNameArgument),
+            )
+            val dosage = requireNotNull(
+                backStackEntry.arguments?.getString(RootDestination.TreatmentLifecycle.dosageArgument),
+            )
+            val frequency = requireNotNull(
+                backStackEntry.arguments?.getString(RootDestination.TreatmentLifecycle.frequencyArgument),
+            )
+            val scheduleText = requireNotNull(
+                backStackEntry.arguments?.getString(RootDestination.TreatmentLifecycle.scheduleTextArgument),
+            )
+            val instructions = requireNotNull(
+                backStackEntry.arguments?.getString(RootDestination.TreatmentLifecycle.instructionsArgument),
+            ).trim()
+            val reminderDelay = requireNotNull(
+                backStackEntry.arguments?.getInt(RootDestination.TreatmentLifecycle.reminderDelayArgument),
+            )
+
+            TreatmentLifecycleRoute(
+                factory = app.container.treatmentLifecycleViewModelFactory(
+                    caregiverId = caregiverId,
+                    olderAdultId = olderAdultId,
+                    olderAdultName = olderAdultName,
+                    medicationId = medicationId,
+                    medicationLabel = medicationLabel,
+                    treatmentId = treatmentId,
+                    treatmentName = treatmentName,
+                    dosage = dosage,
+                    frequency = frequency,
+                    scheduleText = scheduleText,
+                    instructions = instructions,
+                    reminderDelayMinutes = reminderDelay,
                 ),
             )
         }
