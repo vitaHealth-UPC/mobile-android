@@ -104,6 +104,7 @@ class SQLiteIntakeLocalStore(
             "older_adult_id = ? AND scheduled_at >= ?",
             arrayOf(olderAdultId, from.toEpochMilli().toString()),
         )
+        Unit
     }
 
     override suspend fun findDose(
@@ -185,6 +186,7 @@ class SQLiteIntakeLocalStore(
             values,
             SQLiteDatabase.CONFLICT_REPLACE,
         )
+        Unit
     }
 
     override suspend fun pendingConfirmations(): List<ConfirmDoseCommand> =
@@ -224,6 +226,7 @@ class SQLiteIntakeLocalStore(
             "intake_id = ?",
             arrayOf(intakeId),
         )
+        Unit
     }
 
     private fun writeDose(
