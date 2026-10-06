@@ -19,10 +19,34 @@ data class MedicationResponse(
     val active: Boolean,
 )
 
+data class CreateTreatmentRequest(
+    val caregiverId: String,
+    val name: String,
+)
+
+data class TreatmentResponse(
+    val id: String,
+    val olderAdultId: String,
+    val name: String,
+    val status: String,
+    val medicationId: String?,
+    val dose: String?,
+    val frequency: String?,
+    val scheduledTime: String?,
+    val instructions: String?,
+    val reminderLeadMinutes: Int?,
+)
+
 interface TreatmentApiService {
     @POST("api/v1/older-adults/{olderAdultId}/medications")
     suspend fun registerMedication(
         @Path("olderAdultId") olderAdultId: String,
         @Body request: RegisterMedicationRequest,
     ): Response<MedicationResponse>
+
+    @POST("api/v1/older-adults/{olderAdultId}/treatments")
+    suspend fun createTreatment(
+        @Path("olderAdultId") olderAdultId: String,
+        @Body request: CreateTreatmentRequest,
+    ): Response<TreatmentResponse>
 }
