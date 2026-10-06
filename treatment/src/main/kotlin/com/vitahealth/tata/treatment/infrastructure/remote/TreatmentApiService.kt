@@ -3,6 +3,8 @@ package com.vitahealth.tata.treatment.infrastructure.remote
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.POST
+import retrofit2.http.PUT
+import retrofit2.http.Query
 import retrofit2.http.Path
 
 data class RegisterMedicationRequest(
@@ -22,6 +24,16 @@ data class MedicationResponse(
 data class CreateTreatmentRequest(
     val caregiverId: String,
     val name: String,
+)
+
+data class ConfigureTreatmentRequest(
+    val caregiverId: String,
+    val medicationId: String,
+    val dose: String,
+    val frequency: String,
+    val scheduledTimes: List<String>,
+    val instructions: String,
+    val reminderLeadMinutes: Int,
 )
 
 data class TreatmentResponse(
@@ -48,5 +60,29 @@ interface TreatmentApiService {
     suspend fun createTreatment(
         @Path("olderAdultId") olderAdultId: String,
         @Body request: CreateTreatmentRequest,
+    ): Response<TreatmentResponse>
+
+    @PUT("api/v1/treatments/{treatmentId}/regimen")
+    suspend fun configureTreatment(
+        @Path("treatmentId") treatmentId: String,
+        @Body request: ConfigureTreatmentRequest,
+    ): Response<TreatmentResponse>
+
+    @POST("api/v1/treatments/{treatmentId}/activation")
+    suspend fun activateTreatment(
+        @Path("treatmentId") treatmentId: String,
+        @Query("caregiverId") caregiverId: String,
+    ): Response<TreatmentResponse>
+
+    @POST("api/v1/treatments/{treatmentId}/pause")
+    suspend fun pauseTreatment(
+        @Path("treatmentId") treatmentId: String,
+        @Query("caregiverId") caregiverId: String,
+    ): Response<TreatmentResponse>
+
+    @POST("api/v1/treatments/{treatmentId}/resume")
+    suspend fun resumeTreatment(
+        @Path("treatmentId") treatmentId: String,
+        @Query("caregiverId") caregiverId: String,
     ): Response<TreatmentResponse>
 }

@@ -13,6 +13,8 @@ import com.vitahealth.tata.identity.infrastructure.remote.IdentityApiService
 import com.vitahealth.tata.identity.infrastructure.remote.RemoteIdentityRepository
 import com.vitahealth.tata.identity.presentation.registration.CaregiverRegistrationViewModel
 import com.vitahealth.tata.treatment.application.handlers.CreateTreatmentCommandHandler
+import com.vitahealth.tata.treatment.application.handlers.ConfigureTreatmentCommandHandler
+import com.vitahealth.tata.treatment.application.handlers.ChangeTreatmentStatusCommandHandler
 import com.vitahealth.tata.treatment.application.handlers.RegisterMedicationCommandHandler
 import com.vitahealth.tata.treatment.application.handlers.SetDoseFrequencyCommandHandler
 import com.vitahealth.tata.treatment.application.handlers.SetScheduleInstructionsCommandHandler
@@ -24,6 +26,7 @@ import com.vitahealth.tata.treatment.presentation.treatment.TreatmentCreationVie
 import com.vitahealth.tata.treatment.presentation.treatment.TreatmentDoseFrequencyViewModel
 import com.vitahealth.tata.treatment.presentation.treatment.TreatmentScheduleInstructionsViewModel
 import com.vitahealth.tata.treatment.presentation.treatment.TreatmentReminderViewModel
+import com.vitahealth.tata.treatment.presentation.treatment.TreatmentLifecycleViewModel
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
@@ -150,6 +153,37 @@ class AppContainer(
         scheduleText = scheduleText,
         instructions = instructions,
         handler = SetReminderPolicyCommandHandler(),
+    )
+
+
+    fun treatmentLifecycleViewModelFactory(
+        caregiverId: String,
+        olderAdultId: String,
+        olderAdultName: String,
+        medicationId: String,
+        medicationLabel: String,
+        treatmentId: String,
+        treatmentName: String,
+        dosage: String,
+        frequency: String,
+        scheduleText: String,
+        instructions: String,
+        reminderDelayMinutes: Int,
+    ) = TreatmentLifecycleViewModel.Factory(
+        caregiverId = caregiverId,
+        olderAdultId = olderAdultId,
+        olderAdultName = olderAdultName,
+        medicationId = medicationId,
+        medicationLabel = medicationLabel,
+        treatmentId = treatmentId,
+        treatmentName = treatmentName,
+        dosage = dosage,
+        frequency = frequency,
+        scheduleText = scheduleText,
+        instructions = instructions,
+        reminderDelayMinutes = reminderDelayMinutes,
+        configureTreatmentHandler = ConfigureTreatmentCommandHandler(treatmentRepository),
+        changeStatusHandler = ChangeTreatmentStatusCommandHandler(treatmentRepository),
     )
 
 }
