@@ -59,6 +59,9 @@ class AppContainer(
     private val treatmentRepository = RemoteTreatmentRepository(treatmentApi)
 
     private val intakeApi: IntakeApiService = retrofit.create(IntakeApiService::class.java)
+    fun intakeAgendaViewModelFactory(olderAdultId: String) = com.vitahealth.tata.intake.presentation.agenda.IntakeAgendaViewModel.Factory(
+        olderAdultId, com.vitahealth.tata.intake.infrastructure.remote.RemoteIntakeAgendaRepository(intakeApi),
+    )
     private val nextDoseRepository = RemoteNextDoseRepository(intakeApi)
     private val doseDetailRepository = RemoteDoseDetailRepository(intakeApi)
 

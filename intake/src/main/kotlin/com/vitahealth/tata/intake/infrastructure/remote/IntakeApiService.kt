@@ -5,6 +5,7 @@ import retrofit2.http.Body
 import retrofit2.http.POST
 import retrofit2.http.GET
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 data class IntakeResponse(
     val id: String,
@@ -23,6 +24,13 @@ data class IntakeResponse(
 data class ConfirmIntakeRequest(val channel: String)
 
 interface IntakeApiService {
+    @GET("api/v1/older-adults/{olderAdultId}/intakes/agenda")
+    suspend fun getAgenda(
+        @Path("olderAdultId") olderAdultId: String,
+        @Query("from") from: String,
+        @Query("to") to: String,
+    ): Response<List<IntakeResponse>>
+
     @POST("api/v1/intakes/{intakeId}/confirmation")
     suspend fun confirmDose(
         @Path("intakeId") intakeId: String,

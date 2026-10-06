@@ -47,6 +47,7 @@ class RemoteDoseConfirmationRepositoryTest {
     }
 
     private class FakeApi(val response: Response<IntakeResponse>, val failure: Exception? = null) : IntakeApiService {
+        override suspend fun getAgenda(olderAdultId: String, from: String, to: String): Response<List<IntakeResponse>> = error("Unused")
         var request: ConfirmIntakeRequest? = null
         var id: String? = null
         override suspend fun confirmDose(intakeId: String, request: ConfirmIntakeRequest): Response<IntakeResponse> {

@@ -38,6 +38,11 @@ import com.vitahealth.tata.shared.design.theme.TataSurface
 import com.vitahealth.tata.shared.design.theme.TataText
 import java.time.Duration
 import java.time.ZoneOffset
+import java.time.ZoneId
+import androidx.compose.runtime.DisposableEffect
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
@@ -45,14 +50,22 @@ import java.util.Locale
 fun NextDoseHomeRoute(
     factory: NextDoseHomeViewModel.Factory,
     onOpenDoseDetail: (String) -> Unit,
+    onOpenAgenda: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val viewModel: NextDoseHomeViewModel = viewModel(factory = factory)
     val state by viewModel.state.collectAsState()
+    val owner = LocalLifecycleOwner.current
+    DisposableEffect(owner, viewModel) {
+        val observer = LifecycleEventObserver { _, event -> if (event == Lifecycle.Event.ON_RESUME) viewModel.retry() }
+        owner.lifecycle.addObserver(observer)
+        onDispose { owner.lifecycle.removeObserver(observer) }
+    }
     NextDoseHomeScreen(
         state = state,
         onRetry = viewModel::retry,
         onOpenDoseDetail = onOpenDoseDetail,
+        onOpenAgenda = onOpenAgenda,
         modifier = modifier,
     )
 }
@@ -62,6 +75,7 @@ fun NextDoseHomeScreen(
     state: NextDoseHomeUiState,
     onRetry: () -> Unit,
     onOpenDoseDetail: (String) -> Unit,
+    onOpenAgenda: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -96,6 +110,7 @@ fun NextDoseHomeScreen(
         }
 
         TipCard()
+        TataButton("Ver agenda semanal", onOpenAgenda, Modifier.fillMaxWidth().padding(top = 20.dp))
         Spacer(Modifier.height(28.dp))
     }
 }
@@ -141,7 +156,7 @@ private fun NextDoseCard(
                     fontWeight = FontWeight.SemiBold,
                 )
                 Text(
-                    text = dose.scheduledAt.atOffset(ZoneOffset.UTC)
+                    text = dose.scheduledAt.atZone(ZoneId.systemDefault())
                         .format(DateTimeFormatter.ofPattern("h:mm a", Locale("es", "PE")))
                         .lowercase()
                         .replace("am", "a. m.")
