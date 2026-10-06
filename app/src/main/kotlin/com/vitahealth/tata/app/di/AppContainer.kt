@@ -17,6 +17,8 @@ import com.vitahealth.tata.intake.application.handlers.GetNextDoseQueryHandler
 import com.vitahealth.tata.intake.infrastructure.remote.IntakeApiService
 import com.vitahealth.tata.intake.infrastructure.remote.RemoteDoseDetailRepository
 import com.vitahealth.tata.intake.infrastructure.remote.RemoteNextDoseRepository
+import com.vitahealth.tata.intake.application.handlers.ConfirmDoseCommandHandler
+import com.vitahealth.tata.intake.infrastructure.remote.RemoteDoseConfirmationRepository
 import com.vitahealth.tata.intake.presentation.detail.DoseDetailViewModel
 import com.vitahealth.tata.intake.presentation.home.NextDoseHomeViewModel
 import com.vitahealth.tata.treatment.application.handlers.CreateTreatmentCommandHandler
@@ -225,6 +227,7 @@ class AppContainer(
     fun doseDetailViewModelFactory(intakeId: String) = DoseDetailViewModel.Factory(
         intakeId = intakeId,
         handler = GetDoseDetailQueryHandler(doseDetailRepository),
+        confirmHandler = ConfirmDoseCommandHandler(RemoteDoseConfirmationRepository(intakeApi)),
     )
 
 }
