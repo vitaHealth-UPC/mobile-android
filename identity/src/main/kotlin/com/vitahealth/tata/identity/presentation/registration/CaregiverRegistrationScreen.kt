@@ -16,6 +16,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -42,10 +43,19 @@ import com.vitahealth.tata.shared.design.theme.TataWarningSurface
 @Composable
 fun CaregiverRegistrationRoute(
     factory: CaregiverRegistrationViewModel.Factory,
+    onRegistrationComplete: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val viewModel: CaregiverRegistrationViewModel = viewModel(factory = factory)
     val state by viewModel.state.collectAsState()
+
+    LaunchedEffect(state.step, state.accountId) {
+        val accountId = state.accountId
+        if (state.step == RegistrationStep.Complete && accountId != null) {
+            onRegistrationComplete(accountId)
+        }
+    }
+
     CaregiverRegistrationScreen(
         state = state,
         onNameChange = viewModel::onNameChange,

@@ -10,4 +10,11 @@ sealed interface RootDestination {
     data object CaregiverRegistration : RootDestination {
         override val route: String = "caregiver-registration"
     }
+
+    data object CareLink : RootDestination {
+        const val caregiverIdArgument = "caregiverId"
+        override val route: String = "care-link/{$caregiverIdArgument}"
+
+        fun createRoute(caregiverId: String): String = "care-link/$caregiverId"
+    }
 }

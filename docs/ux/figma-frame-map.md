@@ -6,7 +6,7 @@ This file is the implementation traceability map between UX states, User Stories
 | --- | --- | --- |
 | Onboarding, registration, verification | identity | `CaregiverRegistrationScreen` + account / verification / verification-expired / complete states |
 | PIN access, incorrect PIN, temporary lockout | identity | `PinAccessScreen` + state |
-| Link & consent, invalid code, consent required | carelink | link/consent screens + state |
+| Link & consent, invalid code, consent required | carelink | `CareLinkScreen` + code-entry / awaiting-consent / invalid-code states |
 | Medications, details, add medication, create/manage treatment | treatment | treatment presentation package |
 | Home, weekly schedule, voice confirmation, dose states | intake | intake presentation package |
 | Alerts, alert detail, contact unavailable, note saved, attended | omission | omission presentation package |
