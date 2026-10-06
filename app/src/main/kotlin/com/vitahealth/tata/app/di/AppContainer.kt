@@ -1,6 +1,7 @@
 package com.vitahealth.tata.app.di
 
 import com.vitahealth.tata.identity.application.handlers.RegisterCaregiverCommandHandler
+import com.vitahealth.tata.identity.application.handlers.RequestNewVerificationCommandHandler
 import com.vitahealth.tata.identity.application.handlers.VerifyCaregiverEmailCommandHandler
 import com.vitahealth.tata.identity.infrastructure.remote.IdentityApiService
 import com.vitahealth.tata.identity.infrastructure.remote.RemoteIdentityRepository
@@ -22,5 +23,6 @@ class AppContainer(
     val caregiverRegistrationViewModelFactory = CaregiverRegistrationViewModel.Factory(
         registerHandler = RegisterCaregiverCommandHandler(identityRepository),
         verifyHandler = VerifyCaregiverEmailCommandHandler(identityRepository),
+        requestNewVerificationHandler = RequestNewVerificationCommandHandler(identityRepository),
     )
 }
