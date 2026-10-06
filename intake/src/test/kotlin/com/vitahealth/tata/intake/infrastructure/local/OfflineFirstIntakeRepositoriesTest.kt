@@ -24,8 +24,10 @@ class OfflineFirstIntakeRepositoriesTest {
         val local = FakeLocalStore().apply {
             cached[dose.id] = dose
         }
-        val remote = NextDoseRepository {
-            AppResult.Failure(
+        val remote = object : NextDoseRepository {
+            override suspend fun getNextDose(
+                olderAdultId: String,
+            ): AppResult<NextDoseReadModel?> = AppResult.Failure(
                 message = "offline",
                 code = "NETWORK_UNAVAILABLE",
             )
@@ -49,8 +51,12 @@ class OfflineFirstIntakeRepositoriesTest {
         val local = FakeLocalStore()
         val from = Instant.parse("2026-10-06T00:00:00Z")
         val to = Instant.parse("2026-10-07T00:00:00Z")
-        val remote = IntakeAgendaRepository { _, _, _ ->
-            AppResult.Success(listOf(dose))
+        val remote = object : IntakeAgendaRepository {
+            override suspend fun getAgenda(
+                olderAdultId: String,
+                from: Instant,
+                to: Instant,
+            ): AppResult<List<DoseDetailReadModel>> = AppResult.Success(listOf(dose))
         }
         val repository = OfflineFirstIntakeAgendaRepository(
             remote = remote,
@@ -70,8 +76,10 @@ class OfflineFirstIntakeRepositoriesTest {
             cached[dose.id] = dose
         }
         val scheduler = RecordingSyncScheduler()
-        val remote = DoseConfirmationRepository {
-            AppResult.Failure(
+        val remote = object : DoseConfirmationRepository {
+            override suspend fun confirm(
+                command: ConfirmDoseCommand,
+            ): AppResult<DoseDetailReadModel> = AppResult.Failure(
                 message = "offline",
                 code = "NETWORK_UNAVAILABLE",
             )
@@ -110,8 +118,10 @@ class OfflineFirstIntakeRepositoriesTest {
             status = DoseStatus.CONFIRMED,
             confirmedAt = Instant.parse("2026-10-06T12:01:00Z"),
         )
-        val remote = DoseConfirmationRepository {
-            AppResult.Success(confirmed)
+        val remote = object : DoseConfirmationRepository {
+            override suspend fun confirm(
+                command: ConfirmDoseCommand,
+            ): AppResult<DoseDetailReadModel> = AppResult.Success(confirmed)
         }
         val repository = OfflineFirstDoseConfirmationRepository(
             remote = remote,
@@ -136,8 +146,10 @@ class OfflineFirstIntakeRepositoriesTest {
         val local = FakeLocalStore().apply {
             cached[dose.id] = dose
         }
-        val remote = DoseDetailRepository {
-            AppResult.Failure(
+        val remote = object : DoseDetailRepository {
+            override suspend fun getDoseDetail(
+                intakeId: String,
+            ): AppResult<DoseDetailReadModel> = AppResult.Failure(
                 message = "offline",
                 code = "NETWORK_UNAVAILABLE",
             )
