@@ -92,8 +92,9 @@ class OfflineFirstDoseDetailRepository(
                 if (result.code != NETWORK_UNAVAILABLE) {
                     result
                 } else {
-                    local.findDose(intakeId)?.let(AppResult::Success)
-                        ?: result
+                    local.findDose(intakeId)?.let { cached ->
+                        AppResult.Success(cached)
+                    } ?: result
                 }
             }
         }
