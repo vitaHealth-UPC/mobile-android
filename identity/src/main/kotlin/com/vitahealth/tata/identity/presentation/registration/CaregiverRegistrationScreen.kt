@@ -1,7 +1,14 @@
 package com.vitahealth.tata.identity.presentation.registration
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -12,7 +19,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -22,7 +28,16 @@ import com.vitahealth.tata.shared.design.components.TataButton
 import com.vitahealth.tata.shared.design.components.TataButtonStyle
 import com.vitahealth.tata.shared.design.components.TataCard
 import com.vitahealth.tata.shared.design.components.TataFormField
-import com.vitahealth.tata.shared.design.theme.*
+import com.vitahealth.tata.shared.design.theme.TataCream
+import com.vitahealth.tata.shared.design.theme.TataDeepNavy
+import com.vitahealth.tata.shared.design.theme.TataError
+import com.vitahealth.tata.shared.design.theme.TataErrorSurface
+import com.vitahealth.tata.shared.design.theme.TataLavender
+import com.vitahealth.tata.shared.design.theme.TataMuted
+import com.vitahealth.tata.shared.design.theme.TataSurface
+import com.vitahealth.tata.shared.design.theme.TataText
+import com.vitahealth.tata.shared.design.theme.TataWarning
+import com.vitahealth.tata.shared.design.theme.TataWarningSurface
 
 @Composable
 fun CaregiverRegistrationRoute(
@@ -39,6 +54,7 @@ fun CaregiverRegistrationRoute(
         onVerificationCodeChange = viewModel::onVerificationCodeChange,
         onCreateAccount = viewModel::createAccount,
         onVerifyEmail = viewModel::verifyEmail,
+        onRequestNewVerification = viewModel::requestNewVerification,
         modifier = modifier,
     )
 }
@@ -52,6 +68,7 @@ fun CaregiverRegistrationScreen(
     onVerificationCodeChange: (String) -> Unit,
     onCreateAccount: () -> Unit,
     onVerifyEmail: () -> Unit,
+    onRequestNewVerification: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -105,7 +122,11 @@ fun CaregiverRegistrationScreen(
         )
         Spacer(Modifier.height(14.dp))
         TataButton(
-            text = if (state.isLoading) "Procesando..." else "Crear cuenta",
+            text = if (state.isLoading && state.step == RegistrationStep.Account) {
+                "Procesando..."
+            } else {
+                "Crear cuenta"
+            },
             enabled = !state.isLoading && state.step == RegistrationStep.Account,
             onClick = onCreateAccount,
         )
@@ -117,12 +138,36 @@ fun CaregiverRegistrationScreen(
                 onCodeChange = onVerificationCodeChange,
             )
             Spacer(Modifier.height(14.dp))
-            TataButton(
-                text = if (state.step == RegistrationStep.Complete) "Correo verificado" else "Verificar correo",
-                enabled = !state.isLoading && state.step == RegistrationStep.Verification,
-                onClick = onVerifyEmail,
-                style = TataButtonStyle.Secondary,
-            )
+
+            when (state.step) {
+                RegistrationStep.Verification -> TataButton(
+                    text = if (state.isLoading) "Verificando..." else "Verificar correo",
+                    enabled = !state.isLoading,
+                    onClick = onVerifyEmail,
+                    style = TataButtonStyle.Secondary,
+                )
+
+                RegistrationStep.VerificationExpired -> TataButton(
+                    text = if (state.isLoading) "Solicitando..." else "Solicitar nuevo código",
+                    enabled = !state.isLoading,
+                    onClick = onRequestNewVerification,
+                    style = TataButtonStyle.Secondary,
+                )
+
+                RegistrationStep.Complete -> TataButton(
+                    text = "Correo verificado",
+                    enabled = false,
+                    onClick = {},
+                    style = TataButtonStyle.Secondary,
+                )
+
+                RegistrationStep.Account -> Unit
+            }
+        }
+
+        if (state.step == RegistrationStep.VerificationExpired) {
+            Spacer(Modifier.height(16.dp))
+            VerificationExpiredMessage()
         }
 
         state.errorMessage?.let { error ->
@@ -175,6 +220,24 @@ private fun VerificationCard(
             onValueChange = onCodeChange,
             placeholder = "4  8  2  1  9  6",
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
+        )
+    }
+}
+
+@Composable
+private fun VerificationExpiredMessage() {
+    TataCard(containerColor = TataWarningSurface) {
+        Text(
+            text = "Verificación vencida",
+            color = TataWarning,
+            style = MaterialTheme.typography.labelLarge,
+            fontWeight = FontWeight.SemiBold,
+        )
+        Text(
+            text = "Solicita un nuevo código para habilitar la cuenta.",
+            color = TataMuted,
+            style = MaterialTheme.typography.bodySmall,
+            modifier = Modifier.padding(top = 4.dp),
         )
     }
 }

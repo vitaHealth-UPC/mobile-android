@@ -1,6 +1,11 @@
 package com.vitahealth.tata.identity.presentation.registration
 
-enum class RegistrationStep { Account, Verification, Complete }
+enum class RegistrationStep {
+    Account,
+    Verification,
+    VerificationExpired,
+    Complete,
+}
 
 data class CaregiverRegistrationUiState(
     val name: String = "",
