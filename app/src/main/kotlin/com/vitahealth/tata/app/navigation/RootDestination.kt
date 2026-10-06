@@ -93,4 +93,42 @@ sealed interface RootDestination {
             Uri.encode(treatmentId) + "/" +
             Uri.encode(treatmentName)
     }
+
+    data object TreatmentScheduleInstructions : RootDestination {
+        const val caregiverIdArgument = "caregiverId"
+        const val olderAdultIdArgument = "olderAdultId"
+        const val olderAdultNameArgument = "olderAdultName"
+        const val medicationIdArgument = "medicationId"
+        const val medicationLabelArgument = "medicationLabel"
+        const val treatmentIdArgument = "treatmentId"
+        const val treatmentNameArgument = "treatmentName"
+        const val dosageArgument = "dosage"
+        const val frequencyArgument = "frequency"
+
+        override val route: String =
+            "treatment-schedule/{$caregiverIdArgument}/{$olderAdultIdArgument}/{$olderAdultNameArgument}/" +
+                "{$medicationIdArgument}/{$medicationLabelArgument}/{$treatmentIdArgument}/{$treatmentNameArgument}/" +
+                "{$dosageArgument}/{$frequencyArgument}"
+
+        fun createRoute(
+            caregiverId: String,
+            olderAdultId: String,
+            olderAdultName: String,
+            medicationId: String,
+            medicationLabel: String,
+            treatmentId: String,
+            treatmentName: String,
+            dosage: String,
+            frequency: String,
+        ): String = "treatment-schedule/" +
+            Uri.encode(caregiverId) + "/" +
+            Uri.encode(olderAdultId) + "/" +
+            Uri.encode(olderAdultName) + "/" +
+            Uri.encode(medicationId) + "/" +
+            Uri.encode(medicationLabel) + "/" +
+            Uri.encode(treatmentId) + "/" +
+            Uri.encode(treatmentName) + "/" +
+            Uri.encode(dosage) + "/" +
+            Uri.encode(frequency)
+    }
 }
