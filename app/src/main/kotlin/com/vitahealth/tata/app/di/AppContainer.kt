@@ -16,12 +16,14 @@ import com.vitahealth.tata.treatment.application.handlers.CreateTreatmentCommand
 import com.vitahealth.tata.treatment.application.handlers.RegisterMedicationCommandHandler
 import com.vitahealth.tata.treatment.application.handlers.SetDoseFrequencyCommandHandler
 import com.vitahealth.tata.treatment.application.handlers.SetScheduleInstructionsCommandHandler
+import com.vitahealth.tata.treatment.application.handlers.SetReminderPolicyCommandHandler
 import com.vitahealth.tata.treatment.infrastructure.remote.RemoteTreatmentRepository
 import com.vitahealth.tata.treatment.infrastructure.remote.TreatmentApiService
 import com.vitahealth.tata.treatment.presentation.medication.MedicationRegistrationViewModel
 import com.vitahealth.tata.treatment.presentation.treatment.TreatmentCreationViewModel
 import com.vitahealth.tata.treatment.presentation.treatment.TreatmentDoseFrequencyViewModel
 import com.vitahealth.tata.treatment.presentation.treatment.TreatmentScheduleInstructionsViewModel
+import com.vitahealth.tata.treatment.presentation.treatment.TreatmentReminderViewModel
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
@@ -122,4 +124,32 @@ class AppContainer(
         frequency = frequency,
         handler = SetScheduleInstructionsCommandHandler(),
     )
+
+    fun treatmentReminderViewModelFactory(
+        caregiverId: String,
+        olderAdultId: String,
+        olderAdultName: String,
+        medicationId: String,
+        medicationLabel: String,
+        treatmentId: String,
+        treatmentName: String,
+        dosage: String,
+        frequency: String,
+        scheduleText: String,
+        instructions: String,
+    ) = TreatmentReminderViewModel.Factory(
+        caregiverId = caregiverId,
+        olderAdultId = olderAdultId,
+        olderAdultName = olderAdultName,
+        medicationId = medicationId,
+        medicationLabel = medicationLabel,
+        treatmentId = treatmentId,
+        treatmentName = treatmentName,
+        dosage = dosage,
+        frequency = frequency,
+        scheduleText = scheduleText,
+        instructions = instructions,
+        handler = SetReminderPolicyCommandHandler(),
+    )
+
 }

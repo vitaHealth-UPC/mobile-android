@@ -131,4 +131,49 @@ sealed interface RootDestination {
             Uri.encode(dosage) + "/" +
             Uri.encode(frequency)
     }
+
+    data object TreatmentReminders : RootDestination {
+        const val caregiverIdArgument = "caregiverId"
+        const val olderAdultIdArgument = "olderAdultId"
+        const val olderAdultNameArgument = "olderAdultName"
+        const val medicationIdArgument = "medicationId"
+        const val medicationLabelArgument = "medicationLabel"
+        const val treatmentIdArgument = "treatmentId"
+        const val treatmentNameArgument = "treatmentName"
+        const val dosageArgument = "dosage"
+        const val frequencyArgument = "frequency"
+        const val scheduleTextArgument = "scheduleText"
+        const val instructionsArgument = "instructions"
+
+        override val route: String =
+            "treatment-reminders/{$caregiverIdArgument}/{$olderAdultIdArgument}/{$olderAdultNameArgument}/" +
+                "{$medicationIdArgument}/{$medicationLabelArgument}/{$treatmentIdArgument}/{$treatmentNameArgument}/" +
+                "{$dosageArgument}/{$frequencyArgument}/{$scheduleTextArgument}/{$instructionsArgument}"
+
+        fun createRoute(
+            caregiverId: String,
+            olderAdultId: String,
+            olderAdultName: String,
+            medicationId: String,
+            medicationLabel: String,
+            treatmentId: String,
+            treatmentName: String,
+            dosage: String,
+            frequency: String,
+            scheduleText: String,
+            instructions: String,
+        ): String = "treatment-reminders/" +
+            Uri.encode(caregiverId) + "/" +
+            Uri.encode(olderAdultId) + "/" +
+            Uri.encode(olderAdultName) + "/" +
+            Uri.encode(medicationId) + "/" +
+            Uri.encode(medicationLabel) + "/" +
+            Uri.encode(treatmentId) + "/" +
+            Uri.encode(treatmentName) + "/" +
+            Uri.encode(dosage) + "/" +
+            Uri.encode(frequency) + "/" +
+            Uri.encode(scheduleText) + "/" +
+            Uri.encode(instructions.ifBlank { " " })
+    }
+
 }
