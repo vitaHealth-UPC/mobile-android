@@ -1,5 +1,7 @@
 package com.vitahealth.tata.app.navigation
 
+import android.net.Uri
+
 sealed interface RootDestination {
     val route: String
 
@@ -15,6 +17,24 @@ sealed interface RootDestination {
         const val caregiverIdArgument = "caregiverId"
         override val route: String = "care-link/{$caregiverIdArgument}"
 
-        fun createRoute(caregiverId: String): String = "care-link/$caregiverId"
+        fun createRoute(caregiverId: String): String = "care-link/" + Uri.encode(caregiverId)
+    }
+
+    data object MedicationRegistration : RootDestination {
+        const val caregiverIdArgument = "caregiverId"
+        const val olderAdultIdArgument = "olderAdultId"
+        const val olderAdultNameArgument = "olderAdultName"
+
+        override val route: String =
+            "medication-registration/{$caregiverIdArgument}/{$olderAdultIdArgument}/{$olderAdultNameArgument}"
+
+        fun createRoute(
+            caregiverId: String,
+            olderAdultId: String,
+            olderAdultName: String,
+        ): String = "medication-registration/" +
+            Uri.encode(caregiverId) + "/" +
+            Uri.encode(olderAdultId) + "/" +
+            Uri.encode(olderAdultName)
     }
 }

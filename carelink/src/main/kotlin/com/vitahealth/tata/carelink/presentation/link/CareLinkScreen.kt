@@ -20,6 +20,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -50,9 +51,18 @@ import java.time.Period
 fun CareLinkRoute(
     factory: CareLinkViewModel.Factory,
     modifier: Modifier = Modifier,
+    onConfirmed: (olderAdultId: String, olderAdultName: String) -> Unit = { _, _ -> },
 ) {
     val viewModel: CareLinkViewModel = viewModel(factory = factory)
     val state by viewModel.state.collectAsState()
+
+    LaunchedEffect(state.step, state.acceptedLink?.id, state.olderAdult?.id) {
+        val link = state.acceptedLink
+        val olderAdult = state.olderAdult
+        if (state.step == CareLinkStep.Confirmed && link != null && olderAdult != null) {
+            onConfirmed(link.olderAdultId, olderAdult.fullName)
+        }
+    }
 
     CareLinkScreen(
         state = state,
@@ -281,7 +291,7 @@ private fun ConsentCard(
         )
         Text(
             text = if (profile != null) {
-                "${profile.fullName} autoriza el acceso a adherencia, alertas e información necesaria para su seguimiento."
+                profile.fullName + " autoriza el acceso a adherencia, alertas e información necesaria para su seguimiento."
             } else {
                 "El adulto mayor autoriza el acceso necesario para el seguimiento."
             },
@@ -342,5 +352,5 @@ private fun StatusCard(
 
 private fun ageLabel(birthDate: LocalDate): String {
     val years = Period.between(birthDate, LocalDate.now()).years.coerceAtLeast(0)
-    return "$years años"
+    return years.toString() + " años"
 }

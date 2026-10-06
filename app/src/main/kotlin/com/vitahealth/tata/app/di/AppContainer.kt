@@ -12,6 +12,10 @@ import com.vitahealth.tata.identity.application.handlers.VerifyCaregiverEmailCom
 import com.vitahealth.tata.identity.infrastructure.remote.IdentityApiService
 import com.vitahealth.tata.identity.infrastructure.remote.RemoteIdentityRepository
 import com.vitahealth.tata.identity.presentation.registration.CaregiverRegistrationViewModel
+import com.vitahealth.tata.treatment.application.handlers.RegisterMedicationCommandHandler
+import com.vitahealth.tata.treatment.infrastructure.remote.RemoteTreatmentRepository
+import com.vitahealth.tata.treatment.infrastructure.remote.TreatmentApiService
+import com.vitahealth.tata.treatment.presentation.medication.MedicationRegistrationViewModel
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
@@ -29,6 +33,9 @@ class AppContainer(
     private val careLinkApi: CareLinkApiService = retrofit.create(CareLinkApiService::class.java)
     private val careLinkRepository = RemoteCareLinkRepository(careLinkApi)
 
+    private val treatmentApi: TreatmentApiService = retrofit.create(TreatmentApiService::class.java)
+    private val treatmentRepository = RemoteTreatmentRepository(treatmentApi)
+
     val caregiverRegistrationViewModelFactory = CaregiverRegistrationViewModel.Factory(
         registerHandler = RegisterCaregiverCommandHandler(identityRepository),
         verifyHandler = VerifyCaregiverEmailCommandHandler(identityRepository),
@@ -40,5 +47,16 @@ class AppContainer(
         acceptCareLinkHandler = AcceptCareLinkCommandHandler(careLinkRepository),
         registerConsentHandler = RegisterConsentCommandHandler(careLinkRepository),
         getOlderAdultHandler = GetOlderAdultProfileQueryHandler(careLinkRepository),
+    )
+
+    fun medicationRegistrationViewModelFactory(
+        caregiverId: String,
+        olderAdultId: String,
+        olderAdultName: String,
+    ) = MedicationRegistrationViewModel.Factory(
+        caregiverId = caregiverId,
+        olderAdultId = olderAdultId,
+        olderAdultName = olderAdultName,
+        registerMedicationHandler = RegisterMedicationCommandHandler(treatmentRepository),
     )
 }
