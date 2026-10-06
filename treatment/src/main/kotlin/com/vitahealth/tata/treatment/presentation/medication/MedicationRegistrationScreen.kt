@@ -20,6 +20,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -40,14 +41,20 @@ import com.vitahealth.tata.shared.design.theme.TataNavy
 import com.vitahealth.tata.shared.design.theme.TataSurface
 import com.vitahealth.tata.shared.design.theme.TataText
 import com.vitahealth.tata.treatment.R
+import com.vitahealth.tata.treatment.domain.model.Medication
 
 @Composable
 fun MedicationRegistrationRoute(
     factory: MedicationRegistrationViewModel.Factory,
     modifier: Modifier = Modifier,
+    onRegistered: (Medication) -> Unit = {},
 ) {
     val viewModel: MedicationRegistrationViewModel = viewModel(factory = factory)
     val state by viewModel.state.collectAsState()
+
+    LaunchedEffect(state.registeredMedication?.id) {
+        state.registeredMedication?.let(onRegistered)
+    }
 
     MedicationRegistrationScreen(
         state = state,

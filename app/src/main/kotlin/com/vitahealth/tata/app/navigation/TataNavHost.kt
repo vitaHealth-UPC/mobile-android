@@ -12,6 +12,7 @@ import com.vitahealth.tata.app.TataApplication
 import com.vitahealth.tata.carelink.presentation.link.CareLinkRoute
 import com.vitahealth.tata.identity.presentation.registration.CaregiverRegistrationRoute
 import com.vitahealth.tata.treatment.presentation.medication.MedicationRegistrationRoute
+import com.vitahealth.tata.treatment.presentation.treatment.TreatmentCreationRoute
 
 @Composable
 fun TataNavHost(
@@ -97,6 +98,69 @@ fun TataNavHost(
                     caregiverId = caregiverId,
                     olderAdultId = olderAdultId,
                     olderAdultName = olderAdultName,
+                ),
+                onRegistered = { medication ->
+                    navController.navigate(
+                        RootDestination.TreatmentCreation.createRoute(
+                            caregiverId = caregiverId,
+                            olderAdultId = olderAdultId,
+                            olderAdultName = olderAdultName,
+                            medicationId = medication.id,
+                            medicationLabel = medication.name + " · " + medication.presentation,
+                        ),
+                    ) {
+                        popUpTo(RootDestination.MedicationRegistration.route) {
+                            inclusive = true
+                        }
+                    }
+                },
+            )
+        }
+
+        composable(
+            route = RootDestination.TreatmentCreation.route,
+            arguments = listOf(
+                navArgument(RootDestination.TreatmentCreation.caregiverIdArgument) {
+                    type = NavType.StringType
+                },
+                navArgument(RootDestination.TreatmentCreation.olderAdultIdArgument) {
+                    type = NavType.StringType
+                },
+                navArgument(RootDestination.TreatmentCreation.olderAdultNameArgument) {
+                    type = NavType.StringType
+                },
+                navArgument(RootDestination.TreatmentCreation.medicationIdArgument) {
+                    type = NavType.StringType
+                },
+                navArgument(RootDestination.TreatmentCreation.medicationLabelArgument) {
+                    type = NavType.StringType
+                },
+            ),
+        ) { backStackEntry ->
+            val app = androidx.compose.ui.platform.LocalContext.current.applicationContext as TataApplication
+            val caregiverId = requireNotNull(
+                backStackEntry.arguments?.getString(RootDestination.TreatmentCreation.caregiverIdArgument),
+            )
+            val olderAdultId = requireNotNull(
+                backStackEntry.arguments?.getString(RootDestination.TreatmentCreation.olderAdultIdArgument),
+            )
+            val olderAdultName = requireNotNull(
+                backStackEntry.arguments?.getString(RootDestination.TreatmentCreation.olderAdultNameArgument),
+            )
+            val medicationId = requireNotNull(
+                backStackEntry.arguments?.getString(RootDestination.TreatmentCreation.medicationIdArgument),
+            )
+            val medicationLabel = requireNotNull(
+                backStackEntry.arguments?.getString(RootDestination.TreatmentCreation.medicationLabelArgument),
+            )
+
+            TreatmentCreationRoute(
+                factory = app.container.treatmentCreationViewModelFactory(
+                    caregiverId = caregiverId,
+                    olderAdultId = olderAdultId,
+                    olderAdultName = olderAdultName,
+                    medicationId = medicationId,
+                    medicationLabel = medicationLabel,
                 ),
             )
         }

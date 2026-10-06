@@ -2,27 +2,27 @@ package com.vitahealth.tata.treatment.application.handlers
 
 import com.vitahealth.tata.shared.common.result.AppResult
 import com.vitahealth.tata.treatment.application.TreatmentRepository
-import com.vitahealth.tata.treatment.application.commands.RegisterMedicationCommand
+import com.vitahealth.tata.treatment.application.commands.CreateTreatmentCommand
 import com.vitahealth.tata.treatment.domain.model.Medication
 import com.vitahealth.tata.treatment.domain.model.Treatment
+import com.vitahealth.tata.treatment.domain.model.TreatmentStatus
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-class RegisterMedicationCommandHandlerTest {
+class CreateTreatmentCommandHandlerTest {
     @Test
-    fun missingRequiredDataIsRejectedBeforeCallingRepository() = runBlocking {
+    fun blankNameIsRejectedBeforeRepositoryCall() = runBlocking {
         val repository = FakeTreatmentRepository()
-        val handler = RegisterMedicationCommandHandler(repository)
+        val handler = CreateTreatmentCommandHandler(repository)
 
         val result = handler(
-            RegisterMedicationCommand(
+            CreateTreatmentCommand(
                 caregiverId = "caregiver-1",
                 olderAdultId = "adult-1",
                 name = " ",
-                presentation = "50 mg",
             ),
         )
 
@@ -32,24 +32,24 @@ class RegisterMedicationCommandHandlerTest {
     }
 
     @Test
-    fun validMedicationIsNormalizedAndForwarded() = runBlocking {
+    fun validTreatmentIsNormalizedAndCreatedAsIncomplete() = runBlocking {
         val repository = FakeTreatmentRepository()
-        val handler = RegisterMedicationCommandHandler(repository)
+        val handler = CreateTreatmentCommandHandler(repository)
 
         val result = handler(
-            RegisterMedicationCommand(
+            CreateTreatmentCommand(
                 caregiverId = " caregiver-1 ",
                 olderAdultId = " adult-1 ",
-                name = " Losartán ",
-                presentation = " 50 mg, comprimido ",
+                name = " Control de presión ",
             ),
         )
 
         assertTrue(result is AppResult.Success)
+        val treatment = (result as AppResult.Success).value
+        assertEquals(TreatmentStatus.INCOMPLETE, treatment.status)
         assertEquals("caregiver-1", repository.caregiverId)
         assertEquals("adult-1", repository.olderAdultId)
-        assertEquals("Losartán", repository.name)
-        assertEquals("50 mg, comprimido", repository.presentation)
+        assertEquals("Control de presión", repository.name)
     }
 
     private class FakeTreatmentRepository : TreatmentRepository {
@@ -57,34 +57,31 @@ class RegisterMedicationCommandHandlerTest {
         var caregiverId: String? = null
         var olderAdultId: String? = null
         var name: String? = null
-        var presentation: String? = null
 
         override suspend fun registerMedication(
             caregiverId: String,
             olderAdultId: String,
             name: String,
             presentation: String,
-        ): AppResult<Medication> {
-            called = true
-            this.caregiverId = caregiverId
-            this.olderAdultId = olderAdultId
-            this.name = name
-            this.presentation = presentation
-            return AppResult.Success(
-                Medication(
-                    id = "med-1",
-                    olderAdultId = olderAdultId,
-                    name = name,
-                    presentation = presentation,
-                    active = true,
-                ),
-            )
-        }
+        ): AppResult<Medication> = error("not used")
 
         override suspend fun createTreatment(
             caregiverId: String,
             olderAdultId: String,
             name: String,
-        ): AppResult<Treatment> = error("not used")
+        ): AppResult<Treatment> {
+            called = true
+            this.caregiverId = caregiverId
+            this.olderAdultId = olderAdultId
+            this.name = name
+            return AppResult.Success(
+                Treatment(
+                    id = "treatment-1",
+                    olderAdultId = olderAdultId,
+                    name = name,
+                    status = TreatmentStatus.INCOMPLETE,
+                ),
+            )
+        }
     }
 }
