@@ -13,6 +13,7 @@ import com.vitahealth.tata.identity.infrastructure.remote.IdentityApiService
 import com.vitahealth.tata.identity.infrastructure.remote.RemoteIdentityRepository
 import com.vitahealth.tata.identity.presentation.registration.CaregiverRegistrationViewModel
 import com.vitahealth.tata.treatment.application.handlers.CreateTreatmentCommandHandler
+import com.vitahealth.tata.treatment.application.handlers.GetTreatmentDetailQueryHandler
 import com.vitahealth.tata.treatment.application.handlers.ConfigureTreatmentCommandHandler
 import com.vitahealth.tata.treatment.application.handlers.ChangeTreatmentStatusCommandHandler
 import com.vitahealth.tata.treatment.application.handlers.RegisterMedicationCommandHandler
@@ -27,6 +28,7 @@ import com.vitahealth.tata.treatment.presentation.treatment.TreatmentDoseFrequen
 import com.vitahealth.tata.treatment.presentation.treatment.TreatmentScheduleInstructionsViewModel
 import com.vitahealth.tata.treatment.presentation.treatment.TreatmentReminderViewModel
 import com.vitahealth.tata.treatment.presentation.treatment.TreatmentLifecycleViewModel
+import com.vitahealth.tata.treatment.presentation.treatment.TreatmentDetailViewModel
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
@@ -184,6 +186,20 @@ class AppContainer(
         reminderDelayMinutes = reminderDelayMinutes,
         configureTreatmentHandler = ConfigureTreatmentCommandHandler(treatmentRepository),
         changeStatusHandler = ChangeTreatmentStatusCommandHandler(treatmentRepository),
+    )
+
+
+    fun treatmentDetailViewModelFactory(
+        caregiverId: String,
+        olderAdultName: String,
+        treatmentId: String,
+        medicationLabelHint: String,
+    ) = TreatmentDetailViewModel.Factory(
+        caregiverId = caregiverId,
+        olderAdultName = olderAdultName,
+        treatmentId = treatmentId,
+        medicationLabelHint = medicationLabelHint,
+        handler = GetTreatmentDetailQueryHandler(treatmentRepository),
     )
 
 }

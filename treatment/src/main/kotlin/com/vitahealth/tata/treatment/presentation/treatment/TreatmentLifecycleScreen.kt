@@ -1,6 +1,7 @@
 package com.vitahealth.tata.treatment.presentation.treatment
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -44,6 +45,7 @@ import com.vitahealth.tata.treatment.domain.model.TreatmentStatus
 fun TreatmentLifecycleRoute(
     factory: TreatmentLifecycleViewModel.Factory,
     modifier: Modifier = Modifier,
+    onOpenDetail: () -> Unit = {},
 ) {
     val viewModel: TreatmentLifecycleViewModel = viewModel(factory = factory)
     val state by viewModel.state.collectAsState()
@@ -53,6 +55,7 @@ fun TreatmentLifecycleRoute(
         onActivate = viewModel::activate,
         onPause = viewModel::pause,
         onResume = viewModel::resume,
+        onOpenDetail = onOpenDetail,
         modifier = modifier,
     )
 }
@@ -63,6 +66,7 @@ fun TreatmentLifecycleScreen(
     onActivate: () -> Unit,
     onPause: () -> Unit,
     onResume: () -> Unit,
+    onOpenDetail: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -83,6 +87,7 @@ fun TreatmentLifecycleScreen(
                 state = state,
                 onPause = onPause,
                 onResume = onResume,
+                onOpenDetail = onOpenDetail,
             )
         }
 
@@ -182,6 +187,7 @@ private fun ManageTreatment(
     state: TreatmentLifecycleUiState,
     onPause: () -> Unit,
     onResume: () -> Unit,
+    onOpenDetail: () -> Unit,
 ) {
     Text(
         text = "Tratamiento de " + firstName(state.olderAdultName),
@@ -199,7 +205,8 @@ private fun ManageTreatment(
     TataCard(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 20.dp),
+            .padding(top = 20.dp)
+            .clickable(onClick = onOpenDetail),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),

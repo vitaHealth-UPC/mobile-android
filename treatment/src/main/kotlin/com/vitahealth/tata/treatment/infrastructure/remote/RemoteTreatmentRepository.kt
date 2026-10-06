@@ -3,13 +3,15 @@ package com.vitahealth.tata.treatment.infrastructure.remote
 import com.vitahealth.tata.shared.common.result.AppResult
 import com.vitahealth.tata.treatment.application.TreatmentRepository
 import com.vitahealth.tata.treatment.application.TreatmentLifecycleRepository
+import com.vitahealth.tata.treatment.application.TreatmentDetailRepository
+import com.vitahealth.tata.treatment.application.readmodels.TreatmentDetailReadModel
 import com.vitahealth.tata.treatment.domain.model.Medication
 import com.vitahealth.tata.treatment.domain.model.Treatment
 import com.vitahealth.tata.treatment.domain.model.TreatmentStatus
 
 class RemoteTreatmentRepository(
     private val api: TreatmentApiService,
-) : TreatmentRepository, TreatmentLifecycleRepository {
+) : TreatmentRepository, TreatmentLifecycleRepository, TreatmentDetailRepository {
     override suspend fun registerMedication(
         caregiverId: String,
         olderAdultId: String,
@@ -151,6 +153,48 @@ class RemoteTreatmentRepository(
                         olderAdultId = body.olderAdultId,
                         name = body.name,
                         status = status,
+                    ),
+                )
+            } else {
+                AppResult.Failure(
+                    message = treatmentMessage(response.code()),
+                    code = treatmentCode(response.code()),
+                )
+            }
+        } catch (exception: Exception) {
+            networkFailure(exception)
+        }
+    }
+
+
+    override suspend fun getTreatmentDetail(
+        caregiverId: String,
+        treatmentId: String,
+    ): AppResult<TreatmentDetailReadModel> {
+        return try {
+            val response = api.getTreatmentDetail(
+                treatmentId = treatmentId,
+                caregiverId = caregiverId,
+            )
+            val body = response.body()
+            if (response.isSuccessful && body != null) {
+                val status = runCatching { TreatmentStatus.valueOf(body.status) }.getOrNull()
+                    ?: return AppResult.Failure(
+                        message = "El servicio devolvió un estado de tratamiento no reconocido.",
+                        code = "INVALID_TREATMENT_STATE",
+                    )
+                AppResult.Success(
+                    TreatmentDetailReadModel(
+                        id = body.id,
+                        olderAdultId = body.olderAdultId,
+                        name = body.name,
+                        status = status,
+                        medicationId = body.medicationId,
+                        dose = body.dose,
+                        frequency = body.frequency,
+                        scheduledTimes = body.scheduledTimes.orEmpty(),
+                        instructions = body.instructions.orEmpty(),
+                        reminderLeadMinutes = body.reminderLeadMinutes,
                     ),
                 )
             } else {

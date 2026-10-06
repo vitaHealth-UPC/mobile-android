@@ -2,6 +2,7 @@ package com.vitahealth.tata.treatment.infrastructure.remote
 
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Query
@@ -82,6 +83,12 @@ interface TreatmentApiService {
 
     @POST("api/v1/treatments/{treatmentId}/resume")
     suspend fun resumeTreatment(
+        @Path("treatmentId") treatmentId: String,
+        @Query("caregiverId") caregiverId: String,
+    ): Response<TreatmentResponse>
+
+    @GET("api/v1/treatments/{treatmentId}")
+    suspend fun getTreatmentDetail(
         @Path("treatmentId") treatmentId: String,
         @Query("caregiverId") caregiverId: String,
     ): Response<TreatmentResponse>
