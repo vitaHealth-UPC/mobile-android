@@ -118,10 +118,9 @@ class OfflineFirstDoseConfirmationRepository(
             is AppResult.Failure -> {
                 if (result.code != NETWORK_UNAVAILABLE) {
                     result
+                } else if (local.findDose(command.intakeId) == null) {
+                    result
                 } else {
-                    val cachedDose = local.findDose(command.intakeId)
-                        ?: return result
-
                     local.enqueueConfirmation(command)
                     syncScheduler.schedule()
 
