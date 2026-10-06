@@ -16,3 +16,7 @@ This file is the implementation traceability map between UX states, User Stories
 | Accessibility and notification states | preferences | preferences presentation package |
 
 Rule: one UX frame does not automatically mean one `Screen.kt`. Error/success/empty variants are normally modeled as UI state.
+
+## US-06 touch confirmation
+
+Figma file `jCppvxtSpLpHOrC3ZWUIVC`, Mobile Prototyping `563:2`: pending detail `563:3266`, confirmed state `563:291`. `DoseDetailScreen` keeps pending/submitting/error/success in `DoseDetailUiState`. Success appears only after server confirmation. The prototype family-notified claim awaits a real notification contract. Voice frame `563:242` remains pending device integration.
