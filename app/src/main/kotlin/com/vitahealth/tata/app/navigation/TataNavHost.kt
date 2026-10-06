@@ -11,6 +11,7 @@ import androidx.navigation.navArgument
 import com.vitahealth.tata.app.TataApplication
 import com.vitahealth.tata.carelink.presentation.link.CareLinkRoute
 import com.vitahealth.tata.identity.presentation.registration.CaregiverRegistrationRoute
+import com.vitahealth.tata.treatment.presentation.medication.MedicationRegistrationRoute
 
 @Composable
 fun TataNavHost(
@@ -50,6 +51,53 @@ fun TataNavHost(
             )
             CareLinkRoute(
                 factory = app.container.careLinkViewModelFactory(caregiverId),
+                onConfirmed = { olderAdultId, olderAdultName ->
+                    navController.navigate(
+                        RootDestination.MedicationRegistration.createRoute(
+                            caregiverId = caregiverId,
+                            olderAdultId = olderAdultId,
+                            olderAdultName = olderAdultName,
+                        ),
+                    ) {
+                        popUpTo(RootDestination.CareLink.route) {
+                            inclusive = true
+                        }
+                    }
+                },
+            )
+        }
+
+        composable(
+            route = RootDestination.MedicationRegistration.route,
+            arguments = listOf(
+                navArgument(RootDestination.MedicationRegistration.caregiverIdArgument) {
+                    type = NavType.StringType
+                },
+                navArgument(RootDestination.MedicationRegistration.olderAdultIdArgument) {
+                    type = NavType.StringType
+                },
+                navArgument(RootDestination.MedicationRegistration.olderAdultNameArgument) {
+                    type = NavType.StringType
+                },
+            ),
+        ) { backStackEntry ->
+            val app = androidx.compose.ui.platform.LocalContext.current.applicationContext as TataApplication
+            val caregiverId = requireNotNull(
+                backStackEntry.arguments?.getString(RootDestination.MedicationRegistration.caregiverIdArgument),
+            )
+            val olderAdultId = requireNotNull(
+                backStackEntry.arguments?.getString(RootDestination.MedicationRegistration.olderAdultIdArgument),
+            )
+            val olderAdultName = requireNotNull(
+                backStackEntry.arguments?.getString(RootDestination.MedicationRegistration.olderAdultNameArgument),
+            )
+
+            MedicationRegistrationRoute(
+                factory = app.container.medicationRegistrationViewModelFactory(
+                    caregiverId = caregiverId,
+                    olderAdultId = olderAdultId,
+                    olderAdultName = olderAdultName,
+                ),
             )
         }
     }
