@@ -1,16 +1,15 @@
 package com.vitahealth.tata.app.navigation
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Text
+import android.app.Application
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.vitahealth.tata.app.TataApplication
+import com.vitahealth.tata.identity.presentation.registration.CaregiverRegistrationRoute
 
 @Composable
 fun TataNavHost(
@@ -19,16 +18,12 @@ fun TataNavHost(
 ) {
     NavHost(
         navController = navController,
-        startDestination = RootDestination.Onboarding.route,
+        startDestination = RootDestination.CaregiverRegistration.route,
         modifier = modifier,
     ) {
-        composable(RootDestination.Onboarding.route) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text("Tata")
-            }
+        composable(RootDestination.CaregiverRegistration.route) {
+            val app = androidx.compose.ui.platform.LocalContext.current.applicationContext as TataApplication
+            CaregiverRegistrationRoute(factory = app.container.caregiverRegistrationViewModelFactory)
         }
     }
 }
