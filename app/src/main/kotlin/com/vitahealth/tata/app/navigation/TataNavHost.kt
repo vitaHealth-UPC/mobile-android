@@ -11,6 +11,7 @@ import androidx.navigation.navArgument
 import com.vitahealth.tata.app.TataApplication
 import com.vitahealth.tata.carelink.presentation.link.CareLinkRoute
 import com.vitahealth.tata.identity.presentation.registration.CaregiverRegistrationRoute
+import com.vitahealth.tata.intake.presentation.home.NextDoseHomeRoute
 import com.vitahealth.tata.treatment.presentation.medication.MedicationRegistrationRoute
 import com.vitahealth.tata.treatment.presentation.treatment.TreatmentCreationRoute
 import com.vitahealth.tata.treatment.presentation.treatment.TreatmentDoseFrequencyRoute
@@ -513,5 +514,28 @@ fun TataNavHost(
                 onBack = { navController.popBackStack() },
             )
         }
+        composable(
+            route = RootDestination.NextDoseHome.route,
+            arguments = listOf(
+                navArgument(RootDestination.NextDoseHome.olderAdultIdArgument) { type = NavType.StringType },
+                navArgument(RootDestination.NextDoseHome.olderAdultNameArgument) { type = NavType.StringType },
+            ),
+        ) { backStackEntry ->
+            val app = androidx.compose.ui.platform.LocalContext.current.applicationContext as TataApplication
+            val olderAdultId = requireNotNull(
+                backStackEntry.arguments?.getString(RootDestination.NextDoseHome.olderAdultIdArgument),
+            )
+            val olderAdultName = requireNotNull(
+                backStackEntry.arguments?.getString(RootDestination.NextDoseHome.olderAdultNameArgument),
+            )
+
+            NextDoseHomeRoute(
+                factory = app.container.nextDoseHomeViewModelFactory(
+                    olderAdultId = olderAdultId,
+                    olderAdultName = olderAdultName,
+                ),
+            )
+        }
+
     }
 }

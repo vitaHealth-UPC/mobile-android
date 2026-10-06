@@ -246,4 +246,19 @@ sealed interface RootDestination {
             Uri.encode(medicationLabelHint.ifBlank { " " })
     }
 
+    data object NextDoseHome : RootDestination {
+        const val olderAdultIdArgument = "olderAdultId"
+        const val olderAdultNameArgument = "olderAdultName"
+
+        override val route: String =
+            "older-adult-home/{$olderAdultIdArgument}/{$olderAdultNameArgument}"
+
+        fun createRoute(
+            olderAdultId: String,
+            olderAdultName: String,
+        ): String = "older-adult-home/" +
+            Uri.encode(olderAdultId) + "/" +
+            Uri.encode(olderAdultName)
+    }
+
 }
