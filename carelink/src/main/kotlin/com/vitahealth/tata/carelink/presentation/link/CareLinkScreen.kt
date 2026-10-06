@@ -1,5 +1,6 @@
 package com.vitahealth.tata.carelink.presentation.link
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -13,7 +14,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -21,6 +25,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -28,12 +33,14 @@ import com.vitahealth.tata.carelink.domain.model.OlderAdultProfile
 import com.vitahealth.tata.shared.design.components.TataButton
 import com.vitahealth.tata.shared.design.components.TataCard
 import com.vitahealth.tata.shared.design.components.TataFormField
+import com.vitahealth.tata.shared.design.theme.TataBorder
 import com.vitahealth.tata.shared.design.theme.TataDeepNavy
 import com.vitahealth.tata.shared.design.theme.TataError
 import com.vitahealth.tata.shared.design.theme.TataErrorSurface
 import com.vitahealth.tata.shared.design.theme.TataLavender
 import com.vitahealth.tata.shared.design.theme.TataMint
 import com.vitahealth.tata.shared.design.theme.TataMuted
+import com.vitahealth.tata.shared.design.theme.TataNavy
 import com.vitahealth.tata.shared.design.theme.TataSurface
 import com.vitahealth.tata.shared.design.theme.TataText
 import java.time.LocalDate
@@ -51,6 +58,8 @@ fun CareLinkRoute(
         state = state,
         onCodeChange = viewModel::onCodeChange,
         onSendRequest = viewModel::sendLinkRequest,
+        onAcceptConsent = viewModel::acceptConsent,
+        onRejectConsent = viewModel::rejectConsent,
         modifier = modifier,
     )
 }
@@ -60,6 +69,8 @@ fun CareLinkScreen(
     state: CareLinkUiState,
     onCodeChange: (String) -> Unit,
     onSendRequest: () -> Unit,
+    onAcceptConsent: () -> Unit,
+    onRejectConsent: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -84,7 +95,7 @@ fun CareLinkScreen(
         )
 
         LinkProgress(
-            awaitingConsent = state.step == CareLinkStep.AwaitingConsent,
+            step = state.step,
             modifier = Modifier.padding(top = 24.dp),
         )
 
@@ -99,18 +110,35 @@ fun CareLinkScreen(
 
         state.olderAdult?.let { profile ->
             Spacer(Modifier.height(14.dp))
-            OlderAdultCard(profile)
+            OlderAdultCard(profile, state.step)
         }
 
         Spacer(Modifier.height(14.dp))
-        if (state.step == CareLinkStep.Code) {
-            TataButton(
+        when (state.step) {
+            CareLinkStep.Code -> TataButton(
                 text = if (state.isLoading) "Enviando..." else "Enviar solicitud",
                 enabled = !state.isLoading,
                 onClick = onSendRequest,
             )
-        } else {
-            AwaitingConsentCard(state.olderAdult)
+
+            CareLinkStep.AwaitingConsent -> ConsentCard(
+                profile = state.olderAdult,
+                isLoading = state.isLoading,
+                onAccept = onAcceptConsent,
+                onReject = onRejectConsent,
+            )
+
+            CareLinkStep.Confirmed -> StatusCard(
+                title = "Vínculo confirmado",
+                message = "El consentimiento fue registrado y el seguimiento ya está autorizado.",
+                containerColor = TataMint,
+            )
+
+            CareLinkStep.Rejected -> StatusCard(
+                title = "Seguimiento restringido",
+                message = "El adulto mayor no autorizó el vínculo. Su información permanece protegida.",
+                containerColor = TataErrorSurface,
+            )
         }
 
         Spacer(Modifier.height(14.dp))
@@ -121,10 +149,11 @@ fun CareLinkScreen(
                 fontWeight = FontWeight.SemiBold,
             )
             Text(
-                text = if (state.step == CareLinkStep.Code) {
-                    "El adulto mayor decide si autoriza el seguimiento."
-                } else {
-                    "Solicitud registrada. El seguimiento seguirá restringido hasta contar con consentimiento."
+                text = when (state.step) {
+                    CareLinkStep.Code -> "El adulto mayor decide si autoriza el seguimiento."
+                    CareLinkStep.AwaitingConsent -> "El seguimiento sigue restringido hasta registrar una decisión."
+                    CareLinkStep.Confirmed -> "El adulto mayor puede retirar su consentimiento posteriormente."
+                    CareLinkStep.Rejected -> "Sin consentimiento no se habilita el acceso de seguimiento."
                 },
                 color = TataMuted,
                 style = MaterialTheme.typography.bodySmall,
@@ -149,9 +178,12 @@ fun CareLinkScreen(
 
 @Composable
 private fun LinkProgress(
-    awaitingConsent: Boolean,
+    step: CareLinkStep,
     modifier: Modifier = Modifier,
 ) {
+    val requestReached = step != CareLinkStep.Code
+    val consentReached = step == CareLinkStep.Confirmed || step == CareLinkStep.Rejected
+
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -160,8 +192,8 @@ private fun LinkProgress(
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         ProgressItem("1", "Código", active = true)
-        ProgressItem("2", "Solicitud", active = awaitingConsent)
-        ProgressItem("3", "Consentimiento", active = false)
+        ProgressItem("2", "Solicitud", active = requestReached)
+        ProgressItem("3", "Consentimiento", active = consentReached)
     }
 }
 
@@ -186,7 +218,10 @@ private fun ProgressItem(
 }
 
 @Composable
-private fun OlderAdultCard(profile: OlderAdultProfile) {
+private fun OlderAdultCard(
+    profile: OlderAdultProfile,
+    step: CareLinkStep,
+) {
     TataCard(modifier = Modifier.fillMaxWidth()) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -217,7 +252,12 @@ private fun OlderAdultCard(profile: OlderAdultProfile) {
                     style = MaterialTheme.typography.bodySmall,
                 )
                 Text(
-                    text = "Solicitud lista para consentimiento",
+                    text = when (step) {
+                        CareLinkStep.Code -> "Perfil encontrado"
+                        CareLinkStep.AwaitingConsent -> "Solicitud lista para consentimiento"
+                        CareLinkStep.Confirmed -> "Vínculo activo"
+                        CareLinkStep.Rejected -> "Vínculo no autorizado"
+                    },
                     color = TataMuted,
                     style = MaterialTheme.typography.bodySmall,
                 )
@@ -227,7 +267,12 @@ private fun OlderAdultCard(profile: OlderAdultProfile) {
 }
 
 @Composable
-private fun AwaitingConsentCard(profile: OlderAdultProfile?) {
+private fun ConsentCard(
+    profile: OlderAdultProfile?,
+    isLoading: Boolean,
+    onAccept: () -> Unit,
+    onReject: () -> Unit,
+) {
     TataCard(containerColor = TataLavender) {
         Text(
             text = "Consentimiento del adulto mayor",
@@ -236,19 +281,61 @@ private fun AwaitingConsentCard(profile: OlderAdultProfile?) {
         )
         Text(
             text = if (profile != null) {
-                "${profile.fullName} debe autorizar el acceso a adherencia, alertas e información necesaria para su seguimiento."
+                "${profile.fullName} autoriza el acceso a adherencia, alertas e información necesaria para su seguimiento."
             } else {
-                "El adulto mayor debe autorizar el acceso necesario para el seguimiento."
+                "El adulto mayor autoriza el acceso necesario para el seguimiento."
             },
             color = TataMuted,
             style = MaterialTheme.typography.bodySmall,
             modifier = Modifier.padding(top = 6.dp),
         )
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 14.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            Button(
+                onClick = onAccept,
+                enabled = !isLoading,
+                modifier = Modifier.weight(1f),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = TataNavy,
+                    contentColor = Color.White,
+                ),
+            ) {
+                Text(if (isLoading) "Procesando..." else "Aceptar vínculo")
+            }
+            OutlinedButton(
+                onClick = onReject,
+                enabled = !isLoading,
+                modifier = Modifier.weight(1f),
+                border = BorderStroke(1.dp, TataBorder),
+            ) {
+                Text("Rechazar", color = TataDeepNavy)
+            }
+        }
+    }
+}
+
+@Composable
+private fun StatusCard(
+    title: String,
+    message: String,
+    containerColor: Color,
+) {
+    TataCard(containerColor = containerColor) {
         Text(
-            text = "Esperando consentimiento",
+            text = title,
             color = TataDeepNavy,
             fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.padding(top = 14.dp),
+        )
+        Text(
+            text = message,
+            color = TataMuted,
+            style = MaterialTheme.typography.bodySmall,
+            modifier = Modifier.padding(top = 5.dp),
         )
     }
 }

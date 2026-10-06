@@ -6,5 +6,6 @@ import com.vitahealth.tata.shared.common.result.AppResult
 
 interface CareLinkRepository {
     suspend fun acceptLink(caregiverId: String, code: String): AppResult<CareLink>
+    suspend fun registerConsent(careLinkId: String, accepted: Boolean): AppResult<CareLink>
     suspend fun getOlderAdult(olderAdultId: String): AppResult<OlderAdultProfile>
 }

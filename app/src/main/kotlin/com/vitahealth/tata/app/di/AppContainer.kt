@@ -2,6 +2,7 @@ package com.vitahealth.tata.app.di
 
 import com.vitahealth.tata.carelink.application.handlers.AcceptCareLinkCommandHandler
 import com.vitahealth.tata.carelink.application.handlers.GetOlderAdultProfileQueryHandler
+import com.vitahealth.tata.carelink.application.handlers.RegisterConsentCommandHandler
 import com.vitahealth.tata.carelink.infrastructure.remote.CareLinkApiService
 import com.vitahealth.tata.carelink.infrastructure.remote.RemoteCareLinkRepository
 import com.vitahealth.tata.carelink.presentation.link.CareLinkViewModel
@@ -37,6 +38,7 @@ class AppContainer(
     fun careLinkViewModelFactory(caregiverId: String) = CareLinkViewModel.Factory(
         caregiverId = caregiverId,
         acceptCareLinkHandler = AcceptCareLinkCommandHandler(careLinkRepository),
+        registerConsentHandler = RegisterConsentCommandHandler(careLinkRepository),
         getOlderAdultHandler = GetOlderAdultProfileQueryHandler(careLinkRepository),
     )
 }

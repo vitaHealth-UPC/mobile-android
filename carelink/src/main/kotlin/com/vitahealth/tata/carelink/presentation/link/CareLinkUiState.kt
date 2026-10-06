@@ -6,6 +6,8 @@ import com.vitahealth.tata.carelink.domain.model.OlderAdultProfile
 enum class CareLinkStep {
     Code,
     AwaitingConsent,
+    Confirmed,
+    Rejected,
 }
 
 data class CareLinkUiState(
