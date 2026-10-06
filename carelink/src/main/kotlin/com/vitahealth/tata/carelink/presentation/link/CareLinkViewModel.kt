@@ -4,9 +4,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.vitahealth.tata.carelink.application.commands.AcceptCareLinkCommand
+import com.vitahealth.tata.carelink.application.commands.RegisterConsentCommand
 import com.vitahealth.tata.carelink.application.handlers.AcceptCareLinkCommandHandler
 import com.vitahealth.tata.carelink.application.handlers.GetOlderAdultProfileQueryHandler
+import com.vitahealth.tata.carelink.application.handlers.RegisterConsentCommandHandler
 import com.vitahealth.tata.carelink.application.queries.GetOlderAdultProfileQuery
+import com.vitahealth.tata.carelink.domain.model.CareLinkStatus
 import com.vitahealth.tata.shared.common.result.AppResult
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,6 +20,7 @@ import kotlinx.coroutines.launch
 class CareLinkViewModel(
     caregiverId: String,
     private val acceptCareLinkHandler: AcceptCareLinkCommandHandler,
+    private val registerConsentHandler: RegisterConsentCommandHandler,
     private val getOlderAdultHandler: GetOlderAdultProfileQueryHandler,
 ) : ViewModel() {
     private val _state = MutableStateFlow(CareLinkUiState(caregiverId = caregiverId))
@@ -67,6 +71,46 @@ class CareLinkViewModel(
         }
     }
 
+    fun acceptConsent() = recordConsent(accepted = true)
+
+    fun rejectConsent() = recordConsent(accepted = false)
+
+    private fun recordConsent(accepted: Boolean) {
+        val current = _state.value
+        val careLinkId = current.acceptedLink?.id ?: return
+        if (current.isLoading || current.step != CareLinkStep.AwaitingConsent) return
+
+        _state.update { it.copy(isLoading = true, errorMessage = null) }
+        viewModelScope.launch {
+            when (val result = registerConsentHandler(
+                RegisterConsentCommand(
+                    careLinkId = careLinkId,
+                    accepted = accepted,
+                ),
+            )) {
+                is AppResult.Success -> _state.update {
+                    val nextStep = when (result.value.status) {
+                        CareLinkStatus.CONFIRMED -> CareLinkStep.Confirmed
+                        CareLinkStatus.REVOKED -> CareLinkStep.Rejected
+                        else -> CareLinkStep.AwaitingConsent
+                    }
+                    it.copy(
+                        isLoading = false,
+                        step = nextStep,
+                        acceptedLink = result.value,
+                    )
+                }
+
+                is AppResult.Failure -> _state.update {
+                    it.copy(
+                        isLoading = false,
+                        errorMessage = consentMessage(result),
+                    )
+                }
+            }
+        }
+    }
+
     private suspend fun loadOlderAdult(olderAdultId: String) {
         when (val result = getOlderAdultHandler(GetOlderAdultProfileQuery(olderAdultId))) {
             is AppResult.Success -> _state.update {
@@ -83,7 +127,15 @@ class CareLinkViewModel(
         when (failure.code) {
             "INVALID_LINKING_CODE" -> "El código de vinculación no es válido."
             "LINKING_CODE_EXPIRED_OR_USED" -> "El código venció o ya fue utilizado."
-            "ACCOUNT_NOT_ENABLED" -> "Verifica tu cuenta antes de vincular a un familiar."
+            "CONSENT_REQUIRED" -> "Verifica tu cuenta antes de vincular a un familiar."
+            "NETWORK_UNAVAILABLE" -> "No hay conexión. Inténtalo nuevamente."
+            else -> failure.message
+        }
+
+    private fun consentMessage(failure: AppResult.Failure): String =
+        when (failure.code) {
+            "CONSENT_REQUIRED" -> "No se pudo registrar el consentimiento."
+            "CARE_LINK_NOT_FOUND" -> "La solicitud de vinculación ya no está disponible."
             "NETWORK_UNAVAILABLE" -> "No hay conexión. Inténtalo nuevamente."
             else -> failure.message
         }
@@ -97,6 +149,7 @@ class CareLinkViewModel(
     class Factory(
         private val caregiverId: String,
         private val acceptCareLinkHandler: AcceptCareLinkCommandHandler,
+        private val registerConsentHandler: RegisterConsentCommandHandler,
         private val getOlderAdultHandler: GetOlderAdultProfileQueryHandler,
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
@@ -104,6 +157,7 @@ class CareLinkViewModel(
             CareLinkViewModel(
                 caregiverId = caregiverId,
                 acceptCareLinkHandler = acceptCareLinkHandler,
+                registerConsentHandler = registerConsentHandler,
                 getOlderAdultHandler = getOlderAdultHandler,
             ) as T
     }

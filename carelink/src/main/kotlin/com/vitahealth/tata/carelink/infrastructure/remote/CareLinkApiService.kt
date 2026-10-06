@@ -11,6 +11,10 @@ data class AcceptCareLinkRequest(
     val code: String,
 )
 
+data class RegisterConsentRequest(
+    val accepted: Boolean,
+)
+
 data class CareLinkResponse(
     val id: String,
     val caregiverId: String,
@@ -39,6 +43,12 @@ interface CareLinkApiService {
     @POST("api/v1/care-links/acceptances")
     suspend fun acceptLink(
         @Body request: AcceptCareLinkRequest,
+    ): Response<CareLinkResponse>
+
+    @POST("api/v1/care-links/{careLinkId}/consent")
+    suspend fun registerConsent(
+        @Path("careLinkId") careLinkId: String,
+        @Body request: RegisterConsentRequest,
     ): Response<CareLinkResponse>
 
     @GET("api/v1/older-adults/{olderAdultId}")
