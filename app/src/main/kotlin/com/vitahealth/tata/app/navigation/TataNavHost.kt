@@ -8,6 +8,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.vitahealth.tata.analytics.presentation.history.AdherenceHistoryRoute
 import com.vitahealth.tata.app.TataApplication
 import com.vitahealth.tata.carelink.presentation.link.CareLinkRoute
 import com.vitahealth.tata.identity.presentation.registration.CaregiverRegistrationRoute
@@ -555,6 +556,22 @@ fun TataNavHost(
             DoseDetailRoute(
                 factory = app.container.doseDetailViewModelFactory(intakeId),
                 onBack = { navController.popBackStack() },
+            )
+        }
+
+        composable(
+            route = RootDestination.AdherenceHistory.route,
+            arguments = listOf(
+                navArgument(RootDestination.AdherenceHistory.olderAdultIdArgument) { type = NavType.StringType },
+            ),
+        ) { backStackEntry ->
+            val app = androidx.compose.ui.platform.LocalContext.current.applicationContext as TataApplication
+            val olderAdultId = requireNotNull(
+                backStackEntry.arguments?.getString(RootDestination.AdherenceHistory.olderAdultIdArgument),
+            )
+
+            AdherenceHistoryRoute(
+                factory = app.container.adherenceHistoryViewModelFactory(olderAdultId),
             )
         }
 

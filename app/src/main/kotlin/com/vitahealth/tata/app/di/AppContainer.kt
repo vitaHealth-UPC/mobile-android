@@ -1,5 +1,9 @@
 package com.vitahealth.tata.app.di
 
+import com.vitahealth.tata.analytics.application.handlers.GetAdherenceSummaryQueryHandler
+import com.vitahealth.tata.analytics.infrastructure.fake.FakeAdherenceScenario
+import com.vitahealth.tata.analytics.infrastructure.fake.FakeAdherenceSummaryRepository
+import com.vitahealth.tata.analytics.presentation.history.AdherenceHistoryViewModel
 import com.vitahealth.tata.carelink.application.handlers.AcceptCareLinkCommandHandler
 import com.vitahealth.tata.carelink.application.handlers.GetOlderAdultProfileQueryHandler
 import com.vitahealth.tata.carelink.application.handlers.RegisterConsentCommandHandler
@@ -225,6 +229,15 @@ class AppContainer(
     fun doseDetailViewModelFactory(intakeId: String) = DoseDetailViewModel.Factory(
         intakeId = intakeId,
         handler = GetDoseDetailQueryHandler(doseDetailRepository),
+    )
+
+    // Datos de ejemplo: cambiar por el repositorio remoto cuando el backend de analytics esté listo.
+    // Escenarios para probar los estados de la pantalla: Content, NoData, Error.
+    private val adherenceSummaryRepository = FakeAdherenceSummaryRepository(FakeAdherenceScenario.Content)
+
+    fun adherenceHistoryViewModelFactory(olderAdultId: String) = AdherenceHistoryViewModel.Factory(
+        olderAdultId = olderAdultId,
+        handler = GetAdherenceSummaryQueryHandler(adherenceSummaryRepository),
     )
 
 }
