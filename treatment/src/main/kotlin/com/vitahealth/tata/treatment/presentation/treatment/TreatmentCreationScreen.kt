@@ -1,5 +1,6 @@
 package com.vitahealth.tata.treatment.presentation.treatment
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -23,6 +24,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -38,6 +40,7 @@ import com.vitahealth.tata.shared.design.theme.TataMuted
 import com.vitahealth.tata.shared.design.theme.TataNavy
 import com.vitahealth.tata.shared.design.theme.TataSurface
 import com.vitahealth.tata.shared.design.theme.TataText
+import com.vitahealth.tata.treatment.R
 
 @Composable
 fun TreatmentCreationRoute(
@@ -107,18 +110,37 @@ fun TreatmentCreationScreen(
                 color = TataMuted,
                 style = MaterialTheme.typography.labelSmall,
             )
-            Text(
-                text = state.medicationLabel,
-                color = TataText,
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.padding(top = 5.dp),
-            )
-            Text(
-                text = "Registrado en el paso anterior.",
-                color = TataMuted,
-                style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(top = 3.dp),
-            )
+            Row(
+                modifier = Modifier.padding(top = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(42.dp)
+                        .background(TataLavender, CircleShape),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Image(
+                        painter = painterResource(R.drawable.treatment_medication_icon),
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp),
+                    )
+                }
+                Column {
+                    Text(
+                        text = state.medicationLabel,
+                        color = TataText,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                    Text(
+                        text = "Registrado en el paso anterior.",
+                        color = TataMuted,
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(top = 3.dp),
+                    )
+                }
+            }
         }
 
         TataCard(
@@ -128,12 +150,12 @@ fun TreatmentCreationScreen(
                 .padding(top = 14.dp),
         ) {
             Text(
-                text = "Tratamiento incompleto",
+                text = "Tratamiento en borrador",
                 color = TataText,
                 fontWeight = FontWeight.SemiBold,
             )
             Text(
-                text = "La pauta, horarios y recordatorios se configurarán en los siguientes pasos. Crear el tratamiento todavía no lo activa.",
+                text = "La dosis, frecuencia, horarios y recordatorios se configuran en los siguientes pasos. Crear el tratamiento todavía no lo activa.",
                 color = TataMuted,
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.padding(top = 5.dp),
@@ -163,15 +185,21 @@ fun TreatmentCreationScreen(
                     .padding(top = 14.dp),
             ) {
                 Text(
-                    text = "Tratamiento creado",
+                    text = "Tratamiento creado como borrador",
                     color = TataText,
                     fontWeight = FontWeight.SemiBold,
                 )
                 Text(
-                    text = treatment.name + " · estado incompleto",
+                    text = treatment.name + " · Borrador",
                     color = TataMuted,
                     style = MaterialTheme.typography.bodySmall,
                     modifier = Modifier.padding(top = 4.dp),
+                )
+                Text(
+                    text = "Aún no genera tomas hasta completar la pauta y activarlo.",
+                    color = TataMuted,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(top = 3.dp),
                 )
             }
         }
@@ -179,7 +207,7 @@ fun TreatmentCreationScreen(
         TataButton(
             text = when {
                 state.isLoading -> "Creando..."
-                state.createdTreatment != null -> "Tratamiento creado"
+                state.createdTreatment != null -> "Borrador creado"
                 else -> "Crear tratamiento"
             },
             enabled = !state.isLoading && state.createdTreatment == null,
