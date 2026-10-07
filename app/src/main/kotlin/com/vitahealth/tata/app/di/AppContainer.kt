@@ -1,12 +1,17 @@
 package com.vitahealth.tata.app.di
 
 import android.content.Context
+import com.vitahealth.tata.analytics.application.AdherenceRecommendationsRepository
+import com.vitahealth.tata.analytics.application.AdherenceSummaryRepository
 import com.vitahealth.tata.analytics.application.handlers.GetAdherenceRecommendationsQueryHandler
 import com.vitahealth.tata.analytics.application.handlers.GetAdherenceSummaryQueryHandler
 import com.vitahealth.tata.analytics.infrastructure.fake.FakeAdherenceRecommendationsRepository
 import com.vitahealth.tata.analytics.infrastructure.fake.FakeAdherenceScenario
 import com.vitahealth.tata.analytics.infrastructure.fake.FakeAdherenceSummaryRepository
 import com.vitahealth.tata.analytics.infrastructure.fake.FakeRecommendationsScenario
+import com.vitahealth.tata.analytics.infrastructure.remote.AnalyticsApiService
+import com.vitahealth.tata.analytics.infrastructure.remote.RemoteAdherenceRecommendationsRepository
+import com.vitahealth.tata.analytics.infrastructure.remote.RemoteAdherenceSummaryRepository
 import com.vitahealth.tata.analytics.presentation.history.AdherenceHistoryViewModel
 import com.vitahealth.tata.analytics.presentation.recommendations.AdherenceRecommendationsViewModel
 import com.vitahealth.tata.carelink.application.handlers.AcceptCareLinkCommandHandler
@@ -283,22 +288,37 @@ class AppContainer(
         confirmHandler = ConfirmDoseCommandHandler(doseConfirmationRepository),
     )
 
-    // Datos de ejemplo: cambiar por el repositorio remoto cuando el backend de analytics esté listo.
-    // Escenarios para probar los estados de la pantalla: Content, NoData, Error.
-    private val adherenceSummaryRepository = FakeAdherenceSummaryRepository(FakeAdherenceScenario.Content)
+    private val analyticsApi: AnalyticsApiService = retrofit.create(AnalyticsApiService::class.java)
+
+    // Con USE_ANALYTICS_BACKEND = false las pantallas usan datos de ejemplo, sin backend.
+    // Escenarios de ejemplo: Content, NoData, EmptyWeek, Error.
+    private val adherenceSummaryRepository: AdherenceSummaryRepository =
+        if (USE_ANALYTICS_BACKEND) {
+            RemoteAdherenceSummaryRepository(analyticsApi)
+        } else {
+            FakeAdherenceSummaryRepository(FakeAdherenceScenario.Content)
+        }
 
     fun adherenceHistoryViewModelFactory(olderAdultId: String) = AdherenceHistoryViewModel.Factory(
         olderAdultId = olderAdultId,
         handler = GetAdherenceSummaryQueryHandler(adherenceSummaryRepository),
     )
 
-    // Escenarios para probar los estados de la pantalla: Content, InsufficientEvidence, Error.
-    private val adherenceRecommendationsRepository =
-        FakeAdherenceRecommendationsRepository(FakeRecommendationsScenario.Content)
+    // Escenarios de ejemplo: Content, InsufficientEvidence, Error.
+    private val adherenceRecommendationsRepository: AdherenceRecommendationsRepository =
+        if (USE_ANALYTICS_BACKEND) {
+            RemoteAdherenceRecommendationsRepository(analyticsApi)
+        } else {
+            FakeAdherenceRecommendationsRepository(FakeRecommendationsScenario.Content)
+        }
 
     fun adherenceRecommendationsViewModelFactory(olderAdultId: String) = AdherenceRecommendationsViewModel.Factory(
         olderAdultId = olderAdultId,
         handler = GetAdherenceRecommendationsQueryHandler(adherenceRecommendationsRepository),
     )
+
+    private companion object {
+        const val USE_ANALYTICS_BACKEND = true
+    }
 
 }
