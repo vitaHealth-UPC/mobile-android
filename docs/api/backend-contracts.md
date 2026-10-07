@@ -30,9 +30,9 @@ Base path `/api/v1/inventories`. Inventory is keyed by `medicationId` (a logical
 
 ### Endpoints
 
-- `POST /api/v1/inventories` â€” register the initial stock (US-40). Body `{ "medicationId": String, "initialQuantity": Int, "replenishmentThreshold": Int }`. `201` returns the inventory resource. Only one inventory may exist per medication, and initial registration requires an existing active medication.
-- `GET /api/v1/inventories/{medicationId}` â€” remaining stock, threshold, low-stock flag and batches (US-41, US-42). `200` returns the inventory resource; `404` means no inventory is registered yet.
-- `POST /api/v1/inventories/{medicationId}/replenishments` â€” add a batch and increase stock (US-43). Body `{ "quantity": Int, "lot": String? }`. `201` returns the updated inventory resource.
+- `POST /api/v1/inventories` — register the initial stock (US-40). Body `{ "medicationId": String, "initialQuantity": Int, "replenishmentThreshold": Int }`. `201` returns the inventory resource. Only one inventory may exist per medication, and initial registration requires an existing active medication.
+- `GET /api/v1/inventories/{medicationId}` — remaining stock, threshold, low-stock flag and batches (US-41, US-42). `200` returns the inventory resource; `404` means no inventory is registered yet.
+- `POST /api/v1/inventories/{medicationId}/replenishments` — add a batch and increase stock (US-43). Body `{ "quantity": Int, "lot": String? }`. `201` returns the updated inventory resource.
 
 ### Response shapes
 
@@ -58,7 +58,7 @@ Timestamps are ISO-8601 strings on the wire. The shared Retrofit uses the defaul
 - `registerReplenishment`: `400 -> INVALID_QUANTITY`, `404 -> INVENTORY_NOT_FOUND`, `409 -> CONCURRENT_UPDATE`, other -> `REQUEST_FAILED`.
 - A thrown I/O exception -> `NETWORK_UNAVAILABLE`; malformed responses or unparseable inventory/batch timestamps -> `INVALID_RESPONSE`. Coroutine cancellation propagates to the caller.
 
-Quantity/threshold are validated in the application layer with the `Quantity` (> 0) and `ReorderThreshold` (>= 0) value objects before any request, so invalid input (the "Cantidad invÃ¡lida" case) never reaches the network. Those app-born failures use the codes `INVALID_QUANTITY`, `INVALID_THRESHOLD` and `INVALID_MEDICATION_REFERENCE`. `GetInventoryStockQueryHandler` passes `INVENTORY_NOT_FOUND` through unchanged; the ViewModel turns it into the "not initialized" state. Each code (backend and app-born) resolves to a localized string in `:inventory` `res/values` and `res/values-b+es+419`; the UI never shows the backend `message` directly.
+Quantity/threshold are validated in the application layer with the `Quantity` (> 0) and `ReorderThreshold` (>= 0) value objects before any request, so invalid input (the "Cantidad inválida" case) never reaches the network. Those app-born failures use the codes `INVALID_QUANTITY`, `INVALID_THRESHOLD` and `INVALID_MEDICATION_REFERENCE`. `GetInventoryStockQueryHandler` passes `INVENTORY_NOT_FOUND` through unchanged; the ViewModel turns it into the "not initialized" state. Each code (backend and app-born) resolves to a localized string in `:inventory` `res/values` and `res/values-b+es+419`; the UI never shows the backend `message` directly.
 
 ### Inventory metadata and coverage
 
@@ -82,3 +82,7 @@ The app keeps a copy in DataStore (`tata_accessibility`) and applies it before a
 ## Medications of an older adult (US-04)
 
 `GET /api/v1/older-adults/{olderAdultId}/medications?caregiverId=` lists the medications ordered by name, inactive ones included. `PUT /api/v1/medications/{medicationId}` takes `{ caregiverId, name, presentation }`; `POST /api/v1/medications/{medicationId}/deactivation?caregiverId=` deactivates and keeps the history. Both return the medication. `403` means no active care link, `404` an unknown medication, `409` that an inactive medication cannot be edited and `400` a missing field. There is no reactivation endpoint.
+
+## Session access and PIN (US-01)
+
+The login screen calls `POST /api/v1/sessions` with `{email,password}`. The encrypted session store saves the token and expiry before navigation. `GET /api/v1/sessions/current` restores caregiver and older-adult sessions; restricted setup sessions require consent. PIN setup uses authenticated `POST /api/v1/pin-credentials`; PIN access uses `POST /api/v1/pin-sessions`, both with `{olderAdultId,pin}`. The backend enforces `PIN_LOCKED` for 15 minutes. Confirmed consent enters PIN setup and then the adult home. Device metadata remembers the adult identifier and name, never the PIN.
