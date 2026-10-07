@@ -89,8 +89,15 @@ class AppContainer(
     context: Context,
     baseUrl: String = "http://10.0.2.2:8080/",
 ) {
+    private val sessions = com.vitahealth.tata.shared.infrastructure.security.EncryptedSessionStore(context)
+    private val httpClient = okhttp3.OkHttpClient.Builder().addInterceptor { chain ->
+        val request = chain.request().newBuilder()
+        sessions.accessToken()?.let { request.header("Authorization", "Bearer $it") }
+        chain.proceed(request.build())
+    }.build()
     private val retrofit: Retrofit = Retrofit.Builder()
         .baseUrl(baseUrl)
+        .client(httpClient)
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
@@ -101,10 +108,10 @@ class AppContainer(
         com.vitahealth.tata.monitoring.presentation.summary.FamilySummaryViewModel.Factory(caregiverId, olderAdultId, name, monitoringRepository)
 
     private val identityApi: IdentityApiService = retrofit.create(IdentityApiService::class.java)
-    private val identityRepository = RemoteIdentityRepository(identityApi)
+    private val identityRepository = RemoteIdentityRepository(identityApi, sessions)
 
     private val careLinkApi: CareLinkApiService = retrofit.create(CareLinkApiService::class.java)
-    private val careLinkRepository = RemoteCareLinkRepository(careLinkApi)
+    private val careLinkRepository = RemoteCareLinkRepository(careLinkApi, sessions)
 
     private val treatmentApi: TreatmentApiService = retrofit.create(TreatmentApiService::class.java)
     private val treatmentRepository = RemoteTreatmentRepository(treatmentApi)

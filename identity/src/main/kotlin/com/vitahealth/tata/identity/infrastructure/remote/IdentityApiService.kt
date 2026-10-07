@@ -7,7 +7,7 @@ import retrofit2.http.POST
 data class RegisterAccountRequest(val name: String, val email: String, val password: String)
 data class VerifyEmailRequest(val email: String, val code: String)
 data class CreateEmailVerificationRequest(val email: String)
-data class AccountResponse(val id: String, val name: String, val email: String, val status: String)
+data class AccountResponse(val id: String, val name: String, val email: String, val status: String, val accessToken: String? = null, val expiresAt: String? = null)
 
 interface IdentityApiService {
     @POST("api/v1/accounts")
