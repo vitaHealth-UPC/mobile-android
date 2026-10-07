@@ -4,11 +4,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.vitahealth.tata.monitoring.application.handlers.GetAlertDetailQueryHandler
+import com.vitahealth.tata.monitoring.application.handlers.GetContactOptionQueryHandler
 import com.vitahealth.tata.monitoring.application.handlers.GetOpenAlertsQueryHandler
 import com.vitahealth.tata.monitoring.application.handlers.RegisterFollowUpNoteCommandHandler
 import com.vitahealth.tata.monitoring.application.handlers.UpdateAlertStatusCommandHandler
 import com.vitahealth.tata.monitoring.application.commands.UpdateAlertStatusCommand
 import com.vitahealth.tata.monitoring.application.queries.GetAlertDetailQuery
+import com.vitahealth.tata.monitoring.application.queries.GetContactOptionQuery
 import com.vitahealth.tata.monitoring.application.queries.GetOpenAlertsQuery
 import com.vitahealth.tata.monitoring.domain.model.AlertStatus
 import com.vitahealth.tata.monitoring.domain.model.canMoveTo
@@ -73,6 +75,7 @@ class AlertDetailViewModel(
     private val handler: GetAlertDetailQueryHandler,
     private val updateStatusHandler: UpdateAlertStatusCommandHandler,
     registerNoteHandler: RegisterFollowUpNoteCommandHandler,
+    private val contactHandler: GetContactOptionQueryHandler,
     private val context: CoroutineContext = EmptyCoroutineContext,
 ) : ViewModel() {
     private val mutableState = MutableStateFlow<AlertDetailUiState>(AlertDetailUiState.Loading)
@@ -82,8 +85,25 @@ class AlertDetailViewModel(
     val noteComposer = NoteComposer(caregiverId, olderAdultId, registerNoteHandler, viewModelScope, context)
     private var job: Job? = null
 
+    private val mutableContact = MutableStateFlow<ContactUiState>(ContactUiState.Loading)
+    val contact: StateFlow<ContactUiState> = mutableContact.asStateFlow()
+    private var contactJob: Job? = null
+
     init {
         load()
+        loadContact()
+    }
+
+    /** Read beside the alert, so a slow contact lookup never delays the alert itself. */
+    fun loadContact() {
+        contactJob?.cancel()
+        mutableContact.value = ContactUiState.Loading
+        contactJob = viewModelScope.launch(context) {
+            mutableContact.value = when (val result = contactHandler(GetContactOptionQuery(caregiverId, olderAdultId))) {
+                is AppResult.Success -> ContactUiState.Ready(result.value)
+                is AppResult.Failure -> ContactUiState.Failed(problemOf(result.code))
+            }
+        }
     }
 
     fun load() {
@@ -128,9 +148,10 @@ class AlertDetailViewModel(
         private val handler: GetAlertDetailQueryHandler,
         private val updateStatusHandler: UpdateAlertStatusCommandHandler,
         private val registerNoteHandler: RegisterFollowUpNoteCommandHandler,
+        private val contactHandler: GetContactOptionQueryHandler,
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T =
-            AlertDetailViewModel(caregiverId, olderAdultId, alertId, handler, updateStatusHandler, registerNoteHandler) as T
+            AlertDetailViewModel(caregiverId, olderAdultId, alertId, handler, updateStatusHandler, registerNoteHandler, contactHandler) as T
     }
 }

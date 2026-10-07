@@ -1,7 +1,5 @@
 package com.vitahealth.tata.monitoring.presentation.summary
 
-import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.*
@@ -19,6 +17,8 @@ import androidx.lifecycle.*
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.vitahealth.tata.monitoring.R
+import com.vitahealth.tata.monitoring.domain.model.ContactChannelType
+import com.vitahealth.tata.monitoring.presentation.contact.openContact
 import com.vitahealth.tata.shared.design.components.*
 import com.vitahealth.tata.shared.design.theme.*
 import java.time.*
@@ -53,12 +53,15 @@ fun FamilySummaryRoute(factory: FamilySummaryViewModel.Factory, olderAdultName: 
                 else dialog.rows.forEach { Text(it, modifier = Modifier.padding(bottom = 16.dp)) }
             } }, confirmButton = {
                 TextButton(onClick = {
-                    if (dialog.phone != null) {
-                        val intent = Intent(Intent.ACTION_DIAL, Uri.fromParts("tel", dialog.phone, null))
-                        if (intent.resolveActivity(context.packageManager) != null) context.startActivity(intent)
-                    }
+                    dialog.contact?.let { context.openContact(it) }
                     model.dismissDialog()
-                }) { Text(if (dialog.phone == null) "Cerrar" else "Abrir teléfono") }
+                }) {
+                    Text(when (dialog.contact?.type) {
+                        null -> "Cerrar"
+                        ContactChannelType.PHONE -> "Abrir teléfono"
+                        ContactChannelType.WHATSAPP -> "Abrir WhatsApp"
+                    })
+                }
             })
     }
 }

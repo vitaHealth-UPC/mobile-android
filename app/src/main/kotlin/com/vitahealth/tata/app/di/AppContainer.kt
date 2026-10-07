@@ -46,10 +46,12 @@ import com.vitahealth.tata.intake.presentation.home.NextDoseHomeViewModel
 import com.vitahealth.tata.inventory.application.handlers.GetInventoryStockQueryHandler
 import com.vitahealth.tata.monitoring.application.handlers.GetAlertDetailQueryHandler
 import com.vitahealth.tata.monitoring.application.handlers.GetOpenAlertsQueryHandler
+import com.vitahealth.tata.monitoring.application.handlers.GetContactOptionQueryHandler
 import com.vitahealth.tata.monitoring.application.handlers.GetFollowUpNotesQueryHandler
 import com.vitahealth.tata.monitoring.application.handlers.RegisterFollowUpNoteCommandHandler
 import com.vitahealth.tata.monitoring.application.handlers.UpdateAlertStatusCommandHandler
 import com.vitahealth.tata.monitoring.infrastructure.remote.NotesApiService
+import com.vitahealth.tata.monitoring.infrastructure.remote.RemoteContactRepository
 import com.vitahealth.tata.monitoring.infrastructure.remote.RemoteNotesRepository
 import com.vitahealth.tata.monitoring.presentation.notes.NotesViewModel
 import com.vitahealth.tata.monitoring.infrastructure.remote.AlertsApiService
@@ -134,7 +136,13 @@ class AppContainer(
         retrofit.create(com.vitahealth.tata.monitoring.infrastructure.remote.FamilyMonitoringApiService::class.java),
     )
     fun familySummaryViewModelFactory(caregiverId: String, olderAdultId: String, name: String) =
-        com.vitahealth.tata.monitoring.presentation.summary.FamilySummaryViewModel.Factory(caregiverId, olderAdultId, name, monitoringRepository)
+        com.vitahealth.tata.monitoring.presentation.summary.FamilySummaryViewModel.Factory(
+            caregiverId, olderAdultId, name, monitoringRepository, GetContactOptionQueryHandler(contactRepository),
+        )
+
+    private val contactRepository = RemoteContactRepository(
+        retrofit.create(com.vitahealth.tata.monitoring.infrastructure.remote.FamilyMonitoringApiService::class.java),
+    )
 
     private val notesRepository = RemoteNotesRepository(retrofit.create(NotesApiService::class.java))
     fun notesViewModelFactory(caregiverId: String, olderAdultId: String) = NotesViewModel.Factory(
@@ -155,6 +163,7 @@ class AppContainer(
             GetAlertDetailQueryHandler(alertsRepository),
             UpdateAlertStatusCommandHandler(alertsRepository),
             RegisterFollowUpNoteCommandHandler(notesRepository),
+            GetContactOptionQueryHandler(contactRepository),
         )
 
     private val identityApi: IdentityApiService = retrofit.create(IdentityApiService::class.java)

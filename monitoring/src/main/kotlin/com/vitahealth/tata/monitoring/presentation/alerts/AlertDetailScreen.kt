@@ -25,6 +25,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.vitahealth.tata.monitoring.R
 import com.vitahealth.tata.monitoring.domain.model.AlertStatus
 import com.vitahealth.tata.monitoring.domain.model.CaregiverAlert
+import com.vitahealth.tata.monitoring.domain.model.ContactChannel
+import com.vitahealth.tata.monitoring.domain.model.ContactChannelType
+import com.vitahealth.tata.monitoring.domain.model.ContactOption
 import com.vitahealth.tata.monitoring.presentation.notes.NoteComposerDialog
 import com.vitahealth.tata.shared.design.components.CaregiverTab
 import com.vitahealth.tata.shared.design.components.CaregiverTabBar
@@ -42,7 +45,11 @@ fun AlertDetailRoute(
     val model: AlertDetailViewModel = viewModel(factory = factory)
     val state by model.state.collectAsState()
     val composer by model.noteComposer.state.collectAsState()
-    AlertDetailScreen(state, onBack, model::load, onTabSelected, model::updateStatus, composer.saved, model.noteComposer::open)
+    val contact by model.contact.collectAsState()
+    AlertDetailScreen(
+        state, onBack, model::load, onTabSelected, model::updateStatus, composer.saved, model.noteComposer::open,
+        contact, model::loadContact,
+    )
     NoteComposerDialog(composer, onSave = { model.noteComposer.save(it) }, onDismiss = model.noteComposer::dismiss)
 }
 
@@ -55,6 +62,8 @@ fun AlertDetailScreen(
     onUpdateStatus: (AlertStatus) -> Unit = {},
     noteSaved: Boolean = false,
     onAddNote: () -> Unit = {},
+    contact: ContactUiState = ContactUiState.Loading,
+    onRetryContact: () -> Unit = {},
 ) {
     val formatter = rememberAlertDateFormatter()
     Column(modifier = Modifier.fillMaxSize().background(TataSurface)) {
@@ -100,7 +109,7 @@ fun AlertDetailScreen(
                             AlertInfoRow(stringResource(R.string.alert_detail_closed), formatter.format(it))
                         }
                     }
-                    AlertFollowUpActions(state, onUpdateStatus, Modifier.padding(top = 20.dp), noteSaved, onAddNote)
+                    AlertFollowUpActions(state, onUpdateStatus, Modifier.padding(top = 20.dp), noteSaved, onAddNote, contact, onRetryContact)
                 }
             }
         }
@@ -167,6 +176,26 @@ private fun AlertDetailAttendedPreview() {
 private fun AlertDetailConflictPreview() {
     TataTheme {
         AlertDetailScreen(state = AlertDetailUiState.Content(previewAlerts.first(), feedback = AlertFeedback.Failed(AlertsProblem.CONFLICT)))
+    }
+}
+
+@Preview(name = "Detalle con contacto", showBackground = true, widthDp = 393, heightDp = 1100)
+@Composable
+private fun AlertDetailContactPreview() {
+    val option = ContactOption(ContactChannel(ContactChannelType.PHONE, "+51 999 888 777"), firstName = "Rosa")
+    TataTheme {
+        AlertDetailScreen(state = AlertDetailUiState.Content(previewAlerts.first()), contact = ContactUiState.Ready(option))
+    }
+}
+
+@Preview(name = "Contacto no disponible", showBackground = true, widthDp = 393, heightDp = 1100)
+@Composable
+private fun AlertDetailNoContactPreview() {
+    TataTheme {
+        AlertDetailScreen(
+            state = AlertDetailUiState.Content(previewAlerts.first()),
+            contact = ContactUiState.Ready(ContactOption(channel = null, firstName = "Rosa")),
+        )
     }
 }
 

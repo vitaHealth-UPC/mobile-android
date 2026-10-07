@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import com.vitahealth.tata.monitoring.R
 import com.vitahealth.tata.monitoring.domain.model.AlertStatus
 import com.vitahealth.tata.monitoring.domain.model.canMoveTo
+import com.vitahealth.tata.monitoring.presentation.contact.ContactAction
 import com.vitahealth.tata.shared.design.components.TataButton
 import com.vitahealth.tata.shared.design.components.TataButtonStyle
 import com.vitahealth.tata.shared.design.components.TataCard
@@ -41,8 +42,8 @@ import com.vitahealth.tata.shared.design.theme.TataSuccess
 import com.vitahealth.tata.shared.design.theme.tataTextColor
 
 /**
- * "Acciones de seguimiento" of the alert detail. US-31 adds attend and close; closing asks first because
- * the backend cannot reopen an alert.
+ * "Acciones de seguimiento" of the alert detail: contact (US-29), attend and close (US-31) and notes (US-30).
+ * Closing asks first because the backend cannot reopen an alert.
  */
 @Composable
 internal fun AlertFollowUpActions(
@@ -51,10 +52,13 @@ internal fun AlertFollowUpActions(
     modifier: Modifier = Modifier,
     noteSaved: Boolean = false,
     onAddNote: () -> Unit = {},
+    contact: ContactUiState = ContactUiState.Loading,
+    onRetryContact: () -> Unit = {},
 ) {
     var confirmClose by rememberSaveable { mutableStateOf(false) }
     val alert = state.alert
     val busy = state.updating != null
+    val firstName = ((contact as? ContactUiState.Ready)?.option?.firstName)
 
     TataCard(modifier = modifier.fillMaxWidth(), containerColor = TataCream) {
         Text(
@@ -64,12 +68,17 @@ internal fun AlertFollowUpActions(
             fontWeight = FontWeight.SemiBold,
         )
         Text(
-            text = stringResource(if (alert.status == AlertStatus.CLOSED) R.string.alert_closed_note else R.string.alert_actions_subtitle),
+            text = when {
+                alert.status == AlertStatus.CLOSED -> stringResource(R.string.alert_closed_note)
+                firstName != null -> stringResource(R.string.alert_actions_subtitle_named, firstName)
+                else -> stringResource(R.string.alert_actions_subtitle)
+            },
             color = AlertsSecondaryText,
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.padding(top = 4.dp, bottom = 12.dp),
         )
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            ContactAction(contact, onRetryContact)
             when {
                 alert.status.canMoveTo(AlertStatus.ATTENDED) -> TataButton(
                     text = stringResource(if (state.updating == AlertStatus.ATTENDED) R.string.alert_action_saving else R.string.alert_action_attend),

@@ -7,6 +7,5 @@ import java.time.ZoneId
 
 interface FamilyMonitoringRepository {
     suspend fun summary(caregiverId: String, olderAdultId: String, name: String, day: LocalDate, zone: ZoneId): AppResult<FamilySummary>
-    suspend fun contact(caregiverId: String, olderAdultId: String): AppResult<String>
     suspend fun history(caregiverId: String, olderAdultId: String): AppResult<List<String>>
 }
