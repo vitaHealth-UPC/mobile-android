@@ -42,7 +42,7 @@ dependencies {
     implementation(libs.coil.compose)
 
     testImplementation(libs.junit)
-    testImplementation(libs.retrofit.converter.gson)
+    implementation(libs.retrofit.converter.gson)
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.1")
     testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
 }

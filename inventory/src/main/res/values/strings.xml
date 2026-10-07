@@ -45,4 +45,6 @@
     <string name="inventory_error_network_unavailable">No connection available. Try again.</string>
     <string name="inventory_error_invalid_response">The service returned unexpected data.</string>
     <string name="inventory_error_unknown">Something went wrong.</string>
+    <string name="inventory_error_medication_not_found">This medication no longer exists. Refresh the medication list.</string>
+    <string name="inventory_error_medication_inactive">This medication is inactive. Select an active medication.</string>
 </resources>

@@ -30,7 +30,7 @@ Base path `/api/v1/inventories`. Inventory is keyed by `medicationId` (a logical
 
 ### Endpoints
 
-- `POST /api/v1/inventories` — register the initial stock (US-40). Body `{ "medicationId": String, "initialQuantity": Int, "replenishmentThreshold": Int }`. `201` returns the inventory resource. Only one inventory may exist per medication.
+- `POST /api/v1/inventories` — register the initial stock (US-40). Body `{ "medicationId": String, "initialQuantity": Int, "replenishmentThreshold": Int }`. `201` returns the inventory resource. Only one inventory may exist per medication, and initial registration requires an existing active medication.
 - `GET /api/v1/inventories/{medicationId}` — remaining stock, threshold, low-stock flag and batches (US-41, US-42). `200` returns the inventory resource; `404` means no inventory is registered yet.
 - `POST /api/v1/inventories/{medicationId}/replenishments` — add a batch and increase stock (US-43). Body `{ "quantity": Int }`. `201` returns the updated inventory resource.
 
@@ -47,16 +47,16 @@ Timestamps are ISO-8601 strings on the wire. The shared Retrofit uses the defaul
 
 ### Backend error codes
 
-`INVALID_QUANTITY` (`400`), `INVENTORY_NOT_FOUND` (`404`), `INVENTORY_ALREADY_EXISTS` (`409`), `CONCURRENT_UPDATE` (`409`, optimistic-lock conflict on replenishment), `INSUFFICIENT_STOCK` (`409`, only reachable through intake consumption, not these endpoints), `VALIDATION_ERROR` (`400`).
+`MEDICATION_NOT_FOUND` (`404`, initial registration), `MEDICATION_INACTIVE` (`409`, initial registration), `INVALID_QUANTITY` (`400`), `INVENTORY_NOT_FOUND` (`404`), `INVENTORY_ALREADY_EXISTS` (`409`), `CONCURRENT_UPDATE` (`409`, optimistic-lock conflict on replenishment), `INSUFFICIENT_STOCK` (`409`, only reachable through intake consumption, not these endpoints), `VALIDATION_ERROR` (`400`).
 
 ### Mobile mapping
 
-`RemoteInventoryRepository` maps per `(endpoint, HTTP status)` following the contract above, so each stable `AppResult.Failure.code` is derived without parsing the error body:
+`RemoteInventoryRepository` reads known stable codes from `ErrorResource`; localized presentation uses the code rather than the server message. Missing, malformed or unknown error codes use these endpoint/status fallbacks:
 
 - `getStock`: `404 -> INVENTORY_NOT_FOUND`, other -> `REQUEST_FAILED`.
-- `registerInitialInventory`: `400 -> INVALID_QUANTITY`, `409 -> INVENTORY_ALREADY_EXISTS`, other -> `REQUEST_FAILED`.
+- `registerInitialInventory`: `400 -> INVALID_QUANTITY`, `404 -> MEDICATION_NOT_FOUND`, `409 -> INVENTORY_ALREADY_EXISTS`, other -> `REQUEST_FAILED`.
 - `registerReplenishment`: `400 -> INVALID_QUANTITY`, `404 -> INVENTORY_NOT_FOUND`, `409 -> CONCURRENT_UPDATE`, other -> `REQUEST_FAILED`.
-- A thrown I/O exception -> `NETWORK_UNAVAILABLE`; unparseable timestamps -> `INVALID_RESPONSE`.
+- A thrown I/O exception -> `NETWORK_UNAVAILABLE`; malformed responses or unparseable inventory/batch timestamps -> `INVALID_RESPONSE`. Coroutine cancellation propagates to the caller.
 
 Quantity/threshold are validated in the application layer with the `Quantity` (> 0) and `ReorderThreshold` (>= 0) value objects before any request, so invalid input (the "Cantidad inválida" case) never reaches the network. Those app-born failures use the codes `INVALID_QUANTITY`, `INVALID_THRESHOLD` and `INVALID_MEDICATION_REFERENCE`. `GetInventoryStockQueryHandler` passes `INVENTORY_NOT_FOUND` through unchanged; the ViewModel turns it into the "not initialized" state. Each code (backend and app-born) resolves to a localized string in `:inventory` `res/values` and `res/values-b+es+419`; the UI never shows the backend `message` directly.
 

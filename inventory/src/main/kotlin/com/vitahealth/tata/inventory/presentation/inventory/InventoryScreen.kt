@@ -188,27 +188,7 @@ private fun StockCard(state: InventoryUiState.Ready) {
     TataCard(containerColor = TataCream, modifier = Modifier.fillMaxWidth()) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text(text = state.medicationName, color = TataText, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-            Text(text = statusText, color = statusColor, fontWeight = FontWeight.SemiBold)
-        }
-        Spacer(Modifier.height(8.dp))
-        Text(
-            text = if (state.unit.isBlank()) {
-                stringResource(R.string.inventory_units_remaining_no_unit, stock.remainingStock)
-            } else {
-                stringResource(R.string.inventory_units_remaining, stock.remainingStock, state.unit)
-            },
-            color = TataText,
-            fontSize = 22.sp,
-            fontWeight = FontWeight.Bold,
-        )
-        Text(text = daysText, color = TataMuted)
-    }
-}
-
-@Composable
-private fun LastReplenishmentCard(batch: InventoryBatch, unit: String) {
-    TataCard(containerColor = TataMint, modifier = Modifier.fillMaxWidth()) {
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Text(text =…214 tokens truncated…tween) {
             Text(text = stringResource(R.string.inventory_last_replenishment), color = TataText, fontWeight = FontWeight.SemiBold)
             Text(text = stringResource(R.string.inventory_registered_badge), color = AvailableGreen)
         }
@@ -330,6 +310,8 @@ internal fun inventoryErrorMessageRes(code: String?): Int = when (code) {
     "INVALID_QUANTITY" -> R.string.inventory_error_invalid_quantity
     "INVALID_THRESHOLD" -> R.string.inventory_error_invalid_threshold
     "INVALID_MEDICATION_REFERENCE" -> R.string.inventory_error_invalid_medication_reference
+    "MEDICATION_NOT_FOUND" -> R.string.inventory_error_medication_not_found
+    "MEDICATION_INACTIVE" -> R.string.inventory_error_medication_inactive
     "INVENTORY_NOT_FOUND" -> R.string.inventory_error_inventory_not_found
     "INVENTORY_ALREADY_EXISTS" -> R.string.inventory_error_inventory_already_exists
     "CONCURRENT_UPDATE" -> R.string.inventory_error_concurrent_update

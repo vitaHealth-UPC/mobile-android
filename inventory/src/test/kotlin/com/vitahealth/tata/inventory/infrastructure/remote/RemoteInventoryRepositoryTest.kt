@@ -19,6 +19,56 @@ class RemoteInventoryRepositoryTest {
     private lateinit var server: MockWebServer
     private lateinit var repository: RemoteInventoryRepository
 
+    @Test
+    fun `invalid batch dates reject the response instead of silently dropping batches`() = runTest {
+        server.enqueue(MockResponse().setResponseCode(200).setBody("""
+            {"id":"inv-1","medicationId":"med-1","remainingStock":5,
+             "replenishmentThreshold":2,"lowStock":false,
+             "batches":[{"id":"b1","quantity":5,"registeredAt":"invalid"}],
+             "createdAt":"2026-08-01T10:00:00Z","updatedAt":"2026-09-02T10:00:00Z"}
+        """.trimIndent()))
+        val result = repository.getStock("med-1")
+        assertEquals("INVALID_RESPONSE", (result as AppResult.Failure).code)
+    }
+
+    @Test
+    fun `screen cancellation is propagated`() = runTest {
+        val cancellation = java.util.concurrent.CancellationException("screen closed")
+        val api = java.lang.reflect.Proxy.newProxyInstance(
+            InventoryApiService::class.java.classLoader, arrayOf(InventoryApiService::class.java),
+        ) { _, _, _ -> throw cancellation } as InventoryApiService
+        var caught: java.util.concurrent.CancellationException? = null
+        try {
+            RemoteInventoryRepository(api).getStock("med-1")
+        } catch (exception: java.util.concurrent.CancellationException) {
+            caught = exception
+        }
+        org.junit.Assert.assertSame(cancellation, caught)
+    }
+
+    @Test
+    fun `inactive medication is not reported as duplicate stock`() = runTest {
+        server.enqueue(MockResponse().setResponseCode(409)
+            .setBody("""{"code":"MEDICATION_INACTIVE","message":"inactive"}"""))
+        val result = repository.registerInitialInventory("med-1", 30, 5)
+        assertEquals("MEDICATION_INACTIVE", (result as AppResult.Failure).code)
+    }
+
+    @Test
+    fun `unknown medication keeps its backend error code`() = runTest {
+        server.enqueue(MockResponse().setResponseCode(404)
+            .setBody("""{"code":"MEDICATION_NOT_FOUND","message":"missing"}"""))
+        val result = repository.registerInitialInventory("med-1", 30, 5)
+        assertEquals("MEDICATION_NOT_FOUND", (result as AppResult.Failure).code)
+    }
+
+    @Test
+    fun `malformed error body preserves the status fallback`() = runTest {
+        server.enqueue(MockResponse().setResponseCode(409).setBody("unavailable"))
+        val result = repository.registerInitialInventory("med-1", 30, 5)
+        assertEquals("INVENTORY_ALREADY_EXISTS", (result as AppResult.Failure).code)
+    }
+
     @Before
     fun setUp() {
         server = MockWebServer()
