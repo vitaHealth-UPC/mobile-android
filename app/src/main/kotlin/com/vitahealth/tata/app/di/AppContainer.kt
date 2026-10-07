@@ -135,6 +135,18 @@ class AppContainer(
             changeSubscription = com.vitahealth.tata.identity.application.handlers.ChangeSubscriptionCommandHandler(subscriptionRepository),
         )
 
+    private val onboardingRepository =
+        com.vitahealth.tata.identity.infrastructure.local.SharedPreferencesOnboardingRepository(context)
+    private val getOnboardingStatus =
+        com.vitahealth.tata.identity.application.handlers.GetOnboardingStatusQueryHandler(onboardingRepository)
+    private val completeOnboardingHandler =
+        com.vitahealth.tata.identity.application.handlers.CompleteOnboardingCommandHandler(onboardingRepository)
+
+    /** False on the first launch of the app, so the welcome screen is shown once. */
+    fun hasSeenOnboarding(): Boolean = getOnboardingStatus()
+
+    fun completeOnboarding() = completeOnboardingHandler()
+
     private val caregiverProfilesRepository = com.vitahealth.tata.carelink.infrastructure.remote.RemoteCaregiverProfilesRepository(retrofit.create(com.vitahealth.tata.carelink.infrastructure.remote.CaregiverProfilesApiService::class.java))
     fun caregiverProfilesViewModelFactory(caregiverId: String) = com.vitahealth.tata.carelink.presentation.profiles.CaregiverProfilesViewModel.Factory(caregiverId,caregiverProfilesRepository)
 
