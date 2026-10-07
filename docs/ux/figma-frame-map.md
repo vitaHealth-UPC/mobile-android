@@ -26,3 +26,11 @@ Figma file `jCppvxtSpLpHOrC3ZWUIVC`, Mobile Prototyping `563:2`: pending detail 
 Weekly schedule frame `563:500` is implemented in `IntakeAgendaScreen` with local calendar week/day selection, real chronological API data, server outcome labels, detail navigation, retry and empty states. Calendar, timeline, tip and core tab assets were downloaded through the Figma MCP design workflow and stored locally; DM Serif Display is bundled with its OFL license.
 
 This delivery wires the core Inicio/Agenda navigation. Notas/Más destinations, full prototype visual parity and emulator screenshot comparison remain pending; there is no configured Android emulator/device in the current environment. Static prototype drug names/dates are replaced by real resources. Do not count the whole prototype as completed because this screen builds.
+
+## US-35 text size
+
+Figma file `jCppvxtSpLpHOrC3ZWUIVC`, Mobile Prototyping `563:2`: Accessibility `563:618`, Large Text Enabled `563:4638`. `AccessibilityScreen` (route `accessibility/{userId}`) keeps the saved / saved-offline / error banner in `AccessibilityUiState.message`. Only the "Large text" row is implemented here; the other rows arrive with US-36 to US-38.
+
+Not implemented on purpose: the "Dark theme" and "Language" rows and the "Need help?" card of the frame have no User Story and no backend field. The row icons are text glyphs until the Figma vector assets are exported.
+
+Entry point: the "More" menu of the family summary (`FamilySummaryScreen`) now offers "Accesibilidad". The older-adult shell has no "More" tab yet.

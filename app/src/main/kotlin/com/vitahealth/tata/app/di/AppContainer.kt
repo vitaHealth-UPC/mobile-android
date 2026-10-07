@@ -47,6 +47,16 @@ import com.vitahealth.tata.treatment.presentation.treatment.TreatmentDoseFrequen
 import com.vitahealth.tata.treatment.presentation.treatment.TreatmentLifecycleViewModel
 import com.vitahealth.tata.treatment.presentation.treatment.TreatmentReminderViewModel
 import com.vitahealth.tata.treatment.presentation.treatment.TreatmentScheduleInstructionsViewModel
+import com.vitahealth.tata.preferences.application.handlers.ObserveAccessibilityPreferencesQueryHandler
+import com.vitahealth.tata.preferences.application.handlers.SyncUserPreferencesCommandHandler
+import com.vitahealth.tata.preferences.application.handlers.UpdateTextSizeCommandHandler
+import com.vitahealth.tata.preferences.domain.model.AccessibilityPreferences
+import com.vitahealth.tata.preferences.infrastructure.OfflineFirstUserPreferencesRepository
+import com.vitahealth.tata.preferences.infrastructure.local.DataStoreAccessibilityLocalStore
+import com.vitahealth.tata.preferences.infrastructure.remote.PreferencesApiService
+import com.vitahealth.tata.preferences.infrastructure.remote.RemoteUserPreferences
+import com.vitahealth.tata.preferences.presentation.accessibility.AccessibilityViewModel
+import kotlinx.coroutines.flow.Flow
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
@@ -73,6 +83,12 @@ class AppContainer(
 
     private val treatmentApi: TreatmentApiService = retrofit.create(TreatmentApiService::class.java)
     private val treatmentRepository = RemoteTreatmentRepository(treatmentApi)
+
+    private val preferencesApi: PreferencesApiService = retrofit.create(PreferencesApiService::class.java)
+    private val preferencesRepository = OfflineFirstUserPreferencesRepository(
+        remote = RemoteUserPreferences(preferencesApi),
+        local = DataStoreAccessibilityLocalStore(context),
+    )
 
     private val intakeApi: IntakeApiService = retrofit.create(IntakeApiService::class.java)
     private val intakeLocalStore = SQLiteIntakeLocalStore(context)
@@ -249,6 +265,17 @@ class AppContainer(
         treatmentId = treatmentId,
         medicationLabelHint = medicationLabelHint,
         handler = GetTreatmentDetailQueryHandler(treatmentRepository),
+    )
+
+    /** Device copy of the accessibility settings; the theme reads it so they apply on every screen. */
+    val accessibilityPreferences: Flow<AccessibilityPreferences> =
+        ObserveAccessibilityPreferencesQueryHandler(preferencesRepository)()
+
+    fun accessibilityViewModelFactory(userId: String) = AccessibilityViewModel.Factory(
+        userId = userId,
+        observeAccessibility = ObserveAccessibilityPreferencesQueryHandler(preferencesRepository),
+        updateTextSize = UpdateTextSizeCommandHandler(preferencesRepository),
+        syncPreferences = SyncUserPreferencesCommandHandler(preferencesRepository),
     )
 
     fun intakeAgendaViewModelFactory(
