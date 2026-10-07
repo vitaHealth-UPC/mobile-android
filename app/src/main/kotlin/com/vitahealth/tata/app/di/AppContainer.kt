@@ -30,6 +30,12 @@ import com.vitahealth.tata.intake.infrastructure.sync.WorkManagerIntakeSyncSched
 import com.vitahealth.tata.intake.presentation.agenda.IntakeAgendaViewModel
 import com.vitahealth.tata.intake.presentation.detail.DoseDetailViewModel
 import com.vitahealth.tata.intake.presentation.home.NextDoseHomeViewModel
+import com.vitahealth.tata.inventory.application.handlers.GetInventoryStockQueryHandler
+import com.vitahealth.tata.inventory.application.handlers.RegisterInitialInventoryCommandHandler
+import com.vitahealth.tata.inventory.application.handlers.RegisterReplenishmentCommandHandler
+import com.vitahealth.tata.inventory.infrastructure.remote.InventoryApiService
+import com.vitahealth.tata.inventory.infrastructure.remote.RemoteInventoryRepository
+import com.vitahealth.tata.inventory.presentation.inventory.InventoryViewModel
 import com.vitahealth.tata.treatment.application.handlers.ChangeTreatmentStatusCommandHandler
 import com.vitahealth.tata.treatment.application.handlers.ConfigureTreatmentCommandHandler
 import com.vitahealth.tata.treatment.application.handlers.CreateTreatmentCommandHandler
@@ -73,6 +79,9 @@ class AppContainer(
 
     private val treatmentApi: TreatmentApiService = retrofit.create(TreatmentApiService::class.java)
     private val treatmentRepository = RemoteTreatmentRepository(treatmentApi)
+
+    private val inventoryApi: InventoryApiService = retrofit.create(InventoryApiService::class.java)
+    private val inventoryRepository = RemoteInventoryRepository(inventoryApi)
 
     private val intakeApi: IntakeApiService = retrofit.create(IntakeApiService::class.java)
     private val intakeLocalStore = SQLiteIntakeLocalStore(context)
@@ -273,5 +282,18 @@ class AppContainer(
         intakeId = intakeId,
         handler = GetDoseDetailQueryHandler(doseDetailRepository),
         confirmHandler = ConfirmDoseCommandHandler(doseConfirmationRepository),
+    )
+
+    fun inventoryViewModelFactory(
+        medicationId: String,
+        medicationName: String,
+        unit: String,
+    ) = InventoryViewModel.Factory(
+        medicationId = medicationId,
+        medicationName = medicationName,
+        unit = unit,
+        getStockHandler = GetInventoryStockQueryHandler(inventoryRepository),
+        registerInitialHandler = RegisterInitialInventoryCommandHandler(inventoryRepository),
+        registerReplenishmentHandler = RegisterReplenishmentCommandHandler(inventoryRepository),
     )
 }
