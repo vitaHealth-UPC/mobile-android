@@ -419,7 +419,7 @@ private fun InventoryNotInitializedPreview() {
     )
 }
 
-@Preview(name = "Stock bajo (es-419)", locale = "es-419", showBackground = true)
+@Preview(name = "Stock bajo (es-419)", locale = "b+es+419", showBackground = true)
 @Composable
 private fun InventoryLowStockEsPreview() {
     InventoryScreen(
@@ -437,7 +437,7 @@ private fun InventoryLowStockEsPreview() {
     )
 }
 
-@Preview(name = "No inicializado (es-419)", locale = "es-419", showBackground = true)
+@Preview(name = "No inicializado (es-419)", locale = "b+es+419", showBackground = true)
 @Composable
 private fun InventoryNotInitializedEsPreview() {
     InventoryScreen(
