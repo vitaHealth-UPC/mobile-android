@@ -110,6 +110,10 @@ class AppContainer(
     private val sessionAccessRepository = com.vitahealth.tata.identity.infrastructure.remote.RemoteSessionAccessRepository(retrofit.create(com.vitahealth.tata.identity.infrastructure.remote.SessionApiService::class.java), sessions)
     val sessionAccessViewModelFactory = com.vitahealth.tata.identity.presentation.access.SessionAccessViewModel.Factory(sessionAccessRepository)
 
+    suspend fun signOut() = sessionAccessRepository.signOut()
+    private val caregiverProfilesRepository = com.vitahealth.tata.carelink.infrastructure.remote.RemoteCaregiverProfilesRepository(retrofit.create(com.vitahealth.tata.carelink.infrastructure.remote.CaregiverProfilesApiService::class.java))
+    fun caregiverProfilesViewModelFactory(caregiverId: String) = com.vitahealth.tata.carelink.presentation.profiles.CaregiverProfilesViewModel.Factory(caregiverId,caregiverProfilesRepository)
+
     private val monitoringRepository = com.vitahealth.tata.monitoring.infrastructure.remote.RemoteFamilyMonitoringRepository(
         retrofit.create(com.vitahealth.tata.monitoring.infrastructure.remote.FamilyMonitoringApiService::class.java),
     )

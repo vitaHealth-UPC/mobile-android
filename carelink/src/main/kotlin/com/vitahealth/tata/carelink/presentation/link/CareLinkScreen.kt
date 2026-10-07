@@ -52,9 +52,11 @@ fun CareLinkRoute(
     factory: CareLinkViewModel.Factory,
     modifier: Modifier = Modifier,
     onConfirmed: (olderAdultId: String, olderAdultName: String) -> Unit = { _, _ -> },
+    initialCode: String = "",
 ) {
     val viewModel: CareLinkViewModel = viewModel(factory = factory)
     val state by viewModel.state.collectAsState()
+    LaunchedEffect(initialCode) { if(initialCode.isNotBlank()) viewModel.onCodeChange(initialCode) }
 
     LaunchedEffect(state.step, state.acceptedLink?.id, state.olderAdult?.id) {
         val link = state.acceptedLink

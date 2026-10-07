@@ -33,6 +33,7 @@ import com.vitahealth.tata.treatment.presentation.treatment.TreatmentReminderRou
 import com.vitahealth.tata.treatment.presentation.treatment.TreatmentLifecycleRoute
 import com.vitahealth.tata.treatment.presentation.treatment.TreatmentDetailRoute
 import java.time.format.DateTimeFormatter
+import kotlinx.coroutines.launch
 
 @Composable
 fun TataNavHost(
@@ -57,7 +58,7 @@ fun TataNavHost(
             com.vitahealth.tata.identity.presentation.access.SessionAccessRoute(
                 factory=app.container.sessionAccessViewModelFactory,
                 onAuthenticated={ subject ->
-                    val route=if(subject.role=="CAREGIVER") RootDestination.CareLink.createRoute(subject.subjectId)
+                    val route=if(subject.role=="CAREGIVER") RootDestination.CaregiverProfiles.createRoute(subject.subjectId)
                     else RootDestination.NextDoseHome.createRoute(subject.subjectId,deviceProfile.getString("name","Adulto mayor") ?: "Adulto mayor")
                     navController.navigate(route) { popUpTo(RootDestination.SessionAccess.route) { inclusive=true } }
                 },
@@ -75,12 +76,24 @@ fun TataNavHost(
                 onBack={navController.popBackStack()})
         }
 
+        composable(RootDestination.CaregiverProfiles.route,arguments=listOf(navArgument("caregiverId"){type=NavType.StringType})) { entry ->
+            val app=androidx.compose.ui.platform.LocalContext.current.applicationContext as TataApplication
+            val caregiver=requireNotNull(entry.arguments?.getString("caregiverId"))
+            val scope=androidx.compose.runtime.rememberCoroutineScope()
+            com.vitahealth.tata.carelink.presentation.profiles.CaregiverProfilesRoute(
+                factory=app.container.caregiverProfilesViewModelFactory(caregiver),
+                onOpenAdult={adult->navController.navigate(RootDestination.FamilySummary.createRoute(caregiver,adult.id,adult.name))},
+                onAdultConsent={code->navController.navigate(RootDestination.CareLink.createRoute(caregiver,code))},
+                onSignOut={scope.launch{app.container.signOut();navController.navigate(RootDestination.SessionAccess.route){popUpTo(navController.graph.id){inclusive=true}}}},
+            )
+        }
+
         composable(RootDestination.CaregiverRegistration.route) {
             val app = androidx.compose.ui.platform.LocalContext.current.applicationContext as TataApplication
             CaregiverRegistrationRoute(
                 factory = app.container.caregiverRegistrationViewModelFactory,
                 onRegistrationComplete = { caregiverId ->
-                    navController.navigate(RootDestination.CareLink.createRoute(caregiverId)) {
+                    navController.navigate(RootDestination.CaregiverProfiles.createRoute(caregiverId)) {
                         popUpTo(RootDestination.CaregiverRegistration.route) {
                             inclusive = true
                         }
@@ -93,6 +106,7 @@ fun TataNavHost(
             route = RootDestination.CareLink.route,
             arguments = listOf(
                 navArgument(RootDestination.CareLink.caregiverIdArgument) { type = NavType.StringType },
+                navArgument("code") { type = NavType.StringType; defaultValue = "" },
             ),
         ) { backStackEntry ->
             val app = androidx.compose.ui.platform.LocalContext.current.applicationContext as TataApplication
@@ -101,6 +115,7 @@ fun TataNavHost(
             )
             CareLinkRoute(
                 factory = app.container.careLinkViewModelFactory(caregiverId),
+                initialCode = backStackEntry.arguments?.getString("code") ?: "",
                 onConfirmed = { olderAdultId, olderAdultName ->
                     app.getSharedPreferences("tata_adult_profile",android.content.Context.MODE_PRIVATE).edit().putString("id",olderAdultId).putString("name",olderAdultName).apply()
                     navController.navigate(RootDestination.PinAccess.createRoute(olderAdultId,olderAdultName,true)) {
@@ -125,7 +140,7 @@ fun TataNavHost(
                 onAgenda = { navController.navigate(RootDestination.IntakeAgenda.createRoute(adult)) },
                 onHistory = { navController.navigate(RootDestination.AdherenceHistory.createRoute(adult)) },
                 onAddMedication = { navController.navigate(RootDestination.MedicationRegistration.createRoute(caregiver, adult, name)) },
-                onChangePerson = { navController.navigate(RootDestination.CareLink.createRoute(caregiver)) },
+                onChangePerson = { navController.navigate(RootDestination.CaregiverProfiles.createRoute(caregiver)) },
                 onAccessibility = { navController.navigate(RootDestination.Accessibility.createRoute(caregiver)) },
                 onNotificationPreferences = { navController.navigate(RootDestination.NotificationPreferences.createRoute(caregiver)) },
                 onMedications = { navController.navigate(RootDestination.MedicationManagement.createRoute(caregiver, adult, name)) },
@@ -660,6 +675,7 @@ fun TataNavHost(
                 backStackEntry.arguments?.getString(RootDestination.NextDoseHome.olderAdultNameArgument),
             )
 
+            val scope=androidx.compose.runtime.rememberCoroutineScope()
             NextDoseHomeRoute(
                 factory = app.container.nextDoseHomeViewModelFactory(
                     olderAdultId = olderAdultId,
@@ -668,6 +684,7 @@ fun TataNavHost(
                 onOpenDoseDetail = { intakeId ->
                     navController.navigate(RootDestination.DoseDetail.createRoute(intakeId))
                 },
+                onSignOut = {scope.launch{app.container.signOut();navController.navigate(RootDestination.SessionAccess.route){popUpTo(navController.graph.id){inclusive=true}}}},
                 onOpenAgenda = { navController.navigate(RootDestination.IntakeAgenda.createRoute(olderAdultId)) },
             )
         }

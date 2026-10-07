@@ -24,8 +24,7 @@ class RemoteSessionAccessRepository(private val api: SessionApiService, private 
         else { if (response.code() == 401) sessions.clear(); failure(response) }
     }
     override suspend fun signOut(): AppResult<Unit> = request {
-        val response = api.signOut()
-        sessions.clear()
+        val response = try { api.signOut() } finally { sessions.clear() }
         if (response.isSuccessful || response.code() == 401) AppResult.Success(Unit) else failure(response)
     }
     private suspend fun authenticate(role: String, call: suspend () -> Response<SessionAccessResponse>): AppResult<SessionSubject> = request {

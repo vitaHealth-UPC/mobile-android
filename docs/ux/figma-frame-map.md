@@ -94,3 +94,7 @@ Entry point: the "More" menu of the family summary offers "Medicamentos". This s
 ## US-01 session entry and PIN
 
 Prototype `641:18` supplies the password entry form; `563:1340` supplies the PIN keypad. Setup, incorrect and blocked PINs are states of `PinAccessScreen`. The screens use the existing Compose form, button, serif and accessibility tokens and call the live session API.
+
+## US-12 profile entry and care-link handoff
+
+`CaregiverProfilesScreen` presents real confirmed links, an empty state, profile registration and the temporary code. It follows the person identity hierarchy and shared card/form tokens consulted in prototype `563:1123`, using actual names and avoiding the prototype's sample adherence figures. Date selection uses the accessible Android date picker. Existing link/consent states receive the generated code; the adult reviews and grants consent explicitly.
