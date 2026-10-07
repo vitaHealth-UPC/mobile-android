@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Late confirmation and preserved omission (US-23) -->
+    <string name="intake_result_late_title">Well done!</string>
+    <string name="intake_result_late_subtitle">Dose confirmed late</string>
+    <string name="intake_result_late_note_title">Classified as late</string>
+    <string name="intake_result_late_note">The confirmation happened within the tolerance period.</string>
+    <string name="intake_result_omitted_title">Missed dose</string>
+    <string name="intake_result_omitted_subtitle">Confirmation window ended</string>
+    <string name="intake_result_omitted_note_title">Window ended</string>
+    <string name="intake_result_omitted_note">A later confirmation does not replace the missed dose.</string>
+    <string name="intake_result_confirmation_unavailable">Confirmation unavailable</string>
+    <string name="intake_result_confirmed_at">Confirmed</string>
+    <string name="intake_result_scheduled_at">Scheduled</string>
+    <string name="intake_result_today">Today, %1$s</string>
+    <string name="intake_result_back_home">Back to home</string>
+</resources>

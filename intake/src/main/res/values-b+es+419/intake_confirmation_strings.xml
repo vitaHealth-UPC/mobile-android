@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Confirmación tardía y omisión conservada (US-23) -->
+    <string name="intake_result_late_title">¡Bien hecho!</string>
+    <string name="intake_result_late_subtitle">Toma confirmada con retraso</string>
+    <string name="intake_result_late_note_title">Clasificada como tardía</string>
+    <string name="intake_result_late_note">La confirmación ocurrió dentro del periodo de tolerancia.</string>
+    <string name="intake_result_omitted_title">Toma omitida</string>
+    <string name="intake_result_omitted_subtitle">Periodo de confirmación finalizado</string>
+    <string name="intake_result_omitted_note_title">Periodo finalizado</string>
+    <string name="intake_result_omitted_note">Una confirmación posterior no reemplaza la omisión.</string>
+    <string name="intake_result_confirmation_unavailable">Confirmación no disponible</string>
+    <string name="intake_result_confirmed_at">Confirmada</string>
+    <string name="intake_result_scheduled_at">Programada</string>
+    <string name="intake_result_today">Hoy, %1$s</string>
+    <string name="intake_result_back_home">Volver al inicio</string>
+</resources>
