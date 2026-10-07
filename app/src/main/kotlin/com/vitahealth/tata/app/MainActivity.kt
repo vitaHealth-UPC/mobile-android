@@ -27,6 +27,7 @@ class MainActivity : ComponentActivity() {
             TataTheme(accessibility = TataAccessibility(
                     fontScale = preferences.textSize.scaleFactor,
                     highContrast = preferences.highContrast,
+                    reducedMotion = preferences.reducedMotion,
                 )) {
                 TataNavHost(modifier = Modifier.fillMaxSize())
             }

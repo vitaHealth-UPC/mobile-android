@@ -129,4 +129,46 @@ class OfflineFirstUserPreferencesRepositoryTest {
         assertTrue(result is AppResult.Failure)
         assertFalse(local.current().highContrast)
     }
+
+    @Test
+    fun reducedMotionIsKeptOnTheDeviceAndSentToTheBackend() = runBlocking {
+        val result = repository.updateReducedMotion("user-1", true)
+
+        assertTrue((result as AppResult.Success).value.syncedWithServer)
+        assertTrue(local.current().reducedMotion)
+        assertEquals(listOf(true), remote.motionCalls)
+    }
+
+    @Test
+    fun voiceConfirmationCanBeTurnedOff() = runBlocking {
+        val result = repository.updateVoiceConfirmation("user-1", false)
+
+        assertTrue(result is AppResult.Success)
+        assertFalse(local.current().voiceConfirmation)
+        assertEquals(listOf(false), remote.voiceCalls)
+    }
+
+    @Test
+    fun everyChangeMadeOfflineIsSentOnTheNextSync() = runBlocking {
+        remote.failWith = NetworkDown
+        repository.updateReducedMotion("user-1", true)
+        repository.updateVoiceConfirmation("user-1", false)
+        remote.failWith = null
+
+        repository.sync("user-1")
+
+        assertEquals(true, remote.stored.reducedMotion)
+        assertEquals(false, remote.stored.voiceConfirmation)
+        assertFalse(local.isPendingSync())
+    }
+
+    @Test
+    fun aRejectedVoiceChangeIsRolledBack() = runBlocking {
+        remote.failWith = RejectedByServer
+
+        val result = repository.updateVoiceConfirmation("user-1", false)
+
+        assertTrue(result is AppResult.Failure)
+        assertTrue(local.current().voiceConfirmation)
+    }
 }

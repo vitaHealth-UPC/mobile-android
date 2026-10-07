@@ -63,7 +63,9 @@ import com.vitahealth.tata.treatment.presentation.treatment.TreatmentScheduleIns
 import com.vitahealth.tata.preferences.application.handlers.ObserveAccessibilityPreferencesQueryHandler
 import com.vitahealth.tata.preferences.application.handlers.SyncUserPreferencesCommandHandler
 import com.vitahealth.tata.preferences.application.handlers.UpdateHighContrastCommandHandler
+import com.vitahealth.tata.preferences.application.handlers.UpdateReducedMotionCommandHandler
 import com.vitahealth.tata.preferences.application.handlers.UpdateTextSizeCommandHandler
+import com.vitahealth.tata.preferences.application.handlers.UpdateVoiceConfirmationCommandHandler
 import com.vitahealth.tata.preferences.domain.model.AccessibilityPreferences
 import com.vitahealth.tata.preferences.infrastructure.OfflineFirstUserPreferencesRepository
 import com.vitahealth.tata.preferences.infrastructure.local.DataStoreAccessibilityLocalStore
@@ -290,6 +292,8 @@ class AppContainer(
         observeAccessibility = ObserveAccessibilityPreferencesQueryHandler(preferencesRepository),
         updateTextSize = UpdateTextSizeCommandHandler(preferencesRepository),
         updateHighContrast = UpdateHighContrastCommandHandler(preferencesRepository),
+        updateReducedMotion = UpdateReducedMotionCommandHandler(preferencesRepository),
+        updateVoiceConfirmation = UpdateVoiceConfirmationCommandHandler(preferencesRepository),
         syncPreferences = SyncUserPreferencesCommandHandler(preferencesRepository),
     )
 

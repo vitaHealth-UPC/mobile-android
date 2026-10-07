@@ -1,5 +1,10 @@
 package com.vitahealth.tata.app.navigation
 
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -16,6 +21,7 @@ import com.vitahealth.tata.identity.presentation.registration.CaregiverRegistrat
 import com.vitahealth.tata.intake.presentation.detail.DoseDetailRoute
 import com.vitahealth.tata.intake.presentation.home.NextDoseHomeRoute
 import com.vitahealth.tata.preferences.presentation.accessibility.AccessibilityRoute
+import com.vitahealth.tata.shared.design.accessibility.LocalTataAccessibility
 import com.vitahealth.tata.treatment.presentation.medication.MedicationRegistrationRoute
 import com.vitahealth.tata.treatment.presentation.treatment.TreatmentCreationRoute
 import com.vitahealth.tata.treatment.presentation.treatment.TreatmentDoseFrequencyRoute
@@ -30,10 +36,16 @@ fun TataNavHost(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
 ) {
+    // Reduced motion removes the screen transitions; otherwise the Navigation default (700 ms fade) applies.
+    val reducedMotion = LocalTataAccessibility.current.reducedMotion
     NavHost(
         navController = navController,
         startDestination = RootDestination.CaregiverRegistration.route,
         modifier = modifier,
+        enterTransition = { if (reducedMotion) EnterTransition.None else fadeIn(animationSpec = tween(700)) },
+        exitTransition = { if (reducedMotion) ExitTransition.None else fadeOut(animationSpec = tween(700)) },
+        popEnterTransition = { if (reducedMotion) EnterTransition.None else fadeIn(animationSpec = tween(700)) },
+        popExitTransition = { if (reducedMotion) ExitTransition.None else fadeOut(animationSpec = tween(700)) },
     ) {
         composable(RootDestination.CaregiverRegistration.route) {
             val app = androidx.compose.ui.platform.LocalContext.current.applicationContext as TataApplication

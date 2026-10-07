@@ -10,11 +10,21 @@
     <string name="accessibility_contrast_title">Enhanced contrast</string>
     <string name="accessibility_contrast_subtitle">Improves legibility</string>
 
+    <string name="accessibility_section_interaction">Interaction</string>
+    <string name="accessibility_motion_title">Reduce motion</string>
+    <string name="accessibility_motion_subtitle">Fewer animations</string>
+    <string name="accessibility_voice_title">Voice confirmation</string>
+    <string name="accessibility_voice_subtitle">Listens for confirmations</string>
+
     <string name="accessibility_saved_title">Preference saved</string>
     <string name="accessibility_large_text_saved">The larger text will be kept the next time you open the app.</string>
     <string name="accessibility_standard_text_saved">The standard text size will be kept the next time you open the app.</string>
     <string name="accessibility_contrast_saved">Text, borders and controls use enhanced contrast.</string>
     <string name="accessibility_standard_contrast_saved">Standard contrast was restored.</string>
+    <string name="accessibility_motion_saved">Screens change without animation.</string>
+    <string name="accessibility_standard_motion_saved">Standard animations were restored.</string>
+    <string name="accessibility_voice_saved">You can confirm an intake by voice.</string>
+    <string name="accessibility_voice_off_saved">Voice confirmation is off. You can still confirm by touch.</string>
     <string name="accessibility_saved_offline">Saved on this device. It will be sent when you are back online.</string>
     <string name="accessibility_error_title">Could not save</string>
     <string name="accessibility_error_rejected">The service did not accept this change. Try again.</string>

@@ -53,4 +53,16 @@ interface PreferencesApiService {
         @Path("userId") userId: String,
         @Body request: EnabledRequest,
     ): Response<UserPreferencesResponse>
+
+    @PUT("api/v1/users/{userId}/preferences/reduced-motion")
+    suspend fun updateReducedMotion(
+        @Path("userId") userId: String,
+        @Body request: EnabledRequest,
+    ): Response<UserPreferencesResponse>
+
+    @PUT("api/v1/users/{userId}/preferences/voice-confirmation")
+    suspend fun updateVoiceConfirmation(
+        @Path("userId") userId: String,
+        @Body request: EnabledRequest,
+    ): Response<UserPreferencesResponse>
 }

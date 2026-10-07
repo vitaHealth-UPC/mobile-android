@@ -49,6 +49,7 @@ import com.vitahealth.tata.shared.design.theme.TataMint
 import com.vitahealth.tata.shared.design.theme.TataMuted
 import com.vitahealth.tata.shared.design.theme.TataNavy
 import com.vitahealth.tata.shared.design.theme.TataPurple
+import com.vitahealth.tata.shared.design.theme.TataSuccess
 import com.vitahealth.tata.shared.design.theme.TataSurface
 import com.vitahealth.tata.shared.design.theme.TataText
 import com.vitahealth.tata.shared.design.theme.TataTheme
@@ -69,6 +70,8 @@ fun AccessibilityRoute(
         onBack = onBack,
         onLargeTextChange = viewModel::onLargeTextChange,
         onHighContrastChange = viewModel::onHighContrastChange,
+        onReducedMotionChange = viewModel::onReducedMotionChange,
+        onVoiceConfirmationChange = viewModel::onVoiceConfirmationChange,
         modifier = modifier,
     )
 }
@@ -79,6 +82,8 @@ fun AccessibilityScreen(
     onBack: () -> Unit,
     onLargeTextChange: (Boolean) -> Unit,
     onHighContrastChange: (Boolean) -> Unit,
+    onReducedMotionChange: (Boolean) -> Unit,
+    onVoiceConfirmationChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -134,6 +139,28 @@ fun AccessibilityScreen(
             )
         }
 
+        Spacer(Modifier.height(20.dp))
+        SectionTitle(stringResource(R.string.accessibility_section_interaction))
+        TataCard(modifier = Modifier.fillMaxWidth()) {
+            TataToggleRow(
+                title = stringResource(R.string.accessibility_motion_title),
+                subtitle = stringResource(R.string.accessibility_motion_subtitle),
+                checked = state.preferences.reducedMotion,
+                onCheckedChange = onReducedMotionChange,
+                enabled = !state.isSaving,
+                leading = { IconBadge(glyph = "↻", background = TataMint, tint = TataSuccess) },
+            )
+            RowDivider()
+            TataToggleRow(
+                title = stringResource(R.string.accessibility_voice_title),
+                subtitle = stringResource(R.string.accessibility_voice_subtitle),
+                checked = state.preferences.voiceConfirmation,
+                onCheckedChange = onVoiceConfirmationChange,
+                enabled = !state.isSaving,
+                leading = { IconBadge(glyph = "🎙", background = TataLavender, tint = TataPurple) },
+            )
+        }
+
         state.message?.let { message ->
             Spacer(Modifier.height(16.dp))
             MessageBanner(message = message, isError = state.messageIsError)
@@ -180,6 +207,10 @@ private fun MessageBanner(message: AccessibilityMessage, isError: Boolean) {
             AccessibilityMessage.StandardTextSaved -> R.string.accessibility_standard_text_saved
             AccessibilityMessage.HighContrastSaved -> R.string.accessibility_contrast_saved
             AccessibilityMessage.StandardContrastSaved -> R.string.accessibility_standard_contrast_saved
+            AccessibilityMessage.ReducedMotionSaved -> R.string.accessibility_motion_saved
+            AccessibilityMessage.StandardMotionSaved -> R.string.accessibility_standard_motion_saved
+            AccessibilityMessage.VoiceConfirmationSaved -> R.string.accessibility_voice_saved
+            AccessibilityMessage.VoiceConfirmationOffSaved -> R.string.accessibility_voice_off_saved
             AccessibilityMessage.SavedOffline -> R.string.accessibility_saved_offline
             AccessibilityMessage.ErrorRejected -> R.string.accessibility_error_rejected
             AccessibilityMessage.ErrorUser -> R.string.accessibility_error_user
@@ -218,6 +249,8 @@ private fun AccessibilityScreenPreview() {
             onBack = {},
             onLargeTextChange = {},
             onHighContrastChange = {},
+            onReducedMotionChange = {},
+            onVoiceConfirmationChange = {},
         )
     }
 }

@@ -7,7 +7,9 @@ import com.vitahealth.tata.preferences.RejectedByServer
 import com.vitahealth.tata.preferences.application.handlers.ObserveAccessibilityPreferencesQueryHandler
 import com.vitahealth.tata.preferences.application.handlers.SyncUserPreferencesCommandHandler
 import com.vitahealth.tata.preferences.application.handlers.UpdateHighContrastCommandHandler
+import com.vitahealth.tata.preferences.application.handlers.UpdateReducedMotionCommandHandler
 import com.vitahealth.tata.preferences.application.handlers.UpdateTextSizeCommandHandler
+import com.vitahealth.tata.preferences.application.handlers.UpdateVoiceConfirmationCommandHandler
 import com.vitahealth.tata.preferences.domain.model.AccessibilityPreferences
 import com.vitahealth.tata.preferences.domain.model.TextSizeLevel
 import com.vitahealth.tata.preferences.infrastructure.OfflineFirstUserPreferencesRepository
@@ -45,6 +47,8 @@ class AccessibilityViewModelTest {
             observeAccessibility = ObserveAccessibilityPreferencesQueryHandler(repository),
             updateTextSize = UpdateTextSizeCommandHandler(repository),
             updateHighContrast = UpdateHighContrastCommandHandler(repository),
+            updateReducedMotion = UpdateReducedMotionCommandHandler(repository),
+            updateVoiceConfirmation = UpdateVoiceConfirmationCommandHandler(repository),
             syncPreferences = SyncUserPreferencesCommandHandler(repository),
         )
     }
@@ -166,6 +170,60 @@ class AccessibilityViewModelTest {
         model.onHighContrastChange(true)
 
         assertFalse(model.state.value.preferences.highContrast)
+        assertEquals(AccessibilityMessage.ErrorRejected, model.state.value.message)
+    }
+
+    @Test
+    fun turningReducedMotionOnSavesItAndShowsTheConfirmation() {
+        val model = viewModel()
+
+        model.onReducedMotionChange(true)
+
+        assertTrue(model.state.value.preferences.reducedMotion)
+        assertEquals(AccessibilityMessage.ReducedMotionSaved, model.state.value.message)
+    }
+
+    @Test
+    fun turningReducedMotionOffRestoresTheAnimations() {
+        val model = viewModel()
+        model.onReducedMotionChange(true)
+
+        model.onReducedMotionChange(false)
+
+        assertFalse(model.state.value.preferences.reducedMotion)
+        assertEquals(AccessibilityMessage.StandardMotionSaved, model.state.value.message)
+    }
+
+    @Test
+    fun voiceConfirmationStartsOnAndCanBeTurnedOff() {
+        val model = viewModel()
+        assertTrue(model.state.value.preferences.voiceConfirmation)
+
+        model.onVoiceConfirmationChange(false)
+
+        assertFalse(model.state.value.preferences.voiceConfirmation)
+        assertEquals(AccessibilityMessage.VoiceConfirmationOffSaved, model.state.value.message)
+    }
+
+    @Test
+    fun voiceConfirmationChangedWithoutConnectionStillApplies() {
+        val model = viewModel()
+        remote.failWith = NetworkDown
+
+        model.onVoiceConfirmationChange(false)
+
+        assertFalse(model.state.value.preferences.voiceConfirmation)
+        assertEquals(AccessibilityMessage.SavedOffline, model.state.value.message)
+    }
+
+    @Test
+    fun aRejectedMotionChangeKeepsTheOldValue() {
+        val model = viewModel()
+        remote.failWith = RejectedByServer
+
+        model.onReducedMotionChange(true)
+
+        assertFalse(model.state.value.preferences.reducedMotion)
         assertEquals(AccessibilityMessage.ErrorRejected, model.state.value.message)
     }
 

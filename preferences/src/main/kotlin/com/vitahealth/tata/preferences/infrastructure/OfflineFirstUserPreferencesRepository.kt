@@ -45,6 +45,20 @@ class OfflineFirstUserPreferencesRepository(
         remote.updateHighContrast(userId, enabled)
     }
 
+    override suspend fun updateReducedMotion(
+        userId: String,
+        enabled: Boolean,
+    ): AppResult<PreferenceUpdate> = apply(change = { it.copy(reducedMotion = enabled) }) {
+        remote.updateReducedMotion(userId, enabled)
+    }
+
+    override suspend fun updateVoiceConfirmation(
+        userId: String,
+        enabled: Boolean,
+    ): AppResult<PreferenceUpdate> = apply(change = { it.copy(voiceConfirmation = enabled) }) {
+        remote.updateVoiceConfirmation(userId, enabled)
+    }
+
     private suspend fun apply(
         change: (AccessibilityPreferences) -> AccessibilityPreferences,
         send: suspend () -> AppResult<UserPreferences>,
@@ -75,6 +89,10 @@ class OfflineFirstUserPreferencesRepository(
         val current = local.current()
         val textSize = remote.updateTextSize(userId, current.textSize)
         if (textSize is AppResult.Failure) return textSize
-        return remote.updateHighContrast(userId, current.highContrast)
+        val contrast = remote.updateHighContrast(userId, current.highContrast)
+        if (contrast is AppResult.Failure) return contrast
+        val motion = remote.updateReducedMotion(userId, current.reducedMotion)
+        if (motion is AppResult.Failure) return motion
+        return remote.updateVoiceConfirmation(userId, current.voiceConfirmation)
     }
 }

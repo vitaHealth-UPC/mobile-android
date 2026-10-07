@@ -18,6 +18,12 @@ class RemoteUserPreferences(
     override suspend fun updateHighContrast(userId: String, enabled: Boolean): AppResult<UserPreferences> =
         request(userId) { api.updateHighContrast(userId, EnabledRequest(enabled)) }
 
+    override suspend fun updateReducedMotion(userId: String, enabled: Boolean): AppResult<UserPreferences> =
+        request(userId) { api.updateReducedMotion(userId, EnabledRequest(enabled)) }
+
+    override suspend fun updateVoiceConfirmation(userId: String, enabled: Boolean): AppResult<UserPreferences> =
+        request(userId) { api.updateVoiceConfirmation(userId, EnabledRequest(enabled)) }
+
     private suspend fun request(
         userId: String,
         call: suspend () -> Response<UserPreferencesResponse>,

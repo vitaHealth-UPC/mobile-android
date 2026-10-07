@@ -39,6 +39,8 @@ class FakeUserPreferencesRemote(
     var failWith: AppResult.Failure? = null
     val textSizeCalls = mutableListOf<TextSizeLevel>()
     val contrastCalls = mutableListOf<Boolean>()
+    val motionCalls = mutableListOf<Boolean>()
+    val voiceCalls = mutableListOf<Boolean>()
     var getCalls = 0
 
     override suspend fun get(userId: String): AppResult<UserPreferences> {
@@ -57,6 +59,20 @@ class FakeUserPreferencesRemote(
         contrastCalls += enabled
         failWith?.let { return it }
         stored = stored.copy(highContrast = enabled)
+        return AppResult.Success(snapshot(userId))
+    }
+
+    override suspend fun updateReducedMotion(userId: String, enabled: Boolean): AppResult<UserPreferences> {
+        motionCalls += enabled
+        failWith?.let { return it }
+        stored = stored.copy(reducedMotion = enabled)
+        return AppResult.Success(snapshot(userId))
+    }
+
+    override suspend fun updateVoiceConfirmation(userId: String, enabled: Boolean): AppResult<UserPreferences> {
+        voiceCalls += enabled
+        failWith?.let { return it }
+        stored = stored.copy(voiceConfirmation = enabled)
         return AppResult.Success(snapshot(userId))
     }
 

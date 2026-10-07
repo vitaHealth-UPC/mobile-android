@@ -15,4 +15,8 @@ interface UserPreferencesRepository {
     suspend fun updateTextSize(userId: String, textSize: TextSizeLevel): AppResult<PreferenceUpdate>
 
     suspend fun updateHighContrast(userId: String, enabled: Boolean): AppResult<PreferenceUpdate>
+
+    suspend fun updateReducedMotion(userId: String, enabled: Boolean): AppResult<PreferenceUpdate>
+
+    suspend fun updateVoiceConfirmation(userId: String, enabled: Boolean): AppResult<PreferenceUpdate>
 }

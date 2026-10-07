@@ -40,3 +40,9 @@ Entry point: the "More" menu of the family summary (`FamilySummaryScreen`) now o
 Frame `563:4751` (High Contrast Enabled) is the same `AccessibilityScreen` with the contrast row on: the banner message is the `HighContrastSaved` UI state. `TataTheme` swaps to a high contrast colour scheme and `TataCard` draws a border; `tataTextColor()` and `tataMutedColor()` give the stronger text colours.
 
 Screens of other modules that still use the `TataText` / `TataMuted` constants directly keep their normal colours until they switch to those two functions.
+
+## US-37 reduced motion (and the voice confirmation setting)
+
+Frame `563:4864` (Reduced Motion Enabled) is the "Interaction" section of `AccessibilityScreen`; its saved banner is the `ReducedMotionSaved` UI state. With the setting on, `TataNavHost` replaces the screen transitions by `EnterTransition.None` / `ExitTransition.None`. Other animations must read `LocalTataAccessibility.current.reducedMotion` when they are added.
+
+The "Voice confirmation" row of the same section only stores the preference (`voiceConfirmationEnabled` in the backend). The voice flow itself belongs to US-06 in `:intake`.
