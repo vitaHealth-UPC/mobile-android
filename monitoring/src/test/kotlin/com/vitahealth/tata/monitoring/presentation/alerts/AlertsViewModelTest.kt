@@ -1,10 +1,15 @@
 package com.vitahealth.tata.monitoring.presentation.alerts
 
 import com.vitahealth.tata.monitoring.FakeAlertsRepository
+import com.vitahealth.tata.monitoring.FakeContactRepository
+import com.vitahealth.tata.monitoring.FakeNotesRepository
 import com.vitahealth.tata.monitoring.alert
 import com.vitahealth.tata.monitoring.application.AlertFailureCodes
 import com.vitahealth.tata.monitoring.application.handlers.GetAlertDetailQueryHandler
+import com.vitahealth.tata.monitoring.application.handlers.GetContactOptionQueryHandler
 import com.vitahealth.tata.monitoring.application.handlers.GetOpenAlertsQueryHandler
+import com.vitahealth.tata.monitoring.application.handlers.RegisterFollowUpNoteCommandHandler
+import com.vitahealth.tata.monitoring.application.handlers.UpdateAlertStatusCommandHandler
 import com.vitahealth.tata.monitoring.domain.model.AlertStatus
 import com.vitahealth.tata.monitoring.failure
 import com.vitahealth.tata.shared.common.result.AppResult
@@ -19,7 +24,14 @@ class AlertsViewModelTest {
     private val repository = FakeAlertsRepository()
 
     private fun listModel() = AlertsViewModel("caregiver", "adult", GetOpenAlertsQueryHandler(repository), Dispatchers.Unconfined)
-    private fun detailModel() = AlertDetailViewModel("caregiver", "adult", 1, GetAlertDetailQueryHandler(repository), Dispatchers.Unconfined)
+    private fun detailModel() = AlertDetailViewModel(
+        "caregiver", "adult", 1,
+        GetAlertDetailQueryHandler(repository),
+        UpdateAlertStatusCommandHandler(repository),
+        RegisterFollowUpNoteCommandHandler(FakeNotesRepository()),
+        GetContactOptionQueryHandler(FakeContactRepository()),
+        Dispatchers.Unconfined,
+    )
 
     @Test fun listStartsLoadingUntilTheReadFinishes() {
         val gate = CompletableDeferred<Unit>().also { repository.gate = it }

@@ -35,6 +35,7 @@ class FakeSubscriptionRepository(
     var failWith: AppResult.Failure? = null
     var planCalls = 0
     val subscriptionCalls = mutableListOf<String>()
+    val changes = mutableListOf<Pair<String, String>>()
 
     override suspend fun listPlans(): AppResult<List<Plan>> {
         planCalls++
@@ -44,5 +45,14 @@ class FakeSubscriptionRepository(
     override suspend fun currentSubscription(accountId: String): AppResult<Subscription> {
         subscriptionCalls += accountId
         return failWith ?: AppResult.Success(Subscription(accountId, subscribedTo, SubscriptionStatus.ACTIVE, renewalDate))
+    }
+
+    override suspend fun changeSubscription(accountId: String, planCode: String): AppResult<Subscription> {
+        changes += accountId to planCode
+        failWith?.let { return it }
+        val plan = listOf(essentialPlan, familyPlan).firstOrNull { it.code == planCode }
+            ?: return AppResult.Failure(message = "unknown plan", code = "PLAN_NOT_FOUND")
+        subscribedTo = plan
+        return AppResult.Success(Subscription(accountId, plan, SubscriptionStatus.ACTIVE, renewalDate))
     }
 }

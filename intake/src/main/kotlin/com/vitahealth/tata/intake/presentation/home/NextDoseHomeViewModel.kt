@@ -11,8 +11,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.Job
-import com.vitahealth.tata.intake.application.IntakeAgendaRepository
-import com.vitahealth.tata.intake.domain.model.DoseStatus
+import com.vitahealth.tata.intake.application.handlers.GetDailyDoseProgressQueryHandler
+import com.vitahealth.tata.intake.application.queries.GetDailyDoseProgressQuery
 import java.time.LocalDate
 import java.time.ZoneId
 
@@ -20,7 +20,7 @@ class NextDoseHomeViewModel(
     private val olderAdultId: String,
     private val olderAdultName: String,
     private val handler: GetNextDoseQueryHandler,
-    private val agendaRepository: IntakeAgendaRepository? = null,
+    private val progressHandler: GetDailyDoseProgressQueryHandler? = null,
 ) : ViewModel() {
     private val _state = MutableStateFlow<NextDoseHomeUiState>(NextDoseHomeUiState.Loading)
     val state: StateFlow<NextDoseHomeUiState> = _state.asStateFlow()
@@ -39,13 +39,7 @@ class NextDoseHomeViewModel(
         request = viewModelScope.launch {
             val zone = ZoneId.systemDefault()
             val day = LocalDate.now(zone)
-            val progress = when (val agenda = agendaRepository?.getAgenda(olderAdultId, day.atStartOfDay(zone).toInstant(), day.plusDays(1).atStartOfDay(zone).toInstant())) {
-                is AppResult.Success -> {
-                    val doses = agenda.value.filter { it.scheduledAt.atZone(zone).toLocalDate() == day }
-                    DailyDoseProgress(doses.count { it.status == DoseStatus.CONFIRMED || it.status == DoseStatus.LATE }, doses.size)
-                }
-                else -> null
-            }
+            val progress = (progressHandler?.invoke(GetDailyDoseProgressQuery(olderAdultId, day, zone)) as? AppResult.Success)?.value
             when (val result = handler(GetNextDoseQuery(olderAdultId))) {
                 is AppResult.Success -> {
                     _state.value = result.value?.let {
@@ -70,7 +64,7 @@ class NextDoseHomeViewModel(
         private val olderAdultId: String,
         private val olderAdultName: String,
         private val handler: GetNextDoseQueryHandler,
-        private val agendaRepository: IntakeAgendaRepository? = null,
+        private val progressHandler: GetDailyDoseProgressQueryHandler? = null,
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T =
@@ -78,7 +72,7 @@ class NextDoseHomeViewModel(
                 olderAdultId = olderAdultId,
                 olderAdultName = olderAdultName,
                 handler = handler,
-                agendaRepository = agendaRepository,
+                progressHandler = progressHandler,
             ) as T
     }
 }

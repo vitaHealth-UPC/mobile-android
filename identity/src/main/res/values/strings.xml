@@ -24,4 +24,15 @@
     <string name="plan_error_account">We could not find an active account. Sign in again.</string>
     <string name="plan_error_session">Your session expired. Sign in again.</string>
     <string name="plan_error_generic">Something went wrong. Try again.</string>
+    <string name="plan_change_button">Change plan</string>
+    <string name="plan_select_hint">Tap a plan to compare it, then change.</string>
+    <string name="plan_cancel">Cancel</string>
+    <string name="plan_confirm_title">Switch to the %1$s plan?</string>
+    <string name="plan_confirm_gain">You will get: %1$s.</string>
+    <string name="plan_confirm_lose">You will lose: %1$s.</string>
+    <string name="plan_confirm_action">Change plan</string>
+    <string name="plan_updated_title">Subscription updated</string>
+    <string name="plan_updated_body">The capabilities of the new plan are now available.</string>
+    <string name="plan_change_error_title">Could not change the plan</string>
+    <string name="plan_change_error_plan">That plan is no longer available. Pick another one.</string>
 </resources>
