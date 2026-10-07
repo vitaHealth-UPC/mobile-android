@@ -58,11 +58,13 @@ interface AnalyticsApiService {
     suspend fun getSummary(
         @Path("olderAdultId") olderAdultId: String,
         @Query("days") days: Int,
+        @Query("zone") zone: String = java.time.ZoneId.systemDefault().id,
     ): Response<AdherenceSummaryResponse>
 
     @GET("api/v1/older-adults/{olderAdultId}/adherence/insight")
     suspend fun getInsights(
         @Path("olderAdultId") olderAdultId: String,
         @Query("days") days: Int,
+        @Query("zone") zone: String = java.time.ZoneId.systemDefault().id,
     ): Response<AdherenceInsightsResponse>
 }

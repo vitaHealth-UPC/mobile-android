@@ -22,6 +22,8 @@ class RemoteAdherenceRecommendationsRepository(
                     code = if (response.code() == 400) "INVALID_REQUEST" else "REQUEST_FAILED",
                 )
             }
+        } catch (exception: java.util.concurrent.CancellationException) {
+            throw exception
         } catch (exception: java.io.IOException) {
             AppResult.Failure(
                 message = "No hay conexión. Inténtalo nuevamente.",
