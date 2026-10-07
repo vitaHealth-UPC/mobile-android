@@ -2,6 +2,7 @@ package com.vitahealth.tata.analytics.presentation.history
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,16 +11,22 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -41,6 +48,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.vitahealth.tata.analytics.domain.model.AdherencePeriod
 import com.vitahealth.tata.shared.design.components.TataButton
 import com.vitahealth.tata.shared.design.components.TataButtonStyle
 import com.vitahealth.tata.shared.design.components.TataCard
@@ -76,8 +84,11 @@ fun AdherenceHistoryRoute(
 ) {
     val viewModel: AdherenceHistoryViewModel = viewModel(factory = factory)
     val state by viewModel.state.collectAsState()
+    val selectedPeriod by viewModel.selectedPeriod.collectAsState()
     AdherenceHistoryScreen(
         state = state,
+        selectedPeriod = selectedPeriod,
+        onPeriodSelected = viewModel::selectPeriod,
         onRetry = viewModel::retry,
         modifier = modifier,
     )
@@ -87,6 +98,8 @@ fun AdherenceHistoryRoute(
 fun AdherenceHistoryScreen(
     state: AdherenceHistoryUiState,
     modifier: Modifier = Modifier,
+    selectedPeriod: AdherencePeriod = AdherencePeriod.LastMonth,
+    onPeriodSelected: (AdherencePeriod) -> Unit = {},
     onRetry: () -> Unit = {},
 ) {
     Column(
@@ -97,8 +110,8 @@ fun AdherenceHistoryScreen(
             .padding(horizontal = 22.dp, vertical = 28.dp),
     ) {
         Spacer(Modifier.height(12.dp))
-        HistoryHeader(periodLabel = state.periodLabelOrDefault())
-        Spacer(Modifier.height(20.dp))
+        HistoryHeader(selectedPeriod = selectedPeriod, onPeriodSelected = onPeriodSelected)
+        Spacer(Modifier.height(12.dp))
 
         when (state) {
             AdherenceHistoryUiState.Loading -> LoadingCard()
@@ -106,23 +119,30 @@ fun AdherenceHistoryScreen(
                 MetricsRow(summary = state.summary)
                 Spacer(Modifier.height(12.dp))
                 TrendCard(points = state.summary.trend)
+                if (state.periodUpdated) {
+                    Spacer(Modifier.height(12.dp))
+                    PeriodUpdatedNotice()
+                }
             }
-            is AdherenceHistoryUiState.InsufficientData -> InsufficientDataCard()
+            is AdherenceHistoryUiState.InsufficientData -> EmptyStateCard(
+                title = "Sin datos suficientes",
+                message = "No existen tomas en este periodo para calcular adherencia.",
+            )
+            is AdherenceHistoryUiState.NoResults -> EmptyStateCard(
+                title = "Sin resultados",
+                message = "No existen tomas registradas dentro del periodo seleccionado.",
+            )
             is AdherenceHistoryUiState.Error -> ErrorCard(message = state.message, onRetry = onRetry)
         }
         Spacer(Modifier.height(28.dp))
     }
 }
 
-private fun AdherenceHistoryUiState.periodLabelOrDefault(): String =
-    when (this) {
-        is AdherenceHistoryUiState.Content -> summary.periodLabel
-        is AdherenceHistoryUiState.InsufficientData -> periodLabel
-        else -> "Últimos 30 días"
-    }
-
 @Composable
-private fun HistoryHeader(periodLabel: String) {
+private fun HistoryHeader(
+    selectedPeriod: AdherencePeriod,
+    onPeriodSelected: (AdherencePeriod) -> Unit,
+) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -135,15 +155,64 @@ private fun HistoryHeader(periodLabel: String) {
                 fontWeight = FontWeight.Bold,
                 color = TataText,
             )
-            Text(
-                text = "$periodLabel ⌄",
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Medium,
-                color = TataDeepNavy,
-                modifier = Modifier.padding(top = 6.dp),
-            )
+            PeriodSelector(selected = selectedPeriod, onSelected = onPeriodSelected)
         }
         CalendarIcon(modifier = Modifier.padding(top = 6.dp))
+    }
+}
+
+@Composable
+private fun PeriodSelector(
+    selected: AdherencePeriod,
+    onSelected: (AdherencePeriod) -> Unit,
+) {
+    var expanded by remember { mutableStateOf(false) }
+    Box(
+        modifier = Modifier
+            .heightIn(min = 44.dp)
+            .clickable { expanded = true },
+        contentAlignment = Alignment.CenterStart,
+    ) {
+        Text(
+            text = "${selected.label()} ⌄",
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Medium,
+            color = TataDeepNavy,
+        )
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            AdherencePeriod.entries.forEach { period ->
+                DropdownMenuItem(
+                    text = { Text(period.label()) },
+                    onClick = {
+                        expanded = false
+                        onSelected(period)
+                    },
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun PeriodUpdatedNotice() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(TataLavender, RoundedCornerShape(16.dp))
+            .padding(14.dp),
+    ) {
+        Text(
+            text = "Periodo actualizado",
+            fontSize = 12.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = TataText,
+        )
+        Text(
+            text = "Los indicadores se calculan solo con las tomas del periodo seleccionado.",
+            fontSize = 11.sp,
+            color = TataMuted,
+            modifier = Modifier.padding(top = 4.dp),
+        )
     }
 }
 
@@ -354,7 +423,10 @@ private fun AdherenceTrendChart(points: List<AdherenceTrendPoint>) {
 }
 
 @Composable
-private fun InsufficientDataCard() {
+private fun EmptyStateCard(
+    title: String,
+    message: String,
+) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -365,14 +437,14 @@ private fun InsufficientDataCard() {
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
-                text = "Sin datos suficientes",
+                text = title,
                 fontSize = 21.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = EmptyStateTitle,
                 textAlign = TextAlign.Center,
             )
             Text(
-                text = "No existen tomas en este periodo para calcular adherencia.",
+                text = message,
                 fontSize = 11.sp,
                 color = EmptyStateBody,
                 textAlign = TextAlign.Center,
@@ -445,6 +517,48 @@ private val previewSummary = AdherenceSummaryUi(
 private fun AdherenceHistoryContentPreview() {
     TataTheme {
         AdherenceHistoryScreen(state = AdherenceHistoryUiState.Content(previewSummary))
+    }
+}
+
+private val previewWeekSummary = AdherenceSummaryUi(
+    periodLabel = "Últimos 7 días",
+    adherencePercent = 92,
+    adherenceChangeText = "↑ 4% vs. 7 días previos",
+    onTimePercent = 88,
+    onTimeChangeText = "↑ 5%",
+    lateCount = 3,
+    omittedCount = 1,
+    lateOmittedCaption = "últ. 7 días",
+    trend = listOf(
+        AdherenceTrendPoint("30 sep", 88),
+        AdherenceTrendPoint("1 oct", 90),
+        AdherenceTrendPoint("2 oct", 85),
+        AdherenceTrendPoint("3 oct", 95),
+        AdherenceTrendPoint("4 oct", 92),
+        AdherenceTrendPoint("5 oct", 94),
+        AdherenceTrendPoint("6 oct", 92),
+    ),
+)
+
+@Preview(name = "Periodo actualizado (7 días)", showBackground = true, widthDp = 393, heightDp = 852)
+@Composable
+private fun AdherenceHistoryPeriodUpdatedPreview() {
+    TataTheme {
+        AdherenceHistoryScreen(
+            state = AdherenceHistoryUiState.Content(previewWeekSummary, periodUpdated = true),
+            selectedPeriod = AdherencePeriod.LastWeek,
+        )
+    }
+}
+
+@Preview(name = "Sin resultados", showBackground = true, widthDp = 393, heightDp = 852)
+@Composable
+private fun AdherenceHistoryNoResultsPreview() {
+    TataTheme {
+        AdherenceHistoryScreen(
+            state = AdherenceHistoryUiState.NoResults("Últimos 7 días"),
+            selectedPeriod = AdherencePeriod.LastWeek,
+        )
     }
 }
 

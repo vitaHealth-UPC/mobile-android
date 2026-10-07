@@ -1,5 +1,7 @@
 package com.vitahealth.tata.analytics.presentation.history
 
+import com.vitahealth.tata.analytics.domain.model.AdherencePeriod
+
 data class AdherenceTrendPoint(
     val label: String,
     val adherencePercent: Int,
@@ -17,14 +19,21 @@ data class AdherenceSummaryUi(
     val trend: List<AdherenceTrendPoint>,
 )
 
+fun AdherencePeriod.label(): String = "Últimos $days días"
+
 sealed interface AdherenceHistoryUiState {
     data object Loading : AdherenceHistoryUiState
 
     data class Content(
         val summary: AdherenceSummaryUi,
+        val periodUpdated: Boolean = false,
     ) : AdherenceHistoryUiState
 
     data class InsufficientData(
+        val periodLabel: String,
+    ) : AdherenceHistoryUiState
+
+    data class NoResults(
         val periodLabel: String,
     ) : AdherenceHistoryUiState
 

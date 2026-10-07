@@ -6,7 +6,9 @@ import androidx.lifecycle.viewModelScope
 import com.vitahealth.tata.analytics.application.handlers.GetAdherenceSummaryQueryHandler
 import com.vitahealth.tata.analytics.application.queries.GetAdherenceSummaryQuery
 import com.vitahealth.tata.analytics.application.readmodels.AdherenceSummaryReadModel
+import com.vitahealth.tata.analytics.domain.model.AdherencePeriod
 import com.vitahealth.tata.shared.common.result.AppResult
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -15,8 +17,6 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 import kotlin.math.abs
 
-private const val DEFAULT_PERIOD_DAYS = 30
-
 class AdherenceHistoryViewModel(
     private val olderAdultId: String,
     private val handler: GetAdherenceSummaryQueryHandler,
@@ -24,19 +24,40 @@ class AdherenceHistoryViewModel(
     private val _state = MutableStateFlow<AdherenceHistoryUiState>(AdherenceHistoryUiState.Loading)
     val state: StateFlow<AdherenceHistoryUiState> = _state.asStateFlow()
 
+    private val _selectedPeriod = MutableStateFlow(AdherencePeriod.LastMonth)
+    val selectedPeriod: StateFlow<AdherencePeriod> = _selectedPeriod.asStateFlow()
+
+    private var periodChanged = false
+    private var loadJob: Job? = null
+
     init {
         load()
     }
 
     fun retry() = load()
 
+    fun selectPeriod(period: AdherencePeriod) {
+        if (period == _selectedPeriod.value) return
+        _selectedPeriod.value = period
+        periodChanged = true
+        load()
+    }
+
     private fun load() {
+        val period = _selectedPeriod.value
+        val changed = periodChanged
         _state.value = AdherenceHistoryUiState.Loading
-        viewModelScope.launch {
-            when (val result = handler(GetAdherenceSummaryQuery(olderAdultId, DEFAULT_PERIOD_DAYS))) {
+        loadJob?.cancel()
+        loadJob = viewModelScope.launch {
+            when (val result = handler(GetAdherenceSummaryQuery(olderAdultId, period.days))) {
                 is AppResult.Success -> {
-                    _state.value = result.value?.let { AdherenceHistoryUiState.Content(it.toUi()) }
-                        ?: AdherenceHistoryUiState.InsufficientData(periodLabel(DEFAULT_PERIOD_DAYS))
+                    _state.value = result.value?.let {
+                        AdherenceHistoryUiState.Content(it.toUi(), periodUpdated = changed)
+                    } ?: if (changed) {
+                        AdherenceHistoryUiState.NoResults(period.label())
+                    } else {
+                        AdherenceHistoryUiState.InsufficientData(period.label())
+                    }
                 }
                 is AppResult.Failure -> {
                     _state.value = AdherenceHistoryUiState.Error(result.message)
