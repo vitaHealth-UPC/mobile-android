@@ -13,6 +13,7 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "0.1.0"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         val apiBaseUrl = providers.gradleProperty("TATA_API_BASE_URL").orElse("https://web-services-yzxl.onrender.com/").get()
         require(apiBaseUrl.startsWith("http://") || apiBaseUrl.startsWith("https://"))
         require(apiBaseUrl.endsWith("/"))
@@ -59,4 +60,6 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
+    debugImplementation("androidx.compose.ui:ui-test-manifest")
 }
