@@ -42,6 +42,12 @@ sealed interface RootDestination {
             "alert-detail/" + Uri.encode(caregiverId) + "/" + Uri.encode(olderAdultId) + "/" + alertId
     }
 
+    data object PlanSubscription : RootDestination {
+        const val accountIdArgument = "accountId"
+        override val route = "plan-subscription/{$accountIdArgument}"
+        fun createRoute(accountId: String) = "plan-subscription/" + Uri.encode(accountId)
+    }
+
     data object Accessibility : RootDestination {
         const val userIdArgument = "userId"
         override val route = "accessibility/{$userIdArgument}"
@@ -70,9 +76,9 @@ sealed interface RootDestination {
 
     data object CareLink : RootDestination {
         const val caregiverIdArgument = "caregiverId"
-        override val route: String = "care-link/{$caregiverIdArgument}?code={code}"
+        override val route: String = "care-link/{$caregiverIdArgument}?code={code}&previewAdult={previewAdult}"
 
-        fun createRoute(caregiverId: String, code: String = ""): String = "care-link/" + Uri.encode(caregiverId) + "?code=" + Uri.encode(code)
+        fun createRoute(caregiverId: String, code: String = "", previewAdult: String = ""): String = "care-link/" + Uri.encode(caregiverId) + "?code=" + Uri.encode(code) + "&previewAdult=" + Uri.encode(previewAdult)
     }
 
     data object MedicationRegistration : RootDestination {

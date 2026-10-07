@@ -85,4 +85,15 @@
     <string name="note_error_too_long">La nota puede tener hasta %1$d caracteres.</string>
     <string name="note_error_rejected">El servidor no aceptó la nota. Revísala e inténtalo nuevamente.</string>
     <string name="note_error_save">No pudimos guardar la nota. Inténtalo nuevamente.</string>
+
+    <!-- Contacto desde una alerta (US-29) -->
+    <string name="alert_actions_subtitle_named">Contacta a %1$s y actualiza la alerta según el resultado.</string>
+    <string name="contact_action_named">Contactar a %1$s</string>
+    <string name="contact_action">Contactar</string>
+    <string name="contact_unavailable">Contacto no disponible</string>
+    <string name="contact_loading">Consultando contacto…</string>
+    <string name="contact_channel_phone">Teléfono: %1$s</string>
+    <string name="contact_channel_whatsapp">WhatsApp: %1$s</string>
+    <string name="contact_retry">Volver a consultar el contacto</string>
+    <string name="contact_no_app">Ninguna app de este dispositivo puede abrir este contacto.</string>
 </resources>

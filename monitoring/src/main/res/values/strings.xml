@@ -84,4 +84,15 @@
     <string name="note_error_too_long">The note can have up to %1$d characters.</string>
     <string name="note_error_rejected">The server did not accept the note. Review it and try again.</string>
     <string name="note_error_save">We could not save the note. Try again.</string>
+
+    <!-- Contact from an alert (US-29) -->
+    <string name="alert_actions_subtitle_named">Contact %1$s and update the alert according to the result.</string>
+    <string name="contact_action_named">Contact %1$s</string>
+    <string name="contact_action">Contact</string>
+    <string name="contact_unavailable">Contact unavailable</string>
+    <string name="contact_loading">Checking contact…</string>
+    <string name="contact_channel_phone">Phone: %1$s</string>
+    <string name="contact_channel_whatsapp">WhatsApp: %1$s</string>
+    <string name="contact_retry">Check contact again</string>
+    <string name="contact_no_app">No app on this device can open this contact.</string>
 </resources>

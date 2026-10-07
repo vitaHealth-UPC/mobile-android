@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -17,6 +18,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.draw.shadow
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.liveRegion
@@ -83,7 +90,8 @@ fun NotesScreen(
     onTabSelected: (CaregiverTab) -> Unit = {},
 ) {
     val formatter = rememberAlertDateFormatter()
-    Column(modifier = Modifier.fillMaxSize().background(TataSurface)) {
+    ProvideTextStyle(MaterialTheme.typography.bodyMedium.copy(fontFamily = FontFamily(Font(com.vitahealth.tata.shared.R.font.tata_inter)), fontSize = 11.sp, lineHeight = 14.sp)) {
+    Column(modifier = Modifier.fillMaxSize().background(Brush.horizontalGradient(listOf(Color.White, TataSurface, Color(0xFFFCFBFF))))) {
         LazyColumn(
             modifier = Modifier.weight(1f).fillMaxWidth(),
             contentPadding = PaddingValues(horizontal = 22.dp, vertical = 28.dp),
@@ -147,6 +155,7 @@ fun NotesScreen(
         }
         CaregiverTabBar(selected = CaregiverTab.Notes, onSelect = onTabSelected)
     }
+    }
 }
 
 @Composable
@@ -168,8 +177,9 @@ private fun EmptyNotesCard() {
 
 @Composable
 private fun NoteCard(note: FollowUpNote, mine: Boolean, recordedAt: String) {
-    TataCard(modifier = Modifier.fillMaxWidth(), containerColor = if (mine) TataLavender else Color.White) {
-        Text(text = note.text, color = tataTextColor(), style = MaterialTheme.typography.bodyLarge)
+    Column(Modifier.fillMaxWidth().shadow(6.dp, RoundedCornerShape(18.dp), ambientColor = Color(0x141A2138), spotColor = Color(0x141A2138))
+        .background(if (mine) TataLavender else Color.White, RoundedCornerShape(18.dp)).padding(16.dp)) {
+        Text(text = note.text, color = tataTextColor(), fontSize = 13.sp, lineHeight = 17.sp)
         Text(
             text = stringResource(
                 R.string.notes_meta,
@@ -177,7 +187,7 @@ private fun NoteCard(note: FollowUpNote, mine: Boolean, recordedAt: String) {
                 recordedAt,
             ),
             color = AlertsSecondaryText,
-            style = MaterialTheme.typography.labelLarge,
+            fontSize = 10.sp, lineHeight = 13.sp,
             modifier = Modifier.padding(top = 8.dp),
         )
     }

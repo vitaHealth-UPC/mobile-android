@@ -16,7 +16,10 @@ import androidx.navigation.navArgument
 import com.vitahealth.tata.analytics.presentation.history.AdherenceHistoryRoute
 import com.vitahealth.tata.analytics.presentation.recommendations.AdherenceRecommendationsRoute
 import com.vitahealth.tata.app.TataApplication
+import com.vitahealth.tata.app.shell.FollowOmissionPush
+import com.vitahealth.tata.omission.application.queries.PushDestination
 import com.vitahealth.tata.carelink.presentation.link.CareLinkRoute
+import com.vitahealth.tata.identity.presentation.subscription.PlanSubscriptionRoute
 import com.vitahealth.tata.identity.presentation.registration.CaregiverRegistrationRoute
 import com.vitahealth.tata.intake.presentation.detail.DoseDetailRoute
 import com.vitahealth.tata.intake.presentation.home.NextDoseHomeRoute
@@ -40,18 +43,61 @@ import kotlinx.coroutines.launch
 fun TataNavHost(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
+    pushDestination: PushDestination? = null,
+    onPushDestinationOpened: () -> Unit = {},
 ) {
     // Reduced motion removes the screen transitions; otherwise the Navigation default (700 ms fade) applies.
+    // A tapped omission notification opens its screen once the graph exists.
+    val pushApp = androidx.compose.ui.platform.LocalContext.current.applicationContext as TataApplication
+    androidx.compose.runtime.LaunchedEffect(pushDestination) {
+        when (pushDestination) {
+            is PushDestination.CaregiverAlerts -> {
+                val (caregiver, adult) = pushDestination.caregiverId to pushDestination.olderAdultId
+                navController.navigate(RootDestination.Alerts.createRoute(caregiver, adult))
+                pushApp.container.openAlertIdFor(pushDestination)?.let { alertId ->
+                    navController.navigate(RootDestination.AlertDetail.createRoute(caregiver, adult, alertId))
+                }
+            }
+            is PushDestination.OlderAdultHome ->
+                navController.navigate(RootDestination.NextDoseHome.createRoute(pushDestination.olderAdultId, pushDestination.olderAdultName))
+            null -> return@LaunchedEffect
+        }
+        onPushDestinationOpened()
+    }
     val reducedMotion = LocalTataAccessibility.current.reducedMotion
+    val container = (androidx.compose.ui.platform.LocalContext.current.applicationContext as TataApplication).container
+    // Read once: a changing start destination would reset the navigation graph.
+    val startRoute = androidx.compose.runtime.remember {
+        if (container.hasSeenOnboarding()) RootDestination.SessionAccess.route else RootDestination.Onboarding.route
+    }
     NavHost(
         navController = navController,
-        startDestination = RootDestination.SessionAccess.route,
+        startDestination = startRoute,
         modifier = modifier,
         enterTransition = { if (reducedMotion) EnterTransition.None else fadeIn(animationSpec = tween(700)) },
         exitTransition = { if (reducedMotion) ExitTransition.None else fadeOut(animationSpec = tween(700)) },
         popEnterTransition = { if (reducedMotion) EnterTransition.None else fadeIn(animationSpec = tween(700)) },
         popExitTransition = { if (reducedMotion) ExitTransition.None else fadeOut(animationSpec = tween(700)) },
     ) {
+        composable(RootDestination.Onboarding.route) {
+            com.vitahealth.tata.identity.presentation.onboarding.OnboardingScreen(
+                onStart = {
+                    container.completeOnboarding()
+                    // Sign-in goes underneath so going back from the registration lands on it.
+                    navController.navigate(RootDestination.SessionAccess.route) {
+                        popUpTo(RootDestination.Onboarding.route) { inclusive = true }
+                    }
+                    navController.navigate(RootDestination.CaregiverRegistration.route)
+                },
+                onSignIn = {
+                    container.completeOnboarding()
+                    navController.navigate(RootDestination.SessionAccess.route) {
+                        popUpTo(RootDestination.Onboarding.route) { inclusive = true }
+                    }
+                },
+            )
+        }
+
         composable(RootDestination.SessionAccess.route) {
             val context = androidx.compose.ui.platform.LocalContext.current
             val app = context.applicationContext as TataApplication
@@ -93,7 +139,7 @@ fun TataNavHost(
             com.vitahealth.tata.carelink.presentation.profiles.CaregiverProfilesRoute(
                 factory=app.container.caregiverProfilesViewModelFactory(caregiver),
                 onOpenAdult={adult->navController.navigate(RootDestination.FamilySummary.createRoute(caregiver,adult.id,adult.name))},
-                onAdultConsent={code->navController.navigate(RootDestination.CareLink.createRoute(caregiver,code))},
+                onAdultConsent={link->navController.navigate(RootDestination.CareLink.createRoute(caregiver,link.code,link.olderAdultId))},
                 onSignOut={scope.launch{app.container.signOut();navController.navigate(RootDestination.SessionAccess.route){popUpTo(navController.graph.id){inclusive=true}}}},
             )
         }
@@ -117,6 +163,7 @@ fun TataNavHost(
             arguments = listOf(
                 navArgument(RootDestination.CareLink.caregiverIdArgument) { type = NavType.StringType },
                 navArgument("code") { type = NavType.StringType; defaultValue = "" },
+                navArgument("previewAdult") { type = NavType.StringType; defaultValue = "" },
             ),
         ) { backStackEntry ->
             val app = androidx.compose.ui.platform.LocalContext.current.applicationContext as TataApplication
@@ -126,6 +173,7 @@ fun TataNavHost(
             CareLinkRoute(
                 factory = app.container.careLinkViewModelFactory(caregiverId),
                 initialCode = backStackEntry.arguments?.getString("code") ?: "",
+                initialOlderAdultId = backStackEntry.arguments?.getString("previewAdult") ?: "",
                 onConfirmed = { olderAdultId, olderAdultName ->
                     app.getSharedPreferences("tata_adult_profile",android.content.Context.MODE_PRIVATE).edit().putString("id",olderAdultId).putString("name",olderAdultName).apply()
                     navController.navigate(RootDestination.PinAccess.createRoute(olderAdultId,olderAdultName,true)) {
@@ -156,7 +204,25 @@ fun TataNavHost(
                 onTreatments = { navController.navigate(RootDestination.TreatmentList.createRoute(caregiver,adult,name)) },
                 onMedications = { navController.navigate(RootDestination.MedicationManagement.createRoute(caregiver, adult, name)) },
                 onAlerts = { navController.navigate(RootDestination.Alerts.createRoute(caregiver, adult)) },
+                onSubscription = { navController.navigate(RootDestination.PlanSubscription.createRoute(caregiver)) },
                 onNotes = { navController.navigate(RootDestination.Notes.createRoute(caregiver, adult)) },
+            )
+            FollowOmissionPush(caregiver + adult) { app.container.followCaregiverAlerts(caregiver, adult) }
+        }
+
+        composable(
+            route = RootDestination.PlanSubscription.route,
+            arguments = listOf(
+                navArgument(RootDestination.PlanSubscription.accountIdArgument) { type = NavType.StringType },
+            ),
+        ) { backStackEntry ->
+            val app = androidx.compose.ui.platform.LocalContext.current.applicationContext as TataApplication
+            val accountId = requireNotNull(
+                backStackEntry.arguments?.getString(RootDestination.PlanSubscription.accountIdArgument),
+            )
+            PlanSubscriptionRoute(
+                factory = app.container.planSubscriptionViewModelFactory(accountId),
+                onBack = { navController.popBackStack() },
             )
         }
 
@@ -746,6 +812,7 @@ fun TataNavHost(
                 onSignOut = {scope.launch{app.container.signOut();navController.navigate(RootDestination.SessionAccess.route){popUpTo(navController.graph.id){inclusive=true}}}},
                 onOpenAgenda = { navController.navigate(RootDestination.IntakeAgenda.createRoute(olderAdultId)) },
             )
+            FollowOmissionPush(olderAdultId) { app.container.followDoseReminders(olderAdultId, olderAdultName) }
         }
 
         composable(
