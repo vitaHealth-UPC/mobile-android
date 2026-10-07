@@ -1,11 +1,13 @@
 package com.vitahealth.tata.monitoring.presentation.alerts
 
 import com.vitahealth.tata.monitoring.FakeAlertsRepository
+import com.vitahealth.tata.monitoring.FakeContactRepository
 import com.vitahealth.tata.monitoring.FakeNotesRepository
 import com.vitahealth.tata.monitoring.alert
 import com.vitahealth.tata.monitoring.application.AlertFailureCodes
 import com.vitahealth.tata.monitoring.application.commands.UpdateAlertStatusCommand
 import com.vitahealth.tata.monitoring.application.handlers.GetAlertDetailQueryHandler
+import com.vitahealth.tata.monitoring.application.handlers.GetContactOptionQueryHandler
 import com.vitahealth.tata.monitoring.application.handlers.RegisterFollowUpNoteCommandHandler
 import com.vitahealth.tata.monitoring.application.handlers.UpdateAlertStatusCommandHandler
 import com.vitahealth.tata.monitoring.domain.model.AlertStatus
@@ -31,6 +33,7 @@ class AlertFollowUpViewModelTest {
             GetAlertDetailQueryHandler(repository),
             UpdateAlertStatusCommandHandler(repository),
             RegisterFollowUpNoteCommandHandler(FakeNotesRepository()),
+            GetContactOptionQueryHandler(FakeContactRepository()),
             Dispatchers.Unconfined,
         )
     }

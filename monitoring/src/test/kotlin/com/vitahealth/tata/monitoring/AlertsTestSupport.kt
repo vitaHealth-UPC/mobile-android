@@ -2,9 +2,12 @@ package com.vitahealth.tata.monitoring
 
 import com.vitahealth.tata.monitoring.application.AlertFailureCodes
 import com.vitahealth.tata.monitoring.application.AlertsRepository
+import com.vitahealth.tata.monitoring.application.ContactRepository
 import com.vitahealth.tata.monitoring.application.NotesRepository
 import com.vitahealth.tata.monitoring.domain.model.AlertStatus
 import com.vitahealth.tata.monitoring.domain.model.CaregiverAlert
+import com.vitahealth.tata.monitoring.domain.model.ContactChannel
+import com.vitahealth.tata.monitoring.domain.model.ContactChannelType
 import com.vitahealth.tata.monitoring.domain.model.FollowUpNote
 import com.vitahealth.tata.monitoring.infrastructure.remote.AlertSummaryResponse
 import com.vitahealth.tata.shared.common.result.AppResult
@@ -93,3 +96,19 @@ internal class FakeNotesRepository : NotesRepository {
     }
 }
 
+
+internal class FakeContactRepository : ContactRepository {
+    var channel: AppResult<ContactChannel> = AppResult.Success(ContactChannel(ContactChannelType.PHONE, "+51 999 888 777"))
+    var fullName: AppResult<String> = AppResult.Success("Rosa Vargas")
+    val requests = mutableListOf<String>()
+
+    override suspend fun contactChannel(caregiverId: String, olderAdultId: String): AppResult<ContactChannel> {
+        requests += "contact:$caregiverId:$olderAdultId"
+        return channel
+    }
+
+    override suspend fun olderAdultFullName(olderAdultId: String): AppResult<String> {
+        requests += "profile:$olderAdultId"
+        return fullName
+    }
+}
