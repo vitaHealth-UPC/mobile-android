@@ -9,7 +9,7 @@ This is a source-level contrast, not a claim that every listed state has been te
 | 1 | Landing - Value & Features | 563:1849 | Dedicated screen/state not implemented | Not yet validated against installed app |
 | 2 | Landing - Plans & Contact | 563:1913 | Dedicated screen/state not implemented | Not yet validated against installed app |
 | 3 | Onboarding | 563:5 | Dedicated screen/state not implemented | Not yet validated against installed app |
-| 4 | Caregiver Registration | 563:1398 | CaregiverRegistrationScreen: Screen and account/verification states exist | Not yet validated against installed app |
+| 4 | Caregiver Registration | 563:1398 | CaregiverRegistrationScreen: Native fields, progress, editable six-digit verification and duplicate/expired banners restyled from MCP | Not yet validated against installed app |
 | 5 | Link & Consent | 563:1440 | CareLinkScreen: Screen and invalid-code state exist | Not yet validated against installed app |
 | 6 | PIN Access | 563:1338 | PinAccessScreen: Rebuilt from MCP; setup/incorrect/locked states | Installed-app baseline compared with Figma; native system bars and dynamic data retained |
 | 7 | Login | 641:16 | SessionAccessScreen: Rebuilt from MCP; password login works; social/recovery options need integrations | Installed-app baseline compared with Figma; native system bars and dynamic data retained |
@@ -37,8 +37,8 @@ This is a source-level contrast, not a claim that every listed state has been te
 | 29 | PIN Setup | 563:1970 | PinAccessScreen: Rebuilt from MCP; setup/incorrect/locked states | Not yet validated against installed app |
 | 30 | PIN Incorrect | 563:2034 | PinAccessScreen: Rebuilt from MCP; setup/incorrect/locked states | Not yet validated against installed app |
 | 31 | PIN Temporarily Blocked | 563:2098 | PinAccessScreen: Rebuilt from MCP; setup/incorrect/locked states | Not yet validated against installed app |
-| 32 | Duplicate Email | 563:2162 | CaregiverRegistrationScreen: Screen and account/verification states exist | Not yet validated against installed app |
-| 33 | Verification Expired | 563:2208 | CaregiverRegistrationScreen: Screen and account/verification states exist | Not yet validated against installed app |
+| 32 | Duplicate Email | 563:2162 | CaregiverRegistrationScreen: Native fields, progress, editable six-digit verification and duplicate/expired banners restyled from MCP | Not yet validated against installed app |
+| 33 | Verification Expired | 563:2208 | CaregiverRegistrationScreen: Native fields, progress, editable six-digit verification and duplicate/expired banners restyled from MCP | Not yet validated against installed app |
 | 34 | Invalid Link Code | 563:2254 | CareLinkScreen: Screen and invalid-code state exist | Not yet validated against installed app |
 | 35 | Consent Required | 563:2308 | FamilySummaryScreen: Summary exists; consent-required presentation needs comparison | Not yet validated against installed app |
 | 36 | Medication Required Fields Error | 563:2404 | MedicationRegistrationScreen: Form and validation exist | Not yet validated against installed app |
@@ -89,3 +89,7 @@ Android defaults to `https://web-services-yzxl.onrender.com/`. The published Ope
 ## Accessibility visual pass
 
 Compared frame 14 and variants 61–64 through MCP. The five existing settings retain their command handlers and persistence. Restyled native switches, row dimensions, type, separators, SVG icon slots (all 24×24), help banner and responsive header. This is partial fidelity: dark theme, the adult bottom navigation and complete variant positioning remain open; do not count these five frames as fully accepted. Notification frames 26/65 were compared at source level and their missing categories are listed above.
+
+## Registration visual pass
+
+Compared frame 4 plus duplicate-email/expired-verification variants 32–33 using MCP. Native screen was rendered in an emulator instrumentation host with production insets and compared visually. Interaction test verifies disabled pre-registration verification, six-digit filtering, verification callback, expired-code recovery and duplicate-email banner. Existing identity unit tests pass. Fixtures are isolated UI test data: no production account was created. Fields lock after account creation and the pre-registration instructions reflect that a code has not yet been sent. Error variants have functional assertions; they are not claimed as fully screenshot-accepted.
