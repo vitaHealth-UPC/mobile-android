@@ -122,6 +122,18 @@ class AppContainer(
     val sessionAccessViewModelFactory = com.vitahealth.tata.identity.presentation.access.SessionAccessViewModel.Factory(sessionAccessRepository)
 
     suspend fun signOut() = sessionAccessRepository.signOut()
+
+    private val subscriptionRepository = com.vitahealth.tata.identity.infrastructure.remote.RemoteSubscriptionRepository(
+        retrofit.create(com.vitahealth.tata.identity.infrastructure.remote.SubscriptionApiService::class.java),
+    )
+
+    fun planSubscriptionViewModelFactory(accountId: String) =
+        com.vitahealth.tata.identity.presentation.subscription.PlanSubscriptionViewModel.Factory(
+            accountId = accountId,
+            getSubscription = com.vitahealth.tata.identity.application.handlers.GetCurrentSubscriptionQueryHandler(subscriptionRepository),
+            listPlans = com.vitahealth.tata.identity.application.handlers.ListAvailablePlansQueryHandler(subscriptionRepository),
+        )
+
     private val caregiverProfilesRepository = com.vitahealth.tata.carelink.infrastructure.remote.RemoteCaregiverProfilesRepository(retrofit.create(com.vitahealth.tata.carelink.infrastructure.remote.CaregiverProfilesApiService::class.java))
     fun caregiverProfilesViewModelFactory(caregiverId: String) = com.vitahealth.tata.carelink.presentation.profiles.CaregiverProfilesViewModel.Factory(caregiverId,caregiverProfilesRepository)
 

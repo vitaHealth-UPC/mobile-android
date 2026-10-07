@@ -104,3 +104,7 @@ Source: the deployed OpenAPI document (`/v3/api-docs`, tags "Alerts" and "Family
 The alert `id` is a numeric `int64` (`Long` in Android), unlike the UUID `String` identifiers listed in the intake section; `intakeId` stays a `String`. The status names are the backend ones: the app shows OPEN as Pending / Pendiente, ATTENDED as Attended / Atendida and CLOSED as Closed / Cerrada. There is no "Resolved" status.
 
 `PUT /api/v1/older-adults/{olderAdultId}/alerts/{alertId}/status?caregiverId=` with `{ "status": "ATTENDED" | "CLOSED" }` exists for US-31 and is not consumed by US-27.
+
+## Plans and subscription (US-44, US-45)
+
+`GET /api/v1/plans` returns `[{ code, name, monthlyPrice, currency, capabilities[] }]`; today ESSENTIAL (S/ 9.90) and FAMILY (S/ 19.90). `GET /api/v1/accounts/{accountId}/subscription` returns `{ accountId, plan, status, renewsAt }` with status `ACTIVE` and `renewsAt` as an ISO instant. Errors are a problem detail whose `title` is the code: `ACCOUNT_NOT_FOUND` and `PLAN_NOT_FOUND` (404), `ACCOUNT_NOT_ACTIVE` (403). A capability this app does not know is ignored, so the backend can add capabilities without breaking old versions.
