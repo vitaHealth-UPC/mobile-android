@@ -86,3 +86,7 @@ The app keeps a copy in DataStore (`tata_accessibility`) and applies it before a
 ## Session access and PIN (US-01)
 
 The login screen calls `POST /api/v1/sessions` with `{email,password}`. The encrypted session store saves the token and expiry before navigation. `GET /api/v1/sessions/current` restores caregiver and older-adult sessions; restricted setup sessions require consent. PIN setup uses authenticated `POST /api/v1/pin-credentials`; PIN access uses `POST /api/v1/pin-sessions`, both with `{olderAdultId,pin}`. The backend enforces `PIN_LOCKED` for 15 minutes. Confirmed consent enters PIN setup and then the adult home. Device metadata remembers the adult identifier and name, never the PIN.
+
+## Caregiver profile entry (US-12)
+
+After caregiver verification/sign-in, the app calls `GET /api/v1/care-links?caregiverId=` and uses `olderAdultId` from confirmed links to open the family summary. New profiles use `POST /api/v1/older-adults`; a temporary code uses `POST /api/v1/care-links/linking-codes`. Partial emergency contacts and future birth dates are rejected before submission. The registered adult is retained if code generation fails, so retry does not duplicate the profile. The caregiver hands the device/code to the adult before acceptance and consent. Account switching revokes the presented session and clears local credentials even without a connection.

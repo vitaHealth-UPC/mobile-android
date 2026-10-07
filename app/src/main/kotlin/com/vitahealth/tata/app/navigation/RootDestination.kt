@@ -5,6 +5,10 @@ import android.net.Uri
 sealed interface RootDestination {
     val route: String
 
+    data object CaregiverProfiles : RootDestination {
+        override val route = "caregiver-profiles/{caregiverId}"
+        fun createRoute(id: String) = "caregiver-profiles/${Uri.encode(id)}"
+    }
     data object SessionAccess : RootDestination { override val route = "session-access" }
     data object PinAccess : RootDestination {
         override val route = "pin-access/{olderAdultId}/{olderAdultName}/{setup}"
@@ -44,9 +48,9 @@ sealed interface RootDestination {
 
     data object CareLink : RootDestination {
         const val caregiverIdArgument = "caregiverId"
-        override val route: String = "care-link/{$caregiverIdArgument}"
+        override val route: String = "care-link/{$caregiverIdArgument}?code={code}"
 
-        fun createRoute(caregiverId: String): String = "care-link/" + Uri.encode(caregiverId)
+        fun createRoute(caregiverId: String, code: String = ""): String = "care-link/" + Uri.encode(caregiverId) + "?code=" + Uri.encode(code)
     }
 
     data object MedicationRegistration : RootDestination {

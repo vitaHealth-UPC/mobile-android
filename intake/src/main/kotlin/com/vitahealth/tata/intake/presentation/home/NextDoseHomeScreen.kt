@@ -52,6 +52,7 @@ fun NextDoseHomeRoute(
     onOpenDoseDetail: (String) -> Unit,
     onOpenAgenda: () -> Unit,
     modifier: Modifier = Modifier,
+    onSignOut: (() -> Unit)? = null,
 ) {
     val viewModel: NextDoseHomeViewModel = viewModel(factory = factory)
     val state by viewModel.state.collectAsState()
@@ -67,6 +68,7 @@ fun NextDoseHomeRoute(
         onOpenDoseDetail = onOpenDoseDetail,
         onOpenAgenda = onOpenAgenda,
         modifier = modifier,
+        onSignOut = onSignOut,
     )
 }
 
@@ -77,6 +79,7 @@ fun NextDoseHomeScreen(
     onOpenDoseDetail: (String) -> Unit,
     onOpenAgenda: () -> Unit,
     modifier: Modifier = Modifier,
+    onSignOut: (() -> Unit)? = null,
 ) {
     Column(
         modifier = modifier
@@ -85,6 +88,7 @@ fun NextDoseHomeScreen(
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 22.dp, vertical = 28.dp),
     ) {
+        onSignOut?.let { action -> androidx.compose.material3.TextButton(onClick=action) { Text("Cambiar cuenta") } }
         Spacer(Modifier.height(12.dp))
         Text(
             text = "Hoy",
