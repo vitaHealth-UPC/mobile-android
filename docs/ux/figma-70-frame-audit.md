@@ -30,7 +30,7 @@ This is a source-level contrast, not a claim that every listed state has been te
 | 22 | Add Medication - Caregiver | 563:453 | MedicationRegistrationScreen: Form and validation exist | Not yet validated against installed app |
 | 23 | Create Treatment | 563:1490 | TreatmentCreationScreen + regimen steps: Split into steps; full single-frame form comparison needed | Not yet validated against installed app |
 | 24 | Treatment Management | 563:1554 | TreatmentListScreen / MedicationManagementScreen / TreatmentLifecycleScreen: Partial composition across separate screens | Not yet validated against installed app |
-| 25 | Inventory & Restock | 563:1632 | InventoryScreen: Inventory/replenishment and validation states exist | Not yet validated against installed app |
+| 25 | Inventory & Restock | 563:1632 | InventoryScreen: Native stock ring, gradients, replenishment actions/fields and last batch restyled from MCP; caregiver bottom tabs remain missing | Not yet validated against installed app |
 | 26 | Notification Preferences | 563:1219 | NotificationPreferencesScreen: MCP comparison confirms missing medication cadence, caregiver alert thresholds/daily summary, emergency contacts/escalation and CALL channel; only quiet hours and PUSH/SMS/EMAIL implemented | Not yet validated against installed app |
 | 27 | Notes - Caregiver | 576:2859 | FamilySummaryScreen notes dialog: Partial: read-only notes; editor missing | Not yet validated against installed app |
 | 28 | Plan & Subscription | 563:1701 | Dedicated screen/state not implemented | Not yet validated against installed app |
@@ -71,8 +71,8 @@ This is a source-level contrast, not a claim that every listed state has been te
 | 63 | Reduced Motion Enabled | 563:4864 | AccessibilityScreen: Five native preference controls restyled from MCP; exact vector icons and help dialog. Dark theme and adult tab bar remain missing | Not yet validated against installed app |
 | 64 | Reading Assistance Enabled | 563:4977 | AccessibilityScreen: Five native preference controls restyled from MCP; exact vector icons and help dialog. Dark theme and adult tab bar remain missing | Not yet validated against installed app |
 | 65 | Notification Preferences Saved | 563:5090 | NotificationPreferencesScreen: MCP comparison confirms missing medication cadence, caregiver alert thresholds/daily summary, emergency contacts/escalation and CALL channel; only quiet hours and PUSH/SMS/EMAIL implemented | Not yet validated against installed app |
-| 66 | Invalid Inventory Quantity | 563:5213 | InventoryScreen: Inventory/replenishment and validation states exist | Not yet validated against installed app |
-| 67 | Stock Replenished | 563:5284 | InventoryScreen: Inventory/replenishment and validation states exist | Not yet validated against installed app |
+| 66 | Invalid Inventory Quantity | 563:5213 | InventoryScreen: Native stock ring, gradients, replenishment actions/fields and last batch restyled from MCP; caregiver bottom tabs remain missing | Not yet validated against installed app |
+| 67 | Stock Replenished | 563:5284 | InventoryScreen: Native stock ring, gradients, replenishment actions/fields and last batch restyled from MCP; caregiver bottom tabs remain missing | Not yet validated against installed app |
 | 68 | Subscription Updated | 563:5354 | Dedicated screen/state not implemented | Not yet validated against installed app |
 | 69 | External Destination Unavailable | 563:5425 | Dedicated screen/state not implemented | Not yet validated against installed app |
 | 70 | Internationalization | 665:183 | Dedicated screen/state not implemented | Not yet validated against installed app |
@@ -93,3 +93,7 @@ Compared frame 14 and variants 61–64 through MCP. The five existing settings r
 ## Registration visual pass
 
 Compared frame 4 plus duplicate-email/expired-verification variants 32–33 using MCP. Native screen was rendered in an emulator instrumentation host with production insets and compared visually. Interaction test verifies disabled pre-registration verification, six-digit filtering, verification callback, expired-code recovery and duplicate-email banner. Existing identity unit tests pass. Fixtures are isolated UI test data: no production account was created. Fields lock after account creation and the pre-registration instructions reflect that a code has not yet been sent. Error variants have functional assertions; they are not claimed as fully screenshot-accepted.
+
+## Inventory visual pass
+
+Compared frame 25 through MCP. Stock status ring is a native Compose shape and its displayed coverage comes from API daysRemaining; absent coverage shows a dash rather than a fabricated estimate. Registrar reposición focuses the numeric field; Guardar reposición retains the real save callback and busy state. Last batch date, quantity and lot come from the read model. Original medication icon is local SVG at its 24×24 design slot. Bottom caregiver tabs are still absent; defining stock initial is restricted to the not-initialized state and is not offered as an overwrite of existing inventory. Do not mark the entire frame fully accepted.
