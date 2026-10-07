@@ -24,6 +24,9 @@ class RemoteUserPreferences(
     override suspend fun updateVoiceConfirmation(userId: String, enabled: Boolean): AppResult<UserPreferences> =
         request(userId) { api.updateVoiceConfirmation(userId, EnabledRequest(enabled)) }
 
+    override suspend fun updateReadingAssistance(userId: String, enabled: Boolean): AppResult<UserPreferences> =
+        request(userId) { api.updateReadingAssistance(userId, EnabledRequest(enabled)) }
+
     private suspend fun request(
         userId: String,
         call: suspend () -> Response<UserPreferencesResponse>,

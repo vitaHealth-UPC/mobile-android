@@ -28,6 +28,7 @@ class MainActivity : ComponentActivity() {
                     fontScale = preferences.textSize.scaleFactor,
                     highContrast = preferences.highContrast,
                     reducedMotion = preferences.reducedMotion,
+                    readingAssistance = preferences.readingAssistance,
                 )) {
                 TataNavHost(modifier = Modifier.fillMaxSize())
             }

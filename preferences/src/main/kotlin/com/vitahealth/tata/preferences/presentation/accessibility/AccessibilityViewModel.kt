@@ -6,12 +6,14 @@ import androidx.lifecycle.viewModelScope
 import com.vitahealth.tata.preferences.application.PreferenceUpdate
 import com.vitahealth.tata.preferences.application.commands.SyncUserPreferencesCommand
 import com.vitahealth.tata.preferences.application.commands.UpdateHighContrastCommand
+import com.vitahealth.tata.preferences.application.commands.UpdateReadingAssistanceCommand
 import com.vitahealth.tata.preferences.application.commands.UpdateReducedMotionCommand
 import com.vitahealth.tata.preferences.application.commands.UpdateTextSizeCommand
 import com.vitahealth.tata.preferences.application.commands.UpdateVoiceConfirmationCommand
 import com.vitahealth.tata.preferences.application.handlers.ObserveAccessibilityPreferencesQueryHandler
 import com.vitahealth.tata.preferences.application.handlers.SyncUserPreferencesCommandHandler
 import com.vitahealth.tata.preferences.application.handlers.UpdateHighContrastCommandHandler
+import com.vitahealth.tata.preferences.application.handlers.UpdateReadingAssistanceCommandHandler
 import com.vitahealth.tata.preferences.application.handlers.UpdateReducedMotionCommandHandler
 import com.vitahealth.tata.preferences.application.handlers.UpdateTextSizeCommandHandler
 import com.vitahealth.tata.preferences.application.handlers.UpdateVoiceConfirmationCommandHandler
@@ -30,6 +32,7 @@ class AccessibilityViewModel(
     private val updateHighContrast: UpdateHighContrastCommandHandler,
     private val updateReducedMotion: UpdateReducedMotionCommandHandler,
     private val updateVoiceConfirmation: UpdateVoiceConfirmationCommandHandler,
+    private val updateReadingAssistance: UpdateReadingAssistanceCommandHandler,
     private val syncPreferences: SyncUserPreferencesCommandHandler,
 ) : ViewModel() {
     private val _state = MutableStateFlow(AccessibilityUiState())
@@ -78,6 +81,14 @@ class AccessibilityViewModel(
         )
     }
 
+    fun onReadingAssistanceChange(enabled: Boolean) {
+        if (_state.value.preferences.readingAssistance == enabled) return
+        save(
+            send = { updateReadingAssistance(UpdateReadingAssistanceCommand(userId, enabled)) },
+            onSaved = if (enabled) AccessibilityMessage.ReadingAssistanceSaved else AccessibilityMessage.StandardReadingSaved,
+        )
+    }
+
     private fun save(
         send: suspend () -> AppResult<PreferenceUpdate>,
         onSaved: AccessibilityMessage,
@@ -112,6 +123,7 @@ class AccessibilityViewModel(
         private val updateHighContrast: UpdateHighContrastCommandHandler,
         private val updateReducedMotion: UpdateReducedMotionCommandHandler,
         private val updateVoiceConfirmation: UpdateVoiceConfirmationCommandHandler,
+        private val updateReadingAssistance: UpdateReadingAssistanceCommandHandler,
         private val syncPreferences: SyncUserPreferencesCommandHandler,
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
@@ -123,6 +135,7 @@ class AccessibilityViewModel(
                 updateHighContrast = updateHighContrast,
                 updateReducedMotion = updateReducedMotion,
                 updateVoiceConfirmation = updateVoiceConfirmation,
+                updateReadingAssistance = updateReadingAssistance,
                 syncPreferences = syncPreferences,
             ) as T
     }

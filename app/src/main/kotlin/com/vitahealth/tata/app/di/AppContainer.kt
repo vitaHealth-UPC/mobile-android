@@ -63,6 +63,7 @@ import com.vitahealth.tata.treatment.presentation.treatment.TreatmentScheduleIns
 import com.vitahealth.tata.preferences.application.handlers.ObserveAccessibilityPreferencesQueryHandler
 import com.vitahealth.tata.preferences.application.handlers.SyncUserPreferencesCommandHandler
 import com.vitahealth.tata.preferences.application.handlers.UpdateHighContrastCommandHandler
+import com.vitahealth.tata.preferences.application.handlers.UpdateReadingAssistanceCommandHandler
 import com.vitahealth.tata.preferences.application.handlers.UpdateReducedMotionCommandHandler
 import com.vitahealth.tata.preferences.application.handlers.UpdateTextSizeCommandHandler
 import com.vitahealth.tata.preferences.application.handlers.UpdateVoiceConfirmationCommandHandler
@@ -294,6 +295,7 @@ class AppContainer(
         updateHighContrast = UpdateHighContrastCommandHandler(preferencesRepository),
         updateReducedMotion = UpdateReducedMotionCommandHandler(preferencesRepository),
         updateVoiceConfirmation = UpdateVoiceConfirmationCommandHandler(preferencesRepository),
+        updateReadingAssistance = UpdateReadingAssistanceCommandHandler(preferencesRepository),
         syncPreferences = SyncUserPreferencesCommandHandler(preferencesRepository),
     )
 

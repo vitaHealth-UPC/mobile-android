@@ -59,6 +59,13 @@ class OfflineFirstUserPreferencesRepository(
         remote.updateVoiceConfirmation(userId, enabled)
     }
 
+    override suspend fun updateReadingAssistance(
+        userId: String,
+        enabled: Boolean,
+    ): AppResult<PreferenceUpdate> = apply(change = { it.copy(readingAssistance = enabled) }) {
+        remote.updateReadingAssistance(userId, enabled)
+    }
+
     private suspend fun apply(
         change: (AccessibilityPreferences) -> AccessibilityPreferences,
         send: suspend () -> AppResult<UserPreferences>,
@@ -93,6 +100,8 @@ class OfflineFirstUserPreferencesRepository(
         if (contrast is AppResult.Failure) return contrast
         val motion = remote.updateReducedMotion(userId, current.reducedMotion)
         if (motion is AppResult.Failure) return motion
-        return remote.updateVoiceConfirmation(userId, current.voiceConfirmation)
+        val voice = remote.updateVoiceConfirmation(userId, current.voiceConfirmation)
+        if (voice is AppResult.Failure) return voice
+        return remote.updateReadingAssistance(userId, current.readingAssistance)
     }
 }

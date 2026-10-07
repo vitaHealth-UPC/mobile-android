@@ -49,6 +49,7 @@ fun TataTheme(
     ) {
         MaterialTheme(
             colorScheme = if (accessibility.highContrast) TataHighContrastColors else TataLightColors,
+            typography = tataTypography(accessibility.readingAssistance),
             content = content,
         )
     }
