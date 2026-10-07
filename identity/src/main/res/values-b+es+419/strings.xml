@@ -24,4 +24,15 @@
     <string name="plan_error_account">No encontramos una cuenta activa. Inicia sesión de nuevo.</string>
     <string name="plan_error_session">Tu sesión expiró. Inicia sesión de nuevo.</string>
     <string name="plan_error_generic">Algo salió mal. Inténtalo de nuevo.</string>
+    <string name="plan_change_button">Cambiar plan</string>
+    <string name="plan_select_hint">Toca un plan para compararlo y luego cámbialo.</string>
+    <string name="plan_cancel">Cancelar</string>
+    <string name="plan_confirm_title">¿Cambiar al plan %1$s?</string>
+    <string name="plan_confirm_gain">Tendrás: %1$s.</string>
+    <string name="plan_confirm_lose">Dejarás de tener: %1$s.</string>
+    <string name="plan_confirm_action">Cambiar plan</string>
+    <string name="plan_updated_title">Suscripción actualizada</string>
+    <string name="plan_updated_body">Las capacidades del nuevo plan ya están disponibles.</string>
+    <string name="plan_change_error_title">No se pudo cambiar el plan</string>
+    <string name="plan_change_error_plan">Ese plan ya no está disponible. Elige otro.</string>
 </resources>

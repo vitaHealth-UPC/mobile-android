@@ -108,3 +108,5 @@ The alert `id` is a numeric `int64` (`Long` in Android), unlike the UUID `String
 ## Plans and subscription (US-44, US-45)
 
 `GET /api/v1/plans` returns `[{ code, name, monthlyPrice, currency, capabilities[] }]`; today ESSENTIAL (S/ 9.90) and FAMILY (S/ 19.90). `GET /api/v1/accounts/{accountId}/subscription` returns `{ accountId, plan, status, renewsAt }` with status `ACTIVE` and `renewsAt` as an ISO instant. Errors are a problem detail whose `title` is the code: `ACCOUNT_NOT_FOUND` and `PLAN_NOT_FOUND` (404), `ACCOUNT_NOT_ACTIVE` (403). A capability this app does not know is ignored, so the backend can add capabilities without breaking old versions.
+
+`PUT /api/v1/accounts/{accountId}/subscription` takes `{ "planCode": "ESSENTIAL" }` and returns the subscription representation. Choosing the plan the account already has changes nothing. `404 PLAN_NOT_FOUND` for an unknown code and `403 ACCOUNT_NOT_ACTIVE` for an account that is not active.
