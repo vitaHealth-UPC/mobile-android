@@ -42,7 +42,9 @@ class SessionAccessViewModel(private val repository: SessionAccessRepository) : 
         viewModelScope.launch {
             when(val result=call()) {
                 is AppResult.Success -> mutable.update { it.copy(busy=false,password="",pin="",subject=result.value) }
-                is AppResult.Failure -> mutable.update { it.copy(busy=false,pin="",error=if(result.code=="AUTHENTICATION_REQUIRED") null else result.code) }
+                is AppResult.Failure -> mutable.update { it.copy(busy=false,
+                    pin=if(result.code in setOf("INVALID_PIN", "INVALID_CREDENTIALS", "PIN_INCORRECT", "PIN_LOCKED", "PIN_TEMPORARILY_BLOCKED")) it.pin else "",
+                    error=if(result.code=="AUTHENTICATION_REQUIRED") null else result.code) }
             }
         }
     }
