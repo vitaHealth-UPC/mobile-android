@@ -6,14 +6,19 @@ import androidx.lifecycle.viewModelScope
 import com.vitahealth.tata.analytics.application.handlers.GetAdherenceSummaryQueryHandler
 import com.vitahealth.tata.analytics.application.queries.GetAdherenceSummaryQuery
 import com.vitahealth.tata.analytics.application.readmodels.AdherenceSummaryReadModel
+import com.vitahealth.tata.analytics.application.readmodels.RecentIntakeReadModel
 import com.vitahealth.tata.analytics.domain.model.AdherencePeriod
+import com.vitahealth.tata.analytics.domain.model.IntakeOutcomeStatus
 import com.vitahealth.tata.shared.common.result.AppResult
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.time.format.TextStyle
 import java.util.Locale
 import kotlin.math.abs
 
@@ -110,4 +115,37 @@ private fun AdherenceSummaryReadModel.toUi(): AdherenceSummaryUi =
                 adherencePercent = it.adherencePercent,
             )
         },
+        recentIntakes = recentIntakes.map { it.toUi() },
     )
+
+private val spanishLocale: Locale = Locale.forLanguageTag("es-PE")
+private val timeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("h:mm a", spanishLocale)
+
+private fun RecentIntakeReadModel.toUi(): RecentIntakeUi =
+    RecentIntakeUi(
+        whenLabel = "${dayLabel(scheduledAt.toLocalDate())}, ${timeLabel(scheduledAt)}",
+        medicationName = medicationName,
+        outcomeText = when (status) {
+            IntakeOutcomeStatus.OnTime -> "a tiempo"
+            IntakeOutcomeStatus.Late -> minutesLate?.let { "$it min tarde" } ?: "tarde"
+            IntakeOutcomeStatus.Omitted -> "omitida"
+        },
+        status = status,
+    )
+
+private fun dayLabel(date: LocalDate): String {
+    val today = LocalDate.now()
+    return when (date) {
+        today -> "Hoy"
+        today.minusDays(1) -> "Ayer"
+        else -> date.dayOfWeek
+            .getDisplayName(TextStyle.SHORT, spanishLocale)
+            .replace(".", "")
+            .replaceFirstChar { it.uppercase() }
+    }
+}
+
+private fun timeLabel(dateTime: LocalDateTime): String =
+    timeFormatter.format(dateTime)
+        .replace(' ', ' ')
+        .replace(' ', ' ')

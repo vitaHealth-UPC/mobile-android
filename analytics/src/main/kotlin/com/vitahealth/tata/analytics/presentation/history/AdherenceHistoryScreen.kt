@@ -1,7 +1,9 @@
 package com.vitahealth.tata.analytics.presentation.history
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,6 +16,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -49,10 +52,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.vitahealth.tata.analytics.domain.model.AdherencePeriod
+import com.vitahealth.tata.analytics.domain.model.IntakeOutcomeStatus
 import com.vitahealth.tata.analytics.presentation.components.AnalyticsEmptyStateCard
 import com.vitahealth.tata.shared.design.components.TataButton
 import com.vitahealth.tata.shared.design.components.TataButtonStyle
 import com.vitahealth.tata.shared.design.components.TataCard
+import com.vitahealth.tata.shared.design.theme.TataBorder
 import com.vitahealth.tata.shared.design.theme.TataDeepNavy
 import com.vitahealth.tata.shared.design.theme.TataLavender
 import com.vitahealth.tata.shared.design.theme.TataMuted
@@ -68,6 +73,7 @@ private val OnTimeCardStart = Color(0xFFECF5FB)
 private val OnTimeCardEnd = Color(0xFFDFECF6)
 private val LateOmittedCardStart = Color(0xFFECF7EF)
 private val LateOmittedCardEnd = Color(0xFFDFF0E4)
+private val OmittedText = Color(0xFFB83D47)
 private val ChartLabel = Color(0xFF637087)
 private val ChartGrid = Color(0xCCE8E8EF)
 private val ChartLine = Color(0x618B83E8)
@@ -117,6 +123,10 @@ fun AdherenceHistoryScreen(
                 MetricsRow(summary = state.summary)
                 Spacer(Modifier.height(12.dp))
                 TrendCard(points = state.summary.trend)
+                if (state.summary.recentIntakes.isNotEmpty()) {
+                    Spacer(Modifier.height(12.dp))
+                    RecentIntakesCard(intakes = state.summary.recentIntakes)
+                }
                 if (state.periodUpdated) {
                     Spacer(Modifier.height(12.dp))
                     PeriodUpdatedNotice()
@@ -185,6 +195,46 @@ private fun PeriodSelector(
                         expanded = false
                         onSelected(period)
                     },
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun RecentIntakesCard(intakes: List<RecentIntakeUi>) {
+    val shape = RoundedCornerShape(16.dp)
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color.White, shape)
+            .border(BorderStroke(1.dp, TataBorder), shape)
+            .padding(14.dp),
+    ) {
+        Text(
+            text = "Tomas recientes",
+            fontSize = 13.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = TataText,
+        )
+        intakes.forEach { intake ->
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 14.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = intake.whenLabel,
+                    fontSize = 11.sp,
+                    color = TataMuted,
+                    modifier = Modifier.width(104.dp),
+                )
+                Text(
+                    text = "${intake.medicationName}, ${intake.outcomeText}",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = if (intake.status == IntakeOutcomeStatus.Omitted) OmittedText else TataText,
                 )
             }
         }
@@ -458,6 +508,12 @@ private fun ErrorCard(
     }
 }
 
+private val previewRecentIntakes = listOf(
+    RecentIntakeUi("Hoy, 8:00 a. m.", "Losartán", "a tiempo", IntakeOutcomeStatus.OnTime),
+    RecentIntakeUi("Ayer, 8:00 p. m.", "Amlodipino", "24 min tarde", IntakeOutcomeStatus.Late),
+    RecentIntakeUi("Sáb, 1:00 p. m.", "Vitamina D3", "omitida", IntakeOutcomeStatus.Omitted),
+)
+
 private val previewSummary = AdherenceSummaryUi(
     periodLabel = "Últimos 30 días",
     adherencePercent = 92,
@@ -476,6 +532,7 @@ private val previewSummary = AdherenceSummaryUi(
         AdherenceTrendPoint("18 jul", 73),
         AdherenceTrendPoint("20 jul", 92),
     ),
+    recentIntakes = previewRecentIntakes,
 )
 
 @Preview(name = "Con datos", showBackground = true, widthDp = 393, heightDp = 852)
@@ -504,6 +561,7 @@ private val previewWeekSummary = AdherenceSummaryUi(
         AdherenceTrendPoint("5 oct", 94),
         AdherenceTrendPoint("6 oct", 92),
     ),
+    recentIntakes = previewRecentIntakes,
 )
 
 @Preview(name = "Periodo actualizado (7 días)", showBackground = true, widthDp = 393, heightDp = 852)

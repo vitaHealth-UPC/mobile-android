@@ -1,10 +1,18 @@
 package com.vitahealth.tata.analytics.presentation.history
 
 import com.vitahealth.tata.analytics.domain.model.AdherencePeriod
+import com.vitahealth.tata.analytics.domain.model.IntakeOutcomeStatus
 
 data class AdherenceTrendPoint(
     val label: String,
     val adherencePercent: Int,
+)
+
+data class RecentIntakeUi(
+    val whenLabel: String,
+    val medicationName: String,
+    val outcomeText: String,
+    val status: IntakeOutcomeStatus,
 )
 
 data class AdherenceSummaryUi(
@@ -17,6 +25,7 @@ data class AdherenceSummaryUi(
     val omittedCount: Int,
     val lateOmittedCaption: String,
     val trend: List<AdherenceTrendPoint>,
+    val recentIntakes: List<RecentIntakeUi> = emptyList(),
 )
 
 fun AdherencePeriod.label(): String = "Últimos $days días"

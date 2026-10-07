@@ -3,6 +3,8 @@ package com.vitahealth.tata.analytics.infrastructure.fake
 import com.vitahealth.tata.analytics.application.AdherenceSummaryRepository
 import com.vitahealth.tata.analytics.application.readmodels.AdherenceSummaryReadModel
 import com.vitahealth.tata.analytics.application.readmodels.AdherenceTrendPointReadModel
+import com.vitahealth.tata.analytics.application.readmodels.RecentIntakeReadModel
+import com.vitahealth.tata.analytics.domain.model.IntakeOutcomeStatus
 import com.vitahealth.tata.shared.common.result.AppResult
 import kotlinx.coroutines.delay
 import java.time.LocalDate
@@ -59,6 +61,26 @@ class FakeAdherenceSummaryRepository(
             trend = daysAgo.zip(percents) { ago, percent ->
                 AdherenceTrendPointReadModel(date = today.minusDays(ago), adherencePercent = percent)
             },
+            recentIntakes = listOf(
+                RecentIntakeReadModel(
+                    scheduledAt = today.atTime(8, 0),
+                    medicationName = "Losartán",
+                    status = IntakeOutcomeStatus.OnTime,
+                    minutesLate = null,
+                ),
+                RecentIntakeReadModel(
+                    scheduledAt = today.minusDays(1).atTime(20, 0),
+                    medicationName = "Amlodipino",
+                    status = IntakeOutcomeStatus.Late,
+                    minutesLate = 24,
+                ),
+                RecentIntakeReadModel(
+                    scheduledAt = today.minusDays(3).atTime(13, 0),
+                    medicationName = "Vitamina D3",
+                    status = IntakeOutcomeStatus.Omitted,
+                    minutesLate = null,
+                ),
+            ),
         )
     }
 
