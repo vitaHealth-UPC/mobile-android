@@ -19,4 +19,6 @@ interface UserPreferencesRepository {
     suspend fun updateReducedMotion(userId: String, enabled: Boolean): AppResult<PreferenceUpdate>
 
     suspend fun updateVoiceConfirmation(userId: String, enabled: Boolean): AppResult<PreferenceUpdate>
+
+    suspend fun updateReadingAssistance(userId: String, enabled: Boolean): AppResult<PreferenceUpdate>
 }

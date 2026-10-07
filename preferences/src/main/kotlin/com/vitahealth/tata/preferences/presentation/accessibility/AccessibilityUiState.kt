@@ -12,6 +12,8 @@ enum class AccessibilityMessage {
     StandardMotionSaved,
     VoiceConfirmationSaved,
     VoiceConfirmationOffSaved,
+    ReadingAssistanceSaved,
+    StandardReadingSaved,
     SavedOffline,
     ErrorRejected,
     ErrorUser,

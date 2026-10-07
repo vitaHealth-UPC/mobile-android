@@ -16,6 +16,10 @@
     <string name="accessibility_voice_title">Confirmación por voz</string>
     <string name="accessibility_voice_subtitle">Escucha confirmaciones</string>
 
+    <string name="accessibility_section_help">Ayuda</string>
+    <string name="accessibility_reading_title">Ayuda al leer</string>
+    <string name="accessibility_reading_subtitle">Resalta textos importantes</string>
+
     <string name="accessibility_saved_title">Preferencia guardada</string>
     <string name="accessibility_large_text_saved">El tamaño ampliado se conservará en próximos ingresos.</string>
     <string name="accessibility_standard_text_saved">El tamaño estándar se conservará en próximos ingresos.</string>
@@ -25,6 +29,8 @@
     <string name="accessibility_standard_motion_saved">Se restablecieron las animaciones estándar.</string>
     <string name="accessibility_voice_saved">Puedes confirmar una toma con tu voz.</string>
     <string name="accessibility_voice_off_saved">La confirmación por voz está desactivada. Aún puedes confirmar con un toque.</string>
+    <string name="accessibility_reading_saved">El texto se muestra con más espacio y mayor grosor.</string>
+    <string name="accessibility_standard_reading_saved">Se restableció el espaciado estándar del texto.</string>
     <string name="accessibility_saved_offline">Guardado en este dispositivo. Se enviará cuando vuelva la conexión.</string>
     <string name="accessibility_error_title">No se pudo guardar</string>
     <string name="accessibility_error_rejected">El servicio no aceptó este cambio. Inténtalo de nuevo.</string>

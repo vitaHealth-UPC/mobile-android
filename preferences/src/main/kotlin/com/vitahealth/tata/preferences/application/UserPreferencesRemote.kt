@@ -15,4 +15,6 @@ interface UserPreferencesRemote {
     suspend fun updateReducedMotion(userId: String, enabled: Boolean): AppResult<UserPreferences>
 
     suspend fun updateVoiceConfirmation(userId: String, enabled: Boolean): AppResult<UserPreferences>
+
+    suspend fun updateReadingAssistance(userId: String, enabled: Boolean): AppResult<UserPreferences>
 }

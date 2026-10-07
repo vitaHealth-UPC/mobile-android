@@ -13,6 +13,8 @@ data class TataAccessibility(
     val highContrast: Boolean = false,
     /** Non-essential animations and transitions must be skipped or shortened. */
     val reducedMotion: Boolean = false,
+    /** Roomier line spacing and a stronger weight on every Material text style. */
+    val readingAssistance: Boolean = false,
 )
 
 val LocalTataAccessibility = staticCompositionLocalOf { TataAccessibility() }

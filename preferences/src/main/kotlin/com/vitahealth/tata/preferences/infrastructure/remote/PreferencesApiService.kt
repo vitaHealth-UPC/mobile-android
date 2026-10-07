@@ -65,4 +65,10 @@ interface PreferencesApiService {
         @Path("userId") userId: String,
         @Body request: EnabledRequest,
     ): Response<UserPreferencesResponse>
+
+    @PUT("api/v1/users/{userId}/preferences/reading-assistance")
+    suspend fun updateReadingAssistance(
+        @Path("userId") userId: String,
+        @Body request: EnabledRequest,
+    ): Response<UserPreferencesResponse>
 }

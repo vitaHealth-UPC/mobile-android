@@ -171,4 +171,25 @@ class OfflineFirstUserPreferencesRepositoryTest {
         assertTrue(result is AppResult.Failure)
         assertTrue(local.current().voiceConfirmation)
     }
+
+    @Test
+    fun readingAssistanceIsKeptOnTheDeviceAndSentToTheBackend() = runBlocking {
+        val result = repository.updateReadingAssistance("user-1", true)
+
+        assertTrue((result as AppResult.Success).value.syncedWithServer)
+        assertTrue(local.current().readingAssistance)
+        assertEquals(listOf(true), remote.readingCalls)
+    }
+
+    @Test
+    fun readingAssistanceChangedOfflineReachesTheBackendOnSync() = runBlocking {
+        remote.failWith = NetworkDown
+        repository.updateReadingAssistance("user-1", true)
+        remote.failWith = null
+
+        repository.sync("user-1")
+
+        assertEquals(true, remote.stored.readingAssistance)
+        assertFalse(local.isPendingSync())
+    }
 }

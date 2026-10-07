@@ -72,6 +72,7 @@ fun AccessibilityRoute(
         onHighContrastChange = viewModel::onHighContrastChange,
         onReducedMotionChange = viewModel::onReducedMotionChange,
         onVoiceConfirmationChange = viewModel::onVoiceConfirmationChange,
+        onReadingAssistanceChange = viewModel::onReadingAssistanceChange,
         modifier = modifier,
     )
 }
@@ -84,6 +85,7 @@ fun AccessibilityScreen(
     onHighContrastChange: (Boolean) -> Unit,
     onReducedMotionChange: (Boolean) -> Unit,
     onVoiceConfirmationChange: (Boolean) -> Unit,
+    onReadingAssistanceChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -161,6 +163,19 @@ fun AccessibilityScreen(
             )
         }
 
+        Spacer(Modifier.height(20.dp))
+        SectionTitle(stringResource(R.string.accessibility_section_help))
+        TataCard(modifier = Modifier.fillMaxWidth()) {
+            TataToggleRow(
+                title = stringResource(R.string.accessibility_reading_title),
+                subtitle = stringResource(R.string.accessibility_reading_subtitle),
+                checked = state.preferences.readingAssistance,
+                onCheckedChange = onReadingAssistanceChange,
+                enabled = !state.isSaving,
+                leading = { IconBadge(glyph = "☰", background = TataMint, tint = TataSuccess) },
+            )
+        }
+
         state.message?.let { message ->
             Spacer(Modifier.height(16.dp))
             MessageBanner(message = message, isError = state.messageIsError)
@@ -211,6 +226,8 @@ private fun MessageBanner(message: AccessibilityMessage, isError: Boolean) {
             AccessibilityMessage.StandardMotionSaved -> R.string.accessibility_standard_motion_saved
             AccessibilityMessage.VoiceConfirmationSaved -> R.string.accessibility_voice_saved
             AccessibilityMessage.VoiceConfirmationOffSaved -> R.string.accessibility_voice_off_saved
+            AccessibilityMessage.ReadingAssistanceSaved -> R.string.accessibility_reading_saved
+            AccessibilityMessage.StandardReadingSaved -> R.string.accessibility_standard_reading_saved
             AccessibilityMessage.SavedOffline -> R.string.accessibility_saved_offline
             AccessibilityMessage.ErrorRejected -> R.string.accessibility_error_rejected
             AccessibilityMessage.ErrorUser -> R.string.accessibility_error_user
@@ -251,6 +268,7 @@ private fun AccessibilityScreenPreview() {
             onHighContrastChange = {},
             onReducedMotionChange = {},
             onVoiceConfirmationChange = {},
+            onReadingAssistanceChange = {},
         )
     }
 }

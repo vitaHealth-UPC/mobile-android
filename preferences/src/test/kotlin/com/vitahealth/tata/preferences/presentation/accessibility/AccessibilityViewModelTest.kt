@@ -7,6 +7,7 @@ import com.vitahealth.tata.preferences.RejectedByServer
 import com.vitahealth.tata.preferences.application.handlers.ObserveAccessibilityPreferencesQueryHandler
 import com.vitahealth.tata.preferences.application.handlers.SyncUserPreferencesCommandHandler
 import com.vitahealth.tata.preferences.application.handlers.UpdateHighContrastCommandHandler
+import com.vitahealth.tata.preferences.application.handlers.UpdateReadingAssistanceCommandHandler
 import com.vitahealth.tata.preferences.application.handlers.UpdateReducedMotionCommandHandler
 import com.vitahealth.tata.preferences.application.handlers.UpdateTextSizeCommandHandler
 import com.vitahealth.tata.preferences.application.handlers.UpdateVoiceConfirmationCommandHandler
@@ -49,6 +50,7 @@ class AccessibilityViewModelTest {
             updateHighContrast = UpdateHighContrastCommandHandler(repository),
             updateReducedMotion = UpdateReducedMotionCommandHandler(repository),
             updateVoiceConfirmation = UpdateVoiceConfirmationCommandHandler(repository),
+            updateReadingAssistance = UpdateReadingAssistanceCommandHandler(repository),
             syncPreferences = SyncUserPreferencesCommandHandler(repository),
         )
     }
@@ -224,6 +226,38 @@ class AccessibilityViewModelTest {
         model.onReducedMotionChange(true)
 
         assertFalse(model.state.value.preferences.reducedMotion)
+        assertEquals(AccessibilityMessage.ErrorRejected, model.state.value.message)
+    }
+
+    @Test
+    fun turningReadingAssistanceOnSavesItAndShowsTheConfirmation() {
+        val model = viewModel()
+
+        model.onReadingAssistanceChange(true)
+
+        assertTrue(model.state.value.preferences.readingAssistance)
+        assertEquals(AccessibilityMessage.ReadingAssistanceSaved, model.state.value.message)
+    }
+
+    @Test
+    fun turningReadingAssistanceOffRestoresTheStandardText() {
+        val model = viewModel()
+        model.onReadingAssistanceChange(true)
+
+        model.onReadingAssistanceChange(false)
+
+        assertFalse(model.state.value.preferences.readingAssistance)
+        assertEquals(AccessibilityMessage.StandardReadingSaved, model.state.value.message)
+    }
+
+    @Test
+    fun aRejectedReadingChangeKeepsTheOldValue() {
+        val model = viewModel()
+        remote.failWith = RejectedByServer
+
+        model.onReadingAssistanceChange(true)
+
+        assertFalse(model.state.value.preferences.readingAssistance)
         assertEquals(AccessibilityMessage.ErrorRejected, model.state.value.message)
     }
 

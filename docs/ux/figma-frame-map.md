@@ -46,3 +46,9 @@ Screens of other modules that still use the `TataText` / `TataMuted` constants d
 Frame `563:4864` (Reduced Motion Enabled) is the "Interaction" section of `AccessibilityScreen`; its saved banner is the `ReducedMotionSaved` UI state. With the setting on, `TataNavHost` replaces the screen transitions by `EnterTransition.None` / `ExitTransition.None`. Other animations must read `LocalTataAccessibility.current.reducedMotion` when they are added.
 
 The "Voice confirmation" row of the same section only stores the preference (`voiceConfirmationEnabled` in the backend). The voice flow itself belongs to US-06 in `:intake`.
+
+## US-38 reading assistance
+
+Frame `563:4977` (Reading Assistance Enabled) is the "Help" section of `AccessibilityScreen`. The setting has real behaviour: `TataTheme` builds the Material typography through `tataTypography(readingAssistance)`, which lifts every text style to at least Medium weight and raises the line height to 1.6 times the font size, with slightly more letter spacing. Font sizes do not change (that is the text size setting).
+
+Text that sets its own `fontSize` / `lineHeight` / `fontWeight` directly does not follow this setting; screens should use the Material text styles.
