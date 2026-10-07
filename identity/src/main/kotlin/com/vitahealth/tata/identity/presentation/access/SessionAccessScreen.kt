@@ -28,20 +28,20 @@ fun SessionAccessRoute(factory: SessionAccessViewModel.Factory, onAuthenticated:
 @Composable
 fun SessionAccessScreen(state: SessionAccessUiState, onEmail: (String)->Unit, onPassword: (String)->Unit, onSignIn: ()->Unit, onRegister: ()->Unit, onPin: ()->Unit, showPin: Boolean) {
     Column(Modifier.fillMaxSize().background(TataSurface).verticalScroll(rememberScrollState()).padding(horizontal=22.dp).padding(top=32.dp,bottom=24.dp)) {
-        Text("Inicia sesiÃ³n",fontFamily=FontFamily(Font(com.vitahealth.tata.shared.R.font.tata_serif)),fontSize=29.sp,color=tataTextColor())
+        Text("Inicia sesión",fontFamily=FontFamily(Font(com.vitahealth.tata.shared.R.font.tata_serif)),fontSize=29.sp,color=tataTextColor())
         Text("Accede a tu cuenta para continuar.",fontSize=12.sp,color=tataMutedColor())
         Spacer(Modifier.height(48.dp))
-        TataFormField("Correo electrÃ³nico",state.email,onEmail,keyboardOptions=KeyboardOptions(keyboardType=KeyboardType.Email),enabled=!state.busy)
+        TataFormField("Correo electrónico",state.email,onEmail,keyboardOptions=KeyboardOptions(keyboardType=KeyboardType.Email),enabled=!state.busy)
         Spacer(Modifier.height(22.dp))
-        TataFormField("ContraseÃ±a",state.password,onPassword,visualTransformation=PasswordVisualTransformation(),keyboardOptions=KeyboardOptions(keyboardType=KeyboardType.Password),enabled=!state.busy)
+        TataFormField("Contraseña",state.password,onPassword,visualTransformation=PasswordVisualTransformation(),keyboardOptions=KeyboardOptions(keyboardType=KeyboardType.Password),enabled=!state.busy)
         Spacer(Modifier.height(34.dp))
         state.error?.let { AccessError(it) }
-        TataButton(if(state.busy) "Ingresandoâ€¦" else "Iniciar sesiÃ³n",onSignIn,enabled=!state.busy)
+        TataButton(if(state.busy) "Ingresando…" else "Iniciar sesión",onSignIn,enabled=!state.busy)
         Spacer(Modifier.height(24.dp))
         if(showPin) TataButton("Ingresar con PIN",onPin,style=TataButtonStyle.Secondary,enabled=!state.busy)
         Spacer(Modifier.height(24.dp))
         Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.Center,verticalAlignment=Alignment.CenterVertically) {
-            Text("Â¿No tienes cuenta?",fontSize=13.sp,color=tataMutedColor())
+            Text("¿No tienes cuenta?",fontSize=13.sp,color=tataMutedColor())
             TextButton(onClick=onRegister,enabled=!state.busy) { Text("Crear cuenta",color=TataNavy) }
         }
     }
@@ -62,12 +62,12 @@ fun PinAccessScreen(state: SessionAccessUiState, olderAdultName: String, setup: 
         Text("Acceso simple para el adulto mayor.",fontSize=12.sp,color=tataMutedColor())
         TataCard(containerColor=TataMint) {
             Text(olderAdultName,fontSize=18.sp,fontWeight=FontWeight.SemiBold,color=tataTextColor())
-            Text(if(setup) "Elige un PIN de 4 dÃ­gitos." else "Usa tu PIN de 4 dÃ­gitos.",fontSize=12.sp,color=tataMutedColor())
+            Text(if(setup) "Elige un PIN de 4 dígitos." else "Usa tu PIN de 4 dígitos.",fontSize=12.sp,color=tataMutedColor())
         }
         Text("PIN",fontSize=12.sp,color=tataMutedColor())
         Surface(shape=RoundedCornerShape(18.dp),color=Color.White,shadowElevation=4.dp,modifier=Modifier.fillMaxWidth()) {
             Row(Modifier.padding(22.dp),horizontalArrangement=Arrangement.SpaceEvenly) {
-                repeat(4) { index -> Box(Modifier.size(32.dp).background(TataLavender,CircleShape),contentAlignment=Alignment.Center) { Text(if(index<state.pin.length) "â€¢" else "",fontSize=22.sp,color=TataNavy) } }
+                repeat(4) { index -> Box(Modifier.size(32.dp).background(TataLavender,CircleShape),contentAlignment=Alignment.Center) { Text(if(index<state.pin.length) "•" else "",fontSize=22.sp,color=TataNavy) } }
             }
         }
         Spacer(Modifier.height(8.dp))
@@ -78,8 +78,8 @@ fun PinAccessScreen(state: SessionAccessUiState, olderAdultName: String, setup: 
         }
         state.error?.let { AccessError(it) }
         Spacer(Modifier.height(12.dp))
-        TataButton(if(state.busy) "Procesandoâ€¦" else if(setup) "Guardar PIN" else "Ingresar",onSubmit,enabled=!state.busy && state.pin.length==4)
-        Text("Â¿Olvidaste tu PIN? Pide ayuda a tu familiar.",fontSize=12.sp,color=tataMutedColor())
+        TataButton(if(state.busy) "Procesando…" else if(setup) "Guardar PIN" else "Ingresar",onSubmit,enabled=!state.busy && state.pin.length==4)
+        Text("¿Olvidaste tu PIN? Pide ayuda a tu familiar.",fontSize=12.sp,color=tataMutedColor())
         TextButton(onClick=onBack) { Text("Volver") }
     }
 }
@@ -87,12 +87,12 @@ fun PinAccessScreen(state: SessionAccessUiState, olderAdultName: String, setup: 
 @Composable
 private fun AccessError(code: String) {
     val message=when(code) {
-        "PIN_LOCKED","PIN_TEMPORARILY_BLOCKED" -> "Tu PIN estÃ¡ bloqueado temporalmente. Intenta nuevamente en 15 minutos."
-        "INVALID_PIN","INVALID_CREDENTIALS","PIN_INCORRECT" -> "Los datos de acceso no son correctos. IntÃ©ntalo otra vez."
-        "ACCOUNT_NOT_ACTIVE","CONSENT_REQUIRED" -> "Verifica tu cuenta y completa la vinculaciÃ³n para continuar."
-        "NETWORK_UNAVAILABLE" -> "No hay conexiÃ³n. Revisa tu red e intÃ©ntalo otra vez."
-        "REQUIRED_FIELDS" -> "Completa tu correo y contraseÃ±a."
-        else -> "No pudimos completar el acceso. IntÃ©ntalo nuevamente."
+        "PIN_LOCKED","PIN_TEMPORARILY_BLOCKED" -> "Tu PIN está bloqueado temporalmente. Intenta nuevamente en 15 minutos."
+        "INVALID_PIN","INVALID_CREDENTIALS","PIN_INCORRECT" -> "Los datos de acceso no son correctos. Inténtalo otra vez."
+        "ACCOUNT_NOT_ACTIVE","CONSENT_REQUIRED" -> "Verifica tu cuenta y completa la vinculación para continuar."
+        "NETWORK_UNAVAILABLE" -> "No hay conexión. Revisa tu red e inténtalo otra vez."
+        "REQUIRED_FIELDS" -> "Completa tu correo y contraseña."
+        else -> "No pudimos completar el acceso. Inténtalo nuevamente."
     }
     Text(message,color=TataError,modifier=Modifier.fillMaxWidth().padding(vertical=8.dp))
 }
