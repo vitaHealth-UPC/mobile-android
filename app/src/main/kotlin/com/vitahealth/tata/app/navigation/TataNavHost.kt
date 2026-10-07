@@ -17,6 +17,7 @@ import com.vitahealth.tata.analytics.presentation.history.AdherenceHistoryRoute
 import com.vitahealth.tata.analytics.presentation.recommendations.AdherenceRecommendationsRoute
 import com.vitahealth.tata.app.TataApplication
 import com.vitahealth.tata.carelink.presentation.link.CareLinkRoute
+import com.vitahealth.tata.identity.presentation.subscription.PlanSubscriptionRoute
 import com.vitahealth.tata.identity.presentation.registration.CaregiverRegistrationRoute
 import com.vitahealth.tata.intake.presentation.detail.DoseDetailRoute
 import com.vitahealth.tata.intake.presentation.home.NextDoseHomeRoute
@@ -158,6 +159,23 @@ fun TataNavHost(
                 onTreatments = { navController.navigate(RootDestination.TreatmentList.createRoute(caregiver,adult,name)) },
                 onMedications = { navController.navigate(RootDestination.MedicationManagement.createRoute(caregiver, adult, name)) },
                 onAlerts = { navController.navigate(RootDestination.Alerts.createRoute(caregiver, adult)) },
+                onSubscription = { navController.navigate(RootDestination.PlanSubscription.createRoute(caregiver)) },
+            )
+        }
+
+        composable(
+            route = RootDestination.PlanSubscription.route,
+            arguments = listOf(
+                navArgument(RootDestination.PlanSubscription.accountIdArgument) { type = NavType.StringType },
+            ),
+        ) { backStackEntry ->
+            val app = androidx.compose.ui.platform.LocalContext.current.applicationContext as TataApplication
+            val accountId = requireNotNull(
+                backStackEntry.arguments?.getString(RootDestination.PlanSubscription.accountIdArgument),
+            )
+            PlanSubscriptionRoute(
+                factory = app.container.planSubscriptionViewModelFactory(accountId),
+                onBack = { navController.popBackStack() },
             )
         }
 

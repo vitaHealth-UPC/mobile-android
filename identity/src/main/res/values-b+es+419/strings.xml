@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="plan_title">Plan y suscripción</string>
+    <string name="plan_subtitle">Administra las capacidades de tu cuenta</string>
+    <string name="plan_back">Volver</string>
+    <string name="plan_loading">Cargando tu plan…</string>
+    <string name="plan_retry">Reintentar</string>
+    <string name="plan_header">Plan %1$s</string>
+    <string name="plan_price_per_month">%1$s / mes</string>
+    <string name="plan_status_active">Activo</string>
+    <string name="plan_active_renews">Activo, renovación %1$s</string>
+    <string name="plan_current_label">Plan actual</string>
+    <string name="plan_renewal_title">Próxima renovación</string>
+    <string name="plan_renewal_unknown">No disponible</string>
+    <string name="plan_renewal_note">El cambio de plan conserva tu historial y vínculos.</string>
+    <string name="plan_capability_reminders">Recordatorios</string>
+    <string name="plan_capability_agenda">Agenda</string>
+    <string name="plan_capability_confirmation">Confirmación</string>
+    <string name="plan_capability_alerts">Alertas</string>
+    <string name="plan_capability_monitoring">Seguimiento</string>
+    <string name="plan_capability_insights">Insights</string>
+    <string name="plan_error_title">No se pudo cargar tu plan</string>
+    <string name="plan_error_offline">No hay conexión. Inténtalo cuando vuelvas a estar en línea.</string>
+    <string name="plan_error_account">No encontramos una cuenta activa. Inicia sesión de nuevo.</string>
+    <string name="plan_error_session">Tu sesión expiró. Inicia sesión de nuevo.</string>
+    <string name="plan_error_generic">Algo salió mal. Inténtalo de nuevo.</string>
+</resources>

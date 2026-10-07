@@ -36,6 +36,12 @@ sealed interface RootDestination {
             "alert-detail/" + Uri.encode(caregiverId) + "/" + Uri.encode(olderAdultId) + "/" + alertId
     }
 
+    data object PlanSubscription : RootDestination {
+        const val accountIdArgument = "accountId"
+        override val route = "plan-subscription/{$accountIdArgument}"
+        fun createRoute(accountId: String) = "plan-subscription/" + Uri.encode(accountId)
+    }
+
     data object Accessibility : RootDestination {
         const val userIdArgument = "userId"
         override val route = "accessibility/{$userIdArgument}"
