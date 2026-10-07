@@ -32,7 +32,7 @@ private val summaryLocale = Locale("es", "PE")
 fun FamilySummaryRoute(factory: FamilySummaryViewModel.Factory, olderAdultName: String,
     onAgenda: () -> Unit, onHistory: () -> Unit, onAddMedication: () -> Unit, onChangePerson: () -> Unit,
     onAccessibility: () -> Unit = {}, onNotificationPreferences: () -> Unit = {},
-    onMedications: () -> Unit = {}) {
+    onMedications: () -> Unit = {}, onTreatments: () -> Unit = {}) {
     val model: FamilySummaryViewModel = viewModel(factory = factory)
     val state by model.state.collectAsState()
     val owner = LocalLifecycleOwner.current
@@ -42,7 +42,7 @@ fun FamilySummaryRoute(factory: FamilySummaryViewModel.Factory, olderAdultName: 
         onDispose { owner.lifecycle.removeObserver(observer) }
     }
     FamilySummaryScreen(state, olderAdultName, model::refresh, onAgenda, onHistory, model::contact,
-        model::alerts, model::notes, onAddMedication, onChangePerson, onAccessibility, onNotificationPreferences, onMedications)
+        model::alerts, model::notes, onAddMedication, onChangePerson, onAccessibility, onNotificationPreferences, onMedications, onTreatments)
     state.dialog?.let { dialog ->
         val context = LocalContext.current
         AlertDialog(onDismissRequest = model::dismissDialog, title = { Text(dialog.title) },
@@ -67,7 +67,7 @@ fun FamilySummaryScreen(state: FamilySummaryUiState, olderAdultName: String, onR
     onAgenda: () -> Unit, onHistory: () -> Unit, onContact: () -> Unit, onAlerts: () -> Unit,
     onNotes: () -> Unit, onAddMedication: () -> Unit, onChangePerson: () -> Unit,
     onAccessibility: () -> Unit = {}, onNotificationPreferences: () -> Unit = {},
-    onMedications: () -> Unit = {}) {
+    onMedications: () -> Unit = {}, onTreatments: () -> Unit = {}) {
     var more by remember { mutableStateOf(false) }
     val summary = state.summary
     Column(Modifier.fillMaxSize().background(Brush.horizontalGradient(listOf(Color.White, TataSurface, Color(0xFFFCFBFF))))) {
@@ -174,7 +174,8 @@ fun FamilySummaryScreen(state: FamilySummaryUiState, olderAdultName: String, onR
         }
     }
     if (more) AlertDialog(onDismissRequest = { more = false }, title = { Text("Más opciones") }, text = {
-        Column { TextButton(onClick = { more = false; onMedications() }) { Text("Medicamentos") }
+        Column { TextButton(onClick = { more = false; onTreatments() }) { Text("Tratamientos") }
+            TextButton(onClick = { more = false; onMedications() }) { Text("Medicamentos") }
             TextButton(onClick = { more = false; onAddMedication() }) { Text("Agregar medicamento") }
             TextButton(onClick = { more = false; onAccessibility() }) { Text("Accesibilidad") }
             TextButton(onClick = { more = false; onNotificationPreferences() }) { Text("Preferencias de notificación") }

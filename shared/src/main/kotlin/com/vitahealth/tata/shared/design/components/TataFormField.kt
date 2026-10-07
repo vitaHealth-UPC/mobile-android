@@ -13,6 +13,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.material3.MaterialTheme
 import com.vitahealth.tata.shared.design.theme.TataBorder
 import com.vitahealth.tata.shared.design.theme.TataMuted
 import com.vitahealth.tata.shared.design.theme.TataText
@@ -33,10 +35,12 @@ fun TataFormField(
         Text(
             text = label,
             color = TataMuted,
+            style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp),
             modifier = Modifier.padding(bottom = 8.dp),
         )
         OutlinedTextField(
             value = value,
+            textStyle = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp),
             onValueChange = onValueChange,
             enabled = enabled,
             modifier = Modifier.fillMaxWidth(),

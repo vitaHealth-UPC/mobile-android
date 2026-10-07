@@ -87,6 +87,9 @@ interface TreatmentApiService {
         @Body request: CreateTreatmentRequest,
     ): Response<TreatmentResponse>
 
+    @GET("api/v1/older-adults/{olderAdultId}/treatments")
+    suspend fun listTreatments(@Path("olderAdultId") olderAdultId: String,@Query("caregiverId") caregiverId: String): Response<List<TreatmentResponse>>
+
     @PUT("api/v1/treatments/{treatmentId}/regimen")
     suspend fun configureTreatment(
         @Path("treatmentId") treatmentId: String,

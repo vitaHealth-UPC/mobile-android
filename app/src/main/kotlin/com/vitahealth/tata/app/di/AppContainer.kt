@@ -114,6 +114,9 @@ class AppContainer(
     private val caregiverProfilesRepository = com.vitahealth.tata.carelink.infrastructure.remote.RemoteCaregiverProfilesRepository(retrofit.create(com.vitahealth.tata.carelink.infrastructure.remote.CaregiverProfilesApiService::class.java))
     fun caregiverProfilesViewModelFactory(caregiverId: String) = com.vitahealth.tata.carelink.presentation.profiles.CaregiverProfilesViewModel.Factory(caregiverId,caregiverProfilesRepository)
 
+    private val treatmentCatalog = com.vitahealth.tata.treatment.infrastructure.remote.RemoteTreatmentCatalogRepository(retrofit.create(TreatmentApiService::class.java))
+    fun treatmentListViewModelFactory(caregiverId: String,olderAdultId: String) = com.vitahealth.tata.treatment.presentation.treatment.TreatmentListViewModel.Factory(caregiverId,olderAdultId,com.vitahealth.tata.treatment.application.handlers.ListTreatmentsQueryHandler(treatmentCatalog))
+
     private val monitoringRepository = com.vitahealth.tata.monitoring.infrastructure.remote.RemoteFamilyMonitoringRepository(
         retrofit.create(com.vitahealth.tata.monitoring.infrastructure.remote.FamilyMonitoringApiService::class.java),
     )
