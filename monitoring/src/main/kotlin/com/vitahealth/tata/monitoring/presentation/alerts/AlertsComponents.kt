@@ -35,6 +35,7 @@ import com.vitahealth.tata.monitoring.R
 import com.vitahealth.tata.monitoring.domain.model.AlertStatus
 import com.vitahealth.tata.shared.design.components.TataButton
 import com.vitahealth.tata.shared.design.components.TataCard
+import com.vitahealth.tata.shared.design.components.TataSvgIcon
 import com.vitahealth.tata.shared.design.theme.TataBorder
 import com.vitahealth.tata.shared.design.theme.TataError
 import com.vitahealth.tata.shared.design.theme.TataErrorSurface
@@ -109,7 +110,7 @@ internal fun AlertStatusChip(status: AlertStatus, modifier: Modifier = Modifier)
     )
 }
 
-/** Warning mark of the alert cards, drawn with a glyph so the module needs no icon asset. */
+/** Original Figma status artwork, kept separate from the native card. */
 @Composable
 internal fun AlertMark(status: AlertStatus, modifier: Modifier = Modifier) {
     val color = if (status == AlertStatus.OPEN) TataError else TataSuccess
@@ -117,7 +118,7 @@ internal fun AlertMark(status: AlertStatus, modifier: Modifier = Modifier) {
         modifier = modifier.size(36.dp).background(Color.White.copy(alpha = 0.7f), CircleShape),
         contentAlignment = Alignment.Center,
     ) {
-        Text(text = if (status == AlertStatus.OPEN) "!" else "✓", color = color, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+        TataSvgIcon(if (status == AlertStatus.OPEN) R.raw.alerts_warning else R.raw.alerts_check, Modifier.size(24.dp))
     }
 }
 
@@ -127,6 +128,7 @@ internal fun AlertsTitle(text: String, modifier: Modifier = Modifier) {
         text = text,
         fontFamily = alertsSerif,
         fontSize = 28.sp,
+        lineHeight = 34.sp,
         color = tataTextColor(),
         modifier = modifier.semantics { heading() },
     )

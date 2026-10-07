@@ -18,6 +18,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -26,7 +27,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.layout.size
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -44,6 +51,7 @@ import com.vitahealth.tata.monitoring.domain.model.CaregiverAlert
 import com.vitahealth.tata.shared.design.components.CaregiverTab
 import com.vitahealth.tata.shared.design.components.CaregiverTabBar
 import com.vitahealth.tata.shared.design.components.TataCard
+import com.vitahealth.tata.shared.design.components.TataSvgIcon
 import com.vitahealth.tata.shared.design.theme.TataLavender
 import com.vitahealth.tata.shared.design.theme.TataMint
 import com.vitahealth.tata.shared.design.theme.TataNavy
@@ -84,14 +92,18 @@ fun AlertsScreen(
     onTabSelected: (CaregiverTab) -> Unit = {},
 ) {
     val formatter = rememberAlertDateFormatter()
-    Column(modifier = Modifier.fillMaxSize().background(TataSurface)) {
+    ProvideTextStyle(MaterialTheme.typography.bodyMedium.copy(fontFamily = FontFamily(Font(com.vitahealth.tata.shared.R.font.tata_inter)), fontSize = 11.sp, lineHeight = 14.sp)) {
+    Column(modifier = Modifier.fillMaxSize().background(Brush.horizontalGradient(listOf(Color.White, TataSurface, Color(0xFFFCFBFF))))) {
         LazyColumn(
             modifier = Modifier.weight(1f).fillMaxWidth(),
             contentPadding = PaddingValues(horizontal = 22.dp, vertical = 28.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             item {
-                AlertsTitle(stringResource(R.string.alerts_title))
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    AlertsTitle(stringResource(R.string.alerts_title), Modifier.weight(1f))
+                    TataSvgIcon(R.raw.alerts_bell, Modifier.size(22.dp))
+                }
                 Text(
                     text = stringResource(R.string.alerts_subtitle),
                     color = AlertsSecondaryText,
@@ -129,6 +141,7 @@ fun AlertsScreen(
             }
         }
         CaregiverTabBar(selected = CaregiverTab.Alerts, onSelect = onTabSelected)
+    }
     }
 }
 
@@ -185,49 +198,33 @@ private fun AlertFilters(selected: AlertFilter, onSelected: (AlertFilter) -> Uni
 @Composable
 private fun AlertListItem(alert: CaregiverAlert, scheduled: String, onClick: () -> Unit) {
     val openLabel = stringResource(R.string.alerts_open_detail)
-    TataCard(
-        modifier = Modifier
-            .fillMaxWidth()
-            .heightIn(min = 48.dp)
-            .clip(RoundedCornerShape(18.dp))
-            .clickable(role = Role.Button, onClickLabel = openLabel, onClick = onClick),
-        containerColor = alert.status.surface(),
+    val colors = if (alert.status == AlertStatus.OPEN) listOf(Color(0xFFFFF0E8), Color(0xFFFBE0D1))
+        else listOf(Color(0xFFEAF5FB), Color(0xFFDDECF7))
+    Row(
+        Modifier.fillMaxWidth().shadow(6.dp, RoundedCornerShape(18.dp), ambientColor = Color(0x141A2138), spotColor = Color(0x141A2138))
+            .clip(RoundedCornerShape(18.dp)).background(Brush.horizontalGradient(colors))
+            .clickable(role = Role.Button, onClickLabel = openLabel, onClick = onClick)
+            .heightIn(min = 106.dp).padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            AlertMark(alert.status)
-            Column(modifier = Modifier.weight(1f).padding(horizontal = 14.dp)) {
-                Text(
-                    text = stringResource(alert.status.titleRes()),
-                    color = tataTextColor(),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                )
-                Text(
-                    text = alert.medicationName,
-                    color = tataTextColor(),
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.padding(top = 4.dp),
-                )
-                Text(
-                    text = stringResource(R.string.alerts_card_scheduled, scheduled),
-                    color = AlertsSecondaryText,
-                    style = MaterialTheme.typography.bodyMedium,
-                )
-                if (alert.reason.isNotBlank()) {
-                    Text(
-                        text = alert.reason,
-                        color = AlertsSecondaryText,
-                        style = MaterialTheme.typography.bodyMedium,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                }
-                Spacer(modifier = Modifier.height(8.dp))
+        AlertMark(alert.status)
+        Column(Modifier.weight(1f).padding(horizontal = 14.dp)) {
+            Text(stringResource(alert.status.titleRes()), color = tataTextColor(), fontSize = 15.sp,
+                lineHeight = 19.sp, fontWeight = FontWeight.SemiBold)
+            Spacer(Modifier.height(5.dp))
+            Text(stringResource(R.string.alerts_card_scheduled, scheduled), color = AlertsSecondaryText, fontSize = 11.sp, lineHeight = 14.sp)
+            Spacer(Modifier.height(7.dp))
+            Text(alert.medicationName, color = tataTextColor(), fontSize = 13.sp, lineHeight = 17.sp, fontWeight = FontWeight.SemiBold)
+            if (alert.reason.isNotBlank()) {
+                Spacer(Modifier.height(5.dp))
+                Text(alert.reason, color = AlertsSecondaryText, fontSize = 11.sp, lineHeight = 14.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            }
+            if (alert.status != AlertStatus.OPEN) {
+                Spacer(Modifier.height(6.dp))
                 AlertStatusChip(alert.status)
             }
-            Text(text = "›", color = TataNavy, style = MaterialTheme.typography.headlineSmall)
         }
+        Text("›", color = TataNavy, fontSize = 20.sp, lineHeight = 24.sp)
     }
 }
 

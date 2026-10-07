@@ -101,7 +101,7 @@ class NextDoseVisualAuditTest {
         capture("agenda-existing")
         compose.onNodeWithText("Losartán 50 mg").performClick()
         compose.runOnIdle { assertEquals("dose-test", opened) }
-        compose.onNodeWithText("Siguiente").performClick()
+        compose.onNodeWithContentDescription("Siguiente").performClick()
         compose.runOnIdle { assertEquals(1L, moves) }
         compose.runOnIdle { doses = DoseStatus.entries.mapIndexed { index, status -> dose.copy(id = "dose-$index", status = status,
             medicationName = listOf("Losartán", "Vitamina D3", "Amlodipino", "Atorvastatina")[index],
