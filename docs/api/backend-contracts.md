@@ -90,3 +90,17 @@ The login screen calls `POST /api/v1/sessions` with `{email,password}`. The encr
 ## Caregiver profile entry (US-12)
 
 After caregiver verification/sign-in, the app calls `GET /api/v1/care-links?caregiverId=` and uses `olderAdultId` from confirmed links to open the family summary. New profiles use `POST /api/v1/older-adults`; a temporary code uses `POST /api/v1/care-links/linking-codes`. Partial emergency contacts and future birth dates are rejected before submission. The registered adult is retained if code generation fails, so retry does not duplicate the profile. The caregiver hands the device/code to the adult before acceptance and consent. Account switching revokes the presented session and clears local credentials even without a connection.
+
+## Caregiver alerts (US-27)
+
+Source: the deployed OpenAPI document (`/v3/api-docs`, tags "Alerts" and "Family Monitoring"). There is no alert list endpoint, and the app does not invent one.
+
+- List: `GET /api/v1/older-adults/{olderAdultId}/status?caregiverId=` (US-25). The alerts that still need attention come in `openAlerts`; the app shows only that array. `404` means the older adult has no active follow-up.
+- Detail: `GET /api/v1/older-adults/{olderAdultId}/alerts/{alertId}?caregiverId=`. `404` means the follow-up or the alert does not exist.
+- Both reads go with the bearer session of the caregiver. The OpenAPI document lists no `403`; the app still treats a `403` as an inactive care link or missing consent, as the recent status already does.
+
+`AlertSummaryResource` (both endpoints): `{ id: int64, intakeId: String, medicationName: String, scheduledAt: date-time, reason: String, status: "OPEN" | "ATTENDED" | "CLOSED", openedAt: date-time, closedAt: date-time | null }`.
+
+The alert `id` is a numeric `int64` (`Long` in Android), unlike the UUID `String` identifiers listed in the intake section; `intakeId` stays a `String`. The status names are the backend ones: the app shows OPEN as Pending / Pendiente, ATTENDED as Attended / Atendida and CLOSED as Closed / Cerrada. There is no "Resolved" status.
+
+`PUT /api/v1/older-adults/{olderAdultId}/alerts/{alertId}/status?caregiverId=` with `{ "status": "ATTENDED" | "CLOSED" }` exists for US-31 and is not consumed by US-27.
