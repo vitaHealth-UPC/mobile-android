@@ -1,0 +1,99 @@
+package com.vitahealth.tata.monitoring.presentation.alerts
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
+import com.vitahealth.tata.monitoring.application.handlers.GetAlertDetailQueryHandler
+import com.vitahealth.tata.monitoring.application.handlers.GetOpenAlertsQueryHandler
+import com.vitahealth.tata.monitoring.application.queries.GetAlertDetailQuery
+import com.vitahealth.tata.monitoring.application.queries.GetOpenAlertsQuery
+import com.vitahealth.tata.shared.common.result.AppResult
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
+
+/** The route calls [refresh] on every resume, so the list follows alerts attended elsewhere. */
+class AlertsViewModel(
+    private val caregiverId: String,
+    private val olderAdultId: String,
+    private val handler: GetOpenAlertsQueryHandler,
+    private val context: CoroutineContext = EmptyCoroutineContext,
+) : ViewModel() {
+    private val mutableState = MutableStateFlow<AlertsUiState>(AlertsUiState.Loading)
+    val state: StateFlow<AlertsUiState> = mutableState.asStateFlow()
+    private var job: Job? = null
+
+    fun refresh() {
+        job?.cancel()
+        val current = mutableState.value
+        // A refresh over visible alerts keeps them on screen instead of flashing the loading state.
+        if (current !is AlertsUiState.Content) mutableState.value = AlertsUiState.Loading
+        job = viewModelScope.launch(context) {
+            mutableState.value = when (val result = handler(GetOpenAlertsQuery(caregiverId, olderAdultId))) {
+                is AppResult.Success -> when {
+                    result.value.isEmpty() -> AlertsUiState.Empty
+                    current is AlertsUiState.Content -> current.copy(alerts = result.value)
+                    else -> AlertsUiState.Content(result.value)
+                }
+                is AppResult.Failure -> AlertsUiState.Error(problemOf(result.code))
+            }
+        }
+    }
+
+    fun selectFilter(filter: AlertFilter) {
+        val current = mutableState.value
+        if (current is AlertsUiState.Content) mutableState.value = current.copy(filter = filter)
+    }
+
+    class Factory(
+        private val caregiverId: String,
+        private val olderAdultId: String,
+        private val handler: GetOpenAlertsQueryHandler,
+    ) : ViewModelProvider.Factory {
+        @Suppress("UNCHECKED_CAST")
+        override fun <T : ViewModel> create(modelClass: Class<T>): T =
+            AlertsViewModel(caregiverId, olderAdultId, handler) as T
+    }
+}
+
+class AlertDetailViewModel(
+    private val caregiverId: String,
+    private val olderAdultId: String,
+    private val alertId: Long,
+    private val handler: GetAlertDetailQueryHandler,
+    private val context: CoroutineContext = EmptyCoroutineContext,
+) : ViewModel() {
+    private val mutableState = MutableStateFlow<AlertDetailUiState>(AlertDetailUiState.Loading)
+    val state: StateFlow<AlertDetailUiState> = mutableState.asStateFlow()
+    private var job: Job? = null
+
+    init {
+        load()
+    }
+
+    fun load() {
+        job?.cancel()
+        mutableState.value = AlertDetailUiState.Loading
+        job = viewModelScope.launch(context) {
+            mutableState.value = when (val result = handler(GetAlertDetailQuery(caregiverId, olderAdultId, alertId))) {
+                is AppResult.Success -> AlertDetailUiState.Content(result.value)
+                is AppResult.Failure -> AlertDetailUiState.Error(problemOf(result.code))
+            }
+        }
+    }
+
+    class Factory(
+        private val caregiverId: String,
+        private val olderAdultId: String,
+        private val alertId: Long,
+        private val handler: GetAlertDetailQueryHandler,
+    ) : ViewModelProvider.Factory {
+        @Suppress("UNCHECKED_CAST")
+        override fun <T : ViewModel> create(modelClass: Class<T>): T =
+            AlertDetailViewModel(caregiverId, olderAdultId, alertId, handler) as T
+    }
+}
