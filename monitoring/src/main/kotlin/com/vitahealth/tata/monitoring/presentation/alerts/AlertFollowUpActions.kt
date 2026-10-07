@@ -27,6 +27,7 @@ import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.vitahealth.tata.monitoring.R
 import com.vitahealth.tata.monitoring.domain.model.AlertStatus
 import com.vitahealth.tata.monitoring.domain.model.canMoveTo
@@ -64,7 +65,7 @@ internal fun AlertFollowUpActions(
         Text(
             text = stringResource(R.string.alert_actions_title),
             color = tataTextColor(),
-            style = MaterialTheme.typography.titleMedium,
+            fontSize = 13.sp, lineHeight = 17.sp,
             fontWeight = FontWeight.SemiBold,
         )
         Text(
@@ -74,7 +75,7 @@ internal fun AlertFollowUpActions(
                 else -> stringResource(R.string.alert_actions_subtitle)
             },
             color = AlertsSecondaryText,
-            style = MaterialTheme.typography.bodyMedium,
+            fontSize = 11.sp, lineHeight = 14.sp,
             modifier = Modifier.padding(top = 4.dp, bottom = 12.dp),
         )
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -110,7 +111,7 @@ internal fun AlertFollowUpActions(
             Text(
                 text = "✓ " + stringResource(R.string.note_saved),
                 color = TataSuccess,
-                style = MaterialTheme.typography.bodyMedium,
+                fontSize = 11.sp, lineHeight = 14.sp,
                 fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
             )
@@ -168,7 +169,7 @@ private fun FeedbackText(feedback: AlertFeedback) {
     Text(
         text = stringResource(message),
         color = color,
-        style = MaterialTheme.typography.bodyMedium,
+        fontSize = 11.sp, lineHeight = 14.sp,
         fontWeight = FontWeight.SemiBold,
         modifier = Modifier
             .padding(top = 12.dp)

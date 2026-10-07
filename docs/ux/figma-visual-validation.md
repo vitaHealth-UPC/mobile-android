@@ -6,7 +6,7 @@ Checkpoint: 2026-10-07. Registro independiente del conteo de implementaciones.
 - 10 carecen de implementación específica.
 - 5 aceptadas visualmente con el criterio proporcional acordado.
 - 55 implementadas requieren validación o correcciones.
-- 53 tienen comparación previa; comparación no equivale a aceptación.
+- 55 tienen comparación visual; comparación no equivale a aceptación.
 
 Aceptación: composición, tipografía, proporciones, iconos, contraste y estado representado coherentes con Figma. Se permiten adaptaciones nativas, desplazamiento por contenido real y datos dinámicos; no se exige copiar nombres, fechas ni títulos a posiciones absolutas. La aceptación visual no certifica integraciones ni navegación completa. Cada variante requiere su propio resultado; reutilizar un composable no aprueba automáticamente todas sus variantes.
 
@@ -31,7 +31,7 @@ Evidencias PNG en el equipo de trabajo: C:/Users/david/Downloads/. Las capturas 
 | 15 | Family Summary | 563:727 | Aceptada visualmente | family-summary-final.png |
 | 16 | Linked Person | 563:1121 | Requiere validar/corregir | — |
 | 17 | Alerts | 563:819 | Requiere validar/corregir | — |
-| 18 | Alert Detail | 563:918 | Requiere validar/corregir | — |
+| 18 | Alert Detail | 563:918 | Requiere corregir: perfil y eventos reales de recordatorios | alert-detail-proportional.png |
 | 19 | History & Insights | 563:1017 | Requiere validar/corregir | — |
 | 20 | Adherence Recommendations | 563:1767 | Requiere validar/corregir | — |
 | 21 | Notes - Adult | 576:2785 | Sin implementación específica | — |
@@ -40,7 +40,7 @@ Evidencias PNG en el equipo de trabajo: C:/Users/david/Downloads/. Las capturas 
 | 24 | Treatment Management | 563:1554 | Requiere validar/corregir | — |
 | 25 | Inventory & Restock | 563:1632 | Requiere validar/corregir | — |
 | 26 | Notification Preferences | 563:1219 | Requiere validar/corregir | — |
-| 27 | Notes - Caregiver | 576:2859 | Requiere validar/corregir | — |
+| 27 | Notes - Caregiver | 576:2859 | Requiere corregir: perfil y títulos no representados | audit-caregiver-notes.png |
 | 28 | Plan & Subscription | 563:1701 | Requiere validar/corregir | — |
 | 29 | PIN Setup | 563:1970 | Requiere validar/corregir | — |
 | 30 | PIN Incorrect | 563:2034 | Requiere validar/corregir | — |
@@ -70,8 +70,8 @@ Evidencias PNG en el equipo de trabajo: C:/Users/david/Downloads/. Las capturas 
 | 54 | Agenda With Statuses | 563:3918 | Aceptada visualmente | agenda-final.png |
 | 55 | Empty Intake History | 563:4037 | Requiere validar/corregir | — |
 | 56 | Contact Unavailable | 563:4145 | Requiere validar/corregir | — |
-| 57 | Follow-up Note Saved | 563:4245 | Requiere validar/corregir | — |
-| 58 | Alert Attended | 563:4345 | Requiere validar/corregir | — |
+| 57 | Follow-up Note Saved | 563:4245 | Requiere corregir: composición del aviso y detalle | audit-alert-followup-note-saved.png |
+| 58 | Alert Attended | 563:4345 | Requiere corregir: perfil y línea de recordatorios | audit-alert-attended-read-only (3).png |
 | 59 | Adherence Period Changed | 563:4445 | Requiere validar/corregir | — |
 | 60 | Insufficient Evidence | 563:4550 | Requiere validar/corregir | — |
 | 61 | Large Text Enabled | 563:4638 | Requiere validar/corregir | — |

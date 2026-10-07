@@ -222,6 +222,26 @@ class ExistingScreensVisualAuditTest {
         capture("treatment-list")
     }
 
+    @Test fun captureCaregiverNotesVariants() {
+        val note = FollowUpNote(1, "Prefiere recibir una llamada si no responde al segundo recordatorio.", java.time.Instant.now(), "caregiver-test")
+        var saved by mutableStateOf(false)
+        var showAlert by mutableStateOf(false)
+        compose.setContent { AuditTheme { Box(Modifier.safeDrawingPadding()) {
+            if (showAlert) com.vitahealth.tata.monitoring.presentation.alerts.AlertDetailScreen(
+                com.vitahealth.tata.monitoring.presentation.alerts.AlertDetailUiState.Content(
+                    CaregiverAlert(1, "dose-test", "Losartán 50 mg", note.recordedAt, "Toma pendiente", AlertStatus.OPEN, note.recordedAt, null)),
+                noteSaved = true)
+            else com.vitahealth.tata.monitoring.presentation.notes.NotesScreen(
+                com.vitahealth.tata.monitoring.presentation.notes.NotesUiState.Content(listOf(note)),
+                caregiverId = "caregiver-test", noteSaved = saved)
+        } } }
+        capture("caregiver-notes")
+        compose.runOnIdle { saved = true }
+        capture("caregiver-notes-saved")
+        compose.runOnIdle { showAlert = true }
+        capture("alert-followup-note-saved")
+    }
+
     @Test fun captureAlertsAndDetail() {
         val now = java.time.Instant.now()
         val alert = com.vitahealth.tata.monitoring.domain.model.CaregiverAlert(1, "dose-test", "Losartán 50 mg", now,
