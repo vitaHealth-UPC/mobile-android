@@ -188,7 +188,27 @@ private fun StockCard(state: InventoryUiState.Ready) {
     TataCard(containerColor = TataCream, modifier = Modifier.fillMaxWidth()) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text(text = state.medicationName, color = TataText, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-            Text(text =…214 tokens truncated…tween) {
+            Text(text = statusText, color = statusColor, fontWeight = FontWeight.SemiBold)
+        }
+        Spacer(Modifier.height(8.dp))
+        Text(
+            text = if (state.unit.isBlank()) {
+                stringResource(R.string.inventory_units_remaining_no_unit, stock.remainingStock)
+            } else {
+                stringResource(R.string.inventory_units_remaining, stock.remainingStock, state.unit)
+            },
+            color = TataText,
+            fontSize = 22.sp,
+            fontWeight = FontWeight.Bold,
+        )
+        Text(text = daysText, color = TataMuted)
+    }
+}
+
+@Composable
+private fun LastReplenishmentCard(batch: InventoryBatch, unit: String) {
+    TataCard(containerColor = TataMint, modifier = Modifier.fillMaxWidth()) {
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text(text = stringResource(R.string.inventory_last_replenishment), color = TataText, fontWeight = FontWeight.SemiBold)
             Text(text = stringResource(R.string.inventory_registered_badge), color = AvailableGreen)
         }
