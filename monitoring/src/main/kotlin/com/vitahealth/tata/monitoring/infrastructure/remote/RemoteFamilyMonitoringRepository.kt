@@ -35,7 +35,7 @@ class RemoteFamilyMonitoringRepository(private val api: FamilyMonitoringApiServi
         AppResult.Success(FamilySummary(name, day,
             AdherenceCounts(status.weeklyAdherence.confirmedIntakes, status.weeklyAdherence.totalIntakes),
             AdherenceCounts(doses.count { it.status == "CONFIRMED" || it.status == "LATE" }, doses.size), next, stock,
-            status.openAlerts.map { OpenAlert(it.id, it.medicationName, it.reason, Instant.parse(it.scheduledAt)) }, inventoryAvailable))
+            status.openAlerts.orEmpty().map { it.toDomain() }.map { OpenAlert(it.id, it.medicationName, it.reason, it.scheduledAt) }, inventoryAvailable))
     }
     override suspend fun contact(caregiverId: String, olderAdultId: String): AppResult<String> = guarded {
         val response = api.contact(olderAdultId, caregiverId)

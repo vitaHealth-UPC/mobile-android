@@ -24,6 +24,7 @@ import com.vitahealth.tata.inventory.presentation.inventory.InventoryRoute
 import com.vitahealth.tata.preferences.presentation.accessibility.AccessibilityRoute
 import com.vitahealth.tata.preferences.presentation.notifications.NotificationPreferencesRoute
 import com.vitahealth.tata.shared.design.accessibility.LocalTataAccessibility
+import com.vitahealth.tata.shared.design.components.CaregiverTab
 import com.vitahealth.tata.treatment.presentation.medication.MedicationManagementRoute
 import com.vitahealth.tata.treatment.presentation.medication.MedicationRegistrationRoute
 import com.vitahealth.tata.treatment.presentation.treatment.TreatmentCreationRoute
@@ -156,6 +157,40 @@ fun TataNavHost(
                 onNotificationPreferences = { navController.navigate(RootDestination.NotificationPreferences.createRoute(caregiver)) },
                 onTreatments = { navController.navigate(RootDestination.TreatmentList.createRoute(caregiver,adult,name)) },
                 onMedications = { navController.navigate(RootDestination.MedicationManagement.createRoute(caregiver, adult, name)) },
+                onAlerts = { navController.navigate(RootDestination.Alerts.createRoute(caregiver, adult)) },
+            )
+        }
+
+        composable(RootDestination.Alerts.route, arguments = listOf(
+            navArgument("caregiverId") { type = NavType.StringType },
+            navArgument("olderAdultId") { type = NavType.StringType },
+        )) { entry ->
+            val app = androidx.compose.ui.platform.LocalContext.current.applicationContext as TataApplication
+            val caregiver = requireNotNull(entry.arguments?.getString("caregiverId"))
+            val adult = requireNotNull(entry.arguments?.getString("olderAdultId"))
+            com.vitahealth.tata.monitoring.presentation.alerts.AlertsRoute(
+                factory = app.container.alertsViewModelFactory(caregiver, adult),
+                onOpenAlert = { alertId -> navController.navigate(RootDestination.AlertDetail.createRoute(caregiver, adult, alertId)) },
+                onTabSelected = { tab -> if (tab != CaregiverTab.Alerts) navController.popBackStack(RootDestination.FamilySummary.route, inclusive = false) },
+            )
+        }
+
+        composable(RootDestination.AlertDetail.route, arguments = listOf(
+            navArgument("caregiverId") { type = NavType.StringType },
+            navArgument("olderAdultId") { type = NavType.StringType },
+            navArgument("alertId") { type = NavType.LongType },
+        )) { entry ->
+            val app = androidx.compose.ui.platform.LocalContext.current.applicationContext as TataApplication
+            val caregiver = requireNotNull(entry.arguments?.getString("caregiverId"))
+            val adult = requireNotNull(entry.arguments?.getString("olderAdultId"))
+            val alertId = requireNotNull(entry.arguments?.getLong("alertId"))
+            com.vitahealth.tata.monitoring.presentation.alerts.AlertDetailRoute(
+                factory = app.container.alertDetailViewModelFactory(caregiver, adult, alertId),
+                onBack = { navController.popBackStack() },
+                onTabSelected = { tab ->
+                    if (tab == CaregiverTab.Alerts) navController.popBackStack()
+                    else navController.popBackStack(RootDestination.FamilySummary.route, inclusive = false)
+                },
             )
         }
 
