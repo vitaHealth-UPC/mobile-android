@@ -44,6 +44,13 @@ import com.vitahealth.tata.intake.presentation.agenda.IntakeAgendaViewModel
 import com.vitahealth.tata.intake.presentation.detail.DoseDetailViewModel
 import com.vitahealth.tata.intake.presentation.home.NextDoseHomeViewModel
 import com.vitahealth.tata.inventory.application.handlers.GetInventoryStockQueryHandler
+import com.vitahealth.tata.monitoring.application.handlers.GetAlertDetailQueryHandler
+import com.vitahealth.tata.monitoring.application.handlers.GetOpenAlertsQueryHandler
+import com.vitahealth.tata.monitoring.infrastructure.remote.AlertsApiService
+import com.vitahealth.tata.monitoring.infrastructure.remote.FamilyMonitoringApiService
+import com.vitahealth.tata.monitoring.infrastructure.remote.RemoteAlertsRepository
+import com.vitahealth.tata.monitoring.presentation.alerts.AlertDetailViewModel
+import com.vitahealth.tata.monitoring.presentation.alerts.AlertsViewModel
 import com.vitahealth.tata.inventory.application.handlers.RegisterInitialInventoryCommandHandler
 import com.vitahealth.tata.inventory.application.handlers.RegisterReplenishmentCommandHandler
 import com.vitahealth.tata.inventory.infrastructure.remote.InventoryApiService
@@ -122,6 +129,15 @@ class AppContainer(
     )
     fun familySummaryViewModelFactory(caregiverId: String, olderAdultId: String, name: String) =
         com.vitahealth.tata.monitoring.presentation.summary.FamilySummaryViewModel.Factory(caregiverId, olderAdultId, name, monitoringRepository)
+
+    private val alertsRepository = RemoteAlertsRepository(
+        monitoringApi = retrofit.create(FamilyMonitoringApiService::class.java),
+        alertsApi = retrofit.create(AlertsApiService::class.java),
+    )
+    fun alertsViewModelFactory(caregiverId: String, olderAdultId: String) =
+        AlertsViewModel.Factory(caregiverId, olderAdultId, GetOpenAlertsQueryHandler(alertsRepository))
+    fun alertDetailViewModelFactory(caregiverId: String, olderAdultId: String, alertId: Long) =
+        AlertDetailViewModel.Factory(caregiverId, olderAdultId, alertId, GetAlertDetailQueryHandler(alertsRepository))
 
     private val identityApi: IdentityApiService = retrofit.create(IdentityApiService::class.java)
     private val identityRepository = RemoteIdentityRepository(identityApi, sessions)
