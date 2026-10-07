@@ -22,7 +22,7 @@ class NextDoseVisualAuditTest {
     @Test fun captureExistingStatesAndVerifyTheirNavigation() {
         val dose = NextDoseReadModel("dose-test", "treatment-test", "med-test", "adult-test",
             "Losartán 50 mg", "1 tableta", "Tomar con agua", Instant.now().plusSeconds(1500), DoseStatus.PENDING)
-        var state by mutableStateOf<NextDoseHomeUiState>(NextDoseHomeUiState.NextDoseAvailable(dose, "Rosa Vargas"))
+        var state by mutableStateOf<NextDoseHomeUiState>(NextDoseHomeUiState.NextDoseAvailable(dose, "Rosa Vargas", DailyDoseProgress(2, 3)))
         var opened: String? = null
         var agenda = 0
         var retried = 0
@@ -35,7 +35,7 @@ class NextDoseVisualAuditTest {
         capture("home-existing-dose")
         compose.onNodeWithText("Losartán 50 mg").performClick()
         compose.runOnIdle { assertEquals("dose-test", opened) }
-        compose.onNodeWithText("Ver agenda semanal").performScrollTo().performClick()
+        compose.onNodeWithText("Ver todas\nmis tomas").performScrollTo().performClick()
         compose.runOnIdle { assertEquals(1, agenda); state = NextDoseHomeUiState.NoNextDose("Rosa Vargas") }
         compose.onNodeWithText("Hoy").performScrollTo()
         compose.onNodeWithText("Sin próxima toma").assertExists()

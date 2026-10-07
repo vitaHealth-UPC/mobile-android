@@ -387,6 +387,7 @@ class AppContainer(
         olderAdultId = olderAdultId,
         olderAdultName = olderAdultName,
         handler = GetNextDoseQueryHandler(nextDoseRepository),
+        agendaRepository = intakeAgendaRepository,
     )
 
     fun doseDetailViewModelFactory(
