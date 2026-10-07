@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="treatment_open_inventory">Inventory</string>
+    <string name="medications_title">Medications</string>
+    <string name="medications_subtitle">Manage %1$s\'s plan without losing history</string>
+    <string name="medications_back">Back</string>
+    <string name="medications_loading">Loading medications…</string>
+    <string name="medications_retry">Try again</string>
+    <string name="medications_empty">No medications registered yet.</string>
+    <string name="medications_add">Add medication</string>
+    <string name="medications_status_active">Active</string>
+    <string name="medications_status_inactive">Inactive</string>
+    <string name="medications_inactive_note">It no longer creates new intakes. Its history is kept.</string>
+    <string name="medications_edit">Edit medication</string>
+    <string name="medications_save">Save changes</string>
+    <string name="medications_cancel">Cancel</string>
+    <string name="medications_field_name">Medication name</string>
+    <string name="medications_field_presentation">Dose and presentation</string>
+    <string name="medications_deactivate">Deactivate medication</string>
+    <string name="medications_deactivate_title">Deactivate %1$s?</string>
+    <string name="medications_deactivate_body">No new intakes will be created. The history is kept. This cannot be undone from the app.</string>
+    <string name="medications_deactivate_confirm">Deactivate</string>
+    <string name="medications_history_title">Protected history</string>
+    <string name="medications_history_body">Editing or deactivating only affects future intakes.</string>
+    <string name="medications_updated_title">Changes saved</string>
+    <string name="medications_updated_body">The new data applies to future intakes only.</string>
+    <string name="medications_deactivated_title">Medication deactivated</string>
+    <string name="medications_deactivated_body">No new intakes will be created. The history is kept.</string>
+    <string name="medications_error_title">Could not complete</string>
+    <string name="medications_error_required">The name and the dose are required.</string>
+    <string name="medications_error_inactive">An inactive medication cannot be edited.</string>
+    <string name="medications_error_not_found">We could not find this medication.</string>
+    <string name="medications_error_offline">There is no connection. Try again when you are back online.</string>
+    <string name="medications_error_generic">Something went wrong. Try again.</string>
+    <string name="medications_denied_title">Restricted access</string>
+    <string name="medications_denied_body">This person is not linked to your account.</string>
+    <string name="medications_denied_back">Back</string>
+</resources>
