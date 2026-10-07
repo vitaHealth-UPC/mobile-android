@@ -13,10 +13,15 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "0.1.0"
+        val apiBaseUrl = providers.gradleProperty("TATA_API_BASE_URL").orElse("https://web-services-yzxl.onrender.com/").get()
+        require(apiBaseUrl.startsWith("http://") || apiBaseUrl.startsWith("https://"))
+        require(apiBaseUrl.endsWith("/"))
+        buildConfigField("String", "API_BASE_URL", "\"${apiBaseUrl}\"")
     }
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     compileOptions {
