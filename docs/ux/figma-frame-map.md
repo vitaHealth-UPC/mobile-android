@@ -16,3 +16,13 @@ This file is the implementation traceability map between UX states, User Stories
 | Accessibility and notification states | preferences | preferences presentation package |
 
 Rule: one UX frame does not automatically mean one `Screen.kt`. Error/success/empty variants are normally modeled as UI state.
+
+## US-06 touch confirmation
+
+Figma file `jCppvxtSpLpHOrC3ZWUIVC`, Mobile Prototyping `563:2`: pending detail `563:3266`, confirmed state `563:291`. `DoseDetailScreen` keeps pending/submitting/error/success in `DoseDetailUiState`. Success appears only after server confirmation. The prototype family-notified claim awaits a real notification contract. Voice frame `563:242` remains pending device integration.
+
+## US-24 agenda
+
+Weekly schedule frame `563:500` is implemented in `IntakeAgendaScreen` with local calendar week/day selection, real chronological API data, server outcome labels, detail navigation, retry and empty states. Calendar, timeline, tip and core tab assets were downloaded through the Figma MCP design workflow and stored locally; DM Serif Display is bundled with its OFL license.
+
+This delivery wires the core Inicio/Agenda navigation. Notas/Más destinations, full prototype visual parity and emulator screenshot comparison remain pending; there is no configured Android emulator/device in the current environment. Static prototype drug names/dates are replaced by real resources. Do not count the whole prototype as completed because this screen builds.

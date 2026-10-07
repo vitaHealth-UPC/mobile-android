@@ -36,7 +36,7 @@ import com.vitahealth.tata.shared.design.theme.TataNavy
 import com.vitahealth.tata.shared.design.theme.TataSurface
 import com.vitahealth.tata.shared.design.theme.TataText
 import com.vitahealth.tata.shared.design.theme.TataWarningSurface
-import java.time.ZoneOffset
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
@@ -52,6 +52,7 @@ fun DoseDetailRoute(
         state = state,
         onBack = onBack,
         onRetry = viewModel::retry,
+        onConfirm = viewModel::confirm,
         modifier = modifier,
     )
 }
@@ -61,6 +62,7 @@ fun DoseDetailScreen(
     state: DoseDetailUiState,
     onBack: () -> Unit,
     onRetry: () -> Unit,
+    onConfirm: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -88,7 +90,25 @@ fun DoseDetailScreen(
                 Text(state.message, color = TataMuted, modifier = Modifier.padding(top = 8.dp))
                 TataButton("Reintentar", onRetry, Modifier.padding(top = 16.dp))
             }
-            is DoseDetailUiState.Content -> DoseContent(state.dose)
+            is DoseDetailUiState.Content -> {
+                if (state.confirmationSucceeded) {
+                    TataCard(containerColor = TataMint, modifier = Modifier.fillMaxWidth()) {
+                        Text("✓ ¡Bien hecho!", style = MaterialTheme.typography.headlineMedium, color = TataNavy)
+                        Text("Toma confirmada ♡", color = TataNavy, modifier = Modifier.padding(top = 8.dp))
+                        Text(state.dose.medicationName, color = TataText, modifier = Modifier.padding(top = 12.dp))
+                        state.dose.confirmedAt?.let { at ->
+                            Text(at.atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("d MMM, h:mm a", Locale("es", "PE"))), color = TataMuted, modifier = Modifier.padding(top = 8.dp))
+                        }
+                    }
+                    TataButton("Volver al inicio", onBack, Modifier.padding(top = 20.dp))
+                } else {
+                    DoseContent(state.dose)
+                    state.confirmationMessage?.let { Text(it, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(bottom = 12.dp)) }
+                    if (state.dose.status == DoseStatus.PENDING) {
+                        TataButton(if (state.confirming) "Confirmando..." else "Confirmar toma", onConfirm, enabled = !state.confirming)
+                    }
+                }
+            }
         }
     }
 }
@@ -168,12 +188,12 @@ private fun DetailLine(label: String, value: String) {
 }
 
 private fun scheduleDayLabel(dose: DoseDetailReadModel): String =
-    dose.scheduledAt.atOffset(ZoneOffset.UTC)
+    dose.scheduledAt.atZone(ZoneId.systemDefault())
         .format(DateTimeFormatter.ofPattern("EEEE", Locale("es", "PE")))
         .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale("es", "PE")) else it.toString() }
 
 private fun scheduleTimeLabel(dose: DoseDetailReadModel): String =
-    dose.scheduledAt.atOffset(ZoneOffset.UTC)
+    dose.scheduledAt.atZone(ZoneId.systemDefault())
         .format(DateTimeFormatter.ofPattern("h:mm a", Locale("es", "PE")))
         .lowercase()
         .replace("am", "a. m.")

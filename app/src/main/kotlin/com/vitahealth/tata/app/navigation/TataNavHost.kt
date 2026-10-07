@@ -62,7 +62,7 @@ fun TataNavHost(
                 factory = app.container.careLinkViewModelFactory(caregiverId),
                 onConfirmed = { olderAdultId, olderAdultName ->
                     navController.navigate(
-                        RootDestination.MedicationRegistration.createRoute(
+                        RootDestination.FamilySummary.createRoute(
                             caregiverId = caregiverId,
                             olderAdultId = olderAdultId,
                             olderAdultName = olderAdultName,
@@ -71,6 +71,24 @@ fun TataNavHost(
                         popUpTo(RootDestination.CareLink.route) { inclusive = true }
                     }
                 },
+            )
+        }
+
+        composable(RootDestination.FamilySummary.route, arguments = listOf(
+            navArgument("caregiverId") { type = NavType.StringType },
+            navArgument("olderAdultId") { type = NavType.StringType },
+            navArgument("olderAdultName") { type = NavType.StringType },
+        )) { entry ->
+            val app = androidx.compose.ui.platform.LocalContext.current.applicationContext as TataApplication
+            val caregiver = requireNotNull(entry.arguments?.getString("caregiverId"))
+            val adult = requireNotNull(entry.arguments?.getString("olderAdultId"))
+            val name = requireNotNull(entry.arguments?.getString("olderAdultName"))
+            com.vitahealth.tata.monitoring.presentation.summary.FamilySummaryRoute(
+                factory = app.container.familySummaryViewModelFactory(caregiver, adult, name),
+                olderAdultName = name,
+                onAgenda = { navController.navigate(RootDestination.IntakeAgenda.createRoute(adult)) },
+                onAddMedication = { navController.navigate(RootDestination.MedicationRegistration.createRoute(caregiver, adult, name)) },
+                onChangePerson = { navController.navigate(RootDestination.CareLink.createRoute(caregiver)) },
             )
         }
 
@@ -540,6 +558,20 @@ fun TataNavHost(
                 onOpenDoseDetail = { intakeId ->
                     navController.navigate(RootDestination.DoseDetail.createRoute(intakeId))
                 },
+                onOpenAgenda = { navController.navigate(RootDestination.IntakeAgenda.createRoute(olderAdultId)) },
+            )
+        }
+
+        composable(
+            route = RootDestination.IntakeAgenda.route,
+            arguments = listOf(navArgument(RootDestination.IntakeAgenda.olderAdultIdArgument) { type = NavType.StringType }),
+        ) { backStackEntry ->
+            val app = androidx.compose.ui.platform.LocalContext.current.applicationContext as TataApplication
+            val olderAdultId = requireNotNull(backStackEntry.arguments?.getString(RootDestination.IntakeAgenda.olderAdultIdArgument))
+            com.vitahealth.tata.intake.presentation.agenda.IntakeAgendaRoute(
+                factory = app.container.intakeAgendaViewModelFactory(olderAdultId),
+                onOpenDose = { navController.navigate(RootDestination.DoseDetail.createRoute(it)) },
+                onHome = { navController.popBackStack() },
             )
         }
 
