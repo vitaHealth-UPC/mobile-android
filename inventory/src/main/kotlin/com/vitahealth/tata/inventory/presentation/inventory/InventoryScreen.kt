@@ -2,6 +2,26 @@ package com.vitahealth.tata.inventory.presentation.inventory
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.remember
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import com.vitahealth.tata.shared.design.components.TataFormField
+import com.vitahealth.tata.shared.design.theme.TataDeepNavy
+import com.vitahealth.tata.shared.design.theme.TataNavy
+import com.vitahealth.tata.shared.design.theme.TataLavender
+import com.vitahealth.tata.shared.design.theme.tataPrototypeTopPadding
+import com.vitahealth.tata.shared.design.theme.tataPrototypeShadow
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -94,18 +114,20 @@ fun InventoryScreen(
             .fillMaxSize()
             .background(TataSurface)
             .verticalScroll(rememberScrollState())
-            .padding(24.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+            .padding(horizontal = 22.dp).padding(top = tataPrototypeTopPadding(), bottom = 24.dp),
     ) {
         Text(
             text = stringResource(R.string.inventory_title),
             color = TataText,
-            fontSize = 30.sp,
-            fontWeight = FontWeight.Bold,
+            fontSize = 29.sp, lineHeight = 38.sp,
+            fontFamily = FontFamily(Font(com.vitahealth.tata.shared.R.font.tata_serif)),
+            modifier = Modifier.padding(start = 2.dp),
         )
         Text(
             text = stringResource(R.string.inventory_subtitle),
-            color = TataMuted,
+            color = TataMuted, fontSize = 12.sp, lineHeight = 16.sp,
+            fontFamily = FontFamily(Font(com.vitahealth.tata.shared.R.font.tata_inter)),
+            modifier = Modifier.padding(start = 2.dp, top = 2.dp, bottom = 20.dp),
         )
 
         when (state) {
@@ -141,49 +163,35 @@ private fun ReadyBody(
     onSaveReplenishment: () -> Unit,
     onLotChange: (String) -> Unit,
 ) {
-    StockCard(state = state)
-
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(
-            text = stringResource(R.string.inventory_replenishment_section),
-            color = TataText,
-            fontWeight = FontWeight.SemiBold,
-        )
-        InventoryQuantityField(
-            label = stringResource(R.string.inventory_quantity_received_label),
-            value = state.replenishmentInput,
-            onValueChange = onReplenishmentChange,
-            isError = state.replenishmentErrorCode == "INVALID_QUANTITY",
-            enabled = !state.submitting,
-            errorLabel = stringResource(R.string.inventory_invalid_quantity_label),
-        )
-        Text(text = stringResource(R.string.inventory_lot_label), color = TataMuted)
-        OutlinedTextField(
-            value = state.lotInput,
-            onValueChange = onLotChange,
-            enabled = !state.submitting,
-            singleLine = true,
-            shape = RoundedCornerShape(15.dp),
-            modifier = Modifier.fillMaxWidth(),
-            colors = OutlinedTextFieldDefaults.colors(focusedContainerColor = Color.White, unfocusedContainerColor = Color.White),
-        )
-        state.replenishmentErrorCode?.let { code ->
-            Text(text = stringResource(inventoryErrorMessageRes(code)), color = TataError)
+    val quantityFocus = remember { FocusRequester() }
+    StockCard(state)
+    Spacer(Modifier.height(28.dp))
+    InventoryAction(stringResource(R.string.inventory_replenishment_section),
+        onClick = { quantityFocus.requestFocus() }, enabled = !state.submitting)
+    Spacer(Modifier.height(22.dp))
+    InventoryQuantityField(label = stringResource(R.string.inventory_quantity_received_label),
+        value = state.replenishmentInput, onValueChange = onReplenishmentChange,
+        isError = state.replenishmentErrorCode == "INVALID_QUANTITY", enabled = !state.submitting,
+        errorLabel = stringResource(R.string.inventory_invalid_quantity_label), focusRequester = quantityFocus)
+    Spacer(Modifier.height(2.dp))
+    TataFormField(label = stringResource(R.string.inventory_lot_label), value = state.lotInput,
+        onValueChange = onLotChange, enabled = !state.submitting, softSurface = true)
+    Spacer(Modifier.height(20.dp))
+    InventoryAction(stringResource(if (state.submitting) R.string.inventory_saving else R.string.inventory_save_replenishment),
+        onSaveReplenishment, !state.submitting, secondary = true)
+    Spacer(Modifier.height(10.dp))
+    state.stock.lastReplenishment?.let { LastReplenishmentCard(it, state.unit) }
+    state.replenishmentErrorCode?.let { code ->
+        Spacer(Modifier.height(12.dp))
+        TataCard(containerColor = com.vitahealth.tata.shared.design.theme.TataErrorSurface) {
+            InventoryText(stringResource(inventoryErrorMessageRes(code)), 11, TataError)
         }
-        if (state.justRegistered) {
-            Text(text = stringResource(R.string.inventory_replenishment_saved), color = AvailableGreen)
-        }
-        TataButton(
-            text = stringResource(
-                if (state.submitting) R.string.inventory_saving else R.string.inventory_save_replenishment,
-            ),
-            onClick = onSaveReplenishment,
-            enabled = !state.submitting,
-        )
     }
-
-    state.stock.lastReplenishment?.let { batch ->
-        LastReplenishmentCard(batch = batch, unit = state.unit)
+    if (state.justRegistered) {
+        Spacer(Modifier.height(12.dp))
+        TataCard(containerColor = TataMint) {
+            InventoryText(stringResource(R.string.inventory_replenishment_saved), 11, AvailableGreen, FontWeight.SemiBold)
+        }
     }
 }
 
@@ -191,53 +199,80 @@ private fun ReadyBody(
 private fun StockCard(state: InventoryUiState.Ready) {
     val stock = state.stock
     val isLow = stock.status == StockStatus.LOW
-    val statusText = stringResource(
-        if (isLow) R.string.inventory_status_low else R.string.inventory_status_available,
-    )
-    val statusColor = if (isLow) TataError else AvailableGreen
-    val daysText = stock.daysRemaining
-        ?.let { stringResource(R.string.inventory_days_estimate, it) }
-        ?: stringResource(R.string.inventory_days_no_estimate)
-
-    TataCard(containerColor = TataCream, modifier = Modifier.fillMaxWidth()) {
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(text = state.medicationName, color = TataText, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-            Text(text = statusText, color = statusColor, fontWeight = FontWeight.SemiBold)
+    Surface(shape = RoundedCornerShape(18.dp), color = Color.Transparent,
+        modifier = Modifier.fillMaxWidth().tataPrototypeShadow(8.dp, RoundedCornerShape(18.dp))) {
+        Box(Modifier.fillMaxWidth().heightIn(min = 150.dp)
+            .background(Brush.horizontalGradient(if (isLow) listOf(Color(0xFFFFF3E2), Color(0xFFFBE8C7))
+                else listOf(Color(0xFFE8F5EB), Color(0xFFDDEDE1))))) {
+            Column(Modifier.padding(start = 16.dp, top = 16.dp, bottom = 18.dp).widthIn(max = 190.dp)) {
+                InventoryText(state.medicationName, 17, TataText, FontWeight.SemiBold)
+                Spacer(Modifier.height(12.dp))
+                InventoryText(if (state.unit.isBlank()) stringResource(R.string.inventory_units_remaining_no_unit, stock.remainingStock)
+                    else stringResource(R.string.inventory_units_remaining, stock.remainingStock, state.unit), 18, TataText, FontWeight.Bold)
+                Spacer(Modifier.height(6.dp))
+                InventoryText(stock.daysRemaining?.let { stringResource(R.string.inventory_days_estimate, it) }
+                    ?: stringResource(R.string.inventory_days_no_estimate), 12, TataMuted)
+            }
+            Column(Modifier.align(Alignment.TopEnd).padding(top = 14.dp, end = 20.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                InventoryText(stringResource(if (isLow) R.string.inventory_status_low else R.string.inventory_status_available),
+                    12, if (isLow) Color(0xFFD94759) else AvailableGreen, FontWeight.SemiBold)
+                Spacer(Modifier.height(8.dp))
+                // Native ring represents stock status; the day estimate always comes from the API.
+                Box(Modifier.size(78.dp).border(9.dp, if (isLow) Color(0xFFE1AE4B) else AvailableGreen, CircleShape), contentAlignment = Alignment.Center) {
+                    Column(Modifier.size(54.dp).background(Color.White, CircleShape), horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center) {
+                        InventoryText(stock.daysRemaining?.toString() ?: "—", 20, TataDeepNavy, FontWeight.Bold)
+                        InventoryText(stringResource(R.string.inventory_days_short), 9, TataMuted)
+                    }
+                }
+            }
         }
-        Spacer(Modifier.height(8.dp))
-        Text(
-            text = if (state.unit.isBlank()) {
-                stringResource(R.string.inventory_units_remaining_no_unit, stock.remainingStock)
-            } else {
-                stringResource(R.string.inventory_units_remaining, stock.remainingStock, state.unit)
-            },
-            color = TataText,
-            fontSize = 22.sp,
-            fontWeight = FontWeight.Bold,
-        )
-        Text(text = daysText, color = TataMuted)
     }
 }
 
 @Composable
 private fun LastReplenishmentCard(batch: InventoryBatch, unit: String) {
-    TataCard(containerColor = TataMint, modifier = Modifier.fillMaxWidth()) {
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(text = stringResource(R.string.inventory_last_replenishment), color = TataText, fontWeight = FontWeight.SemiBold)
-            Text(text = stringResource(R.string.inventory_registered_badge), color = AvailableGreen)
+    Surface(shape = RoundedCornerShape(18.dp), color = Color.Transparent,
+        modifier = Modifier.fillMaxWidth().tataPrototypeShadow(8.dp, RoundedCornerShape(18.dp))) {
+        Box(Modifier.fillMaxWidth().heightIn(min = 92.dp)
+            .background(Brush.horizontalGradient(listOf(Color(0xFFECF4FB), Color(0xFFDFECF6))))) {
+            Column(Modifier.padding(start = 16.dp, top = 12.dp, end = 64.dp, bottom = 12.dp)) {
+                InventoryText(stringResource(R.string.inventory_last_replenishment), 12, TataText, FontWeight.SemiBold)
+                Spacer(Modifier.height(8.dp))
+                InventoryText(batchDateFormatter.format(batch.registeredAt), 15, TataText, FontWeight.SemiBold)
+                Spacer(Modifier.height(6.dp))
+                val quantity = if (unit.isBlank()) stringResource(R.string.inventory_batch_summary_no_unit, batch.quantity)
+                    else stringResource(R.string.inventory_batch_summary, batch.quantity, unit)
+                InventoryText(listOfNotNull(quantity, batch.lot?.takeIf { it.isNotBlank() }).joinToString(", "), 11, TataMuted)
+            }
+            Box(Modifier.align(Alignment.TopEnd).padding(top = 14.dp, end = 17.dp)
+                .background(TataMint, CircleShape).padding(horizontal = 14.dp, vertical = 5.dp)) {
+                InventoryText(stringResource(R.string.inventory_registered_badge), 10, AvailableGreen)
+            }
+            val context = androidx.compose.ui.platform.LocalContext.current
+            coil3.compose.AsyncImage(model = coil3.request.ImageRequest.Builder(context)
+                .data(R.raw.figma_inventory_medication).decoderFactory(coil3.svg.SvgDecoder.Factory()).build(), contentDescription = null,
+                modifier = Modifier.align(Alignment.BottomEnd).padding(end = 27.dp, bottom = 18.dp).size(24.dp))
         }
-        Spacer(Modifier.height(4.dp))
-        batch.lot?.let { Text(text = it, color = TataMuted) }
-        Text(text = batchDateFormatter.format(batch.registeredAt), color = TataText, fontWeight = FontWeight.Bold)
-        Text(
-            text = if (unit.isBlank()) {
-                stringResource(R.string.inventory_batch_summary_no_unit, batch.quantity)
-            } else {
-                stringResource(R.string.inventory_batch_summary, batch.quantity, unit)
-            },
-            color = TataMuted,
-        )
     }
+}
+
+@Composable
+private fun InventoryAction(text: String, onClick: () -> Unit, enabled: Boolean, secondary: Boolean = false) {
+    Surface(onClick = onClick, enabled = enabled, shape = CircleShape,
+        color = if (secondary) TataLavender else TataNavy,
+        border = if (secondary) BorderStroke(1.dp, Color(0xFFC2B5E5)) else null,
+        modifier = Modifier.fillMaxWidth().height(56.dp).tataPrototypeShadow(8.dp, CircleShape)) {
+        Box(contentAlignment = Alignment.Center) {
+            InventoryText(text, 15, if (secondary) TataNavy else Color.White, FontWeight.SemiBold)
+        }
+    }
+}
+
+@Composable
+private fun InventoryText(text: String, size: Int, color: Color, weight: FontWeight = FontWeight.Normal) {
+    Text(text, style = TextStyle(fontFamily = FontFamily(Font(com.vitahealth.tata.shared.R.font.tata_inter)),
+        fontSize = size.sp, lineHeight = (size * 1.3f).sp, fontWeight = weight, color = color))
 }
 
 @Composable
@@ -247,6 +282,7 @@ private fun NotInitializedBody(
     onThresholdChange: (String) -> Unit,
     onDefineInitial: () -> Unit,
 ) {
+    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
     Text(text = stringResource(R.string.inventory_not_initialized), color = TataMuted)
 
     InventoryQuantityField(
@@ -275,6 +311,7 @@ private fun NotInitializedBody(
         onClick = onDefineInitial,
         enabled = !state.submitting,
     )
+    }
 }
 
 @Composable
@@ -308,11 +345,14 @@ private fun InventoryQuantityField(
     enabled: Boolean,
     modifier: Modifier = Modifier,
     errorLabel: String? = null,
+    focusRequester: FocusRequester? = null,
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
         Text(
             text = if (isError && errorLabel != null) errorLabel else label,
             color = if (isError) TataError else TataMuted,
+            fontSize = 11.sp, lineHeight = 14.sp,
+            fontFamily = FontFamily(Font(com.vitahealth.tata.shared.R.font.tata_inter)),
             modifier = Modifier.padding(bottom = 8.dp),
         )
         OutlinedTextField(
@@ -322,7 +362,9 @@ private fun InventoryQuantityField(
             isError = isError,
             singleLine = true,
             shape = RoundedCornerShape(15.dp),
-            modifier = Modifier.fillMaxWidth(),
+            textStyle = TextStyle(fontFamily = FontFamily(Font(com.vitahealth.tata.shared.R.font.tata_inter)), fontSize = 14.sp),
+            modifier = Modifier.fillMaxWidth().heightIn(min = 58.dp).tataPrototypeShadow(8.dp, RoundedCornerShape(15.dp))
+                .then(if (focusRequester != null) Modifier.focusRequester(focusRequester) else Modifier),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedContainerColor = Color.White,
@@ -330,7 +372,7 @@ private fun InventoryQuantityField(
                 disabledContainerColor = Color.White,
                 errorContainerColor = Color.White,
                 focusedBorderColor = if (isError) TataError else TataBorder,
-                unfocusedBorderColor = if (isError) TataError else TataBorder,
+                unfocusedBorderColor = if (isError) TataError else Color.Transparent,
                 errorBorderColor = TataError,
                 focusedTextColor = TataText,
                 unfocusedTextColor = TataText,
