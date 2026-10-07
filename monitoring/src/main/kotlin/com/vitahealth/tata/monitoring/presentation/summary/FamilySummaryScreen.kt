@@ -30,7 +30,7 @@ private val summaryLocale = Locale("es", "PE")
 
 @Composable
 fun FamilySummaryRoute(factory: FamilySummaryViewModel.Factory, olderAdultName: String,
-    onAgenda: () -> Unit, onAddMedication: () -> Unit, onChangePerson: () -> Unit) {
+    onAgenda: () -> Unit, onHistory: () -> Unit, onAddMedication: () -> Unit, onChangePerson: () -> Unit) {
     val model: FamilySummaryViewModel = viewModel(factory = factory)
     val state by model.state.collectAsState()
     val owner = LocalLifecycleOwner.current
@@ -39,7 +39,7 @@ fun FamilySummaryRoute(factory: FamilySummaryViewModel.Factory, olderAdultName: 
         owner.lifecycle.addObserver(observer)
         onDispose { owner.lifecycle.removeObserver(observer) }
     }
-    FamilySummaryScreen(state, olderAdultName, model::refresh, onAgenda, model::history, model::contact,
+    FamilySummaryScreen(state, olderAdultName, model::refresh, onAgenda, onHistory, model::contact,
         model::alerts, model::notes, onAddMedication, onChangePerson)
     state.dialog?.let { dialog ->
         val context = LocalContext.current

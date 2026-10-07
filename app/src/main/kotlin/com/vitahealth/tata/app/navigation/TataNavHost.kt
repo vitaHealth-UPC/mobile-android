@@ -87,6 +87,7 @@ fun TataNavHost(
                 factory = app.container.familySummaryViewModelFactory(caregiver, adult, name),
                 olderAdultName = name,
                 onAgenda = { navController.navigate(RootDestination.IntakeAgenda.createRoute(adult)) },
+                onHistory = { navController.navigate(RootDestination.AdherenceHistory.createRoute(adult)) },
                 onAddMedication = { navController.navigate(RootDestination.MedicationRegistration.createRoute(caregiver, adult, name)) },
                 onChangePerson = { navController.navigate(RootDestination.CareLink.createRoute(caregiver)) },
             )
