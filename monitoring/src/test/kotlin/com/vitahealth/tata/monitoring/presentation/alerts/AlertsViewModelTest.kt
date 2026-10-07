@@ -5,6 +5,7 @@ import com.vitahealth.tata.monitoring.alert
 import com.vitahealth.tata.monitoring.application.AlertFailureCodes
 import com.vitahealth.tata.monitoring.application.handlers.GetAlertDetailQueryHandler
 import com.vitahealth.tata.monitoring.application.handlers.GetOpenAlertsQueryHandler
+import com.vitahealth.tata.monitoring.application.handlers.UpdateAlertStatusCommandHandler
 import com.vitahealth.tata.monitoring.domain.model.AlertStatus
 import com.vitahealth.tata.monitoring.failure
 import com.vitahealth.tata.shared.common.result.AppResult
@@ -19,7 +20,12 @@ class AlertsViewModelTest {
     private val repository = FakeAlertsRepository()
 
     private fun listModel() = AlertsViewModel("caregiver", "adult", GetOpenAlertsQueryHandler(repository), Dispatchers.Unconfined)
-    private fun detailModel() = AlertDetailViewModel("caregiver", "adult", 1, GetAlertDetailQueryHandler(repository), Dispatchers.Unconfined)
+    private fun detailModel() = AlertDetailViewModel(
+        "caregiver", "adult", 1,
+        GetAlertDetailQueryHandler(repository),
+        UpdateAlertStatusCommandHandler(repository),
+        Dispatchers.Unconfined,
+    )
 
     @Test fun listStartsLoadingUntilTheReadFinishes() {
         val gate = CompletableDeferred<Unit>().also { repository.gate = it }

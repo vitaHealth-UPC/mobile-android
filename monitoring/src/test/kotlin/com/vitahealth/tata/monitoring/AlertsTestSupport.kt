@@ -45,6 +45,7 @@ internal fun failure(code: String) = AppResult.Failure(message = code, code = co
 internal class FakeAlertsRepository : AlertsRepository {
     var list: AppResult<List<CaregiverAlert>> = AppResult.Success(emptyList())
     var detail: AppResult<CaregiverAlert> = failure(AlertFailureCodes.NOT_FOUND)
+    var update: AppResult<CaregiverAlert> = failure(AlertFailureCodes.REQUEST_FAILED)
     /** When set, reads suspend until the test completes it, so the loading state can be observed. */
     var gate: CompletableDeferred<Unit>? = null
     val requests = mutableListOf<String>()
@@ -59,5 +60,11 @@ internal class FakeAlertsRepository : AlertsRepository {
         requests += "detail:$caregiverId:$olderAdultId:$alertId"
         gate?.await()
         return detail
+    }
+
+    override suspend fun updateStatus(caregiverId: String, olderAdultId: String, alertId: Long, status: AlertStatus): AppResult<CaregiverAlert> {
+        requests += "update:$caregiverId:$olderAdultId:$alertId:$status"
+        gate?.await()
+        return update
     }
 }
