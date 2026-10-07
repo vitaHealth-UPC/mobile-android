@@ -11,4 +11,8 @@ interface UserPreferencesRemote {
     suspend fun updateTextSize(userId: String, textSize: TextSizeLevel): AppResult<UserPreferences>
 
     suspend fun updateHighContrast(userId: String, enabled: Boolean): AppResult<UserPreferences>
+
+    suspend fun updateReducedMotion(userId: String, enabled: Boolean): AppResult<UserPreferences>
+
+    suspend fun updateVoiceConfirmation(userId: String, enabled: Boolean): AppResult<UserPreferences>
 }

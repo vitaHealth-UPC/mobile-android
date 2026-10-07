@@ -6,11 +6,15 @@ import androidx.lifecycle.viewModelScope
 import com.vitahealth.tata.preferences.application.PreferenceUpdate
 import com.vitahealth.tata.preferences.application.commands.SyncUserPreferencesCommand
 import com.vitahealth.tata.preferences.application.commands.UpdateHighContrastCommand
+import com.vitahealth.tata.preferences.application.commands.UpdateReducedMotionCommand
 import com.vitahealth.tata.preferences.application.commands.UpdateTextSizeCommand
+import com.vitahealth.tata.preferences.application.commands.UpdateVoiceConfirmationCommand
 import com.vitahealth.tata.preferences.application.handlers.ObserveAccessibilityPreferencesQueryHandler
 import com.vitahealth.tata.preferences.application.handlers.SyncUserPreferencesCommandHandler
 import com.vitahealth.tata.preferences.application.handlers.UpdateHighContrastCommandHandler
+import com.vitahealth.tata.preferences.application.handlers.UpdateReducedMotionCommandHandler
 import com.vitahealth.tata.preferences.application.handlers.UpdateTextSizeCommandHandler
+import com.vitahealth.tata.preferences.application.handlers.UpdateVoiceConfirmationCommandHandler
 import com.vitahealth.tata.preferences.domain.model.TextSizeLevel
 import com.vitahealth.tata.shared.common.result.AppResult
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,6 +28,8 @@ class AccessibilityViewModel(
     observeAccessibility: ObserveAccessibilityPreferencesQueryHandler,
     private val updateTextSize: UpdateTextSizeCommandHandler,
     private val updateHighContrast: UpdateHighContrastCommandHandler,
+    private val updateReducedMotion: UpdateReducedMotionCommandHandler,
+    private val updateVoiceConfirmation: UpdateVoiceConfirmationCommandHandler,
     private val syncPreferences: SyncUserPreferencesCommandHandler,
 ) : ViewModel() {
     private val _state = MutableStateFlow(AccessibilityUiState())
@@ -53,6 +59,22 @@ class AccessibilityViewModel(
         save(
             send = { updateHighContrast(UpdateHighContrastCommand(userId, enabled)) },
             onSaved = if (enabled) AccessibilityMessage.HighContrastSaved else AccessibilityMessage.StandardContrastSaved,
+        )
+    }
+
+    fun onReducedMotionChange(enabled: Boolean) {
+        if (_state.value.preferences.reducedMotion == enabled) return
+        save(
+            send = { updateReducedMotion(UpdateReducedMotionCommand(userId, enabled)) },
+            onSaved = if (enabled) AccessibilityMessage.ReducedMotionSaved else AccessibilityMessage.StandardMotionSaved,
+        )
+    }
+
+    fun onVoiceConfirmationChange(enabled: Boolean) {
+        if (_state.value.preferences.voiceConfirmation == enabled) return
+        save(
+            send = { updateVoiceConfirmation(UpdateVoiceConfirmationCommand(userId, enabled)) },
+            onSaved = if (enabled) AccessibilityMessage.VoiceConfirmationSaved else AccessibilityMessage.VoiceConfirmationOffSaved,
         )
     }
 
@@ -88,6 +110,8 @@ class AccessibilityViewModel(
         private val observeAccessibility: ObserveAccessibilityPreferencesQueryHandler,
         private val updateTextSize: UpdateTextSizeCommandHandler,
         private val updateHighContrast: UpdateHighContrastCommandHandler,
+        private val updateReducedMotion: UpdateReducedMotionCommandHandler,
+        private val updateVoiceConfirmation: UpdateVoiceConfirmationCommandHandler,
         private val syncPreferences: SyncUserPreferencesCommandHandler,
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
@@ -97,6 +121,8 @@ class AccessibilityViewModel(
                 observeAccessibility = observeAccessibility,
                 updateTextSize = updateTextSize,
                 updateHighContrast = updateHighContrast,
+                updateReducedMotion = updateReducedMotion,
+                updateVoiceConfirmation = updateVoiceConfirmation,
                 syncPreferences = syncPreferences,
             ) as T
     }

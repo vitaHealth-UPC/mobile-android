@@ -11,6 +11,8 @@ data class TataAccessibility(
     val fontScale: Float = 1f,
     /** Stronger text, borders and controls. Components read it through [LocalTataAccessibility]. */
     val highContrast: Boolean = false,
+    /** Non-essential animations and transitions must be skipped or shortened. */
+    val reducedMotion: Boolean = false,
 )
 
 val LocalTataAccessibility = staticCompositionLocalOf { TataAccessibility() }
