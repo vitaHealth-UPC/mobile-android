@@ -16,4 +16,5 @@ data class CaregiverRegistrationUiState(
     val step: RegistrationStep = RegistrationStep.Account,
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
+    val errorCode: String? = null,
 )

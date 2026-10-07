@@ -169,12 +169,12 @@ internal fun AlertsProblemCard(
         AlertsProblem.NETWORK -> R.string.alerts_error_network
         AlertsProblem.ACCESS_DENIED -> R.string.alerts_error_access
         AlertsProblem.NOT_FOUND -> notFoundMessage
-        AlertsProblem.UNKNOWN -> R.string.alerts_error_unknown
+        AlertsProblem.CONFLICT, AlertsProblem.UNKNOWN -> R.string.alerts_error_unknown
     }
     TataCard(modifier = modifier.fillMaxWidth(), containerColor = TataWarningSurface) {
         Text(text = stringResource(message), color = tataTextColor(), style = MaterialTheme.typography.bodyLarge)
         // Retrying cannot fix a missing link, consent or alert: only transient failures offer it.
-        if (problem == AlertsProblem.NETWORK || problem == AlertsProblem.UNKNOWN) {
+        if (problem == AlertsProblem.NETWORK || problem == AlertsProblem.UNKNOWN || problem == AlertsProblem.CONFLICT) {
             TataButton(
                 text = stringResource(R.string.alerts_retry),
                 onClick = onRetry,

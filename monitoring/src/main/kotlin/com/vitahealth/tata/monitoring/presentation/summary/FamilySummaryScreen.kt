@@ -1,7 +1,5 @@
 package com.vitahealth.tata.monitoring.presentation.summary
 
-import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.*
@@ -19,6 +17,8 @@ import androidx.lifecycle.*
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.vitahealth.tata.monitoring.R
+import com.vitahealth.tata.monitoring.domain.model.ContactChannelType
+import com.vitahealth.tata.monitoring.presentation.contact.openContact
 import com.vitahealth.tata.shared.design.components.*
 import com.vitahealth.tata.shared.design.theme.*
 import java.time.*
@@ -32,7 +32,8 @@ private val summaryLocale = Locale("es", "PE")
 fun FamilySummaryRoute(factory: FamilySummaryViewModel.Factory, olderAdultName: String,
     onAgenda: () -> Unit, onHistory: () -> Unit, onAddMedication: () -> Unit, onChangePerson: () -> Unit,
     onAccessibility: () -> Unit = {}, onNotificationPreferences: () -> Unit = {},
-    onMedications: () -> Unit = {}, onTreatments: () -> Unit = {}, onAlerts: () -> Unit = {}) {
+    onMedications: () -> Unit = {}, onTreatments: () -> Unit = {}, onAlerts: () -> Unit = {},
+    onSubscription: () -> Unit = {}, onNotes: () -> Unit = {}) {
     val model: FamilySummaryViewModel = viewModel(factory = factory)
     val state by model.state.collectAsState()
     val owner = LocalLifecycleOwner.current
@@ -42,7 +43,7 @@ fun FamilySummaryRoute(factory: FamilySummaryViewModel.Factory, olderAdultName: 
         onDispose { owner.lifecycle.removeObserver(observer) }
     }
     FamilySummaryScreen(state, olderAdultName, model::refresh, onAgenda, onHistory, model::contact,
-        onAlerts, model::notes, onAddMedication, onChangePerson, onAccessibility, onNotificationPreferences, onMedications, onTreatments)
+        onAlerts, onNotes, onAddMedication, onChangePerson, onAccessibility, onNotificationPreferences, onMedications, onTreatments, onSubscription)
     state.dialog?.let { dialog ->
         val context = LocalContext.current
         AlertDialog(onDismissRequest = model::dismissDialog, title = { Text(dialog.title) },
@@ -52,12 +53,15 @@ fun FamilySummaryRoute(factory: FamilySummaryViewModel.Factory, olderAdultName: 
                 else dialog.rows.forEach { Text(it, modifier = Modifier.padding(bottom = 16.dp)) }
             } }, confirmButton = {
                 TextButton(onClick = {
-                    if (dialog.phone != null) {
-                        val intent = Intent(Intent.ACTION_DIAL, Uri.fromParts("tel", dialog.phone, null))
-                        if (intent.resolveActivity(context.packageManager) != null) context.startActivity(intent)
-                    }
+                    dialog.contact?.let { context.openContact(it) }
                     model.dismissDialog()
-                }) { Text(if (dialog.phone == null) "Cerrar" else "Abrir teléfono") }
+                }) {
+                    Text(when (dialog.contact?.type) {
+                        null -> "Cerrar"
+                        ContactChannelType.PHONE -> "Abrir teléfono"
+                        ContactChannelType.WHATSAPP -> "Abrir WhatsApp"
+                    })
+                }
             })
     }
 }
@@ -67,7 +71,8 @@ fun FamilySummaryScreen(state: FamilySummaryUiState, olderAdultName: String, onR
     onAgenda: () -> Unit, onHistory: () -> Unit, onContact: () -> Unit, onAlerts: () -> Unit,
     onNotes: () -> Unit, onAddMedication: () -> Unit, onChangePerson: () -> Unit,
     onAccessibility: () -> Unit = {}, onNotificationPreferences: () -> Unit = {},
-    onMedications: () -> Unit = {}, onTreatments: () -> Unit = {}) {
+    onMedications: () -> Unit = {}, onTreatments: () -> Unit = {},
+    onSubscription: () -> Unit = {}) {
     var more by remember { mutableStateOf(false) }
     val summary = state.summary
     Column(Modifier.fillMaxSize().background(Brush.horizontalGradient(listOf(Color.White, TataSurface, Color(0xFFFCFBFF))))) {
@@ -160,18 +165,15 @@ fun FamilySummaryScreen(state: FamilySummaryUiState, olderAdultName: String, onR
                 Spacer(Modifier.height(18.dp))
             }
         }
-        Row(Modifier.padding(horizontal = 14.dp, vertical = 8.dp).fillMaxWidth().background(Color.White, RoundedCornerShape(28.dp)).padding(8.dp), horizontalArrangement = Arrangement.SpaceAround) {
-            listOf(Triple("Inicio", R.drawable.family_home, onRetry), Triple("Alertas", R.drawable.family_alerts, onAlerts),
-                Triple("Notas", R.drawable.family_notes, onNotes), Triple("Persona", R.drawable.family_person, onChangePerson),
-                Triple("Más", R.drawable.family_more, { more = true })).forEachIndexed { index, item ->
-                Column(Modifier.widthIn(min = 48.dp).heightIn(min = 48.dp).clickable(role = Role.Button, onClick = item.third), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Box(Modifier.size(38.dp, 30.dp).background(if (index == 0) TataNavy else Color.Transparent, RoundedCornerShape(15.dp)), contentAlignment = Alignment.Center) {
-                        Image(painterResource(item.second), null, Modifier.size(22.dp))
-                    }
-                    Text(item.first, fontSize = 9.sp, color = if (index == 0) TataNavy else TataMuted)
-                }
+        CaregiverTabBar(CaregiverTab.Home, { tab ->
+            when (tab) {
+                CaregiverTab.Home -> onRetry()
+                CaregiverTab.Alerts -> onAlerts()
+                CaregiverTab.Notes -> onNotes()
+                CaregiverTab.Person -> onChangePerson()
+                CaregiverTab.More -> more = true
             }
-        }
+        })
     }
     if (more) AlertDialog(onDismissRequest = { more = false }, title = { Text("Más opciones") }, text = {
         Column { TextButton(onClick = { more = false; onTreatments() }) { Text("Tratamientos") }
@@ -179,6 +181,7 @@ fun FamilySummaryScreen(state: FamilySummaryUiState, olderAdultName: String, onR
             TextButton(onClick = { more = false; onAddMedication() }) { Text("Agregar medicamento") }
             TextButton(onClick = { more = false; onAccessibility() }) { Text("Accesibilidad") }
             TextButton(onClick = { more = false; onNotificationPreferences() }) { Text("Preferencias de notificación") }
+            TextButton(onClick = { more = false; onSubscription() }) { Text("Plan y suscripción") }
             TextButton(onClick = { more = false; onChangePerson() }) { Text("Vincular otra persona") }
             TextButton(onClick = { more = false; onRetry() }) { Text("Actualizar resumen") } }
     }, confirmButton = { TextButton(onClick = { more = false }) { Text("Cerrar") } })

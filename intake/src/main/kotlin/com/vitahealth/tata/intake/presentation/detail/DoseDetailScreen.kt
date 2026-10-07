@@ -1,44 +1,42 @@
 package com.vitahealth.tata.intake.presentation.detail
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.vitahealth.tata.intake.R
 import com.vitahealth.tata.intake.application.readmodels.DoseDetailReadModel
 import com.vitahealth.tata.intake.domain.model.DoseStatus
-import com.vitahealth.tata.shared.design.components.TataButton
-import com.vitahealth.tata.shared.design.components.TataCard
-import com.vitahealth.tata.shared.design.theme.TataCream
-import com.vitahealth.tata.shared.design.theme.TataLavender
-import com.vitahealth.tata.shared.design.theme.TataMint
-import com.vitahealth.tata.shared.design.theme.TataMuted
-import com.vitahealth.tata.shared.design.theme.TataNavy
-import com.vitahealth.tata.shared.design.theme.TataSurface
-import com.vitahealth.tata.shared.design.theme.TataText
-import com.vitahealth.tata.shared.design.theme.TataWarningSurface
+import com.vitahealth.tata.shared.design.components.*
+import com.vitahealth.tata.shared.design.theme.*
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+
+private val detailInter = FontFamily(Font(com.vitahealth.tata.shared.R.font.tata_inter))
+private val detailSerif = FontFamily(Font(com.vitahealth.tata.shared.R.font.tata_serif))
 
 @Composable
 fun DoseDetailRoute(
@@ -65,125 +63,126 @@ fun DoseDetailScreen(
     onConfirm: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .background(TataSurface)
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 22.dp, vertical = 28.dp),
-    ) {
-        Text(
-            text = "‹  Detalle del medicamento",
-            style = MaterialTheme.typography.headlineSmall,
-            color = TataText,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.clickable(onClick = onBack),
-        )
-        Spacer(Modifier.height(20.dp))
-
-        when (state) {
-            DoseDetailUiState.Loading -> TataCard(Modifier.fillMaxWidth()) {
-                Text("Cargando detalle de la toma...", color = TataMuted)
+    Column(modifier.fillMaxSize().background(Brush.horizontalGradient(listOf(Color.White, TataSurface, Color(0xFFFCFBFF))))) {
+        Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = 22.dp)) {
+            Spacer(Modifier.height(28.dp))
+            val backLabel = stringResource(R.string.detail_back)
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                IconButton(onClick = onBack, modifier = Modifier.size(32.dp).semantics { contentDescription = backLabel }) {
+                    Text("‹", color = TataNavy, fontSize = 24.sp)
+                }
+                Text(stringResource(R.string.detail_title), fontFamily = detailSerif, fontSize = 22.sp, lineHeight = 28.sp, color = TataText)
             }
-            is DoseDetailUiState.Error -> TataCard(Modifier.fillMaxWidth()) {
-                Text("No pudimos cargar esta toma", fontWeight = FontWeight.Bold, color = TataText)
-                Text(state.message, color = TataMuted, modifier = Modifier.padding(top = 8.dp))
-                TataButton("Reintentar", onRetry, Modifier.padding(top = 16.dp))
-            }
-            is DoseDetailUiState.Content -> {
-                if (state.confirmationSucceeded) {
-                    TataCard(containerColor = TataMint, modifier = Modifier.fillMaxWidth()) {
-                        Text("✓ ¡Bien hecho!", style = MaterialTheme.typography.headlineMedium, color = TataNavy)
-                        Text("Toma confirmada ♡", color = TataNavy, modifier = Modifier.padding(top = 8.dp))
-                        Text(state.dose.medicationName, color = TataText, modifier = Modifier.padding(top = 12.dp))
-                        state.dose.confirmedAt?.let { at ->
-                            Text(at.atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("d MMM, h:mm a", Locale("es", "PE"))), color = TataMuted, modifier = Modifier.padding(top = 8.dp))
+            Spacer(Modifier.height(22.dp))
+            when (state) {
+                DoseDetailUiState.Loading -> TataCard(Modifier.fillMaxWidth()) { Text(stringResource(R.string.detail_loading), color = TataMuted) }
+                is DoseDetailUiState.Error -> TataCard(Modifier.fillMaxWidth()) {
+                    Text(stringResource(R.string.detail_error_title), fontWeight = FontWeight.Bold, color = TataText)
+                    Text(state.message, color = TataMuted, modifier = Modifier.padding(top = 8.dp))
+                    TataButton(stringResource(R.string.home_retry), onRetry, Modifier.padding(top = 16.dp))
+                }
+                is DoseDetailUiState.Content -> {
+                    val outcome = state.outcome
+                    if (outcome == ConfirmationOutcome.LATE || outcome == ConfirmationOutcome.OMISSION_PRESERVED) {
+                        ConfirmationResult(outcome, state.dose, onBack)
+                    } else if (state.confirmationSucceeded) {
+                        TataCard(containerColor = TataMint, modifier = Modifier.fillMaxWidth()) {
+                            Text(stringResource(R.string.detail_success_title), fontFamily = detailSerif, fontSize = 28.sp, color = TataNavy)
+                            Text(stringResource(R.string.detail_success_description), color = TataNavy, modifier = Modifier.padding(top = 8.dp))
+                            Text(state.dose.medicationName, color = TataText, modifier = Modifier.padding(top = 12.dp))
+                            state.dose.confirmedAt?.let { at ->
+                                Text(at.atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("d MMM, h:mm a", Locale.forLanguageTag("es-PE"))), color = TataMuted, modifier = Modifier.padding(top = 8.dp))
+                            }
                         }
-                    }
-                    TataButton("Volver al inicio", onBack, Modifier.padding(top = 20.dp))
-                } else {
-                    DoseContent(state.dose)
-                    state.confirmationMessage?.let { Text(it, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(bottom = 12.dp)) }
-                    if (state.dose.status == DoseStatus.PENDING) {
-                        TataButton(if (state.confirming) "Confirmando..." else "Confirmar toma", onConfirm, enabled = !state.confirming)
+                        TataButton(stringResource(R.string.detail_back_home), onBack, Modifier.padding(top = 20.dp))
+                    } else {
+                        DoseContent(state.dose)
+                        state.confirmationMessage?.let { Text(it, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(bottom = 12.dp)) }
+                        if (state.confirmationUnavailable) {
+                            TataButton(stringResource(R.string.home_retry), onRetry)
+                        } else if (state.dose.status == DoseStatus.PENDING) {
+                            TataButton(stringResource(if (state.confirming) R.string.detail_confirming else R.string.detail_confirm), onConfirm, enabled = !state.confirming)
+                        }
                     }
                 }
             }
+            Spacer(Modifier.height(24.dp))
         }
+        AdultTabBar(selected = AdultTab.Medications, availableTabs = emptySet(), onSelect = {})
     }
 }
 
 @Composable
 private fun DoseContent(dose: DoseDetailReadModel) {
-    TataCard(
-        containerColor = TataLavender,
-        modifier = Modifier.fillMaxWidth(),
-    ) {
-        Text("Detalle de toma", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-        Text(dose.medicationName, color = TataNavy, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(top = 6.dp))
-        Text(dose.dose, color = TataMuted, modifier = Modifier.padding(top = 3.dp))
+    Row(Modifier.fillMaxWidth().shadow(6.dp, RoundedCornerShape(20.dp)).clip(RoundedCornerShape(20.dp))
+        .background(Brush.horizontalGradient(listOf(Color(0xFFF0EBFF), Color(0xFFE7DDFB))))
+        .padding(start = 3.dp, end = 16.dp, top = 9.dp, bottom = 17.dp), verticalAlignment = Alignment.CenterVertically) {
+        Box(Modifier.size(90.dp), contentAlignment = Alignment.Center) {
+            Image(painterResource(R.drawable.detail_tablet), null, Modifier.requiredSize(130.dp).offset(y = 10.dp))
+        }
+        Spacer(Modifier.width(15.dp))
+        Column(Modifier.weight(1f)) {
+            Text(dose.medicationName, fontFamily = detailInter, fontSize = 23.sp, lineHeight = 28.sp, fontWeight = FontWeight.Bold, color = TataText)
+            Text(statusTitle(dose.status), fontFamily = detailInter, fontSize = 12.sp, lineHeight = 15.sp, color = Color(0xFF5966B8),
+                modifier = Modifier.padding(top = 5.dp).background(Color(0xFFF8F6FF), RoundedCornerShape(12.dp)).padding(horizontal = 7.dp, vertical = 4.dp))
+            Text(dose.dose, fontFamily = detailInter, fontSize = 13.sp, lineHeight = 17.sp, color = TataText, modifier = Modifier.padding(top = 8.dp))
+        }
     }
-
-    Text("Próxima confirmación", color = TataMuted, modifier = Modifier.padding(top = 18.dp, bottom = 6.dp))
-    TataCard(Modifier.fillMaxWidth()) {
-        Row(
-            Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Column {
-                Text(scheduleDayLabel(dose), color = TataMuted)
-                Text(
-                    scheduleTimeLabel(dose),
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = TataText,
-                )
+    DetailSectionLabel(stringResource(R.string.detail_next_confirmation))
+    Row(Modifier.fillMaxWidth().shadow(6.dp, RoundedCornerShape(18.dp)).background(Color.White, RoundedCornerShape(18.dp)).padding(horizontal = 16.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+        TataSvgIcon(R.raw.detail_morning, Modifier.size(22.dp))
+        Column(Modifier.weight(1f).padding(start = 10.dp)) {
+            Text(scheduleDayLabel(dose), fontFamily = detailInter, fontSize = 12.sp, lineHeight = 15.sp, color = TataMuted)
+            Text(scheduleTimeLabel(dose), fontFamily = detailInter, fontSize = 23.sp, lineHeight = 28.sp, fontWeight = FontWeight.Bold, color = TataText)
+        }
+        Text(statusTitle(dose.status), fontFamily = detailInter, fontSize = 12.sp, lineHeight = 15.sp, color = TataNavy,
+            modifier = Modifier.background(statusColor(dose.status), RoundedCornerShape(13.dp)).padding(horizontal = 9.dp, vertical = 5.dp))
+    }
+    DetailSectionLabel(stringResource(R.string.detail_information))
+    Column(Modifier.fillMaxWidth().shadow(6.dp, RoundedCornerShape(18.dp)).background(Color.White, RoundedCornerShape(18.dp)).padding(horizontal = 13.dp, vertical = 8.dp)) {
+        DetailLine(R.raw.detail_dose, stringResource(R.string.detail_dose), dose.dose)
+        DetailLine(R.raw.detail_when, stringResource(R.string.detail_when), scheduleTimeLabel(dose))
+        // The intake contract does not provide clinical indication or treatment frequency.
+        DetailLine(R.raw.detail_purpose, stringResource(R.string.detail_purpose), stringResource(R.string.detail_unspecified))
+        DetailLine(R.raw.detail_instructions, stringResource(R.string.detail_instructions), dose.instructions.ifBlank { stringResource(R.string.detail_no_instructions) })
+    }
+    Spacer(Modifier.height(19.dp))
+    Column(Modifier.fillMaxWidth().shadow(6.dp, RoundedCornerShape(18.dp)).background(Brush.horizontalGradient(listOf(Color(0xFFF1ECFF), Color(0xFFE5DCFA))), RoundedCornerShape(18.dp)).padding(16.dp)) {
+        Text(stringResource(R.string.detail_before_dose), fontFamily = detailInter, fontSize = 14.sp, lineHeight = 17.sp, fontWeight = FontWeight.SemiBold, color = TataNavy)
+        Row(Modifier.fillMaxWidth().padding(top = 9.dp), verticalAlignment = Alignment.CenterVertically) {
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                PreparationLine("✓", stringResource(R.string.detail_prepare_medication))
+                PreparationLine("✓", stringResource(R.string.detail_prepare_water))
+                PreparationLine("○", stringResource(R.string.detail_prepare_seat))
             }
-            Text(
-                text = statusTitle(dose.status),
-                color = TataNavy,
-                modifier = Modifier
-                    .background(statusColor(dose.status), RoundedCornerShape(20.dp))
-                    .padding(horizontal = 12.dp, vertical = 7.dp),
-            )
+            Image(painterResource(R.drawable.detail_water_plant), null, Modifier.size(106.dp, 86.dp))
         }
     }
-
-    Text("Información", color = TataMuted, modifier = Modifier.padding(top = 18.dp, bottom = 6.dp))
-    TataCard(Modifier.fillMaxWidth()) {
-        DetailLine("Dosis", dose.dose)
-        DetailLine("Cuándo", scheduleTimeLabel(dose))
-        DetailLine("Medicamento", dose.medicationName)
-        DetailLine("Indicaciones", dose.instructions.ifBlank { "Sin indicaciones adicionales" })
+    if (dose.status != DoseStatus.PENDING) {
+        Text(statusMessage(dose.status), color = TataMuted, fontFamily = detailInter, fontSize = 13.sp, modifier = Modifier.padding(top = 12.dp))
     }
-
-    TataCard(
-        containerColor = TataLavender,
-        modifier = Modifier.fillMaxWidth().padding(top = 18.dp),
-    ) {
-        Text("Antes de tu toma", color = TataNavy, fontWeight = FontWeight.SemiBold)
-        Text("✓ Revisa la dosis y el horario", color = TataText, modifier = Modifier.padding(top = 8.dp))
-        if (dose.instructions.isNotBlank()) {
-            Text("✓ " + dose.instructions, color = TataText, modifier = Modifier.padding(top = 5.dp))
-        }
-    }
-
-    TataCard(
-        containerColor = statusColor(dose.status),
-        modifier = Modifier.fillMaxWidth().padding(top = 18.dp),
-    ) {
-        Text("Estado: " + statusTitle(dose.status), color = TataNavy, fontWeight = FontWeight.SemiBold)
-        Text(statusMessage(dose.status), color = TataMuted, modifier = Modifier.padding(top = 5.dp))
-    }
-    Spacer(Modifier.height(24.dp))
+    Spacer(Modifier.height(20.dp))
 }
 
 @Composable
-private fun DetailLine(label: String, value: String) {
-    Row(Modifier.fillMaxWidth().padding(vertical = 5.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-        Text(label, color = TataMuted)
-        Text(value, color = TataText, fontWeight = FontWeight.Medium, modifier = Modifier.padding(start = 16.dp))
+private fun DetailSectionLabel(label: String) {
+    Text(label, fontFamily = detailInter, fontSize = 13.sp, lineHeight = 16.sp, color = TataMuted, modifier = Modifier.padding(top = 23.dp, bottom = 8.dp))
+}
+
+@Composable
+private fun DetailLine(icon: Int, label: String, value: String) {
+    Row(Modifier.fillMaxWidth().heightIn(min = 32.dp), verticalAlignment = Alignment.CenterVertically) {
+        TataSvgIcon(icon, Modifier.size(20.dp))
+        Text(label, fontFamily = detailInter, fontSize = 13.sp, lineHeight = 17.sp, color = TataMuted, modifier = Modifier.padding(start = 10.dp).width(102.dp))
+        Text(value, fontFamily = detailInter, fontSize = 13.sp, lineHeight = 17.sp, fontWeight = FontWeight.Medium, color = TataText, modifier = Modifier.weight(1f).padding(vertical = 4.dp))
+    }
+}
+
+@Composable
+private fun PreparationLine(mark: String, text: String) {
+    Row(verticalAlignment = Alignment.Top) {
+        Text(mark, fontSize = 14.sp, color = Color(0xFF6E6ED1), modifier = Modifier.width(26.dp))
+        Text(text, fontFamily = detailInter, fontSize = 13.sp, lineHeight = 17.sp, color = TataText)
     }
 }
 

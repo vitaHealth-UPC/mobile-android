@@ -22,3 +22,13 @@ data class CaregiverAlert(
         require(closedAt == null || !closedAt.isBefore(openedAt)) { "an alert cannot close before it opens" }
     }
 }
+
+/**
+ * Follow-up moves a caregiver can request: attend an open alert, or close an open or attended one.
+ * The backend keeps the final word and answers 409 when the alert already moved.
+ */
+fun AlertStatus.canMoveTo(target: AlertStatus): Boolean = when (this) {
+    AlertStatus.OPEN -> target == AlertStatus.ATTENDED || target == AlertStatus.CLOSED
+    AlertStatus.ATTENDED -> target == AlertStatus.CLOSED
+    AlertStatus.CLOSED -> false
+}
