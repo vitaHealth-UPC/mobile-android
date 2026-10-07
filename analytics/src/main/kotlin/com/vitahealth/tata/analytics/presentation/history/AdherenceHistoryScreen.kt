@@ -49,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.vitahealth.tata.analytics.domain.model.AdherencePeriod
+import com.vitahealth.tata.analytics.presentation.components.AnalyticsEmptyStateCard
 import com.vitahealth.tata.shared.design.components.TataButton
 import com.vitahealth.tata.shared.design.components.TataButtonStyle
 import com.vitahealth.tata.shared.design.components.TataCard
@@ -67,9 +68,6 @@ private val OnTimeCardStart = Color(0xFFECF5FB)
 private val OnTimeCardEnd = Color(0xFFDFECF6)
 private val LateOmittedCardStart = Color(0xFFECF7EF)
 private val LateOmittedCardEnd = Color(0xFFDFF0E4)
-private val EmptyStateSurface = Color(0xFFEBF5FC)
-private val EmptyStateTitle = Color(0xFF121A2E)
-private val EmptyStateBody = Color(0xFF78859E)
 private val ChartLabel = Color(0xFF637087)
 private val ChartGrid = Color(0xCCE8E8EF)
 private val ChartLine = Color(0x618B83E8)
@@ -124,11 +122,11 @@ fun AdherenceHistoryScreen(
                     PeriodUpdatedNotice()
                 }
             }
-            is AdherenceHistoryUiState.InsufficientData -> EmptyStateCard(
+            is AdherenceHistoryUiState.InsufficientData -> AnalyticsEmptyStateCard(
                 title = "Sin datos suficientes",
                 message = "No existen tomas en este periodo para calcular adherencia.",
             )
-            is AdherenceHistoryUiState.NoResults -> EmptyStateCard(
+            is AdherenceHistoryUiState.NoResults -> AnalyticsEmptyStateCard(
                 title = "Sin resultados",
                 message = "No existen tomas registradas dentro del periodo seleccionado.",
             )
@@ -418,38 +416,6 @@ private fun AdherenceTrendChart(points: List<AdherenceTrendPoint>) {
                     .coerceIn(0f, size.width - layout.size.width)
                 drawText(layout, topLeft = Offset(x, top + plotHeight + 6.dp.toPx()))
             }
-        }
-    }
-}
-
-@Composable
-private fun EmptyStateCard(
-    title: String,
-    message: String,
-) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(226.dp)
-            .background(EmptyStateSurface, RoundedCornerShape(20.dp))
-            .padding(horizontal = 24.dp),
-        contentAlignment = Alignment.Center,
-    ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(
-                text = title,
-                fontSize = 21.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = EmptyStateTitle,
-                textAlign = TextAlign.Center,
-            )
-            Text(
-                text = message,
-                fontSize = 11.sp,
-                color = EmptyStateBody,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(top = 12.dp),
-            )
         }
     }
 }

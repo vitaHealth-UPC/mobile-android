@@ -1,9 +1,13 @@
 package com.vitahealth.tata.app.di
 
+import com.vitahealth.tata.analytics.application.handlers.GetAdherenceRecommendationsQueryHandler
 import com.vitahealth.tata.analytics.application.handlers.GetAdherenceSummaryQueryHandler
+import com.vitahealth.tata.analytics.infrastructure.fake.FakeAdherenceRecommendationsRepository
 import com.vitahealth.tata.analytics.infrastructure.fake.FakeAdherenceScenario
 import com.vitahealth.tata.analytics.infrastructure.fake.FakeAdherenceSummaryRepository
+import com.vitahealth.tata.analytics.infrastructure.fake.FakeRecommendationsScenario
 import com.vitahealth.tata.analytics.presentation.history.AdherenceHistoryViewModel
+import com.vitahealth.tata.analytics.presentation.recommendations.AdherenceRecommendationsViewModel
 import com.vitahealth.tata.carelink.application.handlers.AcceptCareLinkCommandHandler
 import com.vitahealth.tata.carelink.application.handlers.GetOlderAdultProfileQueryHandler
 import com.vitahealth.tata.carelink.application.handlers.RegisterConsentCommandHandler
@@ -238,6 +242,15 @@ class AppContainer(
     fun adherenceHistoryViewModelFactory(olderAdultId: String) = AdherenceHistoryViewModel.Factory(
         olderAdultId = olderAdultId,
         handler = GetAdherenceSummaryQueryHandler(adherenceSummaryRepository),
+    )
+
+    // Escenarios para probar los estados de la pantalla: Content, InsufficientEvidence, Error.
+    private val adherenceRecommendationsRepository =
+        FakeAdherenceRecommendationsRepository(FakeRecommendationsScenario.Content)
+
+    fun adherenceRecommendationsViewModelFactory(olderAdultId: String) = AdherenceRecommendationsViewModel.Factory(
+        olderAdultId = olderAdultId,
+        handler = GetAdherenceRecommendationsQueryHandler(adherenceRecommendationsRepository),
     )
 
 }
