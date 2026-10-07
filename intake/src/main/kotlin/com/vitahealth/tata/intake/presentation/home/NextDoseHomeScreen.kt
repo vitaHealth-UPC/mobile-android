@@ -34,6 +34,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.vitahealth.tata.intake.R
 import com.vitahealth.tata.intake.application.readmodels.DailyDoseProgress
 import com.vitahealth.tata.intake.application.readmodels.NextDoseReadModel
+import com.vitahealth.tata.shared.design.components.TataSvgIcon
+import com.vitahealth.tata.shared.design.components.AdultTab
+import com.vitahealth.tata.shared.design.components.AdultTabBar
 import com.vitahealth.tata.shared.design.components.TataButton
 import com.vitahealth.tata.shared.design.components.TataCard
 import com.vitahealth.tata.shared.design.theme.*
@@ -125,8 +128,8 @@ fun NextDoseHomeScreen(
             Spacer(Modifier.height(22.dp))
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(11.dp)) {
                 // Voice recognition has no route yet; do not pretend that a tap confirms an intake.
-                HomeShortcut(stringResource(R.string.home_voice_title), stringResource(R.string.home_voice_subtitle), TataMint, Modifier.weight(1f), null)
-                HomeShortcut(stringResource(R.string.home_agenda_title), stringResource(R.string.home_agenda_subtitle), Color(0xFFE1EFF8), Modifier.weight(1f), onOpenAgenda)
+                HomeShortcut(stringResource(R.string.home_voice_title), stringResource(R.string.home_voice_subtitle), TataMint, com.vitahealth.tata.shared.R.raw.home_mic, Modifier.weight(1f), null)
+                HomeShortcut(stringResource(R.string.home_agenda_title), stringResource(R.string.home_agenda_subtitle), Color(0xFFE1EFF8), com.vitahealth.tata.shared.R.raw.home_list, Modifier.weight(1f), onOpenAgenda)
             }
             if (showTip) {
                 Spacer(Modifier.height(21.dp))
@@ -143,10 +146,11 @@ fun NextDoseHomeScreen(
             onSignOut?.let { action -> TextButton(onClick = action) { Text(stringResource(R.string.home_switch_account), color = TataNavy) } }
             Spacer(Modifier.height(24.dp))
         }
-        Row(Modifier.padding(horizontal = 14.dp, vertical = 10.dp).fillMaxWidth().shadow(6.dp, RoundedCornerShape(28.dp)).background(Color.White, RoundedCornerShape(28.dp)).padding(vertical = 12.dp), horizontalArrangement = Arrangement.SpaceEvenly) {
-            Text(stringResource(R.string.home_tab_start), fontFamily = homeInter, color = TataNavy, fontWeight = FontWeight.SemiBold)
-            Text(stringResource(R.string.home_tab_agenda), fontFamily = homeInter, color = TataMuted, modifier = Modifier.clickable(role = Role.Button, onClick = onOpenAgenda))
-        }
+        AdultTabBar(
+            selected = AdultTab.Home,
+            availableTabs = setOf(AdultTab.Home, AdultTab.Agenda),
+            onSelect = { if (it == AdultTab.Agenda) onOpenAgenda() },
+        )
     }
 }
 
@@ -195,10 +199,13 @@ private fun ProgressCard(progress: DailyDoseProgress?, onOpenAgenda: () -> Unit)
 }
 
 @Composable
-private fun HomeShortcut(title: String, subtitle: String, color: Color, modifier: Modifier, onClick: (() -> Unit)?) {
+private fun HomeShortcut(title: String, subtitle: String, color: Color, icon: Int, modifier: Modifier, onClick: (() -> Unit)?) {
     Column(modifier.shadow(5.dp, RoundedCornerShape(18.dp)).background(color, RoundedCornerShape(18.dp))
         .clickable(enabled = onClick != null, role = Role.Button, onClick = { onClick?.invoke() }).padding(start = 16.dp, end = 16.dp, top = 14.dp, bottom = 12.dp)) {
-        Text(title, fontFamily = homeInter, fontSize = 20.sp, lineHeight = 24.sp, fontWeight = FontWeight.Bold, color = TataText)
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Text(title, fontFamily = homeInter, fontSize = 20.sp, lineHeight = 24.sp, fontWeight = FontWeight.Bold, color = TataText, modifier = Modifier.weight(1f))
+            TataSvgIcon(icon, Modifier.size(if (icon == com.vitahealth.tata.shared.R.raw.home_list) 27.dp else 28.dp))
+        }
         Text(subtitle, fontFamily = homeInter, fontSize = 12.sp, lineHeight = 15.sp, color = TataMuted, modifier = Modifier.padding(top = 2.dp))
     }
 }
