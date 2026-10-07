@@ -106,3 +106,9 @@ Frame `563:1701` (Plan & Subscription): `PlanSubscriptionScreen` (route `plan-su
 Not implemented on purpose: the plan descriptions ("Alertas, seguimiento, insights y múltiples canales") because the backend sends no description, and the progress bar of the period because it sends no start date. The "Change plan" button arrives with US-45.
 
 Entry point: the "More" menu of the family summary offers "Plan y suscripción".
+
+## US-45 change subscription
+
+Frames `563:1701` (Plan & Subscription) and `563:5354` (Subscription Updated), same `PlanSubscriptionScreen`. Tapping a plan other than the current one selects it (radio behaviour, a border marks the choice); "Cambiar plan" opens a confirmation that lists what the account gains and loses (computed from the capabilities, not written text) and the monthly price. The "Subscription updated" banner is the `PlanChangeMessage.Updated` UI state; the failures (plan no longer available, account, session, offline) are the other values of the same enum and leave the current plan untouched.
+
+The plan changes only after the backend answers, so the screen never shows a plan the account does not have.

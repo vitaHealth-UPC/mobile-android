@@ -33,6 +33,17 @@ class RemoteSubscriptionRepository(
             }
         }
 
+    override suspend fun changeSubscription(accountId: String, planCode: String): AppResult<Subscription> =
+        request(
+            call = { api.changeSubscription(accountId, ChangeSubscriptionRequest(planCode)) },
+            map = { it.toDomain() },
+        ).let { result ->
+            when (result) {
+                is AppResult.Success -> result.value?.let { AppResult.Success(it) } ?: invalidResponse()
+                is AppResult.Failure -> result
+            }
+        }
+
     private suspend fun <Dto, Out> request(
         call: suspend () -> Response<Dto>,
         map: (Dto) -> Out,

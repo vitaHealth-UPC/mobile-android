@@ -1,6 +1,8 @@
 package com.vitahealth.tata.identity.presentation.subscription
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,15 +16,19 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -40,6 +46,7 @@ import com.vitahealth.tata.identity.domain.model.PlanCapability
 import com.vitahealth.tata.identity.domain.model.Subscription
 import com.vitahealth.tata.identity.domain.model.SubscriptionStatus
 import com.vitahealth.tata.shared.design.components.TataButton
+import com.vitahealth.tata.shared.design.components.TataButtonStyle
 import com.vitahealth.tata.shared.design.components.TataCard
 import com.vitahealth.tata.shared.design.theme.TataBlueSurface
 import com.vitahealth.tata.shared.design.theme.TataError
@@ -72,6 +79,10 @@ fun PlanSubscriptionRoute(
         state = state,
         onBack = onBack,
         onRetry = viewModel::load,
+        onSelectPlan = viewModel::onSelectPlan,
+        onChangePlan = viewModel::onChangeRequest,
+        onChangeCancel = viewModel::onChangeCancel,
+        onChangeConfirm = viewModel::onChangeConfirm,
         modifier = modifier,
     )
 }
@@ -81,6 +92,10 @@ fun PlanSubscriptionScreen(
     state: PlanSubscriptionUiState,
     onBack: () -> Unit,
     onRetry: () -> Unit,
+    onSelectPlan: (Plan) -> Unit,
+    onChangePlan: () -> Unit,
+    onChangeCancel: () -> Unit,
+    onChangeConfirm: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -109,12 +124,105 @@ fun PlanSubscriptionScreen(
                 CurrentPlanCard(subscription)
                 Spacer(Modifier.height(16.dp))
                 state.plans.forEach { plan ->
-                    PlanCard(plan = plan, isCurrent = subscription.isOn(plan))
+                    PlanCard(
+                        plan = plan,
+                        isCurrent = subscription.isOn(plan),
+                        isSelected = state.selectedPlan?.code == plan.code,
+                        enabled = !state.isChanging,
+                        onSelect = { onSelectPlan(plan) },
+                    )
                     Spacer(Modifier.height(14.dp))
                 }
+                TataButton(
+                    text = stringResource(R.string.plan_change_button),
+                    onClick = onChangePlan,
+                    enabled = state.selectedPlan != null && !state.isChanging,
+                )
+                if (state.selectedPlan == null) {
+                    Text(
+                        text = stringResource(R.string.plan_select_hint),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = TataMuted,
+                        modifier = Modifier.padding(top = 6.dp, start = 4.dp),
+                    )
+                }
+                Spacer(Modifier.height(16.dp))
                 RenewalCard(subscription)
+                state.confirming?.let { target ->
+                    ChangeDialog(subscription, target, onChangeCancel, onChangeConfirm)
+                }
+                state.changeMessage?.let {
+                    Spacer(Modifier.height(16.dp))
+                    ChangeBanner(it, state.changeMessageIsError)
+                }
             }
         }
+    }
+}
+
+@Composable
+private fun ChangeDialog(
+    subscription: Subscription,
+    target: Plan,
+    onCancel: () -> Unit,
+    onConfirm: () -> Unit,
+) {
+    val context = LocalContext.current
+    val impact = subscription.impactOfChangingTo(target)
+    fun names(capabilities: Set<PlanCapability>) =
+        capabilities.sortedBy { it.ordinal }.joinToString(", ") { context.getString(capabilityLabel(it)) }
+
+    AlertDialog(
+        onDismissRequest = onCancel,
+        title = { Text(stringResource(R.string.plan_confirm_title, target.name)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    stringResource(R.string.plan_price_per_month, formatPlanPrice(target.monthlyPrice, target.currency)),
+                    fontWeight = FontWeight.SemiBold,
+                )
+                if (impact.gained.isNotEmpty()) {
+                    Text(stringResource(R.string.plan_confirm_gain, names(impact.gained)))
+                }
+                if (impact.lost.isNotEmpty()) {
+                    Text(stringResource(R.string.plan_confirm_lose, names(impact.lost)))
+                }
+                Text(stringResource(R.string.plan_renewal_note))
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onConfirm) { Text(stringResource(R.string.plan_confirm_action)) }
+        },
+        dismissButton = {
+            TextButton(onClick = onCancel) { Text(stringResource(R.string.plan_cancel)) }
+        },
+    )
+}
+
+@Composable
+private fun ChangeBanner(message: PlanChangeMessage, isError: Boolean) {
+    val body = stringResource(
+        when (message) {
+            PlanChangeMessage.Updated -> R.string.plan_updated_body
+            PlanChangeMessage.ErrorPlanUnavailable -> R.string.plan_change_error_plan
+            PlanChangeMessage.ErrorAccount -> R.string.plan_error_account
+            PlanChangeMessage.ErrorSession -> R.string.plan_error_session
+            PlanChangeMessage.ErrorOffline -> R.string.plan_error_offline
+            PlanChangeMessage.ErrorGeneric -> R.string.plan_error_generic
+        },
+    )
+    TataCard(Modifier.fillMaxWidth(), if (isError) TataErrorSurface else TataMint) {
+        Text(
+            text = stringResource(if (isError) R.string.plan_change_error_title else R.string.plan_updated_title),
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.SemiBold,
+            color = if (isError) TataError else StatusGreen,
+        )
+        Text(
+            text = body,
+            style = MaterialTheme.typography.bodySmall,
+            color = if (isError) TataError else TataMuted,
+        )
     }
 }
 
@@ -198,8 +306,31 @@ private fun CurrentPlanCard(subscription: Subscription) {
 
 @OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 @Composable
-private fun PlanCard(plan: Plan, isCurrent: Boolean) {
-    TataCard(Modifier.fillMaxWidth(), if (isCurrent) TataLavender else androidx.compose.ui.graphics.Color.White) {
+private fun PlanCard(
+    plan: Plan,
+    isCurrent: Boolean,
+    isSelected: Boolean,
+    enabled: Boolean,
+    onSelect: () -> Unit,
+) {
+    val container = when {
+        isCurrent -> TataLavender
+        isSelected -> TataBlueSurface
+        else -> androidx.compose.ui.graphics.Color.White
+    }
+    TataCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .then(if (isSelected) Modifier.border(BorderStroke(2.dp, TataNavy), RoundedCornerShape(18.dp)) else Modifier)
+            // The current plan cannot be chosen again; the others behave as one choice of a group.
+            .selectable(
+                selected = isSelected,
+                enabled = enabled && !isCurrent,
+                role = Role.RadioButton,
+                onClick = onSelect,
+            ),
+        containerColor = container,
+    ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -326,6 +457,10 @@ private fun PlanSubscriptionScreenPreview() {
             ),
             onBack = {},
             onRetry = {},
+            onSelectPlan = {},
+            onChangePlan = {},
+            onChangeCancel = {},
+            onChangeConfirm = {},
         )
     }
 }

@@ -132,6 +132,7 @@ class AppContainer(
             accountId = accountId,
             getSubscription = com.vitahealth.tata.identity.application.handlers.GetCurrentSubscriptionQueryHandler(subscriptionRepository),
             listPlans = com.vitahealth.tata.identity.application.handlers.ListAvailablePlansQueryHandler(subscriptionRepository),
+            changeSubscription = com.vitahealth.tata.identity.application.handlers.ChangeSubscriptionCommandHandler(subscriptionRepository),
         )
 
     private val caregiverProfilesRepository = com.vitahealth.tata.carelink.infrastructure.remote.RemoteCaregiverProfilesRepository(retrofit.create(com.vitahealth.tata.carelink.infrastructure.remote.CaregiverProfilesApiService::class.java))
