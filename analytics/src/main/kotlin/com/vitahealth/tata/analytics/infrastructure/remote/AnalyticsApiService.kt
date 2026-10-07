@@ -60,7 +60,7 @@ interface AnalyticsApiService {
         @Query("days") days: Int,
     ): Response<AdherenceSummaryResponse>
 
-    @GET("api/v1/older-adults/{olderAdultId}/adherence/insights")
+    @GET("api/v1/older-adults/{olderAdultId}/adherence/insight")
     suspend fun getInsights(
         @Path("olderAdultId") olderAdultId: String,
         @Query("days") days: Int,
