@@ -11,6 +11,12 @@ sealed interface RootDestination {
             "family-summary/" + Uri.encode(caregiverId) + "/" + Uri.encode(olderAdultId) + "/" + Uri.encode(olderAdultName)
     }
 
+    data object Accessibility : RootDestination {
+        const val userIdArgument = "userId"
+        override val route = "accessibility/{$userIdArgument}"
+        fun createRoute(userId: String) = "accessibility/" + Uri.encode(userId)
+    }
+
     data object IntakeAgenda : RootDestination {
         const val olderAdultIdArgument = "olderAdultId"
         override val route = "intake-agenda/{$olderAdultIdArgument}"
