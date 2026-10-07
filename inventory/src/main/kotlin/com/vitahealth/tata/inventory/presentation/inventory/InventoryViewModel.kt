@@ -86,6 +86,8 @@ class InventoryViewModel(
         copy(replenishmentInput = value, replenishmentErrorCode = null, justRegistered = false)
     }
 
+    fun onLotChange(value: String) = updateReady { copy(lotInput = value.take(200), justRegistered = false) }
+
     fun saveReplenishment() {
         val current = _state.value as? InventoryUiState.Ready ?: return
         if (current.submitting) return
@@ -100,7 +102,7 @@ class InventoryViewModel(
         viewModelScope.launch {
             when (
                 val result = registerReplenishmentHandler(
-                    RegisterReplenishmentCommand(medicationId = medicationId, quantity = quantity),
+                    RegisterReplenishmentCommand(medicationId = medicationId, quantity = quantity, lot = current.lotInput),
                 )
             ) {
                 is AppResult.Success -> _state.value = InventoryUiState.Ready(

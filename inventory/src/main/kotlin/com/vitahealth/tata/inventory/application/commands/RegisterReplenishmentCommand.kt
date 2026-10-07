@@ -4,4 +4,5 @@ package com.vitahealth.tata.inventory.application.commands
 data class RegisterReplenishmentCommand(
     val medicationId: String,
     val quantity: Int,
+    val lot: String? = null,
 )

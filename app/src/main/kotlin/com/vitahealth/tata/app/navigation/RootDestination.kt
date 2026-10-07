@@ -11,6 +11,18 @@ sealed interface RootDestination {
             "family-summary/" + Uri.encode(caregiverId) + "/" + Uri.encode(olderAdultId) + "/" + Uri.encode(olderAdultName)
     }
 
+    data object Accessibility : RootDestination {
+        const val userIdArgument = "userId"
+        override val route = "accessibility/{$userIdArgument}"
+        fun createRoute(userId: String) = "accessibility/" + Uri.encode(userId)
+    }
+
+    data object NotificationPreferences : RootDestination {
+        const val userIdArgument = "userId"
+        override val route = "notification-preferences/{$userIdArgument}"
+        fun createRoute(userId: String) = "notification-preferences/" + Uri.encode(userId)
+    }
+
     data object IntakeAgenda : RootDestination {
         const val olderAdultIdArgument = "olderAdultId"
         override val route = "intake-agenda/{$olderAdultIdArgument}"
@@ -45,6 +57,24 @@ sealed interface RootDestination {
             olderAdultId: String,
             olderAdultName: String,
         ): String = "medication-registration/" +
+            Uri.encode(caregiverId) + "/" +
+            Uri.encode(olderAdultId) + "/" +
+            Uri.encode(olderAdultName)
+    }
+
+    data object MedicationManagement : RootDestination {
+        const val caregiverIdArgument = "caregiverId"
+        const val olderAdultIdArgument = "olderAdultId"
+        const val olderAdultNameArgument = "olderAdultName"
+
+        override val route: String =
+            "medication-management/{$caregiverIdArgument}/{$olderAdultIdArgument}/{$olderAdultNameArgument}"
+
+        fun createRoute(
+            caregiverId: String,
+            olderAdultId: String,
+            olderAdultName: String,
+        ): String = "medication-management/" +
             Uri.encode(caregiverId) + "/" +
             Uri.encode(olderAdultId) + "/" +
             Uri.encode(olderAdultName)
@@ -299,6 +329,22 @@ sealed interface RootDestination {
             Uri.encode(medicationId) + "/" +
             Uri.encode(medicationName.ifBlank { " " }) + "/" +
             Uri.encode(unit.ifBlank { " " })
+    }
+
+    data object AdherenceHistory : RootDestination {
+        const val olderAdultIdArgument = "olderAdultId"
+        override val route: String = "adherence-history/{$olderAdultIdArgument}"
+
+        fun createRoute(olderAdultId: String): String =
+            "adherence-history/" + Uri.encode(olderAdultId)
+    }
+
+    data object AdherenceRecommendations : RootDestination {
+        const val olderAdultIdArgument = "olderAdultId"
+        override val route: String = "adherence-recommendations/{$olderAdultIdArgument}"
+
+        fun createRoute(olderAdultId: String): String =
+            "adherence-recommendations/" + Uri.encode(olderAdultId)
     }
 
 }

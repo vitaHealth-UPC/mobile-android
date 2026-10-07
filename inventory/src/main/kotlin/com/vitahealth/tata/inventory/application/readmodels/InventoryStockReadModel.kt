@@ -8,9 +8,7 @@ import java.time.Instant
  * Read side of a medication's inventory (US-41 / US-42), mapped from the backend's
  * inventory resource.
  *
- * [daysRemaining] is optional and currently always `null`: the backend does not yet return a
- * "days of treatment" estimate, so the UI shows "Sin estimación". Computing it in the app would
- * be business logic that belongs in the backend.
+ * [daysRemaining] is the backend coverage estimate, or null when no daily schedule exists.
  */
 data class InventoryStockReadModel(
     val medicationId: String,

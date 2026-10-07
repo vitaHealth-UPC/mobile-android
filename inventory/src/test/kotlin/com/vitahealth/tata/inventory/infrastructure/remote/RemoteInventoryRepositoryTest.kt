@@ -69,6 +69,23 @@ class RemoteInventoryRepositoryTest {
         assertEquals("INVENTORY_ALREADY_EXISTS", (result as AppResult.Failure).code)
     }
 
+    @Test
+    fun `replenishment sends lot and reads backend coverage`() = runTest {
+        server.enqueue(MockResponse().setResponseCode(201).setBody("""
+            {"id":"inv-1","medicationId":"med-1","remainingStock":30,
+             "replenishmentThreshold":5,"lowStock":false,"daysRemaining":15,"dailyConsumptionUnits":2,
+             "batches":[{"id":"b1","quantity":30,"lot":"2026-09","registeredAt":"2026-09-02T10:00:00Z"}],
+             "createdAt":"2026-08-01T10:00:00Z","updatedAt":"2026-09-02T10:00:00Z"}
+        """.trimIndent()))
+        val result = repository.registerReplenishment("med-1", 30, "2026-09") as AppResult.Success
+        assertEquals(15, result.value.daysRemaining)
+        assertEquals("2026-09", result.value.lastReplenishment?.lot)
+        val request = server.takeRequest()
+        val payload = com.google.gson.JsonParser.parseString(request.body.readUtf8()).asJsonObject
+        assertEquals("2026-09", payload.get("lot").asString)
+        assertEquals(30, payload.get("quantity").asInt)
+    }
+
     @Before
     fun setUp() {
         server = MockWebServer()
@@ -158,3 +175,4 @@ class RemoteInventoryRepositoryTest {
         assertEquals("INVENTORY_ALREADY_EXISTS", (result as AppResult.Failure).code)
     }
 }
+

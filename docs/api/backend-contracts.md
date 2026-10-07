@@ -30,16 +30,16 @@ Base path `/api/v1/inventories`. Inventory is keyed by `medicationId` (a logical
 
 ### Endpoints
 
-- `POST /api/v1/inventories` — register the initial stock (US-40). Body `{ "medicationId": String, "initialQuantity": Int, "replenishmentThreshold": Int }`. `201` returns the inventory resource. Only one inventory may exist per medication, and initial registration requires an existing active medication.
-- `GET /api/v1/inventories/{medicationId}` — remaining stock, threshold, low-stock flag and batches (US-41, US-42). `200` returns the inventory resource; `404` means no inventory is registered yet.
-- `POST /api/v1/inventories/{medicationId}/replenishments` — add a batch and increase stock (US-43). Body `{ "quantity": Int }`. `201` returns the updated inventory resource.
+- `POST /api/v1/inventories` â€” register the initial stock (US-40). Body `{ "medicationId": String, "initialQuantity": Int, "replenishmentThreshold": Int }`. `201` returns the inventory resource. Only one inventory may exist per medication, and initial registration requires an existing active medication.
+- `GET /api/v1/inventories/{medicationId}` â€” remaining stock, threshold, low-stock flag and batches (US-41, US-42). `200` returns the inventory resource; `404` means no inventory is registered yet.
+- `POST /api/v1/inventories/{medicationId}/replenishments` â€” add a batch and increase stock (US-43). Body `{ "quantity": Int, "lot": String? }`. `201` returns the updated inventory resource.
 
 ### Response shapes
 
 `InventoryResource`:
-`{ id, medicationId, remainingStock: Int, replenishmentThreshold: Int, lowStock: Boolean, batches: Batch[], createdAt: Instant, updatedAt: Instant }`. `lowStock` is `true` when `remainingStock <= replenishmentThreshold`; the app consumes this flag and does not recompute the rule.
+`{ id, medicationId, remainingStock: Int, replenishmentThreshold: Int, lowStock: Boolean, batches: Batch[], createdAt: Instant, updatedAt: Instant, daysRemaining: Int?, dailyConsumptionUnits: Int? }`. `lowStock` is `true` when `remainingStock <= replenishmentThreshold`; the app consumes this flag and does not recompute the rule.
 
-`Batch`: `{ id, quantity: Int, registeredAt: Instant }`.
+`Batch`: `{ id, quantity: Int, registeredAt: Instant, lot: String? }`.
 
 `ErrorResource`: `{ code: String, message: String }`. The `code` is stable and meant for clients; the `message` is localized by `Accept-Language`.
 
@@ -58,10 +58,27 @@ Timestamps are ISO-8601 strings on the wire. The shared Retrofit uses the defaul
 - `registerReplenishment`: `400 -> INVALID_QUANTITY`, `404 -> INVENTORY_NOT_FOUND`, `409 -> CONCURRENT_UPDATE`, other -> `REQUEST_FAILED`.
 - A thrown I/O exception -> `NETWORK_UNAVAILABLE`; malformed responses or unparseable inventory/batch timestamps -> `INVALID_RESPONSE`. Coroutine cancellation propagates to the caller.
 
-Quantity/threshold are validated in the application layer with the `Quantity` (> 0) and `ReorderThreshold` (>= 0) value objects before any request, so invalid input (the "Cantidad inválida" case) never reaches the network. Those app-born failures use the codes `INVALID_QUANTITY`, `INVALID_THRESHOLD` and `INVALID_MEDICATION_REFERENCE`. `GetInventoryStockQueryHandler` passes `INVENTORY_NOT_FOUND` through unchanged; the ViewModel turns it into the "not initialized" state. Each code (backend and app-born) resolves to a localized string in `:inventory` `res/values` and `res/values-b+es+419`; the UI never shows the backend `message` directly.
+Quantity/threshold are validated in the application layer with the `Quantity` (> 0) and `ReorderThreshold` (>= 0) value objects before any request, so invalid input (the "Cantidad invÃ¡lida" case) never reaches the network. Those app-born failures use the codes `INVALID_QUANTITY`, `INVALID_THRESHOLD` and `INVALID_MEDICATION_REFERENCE`. `GetInventoryStockQueryHandler` passes `INVENTORY_NOT_FOUND` through unchanged; the ViewModel turns it into the "not initialized" state. Each code (backend and app-born) resolves to a localized string in `:inventory` `res/values` and `res/values-b+es+419`; the UI never shows the backend `message` directly.
 
-### Pending backend contract
+### Inventory metadata and coverage
 
-- **`lot`** on batches. The US-43 ticket describes "quantity, lot and timestamp" and the mockup shows a "Lote / nota" field, but `Batch` currently exposes only quantity and timestamp. The field is intentionally omitted from the app until the backend adds it.
-- **`daysRemaining`** ("≈ X días de tratamiento"). Not returned by `GET`. It is modeled as an optional `InventoryStockReadModel.daysRemaining: Int? = null`; the UI shows "Sin estimación". The estimate needs a consumption rate (doses/day, derivable from the Treatment regimen) and belongs in the backend read model, not in the app.
-- **Medication unit** ("comprimidos") and display name. Inventory only knows `medicationId`; it does not return the medication name or presentation. The app passes them in by composition (`:app` from `TreatmentDetail`). The unit is not available at that entry point yet, so the screen receives a blank unit and renders counts without a unit word ("5 restantes"). A future source is `GET /api/v1/medications/{id}` (returns `name` + `presentation`).
+Replenishments accept an optional `lot` (trimmed, maximum 200 characters), which is persisted and returned on the batch. The app presents the Figma "Lote / nota" field and the last replenishment metadata.
+
+`daysRemaining` is computed by the backend as remaining stock divided by scheduled daily intake units, rounded down. The current intake model consumes one unit per scheduled intake. A medication without an active scheduled treatment returns null; the app displays "Sin estimación". Medication name and presentation are supplied from the treatment entry point.
+
+## Accessibility preferences (US-35 and following)
+
+`GET /api/v1/users/{userId}/preferences` returns `textSize` (`SMALL | MEDIUM | LARGE | EXTRA_LARGE`), `highContrast`, `reducedMotion`, `readingAssistance`, `voiceConfirmationEnabled`, `quietHours` (`{start, end}` or null) and `notificationChannels` (`PUSH | SMS | EMAIL`). A user who never saved anything gets the defaults. `PUT /api/v1/users/{userId}/preferences/text-size` takes `{ "textSize": "LARGE" }` and returns the same representation. The endpoints require a bearer session authorized for the account identified by `userId`.
+
+The app keeps a copy in DataStore (`tata_accessibility`) and applies it before any network call. A change made without connection stays on the device, is flagged as pending and is sent on the next `sync`. A `400` from the backend rolls the device copy back. The "Large text" switch maps to `LARGE` (on) and `MEDIUM` (off).
+
+`PUT /api/v1/users/{userId}/preferences/contrast` takes `{ "enabled": true }` and returns the same preferences representation (US-36). The offline rule is the same as for the text size.
+
+`PUT /api/v1/users/{userId}/preferences/reduced-motion` (US-37) and `PUT /api/v1/users/{userId}/preferences/voice-confirmation` take `{ "enabled": true }` and return the preferences representation.
+
+`PUT /api/v1/users/{userId}/preferences/reading-assistance` (US-38) takes `{ "enabled": true }` and returns the preferences representation.
+
+`PUT /api/v1/users/{userId}/notification-preferences` (US-39) takes `{ "quietHours": {"start": "22:00", "end": "07:00"} | absent, "channels": [{"type": "PUSH", "enabled": true}, ...] }`, replaces both settings and returns the preferences representation. A `400` means an empty interval or a repeated channel. These two settings have no device copy: they are read and saved online only.
+## Medications of an older adult (US-04)
+
+`GET /api/v1/older-adults/{olderAdultId}/medications?caregiverId=` lists the medications ordered by name, inactive ones included. `PUT /api/v1/medications/{medicationId}` takes `{ caregiverId, name, presentation }`; `POST /api/v1/medications/{medicationId}/deactivation?caregiverId=` deactivates and keeps the history. Both return the medication. `403` means no active care link, `404` an unknown medication, `409` that an inactive medication cannot be edited and `400` a missing field. There is no reactivation endpoint.

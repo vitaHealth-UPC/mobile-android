@@ -1,4 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="treatment_open_inventory">Inventario</string>
+    <string name="medications_title">Medicamentos</string>
+    <string name="medications_subtitle">Gestiona la pauta de %1$s sin perder historial</string>
+    <string name="medications_back">Volver</string>
+    <string name="medications_loading">Cargando medicamentos…</string>
+    <string name="medications_retry">Reintentar</string>
+    <string name="medications_empty">Aún no hay medicamentos registrados.</string>
+    <string name="medications_add">Agregar medicamento</string>
+    <string name="medications_status_active">Activo</string>
+    <string name="medications_status_inactive">Inactivo</string>
+    <string name="medications_inactive_note">Ya no genera nuevas tomas. Su historial se conserva.</string>
+    <string name="medications_edit">Editar medicamento</string>
+    <string name="medications_save">Guardar cambios</string>
+    <string name="medications_cancel">Cancelar</string>
+    <string name="medications_field_name">Nombre del medicamento</string>
+    <string name="medications_field_presentation">Dosis y presentación</string>
+    <string name="medications_deactivate">Desactivar medicamento</string>
+    <string name="medications_deactivate_title">¿Desactivar %1$s?</string>
+    <string name="medications_deactivate_body">No se generarán nuevas tomas. El historial se conserva. Esto no se puede deshacer desde la app.</string>
+    <string name="medications_deactivate_confirm">Desactivar</string>
+    <string name="medications_history_title">Historial protegido</string>
+    <string name="medications_history_body">Editar o desactivar solo afecta las tomas futuras.</string>
+    <string name="medications_updated_title">Cambios guardados</string>
+    <string name="medications_updated_body">Los nuevos datos se aplicarán solo a tomas futuras.</string>
+    <string name="medications_deactivated_title">Medicamento desactivado</string>
+    <string name="medications_deactivated_body">No se generarán nuevas tomas. El historial se conserva.</string>
+    <string name="medications_error_title">No se pudo completar</string>
+    <string name="medications_error_required">El nombre y la dosis son obligatorios.</string>
+    <string name="medications_error_inactive">Un medicamento inactivo no se puede editar.</string>
+    <string name="medications_error_not_found">No encontramos este medicamento.</string>
+    <string name="medications_error_offline">No hay conexión. Inténtalo cuando vuelvas a estar en línea.</string>
+    <string name="medications_error_generic">Algo salió mal. Inténtalo de nuevo.</string>
+    <string name="medications_denied_title">Acceso restringido</string>
+    <string name="medications_denied_body">Esta persona no está vinculada a tu cuenta.</string>
+    <string name="medications_denied_back">Volver</string>
 </resources>

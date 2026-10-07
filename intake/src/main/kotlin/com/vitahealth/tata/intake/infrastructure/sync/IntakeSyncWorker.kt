@@ -21,8 +21,16 @@ class IntakeSyncWorker(
             ?: return Result.failure()
 
         val local = SQLiteIntakeLocalStore(applicationContext)
+        val sessions = com.vitahealth.tata.shared.infrastructure.security.EncryptedSessionStore(applicationContext)
+        if (sessions.accessToken() == null) return Result.retry()
+        val client = okhttp3.OkHttpClient.Builder().addInterceptor { chain ->
+            val request = chain.request().newBuilder()
+            sessions.accessToken()?.let { request.header("Authorization", "Bearer $it") }
+            chain.proceed(request.build())
+        }.build()
         val api = Retrofit.Builder()
             .baseUrl(baseUrl)
+            .client(client)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(IntakeApiService::class.java)

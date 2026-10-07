@@ -1,6 +1,19 @@
 package com.vitahealth.tata.app.di
 
 import android.content.Context
+import com.vitahealth.tata.analytics.application.AdherenceRecommendationsRepository
+import com.vitahealth.tata.analytics.application.AdherenceSummaryRepository
+import com.vitahealth.tata.analytics.application.handlers.GetAdherenceRecommendationsQueryHandler
+import com.vitahealth.tata.analytics.application.handlers.GetAdherenceSummaryQueryHandler
+import com.vitahealth.tata.analytics.infrastructure.fake.FakeAdherenceRecommendationsRepository
+import com.vitahealth.tata.analytics.infrastructure.fake.FakeAdherenceScenario
+import com.vitahealth.tata.analytics.infrastructure.fake.FakeAdherenceSummaryRepository
+import com.vitahealth.tata.analytics.infrastructure.fake.FakeRecommendationsScenario
+import com.vitahealth.tata.analytics.infrastructure.remote.AnalyticsApiService
+import com.vitahealth.tata.analytics.infrastructure.remote.RemoteAdherenceRecommendationsRepository
+import com.vitahealth.tata.analytics.infrastructure.remote.RemoteAdherenceSummaryRepository
+import com.vitahealth.tata.analytics.presentation.history.AdherenceHistoryViewModel
+import com.vitahealth.tata.analytics.presentation.recommendations.AdherenceRecommendationsViewModel
 import com.vitahealth.tata.carelink.application.handlers.AcceptCareLinkCommandHandler
 import com.vitahealth.tata.carelink.application.handlers.GetOlderAdultProfileQueryHandler
 import com.vitahealth.tata.carelink.application.handlers.RegisterConsentCommandHandler
@@ -39,13 +52,17 @@ import com.vitahealth.tata.inventory.presentation.inventory.InventoryViewModel
 import com.vitahealth.tata.treatment.application.handlers.ChangeTreatmentStatusCommandHandler
 import com.vitahealth.tata.treatment.application.handlers.ConfigureTreatmentCommandHandler
 import com.vitahealth.tata.treatment.application.handlers.CreateTreatmentCommandHandler
+import com.vitahealth.tata.treatment.application.handlers.DeactivateMedicationCommandHandler
 import com.vitahealth.tata.treatment.application.handlers.GetTreatmentDetailQueryHandler
+import com.vitahealth.tata.treatment.application.handlers.ListMedicationsQueryHandler
 import com.vitahealth.tata.treatment.application.handlers.RegisterMedicationCommandHandler
 import com.vitahealth.tata.treatment.application.handlers.SetDoseFrequencyCommandHandler
 import com.vitahealth.tata.treatment.application.handlers.SetReminderPolicyCommandHandler
 import com.vitahealth.tata.treatment.application.handlers.SetScheduleInstructionsCommandHandler
+import com.vitahealth.tata.treatment.application.handlers.UpdateMedicationCommandHandler
 import com.vitahealth.tata.treatment.infrastructure.remote.RemoteTreatmentRepository
 import com.vitahealth.tata.treatment.infrastructure.remote.TreatmentApiService
+import com.vitahealth.tata.treatment.presentation.medication.MedicationManagementViewModel
 import com.vitahealth.tata.treatment.presentation.medication.MedicationRegistrationViewModel
 import com.vitahealth.tata.treatment.presentation.treatment.TreatmentCreationViewModel
 import com.vitahealth.tata.treatment.presentation.treatment.TreatmentDetailViewModel
@@ -53,6 +70,24 @@ import com.vitahealth.tata.treatment.presentation.treatment.TreatmentDoseFrequen
 import com.vitahealth.tata.treatment.presentation.treatment.TreatmentLifecycleViewModel
 import com.vitahealth.tata.treatment.presentation.treatment.TreatmentReminderViewModel
 import com.vitahealth.tata.treatment.presentation.treatment.TreatmentScheduleInstructionsViewModel
+import com.vitahealth.tata.preferences.application.handlers.GetNotificationPreferencesQueryHandler
+import com.vitahealth.tata.preferences.application.handlers.ObserveAccessibilityPreferencesQueryHandler
+import com.vitahealth.tata.preferences.application.handlers.SyncUserPreferencesCommandHandler
+import com.vitahealth.tata.preferences.application.handlers.UpdateHighContrastCommandHandler
+import com.vitahealth.tata.preferences.application.handlers.UpdateNotificationPreferencesCommandHandler
+import com.vitahealth.tata.preferences.application.handlers.UpdateReadingAssistanceCommandHandler
+import com.vitahealth.tata.preferences.application.handlers.UpdateReducedMotionCommandHandler
+import com.vitahealth.tata.preferences.application.handlers.UpdateTextSizeCommandHandler
+import com.vitahealth.tata.preferences.application.handlers.UpdateVoiceConfirmationCommandHandler
+import com.vitahealth.tata.preferences.domain.model.AccessibilityPreferences
+import com.vitahealth.tata.preferences.infrastructure.OfflineFirstUserPreferencesRepository
+import com.vitahealth.tata.preferences.infrastructure.local.DataStoreAccessibilityLocalStore
+import com.vitahealth.tata.preferences.infrastructure.remote.PreferencesApiService
+import com.vitahealth.tata.preferences.infrastructure.remote.RemoteNotificationPreferencesRepository
+import com.vitahealth.tata.preferences.infrastructure.remote.RemoteUserPreferences
+import com.vitahealth.tata.preferences.presentation.accessibility.AccessibilityViewModel
+import com.vitahealth.tata.preferences.presentation.notifications.NotificationPreferencesViewModel
+import kotlinx.coroutines.flow.Flow
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
@@ -60,8 +95,15 @@ class AppContainer(
     context: Context,
     baseUrl: String = "http://10.0.2.2:8080/",
 ) {
+    private val sessions = com.vitahealth.tata.shared.infrastructure.security.EncryptedSessionStore(context)
+    private val httpClient = okhttp3.OkHttpClient.Builder().addInterceptor { chain ->
+        val request = chain.request().newBuilder()
+        sessions.accessToken()?.let { request.header("Authorization", "Bearer $it") }
+        chain.proceed(request.build())
+    }.build()
     private val retrofit: Retrofit = Retrofit.Builder()
         .baseUrl(baseUrl)
+        .client(httpClient)
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
@@ -72,16 +114,23 @@ class AppContainer(
         com.vitahealth.tata.monitoring.presentation.summary.FamilySummaryViewModel.Factory(caregiverId, olderAdultId, name, monitoringRepository)
 
     private val identityApi: IdentityApiService = retrofit.create(IdentityApiService::class.java)
-    private val identityRepository = RemoteIdentityRepository(identityApi)
+    private val identityRepository = RemoteIdentityRepository(identityApi, sessions)
 
     private val careLinkApi: CareLinkApiService = retrofit.create(CareLinkApiService::class.java)
-    private val careLinkRepository = RemoteCareLinkRepository(careLinkApi)
+    private val careLinkRepository = RemoteCareLinkRepository(careLinkApi, sessions)
 
     private val treatmentApi: TreatmentApiService = retrofit.create(TreatmentApiService::class.java)
     private val treatmentRepository = RemoteTreatmentRepository(treatmentApi)
 
     private val inventoryApi: InventoryApiService = retrofit.create(InventoryApiService::class.java)
     private val inventoryRepository = RemoteInventoryRepository(inventoryApi)
+    private val preferencesApi: PreferencesApiService = retrofit.create(PreferencesApiService::class.java)
+    private val preferencesRepository = OfflineFirstUserPreferencesRepository(
+        remote = RemoteUserPreferences(preferencesApi),
+        local = DataStoreAccessibilityLocalStore(context),
+    )
+
+    private val notificationPreferencesRepository = RemoteNotificationPreferencesRepository(preferencesApi)
 
     private val intakeApi: IntakeApiService = retrofit.create(IntakeApiService::class.java)
     private val intakeLocalStore = SQLiteIntakeLocalStore(context)
@@ -131,6 +180,19 @@ class AppContainer(
         olderAdultId = olderAdultId,
         olderAdultName = olderAdultName,
         registerMedicationHandler = RegisterMedicationCommandHandler(treatmentRepository),
+    )
+
+    fun medicationManagementViewModelFactory(
+        caregiverId: String,
+        olderAdultId: String,
+        olderAdultName: String,
+    ) = MedicationManagementViewModel.Factory(
+        caregiverId = caregiverId,
+        olderAdultId = olderAdultId,
+        olderAdultName = olderAdultName,
+        listMedications = ListMedicationsQueryHandler(treatmentRepository),
+        updateMedication = UpdateMedicationCommandHandler(treatmentRepository),
+        deactivateMedication = DeactivateMedicationCommandHandler(treatmentRepository),
     )
 
     fun treatmentCreationViewModelFactory(
@@ -260,6 +322,27 @@ class AppContainer(
         handler = GetTreatmentDetailQueryHandler(treatmentRepository),
     )
 
+    /** Device copy of the accessibility settings; the theme reads it so they apply on every screen. */
+    val accessibilityPreferences: Flow<AccessibilityPreferences> =
+        ObserveAccessibilityPreferencesQueryHandler(preferencesRepository)()
+
+    fun accessibilityViewModelFactory(userId: String) = AccessibilityViewModel.Factory(
+        userId = userId,
+        observeAccessibility = ObserveAccessibilityPreferencesQueryHandler(preferencesRepository),
+        updateTextSize = UpdateTextSizeCommandHandler(preferencesRepository),
+        updateHighContrast = UpdateHighContrastCommandHandler(preferencesRepository),
+        updateReducedMotion = UpdateReducedMotionCommandHandler(preferencesRepository),
+        updateVoiceConfirmation = UpdateVoiceConfirmationCommandHandler(preferencesRepository),
+        updateReadingAssistance = UpdateReadingAssistanceCommandHandler(preferencesRepository),
+        syncPreferences = SyncUserPreferencesCommandHandler(preferencesRepository),
+    )
+
+    fun notificationPreferencesViewModelFactory(userId: String) = NotificationPreferencesViewModel.Factory(
+        userId = userId,
+        getPreferences = GetNotificationPreferencesQueryHandler(notificationPreferencesRepository),
+        updatePreferences = UpdateNotificationPreferencesCommandHandler(notificationPreferencesRepository),
+    )
+
     fun intakeAgendaViewModelFactory(
         olderAdultId: String,
     ) = IntakeAgendaViewModel.Factory(
@@ -296,4 +379,37 @@ class AppContainer(
         registerInitialHandler = RegisterInitialInventoryCommandHandler(inventoryRepository),
         registerReplenishmentHandler = RegisterReplenishmentCommandHandler(inventoryRepository),
     )
+    private val analyticsApi: AnalyticsApiService = retrofit.create(AnalyticsApiService::class.java)
+
+    // Con USE_ANALYTICS_BACKEND = false las pantallas usan datos de ejemplo, sin backend.
+    // Escenarios de ejemplo: Content, NoData, EmptyWeek, Error.
+    private val adherenceSummaryRepository: AdherenceSummaryRepository =
+        if (USE_ANALYTICS_BACKEND) {
+            RemoteAdherenceSummaryRepository(analyticsApi)
+        } else {
+            FakeAdherenceSummaryRepository(FakeAdherenceScenario.Content)
+        }
+
+    fun adherenceHistoryViewModelFactory(olderAdultId: String) = AdherenceHistoryViewModel.Factory(
+        olderAdultId = olderAdultId,
+        handler = GetAdherenceSummaryQueryHandler(adherenceSummaryRepository),
+    )
+
+    // Escenarios de ejemplo: Content, InsufficientEvidence, Error.
+    private val adherenceRecommendationsRepository: AdherenceRecommendationsRepository =
+        if (USE_ANALYTICS_BACKEND) {
+            RemoteAdherenceRecommendationsRepository(analyticsApi)
+        } else {
+            FakeAdherenceRecommendationsRepository(FakeRecommendationsScenario.Content)
+        }
+
+    fun adherenceRecommendationsViewModelFactory(olderAdultId: String) = AdherenceRecommendationsViewModel.Factory(
+        olderAdultId = olderAdultId,
+        handler = GetAdherenceRecommendationsQueryHandler(adherenceRecommendationsRepository),
+    )
+
+    private companion object {
+        const val USE_ANALYTICS_BACKEND = true
+    }
+
 }

@@ -13,15 +13,16 @@ data class RegisterInitialInventoryRequest(
     val replenishmentThreshold: Int,
 )
 
-/** Body of US-43 "register replenishment". The backend `Batch` has no `lot` field yet. */
+/** Body of US-43 "register replenishment". Optional lot metadata is supported. */
 data class RegisterReplenishmentRequest(
     val quantity: Int,
+    val lot: String? = null,
 )
 
 /**
  * Mirrors the backend `InventoryResource`. Timestamps are ISO-8601 strings because the shared
  * Retrofit uses the default Gson, which does not deserialize `java.time.Instant`; they are
- * parsed in the repository. There is no `daysRemaining` field: the backend does not expose it.
+ * parsed in the repository. Coverage is computed by the backend.
  */
 data class InventoryResponse(
     val id: String,
@@ -32,13 +33,16 @@ data class InventoryResponse(
     val batches: List<BatchResponse>,
     val createdAt: String,
     val updatedAt: String,
+    val daysRemaining: Int? = null,
+    val dailyConsumptionUnits: Int? = null,
 )
 
-/** Mirrors the backend `BatchResource`: quantity and timestamp only (no `lot`). */
+/** Mirrors the backend `BatchResource`: quantity, timestamp and optional lot metadata. */
 data class BatchResponse(
     val id: String,
     val quantity: Int,
     val registeredAt: String,
+    val lot: String? = null,
 )
 
 interface InventoryApiService {

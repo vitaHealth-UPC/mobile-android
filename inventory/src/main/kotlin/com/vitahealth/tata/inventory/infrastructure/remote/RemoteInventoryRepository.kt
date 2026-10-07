@@ -59,12 +59,13 @@ class RemoteInventoryRepository(
     override suspend fun registerReplenishment(
         medicationId: String,
         quantity: Int,
+        lot: String?,
     ): AppResult<InventoryStockReadModel> =
         request(
             call = {
                 api.registerReplenishment(
                     medicationId = medicationId,
-                    request = RegisterReplenishmentRequest(quantity = quantity),
+                    request = RegisterReplenishmentRequest(quantity = quantity, lot = lot),
                 )
             },
             errorFor = { status ->
@@ -121,7 +122,7 @@ class RemoteInventoryRepository(
         val batches = body.batches.map { dto ->
             val registeredAt = parseInstant(dto.registeredAt)
                 ?: return AppResult.Failure(message = "unparseable batch timestamp", code = "INVALID_RESPONSE")
-            InventoryBatch(id = dto.id, quantity = dto.quantity, registeredAt = registeredAt)
+            InventoryBatch(id = dto.id, quantity = dto.quantity, registeredAt = registeredAt, lot = dto.lot)
         }
 
         return AppResult.Success(
@@ -133,7 +134,7 @@ class RemoteInventoryRepository(
                 batches = batches,
                 createdAt = createdAt,
                 updatedAt = updatedAt,
-                daysRemaining = null,
+                daysRemaining = body.daysRemaining,
             ),
         )
     }

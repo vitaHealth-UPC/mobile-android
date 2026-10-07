@@ -30,9 +30,11 @@ class RegisterReplenishmentCommandHandler(
                 code = "INVALID_QUANTITY",
             )
 
+        if ((command.lot?.length ?: 0) > 200) return AppResult.Failure(message = "lot exceeds 200 characters", code = "VALIDATION_ERROR")
         return repository.registerReplenishment(
             medicationId = medicationId,
             quantity = quantity.value,
+            lot = command.lot?.trim()?.takeIf { it.isNotBlank() },
         )
     }
 }

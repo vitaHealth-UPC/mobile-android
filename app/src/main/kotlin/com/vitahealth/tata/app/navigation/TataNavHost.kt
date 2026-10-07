@@ -1,5 +1,10 @@
 package com.vitahealth.tata.app.navigation
 
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -8,12 +13,18 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.vitahealth.tata.analytics.presentation.history.AdherenceHistoryRoute
+import com.vitahealth.tata.analytics.presentation.recommendations.AdherenceRecommendationsRoute
 import com.vitahealth.tata.app.TataApplication
 import com.vitahealth.tata.carelink.presentation.link.CareLinkRoute
 import com.vitahealth.tata.identity.presentation.registration.CaregiverRegistrationRoute
 import com.vitahealth.tata.intake.presentation.detail.DoseDetailRoute
 import com.vitahealth.tata.intake.presentation.home.NextDoseHomeRoute
 import com.vitahealth.tata.inventory.presentation.inventory.InventoryRoute
+import com.vitahealth.tata.preferences.presentation.accessibility.AccessibilityRoute
+import com.vitahealth.tata.preferences.presentation.notifications.NotificationPreferencesRoute
+import com.vitahealth.tata.shared.design.accessibility.LocalTataAccessibility
+import com.vitahealth.tata.treatment.presentation.medication.MedicationManagementRoute
 import com.vitahealth.tata.treatment.presentation.medication.MedicationRegistrationRoute
 import com.vitahealth.tata.treatment.presentation.treatment.TreatmentCreationRoute
 import com.vitahealth.tata.treatment.presentation.treatment.TreatmentDoseFrequencyRoute
@@ -28,10 +39,16 @@ fun TataNavHost(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
 ) {
+    // Reduced motion removes the screen transitions; otherwise the Navigation default (700 ms fade) applies.
+    val reducedMotion = LocalTataAccessibility.current.reducedMotion
     NavHost(
         navController = navController,
         startDestination = RootDestination.CaregiverRegistration.route,
         modifier = modifier,
+        enterTransition = { if (reducedMotion) EnterTransition.None else fadeIn(animationSpec = tween(700)) },
+        exitTransition = { if (reducedMotion) ExitTransition.None else fadeOut(animationSpec = tween(700)) },
+        popEnterTransition = { if (reducedMotion) EnterTransition.None else fadeIn(animationSpec = tween(700)) },
+        popExitTransition = { if (reducedMotion) ExitTransition.None else fadeOut(animationSpec = tween(700)) },
     ) {
         composable(RootDestination.CaregiverRegistration.route) {
             val app = androidx.compose.ui.platform.LocalContext.current.applicationContext as TataApplication
@@ -86,8 +103,73 @@ fun TataNavHost(
                 factory = app.container.familySummaryViewModelFactory(caregiver, adult, name),
                 olderAdultName = name,
                 onAgenda = { navController.navigate(RootDestination.IntakeAgenda.createRoute(adult)) },
+                onHistory = { navController.navigate(RootDestination.AdherenceHistory.createRoute(adult)) },
                 onAddMedication = { navController.navigate(RootDestination.MedicationRegistration.createRoute(caregiver, adult, name)) },
                 onChangePerson = { navController.navigate(RootDestination.CareLink.createRoute(caregiver)) },
+                onAccessibility = { navController.navigate(RootDestination.Accessibility.createRoute(caregiver)) },
+                onNotificationPreferences = { navController.navigate(RootDestination.NotificationPreferences.createRoute(caregiver)) },
+                onMedications = { navController.navigate(RootDestination.MedicationManagement.createRoute(caregiver, adult, name)) },
+            )
+        }
+
+        composable(
+            route = RootDestination.NotificationPreferences.route,
+            arguments = listOf(
+                navArgument(RootDestination.NotificationPreferences.userIdArgument) { type = NavType.StringType },
+            ),
+        ) { backStackEntry ->
+            val app = androidx.compose.ui.platform.LocalContext.current.applicationContext as TataApplication
+            val userId = requireNotNull(
+                backStackEntry.arguments?.getString(RootDestination.NotificationPreferences.userIdArgument),
+            )
+            NotificationPreferencesRoute(
+                factory = app.container.notificationPreferencesViewModelFactory(userId),
+                onBack = { navController.popBackStack() },
+            )
+        }
+
+        composable(
+            route = RootDestination.Accessibility.route,
+            arguments = listOf(
+                navArgument(RootDestination.Accessibility.userIdArgument) { type = NavType.StringType },
+            ),
+        ) { backStackEntry ->
+            val app = androidx.compose.ui.platform.LocalContext.current.applicationContext as TataApplication
+            val userId = requireNotNull(
+                backStackEntry.arguments?.getString(RootDestination.Accessibility.userIdArgument),
+            )
+            AccessibilityRoute(
+                factory = app.container.accessibilityViewModelFactory(userId),
+                onBack = { navController.popBackStack() },
+            )
+        }
+
+        composable(
+            route = RootDestination.MedicationManagement.route,
+            arguments = listOf(
+                navArgument(RootDestination.MedicationManagement.caregiverIdArgument) { type = NavType.StringType },
+                navArgument(RootDestination.MedicationManagement.olderAdultIdArgument) { type = NavType.StringType },
+                navArgument(RootDestination.MedicationManagement.olderAdultNameArgument) { type = NavType.StringType },
+            ),
+        ) { backStackEntry ->
+            val app = androidx.compose.ui.platform.LocalContext.current.applicationContext as TataApplication
+            val caregiverId = requireNotNull(
+                backStackEntry.arguments?.getString(RootDestination.MedicationManagement.caregiverIdArgument),
+            )
+            val olderAdultId = requireNotNull(
+                backStackEntry.arguments?.getString(RootDestination.MedicationManagement.olderAdultIdArgument),
+            )
+            val olderAdultName = requireNotNull(
+                backStackEntry.arguments?.getString(RootDestination.MedicationManagement.olderAdultNameArgument),
+            )
+            MedicationManagementRoute(
+                factory = app.container.medicationManagementViewModelFactory(caregiverId, olderAdultId, olderAdultName),
+                onBack = { navController.popBackStack() },
+                onAddMedication = {
+                    navController.navigate(
+                        RootDestination.MedicationRegistration.createRoute(caregiverId, olderAdultId, olderAdultName),
+                    )
+                },
             )
         }
 
@@ -625,6 +707,46 @@ fun TataNavHost(
                     medicationName = medicationName,
                     unit = unit,
                 ),
+            )
+        }
+
+        composable(
+            route = RootDestination.AdherenceHistory.route,
+            arguments = listOf(
+                navArgument(RootDestination.AdherenceHistory.olderAdultIdArgument) { type = NavType.StringType },
+            ),
+        ) { backStackEntry ->
+            val app = androidx.compose.ui.platform.LocalContext.current.applicationContext as TataApplication
+            val olderAdultId = requireNotNull(
+                backStackEntry.arguments?.getString(RootDestination.AdherenceHistory.olderAdultIdArgument),
+            )
+
+            AdherenceHistoryRoute(
+                factory = app.container.adherenceHistoryViewModelFactory(olderAdultId),
+                onOpenRecommendations = {
+                    navController.navigate(RootDestination.AdherenceRecommendations.createRoute(olderAdultId))
+                },
+                onTabSelected = { navController.popBackStack(RootDestination.FamilySummary.route, inclusive = false) },
+            )
+        }
+
+        composable(
+            route = RootDestination.AdherenceRecommendations.route,
+            arguments = listOf(
+                navArgument(RootDestination.AdherenceRecommendations.olderAdultIdArgument) {
+                    type = NavType.StringType
+                },
+            ),
+        ) { backStackEntry ->
+            val app = androidx.compose.ui.platform.LocalContext.current.applicationContext as TataApplication
+            val olderAdultId = requireNotNull(
+                backStackEntry.arguments?.getString(RootDestination.AdherenceRecommendations.olderAdultIdArgument),
+            )
+
+            AdherenceRecommendationsRoute(
+                factory = app.container.adherenceRecommendationsViewModelFactory(olderAdultId),
+                onBackToHistory = { navController.popBackStack() },
+                onTabSelected = { navController.popBackStack(RootDestination.FamilySummary.route, inclusive = false) },
             )
         }
 

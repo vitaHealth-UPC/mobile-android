@@ -71,6 +71,7 @@ fun InventoryRoute(
         onDefineInitial = viewModel::defineInitialInventory,
         onReplenishmentChange = viewModel::onReplenishmentQuantityChange,
         onSaveReplenishment = viewModel::saveReplenishment,
+        onLotChange = viewModel::onLotChange,
         onRetry = viewModel::retry,
         modifier = modifier,
     )
@@ -86,6 +87,7 @@ fun InventoryScreen(
     onSaveReplenishment: () -> Unit,
     onRetry: () -> Unit,
     modifier: Modifier = Modifier,
+    onLotChange: (String) -> Unit = {},
 ) {
     Column(
         modifier = modifier
@@ -118,6 +120,7 @@ fun InventoryScreen(
                 state = state,
                 onReplenishmentChange = onReplenishmentChange,
                 onSaveReplenishment = onSaveReplenishment,
+                onLotChange = onLotChange,
             )
             is InventoryUiState.Error -> ErrorBody(code = state.code, onRetry = onRetry)
         }
@@ -136,6 +139,7 @@ private fun ReadyBody(
     state: InventoryUiState.Ready,
     onReplenishmentChange: (String) -> Unit,
     onSaveReplenishment: () -> Unit,
+    onLotChange: (String) -> Unit,
 ) {
     StockCard(state = state)
 
@@ -152,6 +156,16 @@ private fun ReadyBody(
             isError = state.replenishmentErrorCode == "INVALID_QUANTITY",
             enabled = !state.submitting,
             errorLabel = stringResource(R.string.inventory_invalid_quantity_label),
+        )
+        Text(text = stringResource(R.string.inventory_lot_label), color = TataMuted)
+        OutlinedTextField(
+            value = state.lotInput,
+            onValueChange = onLotChange,
+            enabled = !state.submitting,
+            singleLine = true,
+            shape = RoundedCornerShape(15.dp),
+            modifier = Modifier.fillMaxWidth(),
+            colors = OutlinedTextFieldDefaults.colors(focusedContainerColor = Color.White, unfocusedContainerColor = Color.White),
         )
         state.replenishmentErrorCode?.let { code ->
             Text(text = stringResource(inventoryErrorMessageRes(code)), color = TataError)
@@ -213,6 +227,7 @@ private fun LastReplenishmentCard(batch: InventoryBatch, unit: String) {
             Text(text = stringResource(R.string.inventory_registered_badge), color = AvailableGreen)
         }
         Spacer(Modifier.height(4.dp))
+        batch.lot?.let { Text(text = it, color = TataMuted) }
         Text(text = batchDateFormatter.format(batch.registeredAt), color = TataText, fontWeight = FontWeight.Bold)
         Text(
             text = if (unit.isBlank()) {

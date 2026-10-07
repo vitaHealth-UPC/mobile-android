@@ -22,5 +22,6 @@ interface InventoryRepository {
     suspend fun registerReplenishment(
         medicationId: String,
         quantity: Int,
+        lot: String? = null,
     ): AppResult<InventoryStockReadModel>
 }

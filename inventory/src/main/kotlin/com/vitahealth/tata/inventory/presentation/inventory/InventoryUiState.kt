@@ -28,6 +28,7 @@ sealed interface InventoryUiState {
         val medicationName: String,
         val unit: String,
         val replenishmentInput: String = "",
+        val lotInput: String = "",
         val submitting: Boolean = false,
         val replenishmentErrorCode: String? = null,
         val justRegistered: Boolean = false,

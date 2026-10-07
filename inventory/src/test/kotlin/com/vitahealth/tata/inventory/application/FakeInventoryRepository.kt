@@ -43,6 +43,7 @@ class FakeInventoryRepository : InventoryRepository {
     override suspend fun registerReplenishment(
         medicationId: String,
         quantity: Int,
+        lot: String?,
     ): AppResult<InventoryStockReadModel> {
         replenishmentCalls++
         lastReplenishmentMedicationId = medicationId

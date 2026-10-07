@@ -1,5 +1,8 @@
 package com.vitahealth.tata.identity.infrastructure.remote
 
+import com.vitahealth.tata.shared.application.SessionStore
+import com.vitahealth.tata.shared.application.NoSessionStore
+import kotlinx.coroutines.CancellationException
 import com.vitahealth.tata.identity.application.IdentityRepository
 import com.vitahealth.tata.identity.domain.model.AccountStatus
 import com.vitahealth.tata.identity.domain.model.CaregiverAccount
@@ -7,6 +10,7 @@ import com.vitahealth.tata.shared.common.result.AppResult
 
 class RemoteIdentityRepository(
     private val api: IdentityApiService,
+    private val sessions: SessionStore = NoSessionStore,
 ) : IdentityRepository {
     override suspend fun registerCaregiver(
         name: String,
@@ -29,6 +33,7 @@ class RemoteIdentityRepository(
             val response = call()
             val body = response.body()
             if (response.isSuccessful && body != null) {
+                if (body.accessToken != null && body.expiresAt != null) sessions.save(body.accessToken, body.expiresAt)
                 AppResult.Success(
                     CaregiverAccount(
                         id = body.id,
@@ -49,6 +54,8 @@ class RemoteIdentityRepository(
                 }
                 AppResult.Failure(message = message, code = code)
             }
+        } catch (exception: CancellationException) {
+            throw exception
         } catch (exception: Exception) {
             AppResult.Failure(
                 message = "Network unavailable",
