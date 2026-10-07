@@ -27,6 +27,17 @@ import com.vitahealth.tata.identity.infrastructure.remote.IdentityApiService
 import com.vitahealth.tata.identity.infrastructure.remote.RemoteIdentityRepository
 import com.vitahealth.tata.identity.presentation.registration.CaregiverRegistrationViewModel
 import com.vitahealth.tata.intake.application.handlers.ConfirmDoseCommandHandler
+import com.vitahealth.tata.omission.application.commands.FollowCaregiverAlertsCommand
+import com.vitahealth.tata.omission.application.commands.FollowDoseRemindersCommand
+import com.vitahealth.tata.omission.application.handlers.FollowCaregiverAlertsCommandHandler
+import com.vitahealth.tata.omission.application.handlers.FollowDoseRemindersCommandHandler
+import com.vitahealth.tata.omission.application.handlers.ResolvePushDestinationQueryHandler
+import com.vitahealth.tata.omission.application.queries.PushDestination
+import com.vitahealth.tata.monitoring.application.queries.GetOpenAlertsQuery
+import com.vitahealth.tata.app.navigation.alertForPush
+import com.vitahealth.tata.omission.infrastructure.push.FirebaseTopicSubscriptions
+import com.vitahealth.tata.omission.infrastructure.push.SharedPreferencesPushTargetStore
+import com.vitahealth.tata.omission.presentation.notifications.OmissionPushIntent
 import com.vitahealth.tata.intake.application.handlers.GetDoseDetailQueryHandler
 import com.vitahealth.tata.intake.application.handlers.GetNextDoseQueryHandler
 import com.vitahealth.tata.intake.infrastructure.local.OfflineFirstDoseConfirmationRepository
@@ -142,6 +153,30 @@ class AppContainer(
         AlertsViewModel.Factory(caregiverId, olderAdultId, GetOpenAlertsQueryHandler(alertsRepository))
     fun alertDetailViewModelFactory(caregiverId: String, olderAdultId: String, alertId: Long) =
         AlertDetailViewModel.Factory(caregiverId, olderAdultId, alertId, GetAlertDetailQueryHandler(alertsRepository))
+
+    // Omission & Escalation push (US-22): FCM topics named after the backend recipients.
+    private val pushTargets = SharedPreferencesPushTargetStore(context)
+    private val pushTopics = FirebaseTopicSubscriptions(context)
+    private val followCaregiverAlertsHandler = FollowCaregiverAlertsCommandHandler(pushTargets, pushTopics)
+    private val followDoseRemindersHandler = FollowDoseRemindersCommandHandler(pushTargets, pushTopics)
+    private val resolvePushDestinationHandler = ResolvePushDestinationQueryHandler(pushTargets)
+
+    fun followCaregiverAlerts(caregiverId: String, olderAdultId: String) =
+        followCaregiverAlertsHandler(FollowCaregiverAlertsCommand(caregiverId, olderAdultId))
+
+    fun followDoseReminders(olderAdultId: String, olderAdultName: String) =
+        followDoseRemindersHandler(FollowDoseRemindersCommand(olderAdultId, olderAdultName))
+
+    /** Screen to open for an intent that came from an omission notification, or null. */
+    fun pushDestination(kind: String?, olderAdultId: String?, medicationName: String?): PushDestination? =
+        OmissionPushIntent.queryFrom(kind, olderAdultId, medicationName)?.let { resolvePushDestinationHandler(it) }
+
+    /** Open alert a caregiver push refers to, read from the recent status (`openAlerts`), or null. */
+    suspend fun openAlertIdFor(destination: PushDestination.CaregiverAlerts): Long? =
+        when (val result = GetOpenAlertsQueryHandler(alertsRepository)(GetOpenAlertsQuery(destination.caregiverId, destination.olderAdultId))) {
+            is com.vitahealth.tata.shared.common.result.AppResult.Success -> alertForPush(result.value, destination.medicationName)?.id
+            is com.vitahealth.tata.shared.common.result.AppResult.Failure -> null
+        }
 
     private val identityApi: IdentityApiService = retrofit.create(IdentityApiService::class.java)
     private val identityRepository = RemoteIdentityRepository(identityApi, sessions)
