@@ -188,8 +188,8 @@ internal fun AlertsProblemCard(
 
 @Composable
 internal fun AlertInfoRow(label: String, value: String) {
-    Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
-        Text(text = label, color = AlertsSecondaryText, style = MaterialTheme.typography.labelLarge)
-        Text(text = value, color = tataTextColor(), style = MaterialTheme.typography.bodyLarge)
+    Row(modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Text(text = label, color = AlertsSecondaryText, fontSize = 11.sp, lineHeight = 14.sp, modifier = Modifier.weight(0.3f))
+        Text(text = value, color = tataTextColor(), fontSize = 11.sp, lineHeight = 14.sp, modifier = Modifier.weight(0.7f))
     }
 }

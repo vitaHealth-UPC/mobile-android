@@ -1,5 +1,6 @@
 package com.vitahealth.tata.monitoring.presentation.alerts
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -18,6 +20,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -66,7 +75,8 @@ fun AlertDetailScreen(
     onRetryContact: () -> Unit = {},
 ) {
     val formatter = rememberAlertDateFormatter()
-    Column(modifier = Modifier.fillMaxSize().background(TataSurface)) {
+    ProvideTextStyle(MaterialTheme.typography.bodyMedium.copy(fontFamily = FontFamily(Font(com.vitahealth.tata.shared.R.font.tata_inter)), fontSize = 11.sp, lineHeight = 14.sp)) {
+    Column(modifier = Modifier.fillMaxSize().background(Brush.horizontalGradient(listOf(Color.White, TataSurface, Color(0xFFFCFBFF))))) {
         Column(
             modifier = Modifier
                 .weight(1f)
@@ -77,8 +87,9 @@ fun AlertDetailScreen(
             val alert = (state as? AlertDetailUiState.Content)?.alert
             Row(verticalAlignment = Alignment.CenterVertically) {
                 AlertsBackButton(onBack)
-                AlertsTitle(
+                Text(
                     text = stringResource(alert?.status?.titleRes() ?: R.string.alert_detail_title),
+                    fontFamily = alertsSerif, fontSize = 22.sp, lineHeight = 27.sp, color = tataTextColor(),
                     modifier = Modifier.weight(1f).padding(start = 4.dp),
                 )
                 if (alert != null) AlertStatusChip(alert.status)
@@ -94,7 +105,7 @@ fun AlertDetailScreen(
                     Text(
                         text = stringResource(R.string.alert_detail_section),
                         color = tataTextColor(),
-                        style = MaterialTheme.typography.titleMedium,
+                        fontSize = 14.sp, lineHeight = 18.sp,
                         fontWeight = FontWeight.SemiBold,
                     )
                     Spacer(modifier = Modifier.height(8.dp))
@@ -115,6 +126,7 @@ fun AlertDetailScreen(
         }
         CaregiverTabBar(selected = CaregiverTab.Alerts, onSelect = onTabSelected)
     }
+    }
 }
 
 @Composable
@@ -122,26 +134,27 @@ private fun MedicationCard(alert: CaregiverAlert, scheduled: String) {
     TataCard(modifier = Modifier.fillMaxWidth(), containerColor = alert.status.surface()) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             AlertMark(alert.status)
-            Column(modifier = Modifier.padding(start = 16.dp)) {
+            Column(modifier = Modifier.weight(1f).padding(start = 12.dp)) {
                 Text(
                     text = alert.medicationName,
                     color = tataTextColor(),
-                    style = MaterialTheme.typography.titleLarge,
+                    fontSize = 18.sp, lineHeight = 23.sp,
                     fontWeight = FontWeight.SemiBold,
                 )
                 Text(
                     text = stringResource(R.string.alert_detail_scheduled),
                     color = AlertsSecondaryText,
-                    style = MaterialTheme.typography.labelLarge,
+                    fontSize = 11.sp, lineHeight = 14.sp,
                     modifier = Modifier.padding(top = 8.dp),
                 )
                 Text(
                     text = scheduled,
                     color = tataTextColor(),
-                    style = MaterialTheme.typography.titleMedium,
+                    fontSize = 14.sp, lineHeight = 18.sp,
                     fontWeight = FontWeight.SemiBold,
                 )
             }
+            Image(painterResource(R.drawable.alert_tablet), null, Modifier.size(70.dp))
         }
     }
 }

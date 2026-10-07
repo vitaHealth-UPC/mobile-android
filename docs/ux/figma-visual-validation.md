@@ -31,7 +31,7 @@ Evidencias PNG en el equipo de trabajo: C:/Users/david/Downloads/. Las capturas 
 | 15 | Family Summary | 563:727 | Aceptada visualmente | family-summary-final.png |
 | 16 | Linked Person | 563:1121 | Requiere validar/corregir | — |
 | 17 | Alerts | 563:819 | Requiere validar/corregir | — |
-| 18 | Alert Detail | 563:918 | Requiere validar/corregir | — |
+| 18 | Alert Detail | 563:918 | Requiere corregir: perfil y eventos reales de recordatorios | alert-detail-proportional.png |
 | 19 | History & Insights | 563:1017 | Requiere validar/corregir | — |
 | 20 | Adherence Recommendations | 563:1767 | Requiere validar/corregir | — |
 | 21 | Notes - Adult | 576:2785 | Sin implementación específica | — |
@@ -71,7 +71,7 @@ Evidencias PNG en el equipo de trabajo: C:/Users/david/Downloads/. Las capturas 
 | 55 | Empty Intake History | 563:4037 | Requiere validar/corregir | — |
 | 56 | Contact Unavailable | 563:4145 | Requiere validar/corregir | — |
 | 57 | Follow-up Note Saved | 563:4245 | Requiere corregir: composición del aviso y detalle | audit-alert-followup-note-saved.png |
-| 58 | Alert Attended | 563:4345 | Requiere validar/corregir | — |
+| 58 | Alert Attended | 563:4345 | Requiere corregir: perfil y línea de recordatorios | audit-alert-attended-read-only (3).png |
 | 59 | Adherence Period Changed | 563:4445 | Requiere validar/corregir | — |
 | 60 | Insufficient Evidence | 563:4550 | Requiere validar/corregir | — |
 | 61 | Large Text Enabled | 563:4638 | Requiere validar/corregir | — |
