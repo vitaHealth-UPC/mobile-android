@@ -46,13 +46,17 @@ import com.vitahealth.tata.intake.presentation.home.NextDoseHomeViewModel
 import com.vitahealth.tata.treatment.application.handlers.ChangeTreatmentStatusCommandHandler
 import com.vitahealth.tata.treatment.application.handlers.ConfigureTreatmentCommandHandler
 import com.vitahealth.tata.treatment.application.handlers.CreateTreatmentCommandHandler
+import com.vitahealth.tata.treatment.application.handlers.DeactivateMedicationCommandHandler
 import com.vitahealth.tata.treatment.application.handlers.GetTreatmentDetailQueryHandler
+import com.vitahealth.tata.treatment.application.handlers.ListMedicationsQueryHandler
 import com.vitahealth.tata.treatment.application.handlers.RegisterMedicationCommandHandler
 import com.vitahealth.tata.treatment.application.handlers.SetDoseFrequencyCommandHandler
 import com.vitahealth.tata.treatment.application.handlers.SetReminderPolicyCommandHandler
 import com.vitahealth.tata.treatment.application.handlers.SetScheduleInstructionsCommandHandler
+import com.vitahealth.tata.treatment.application.handlers.UpdateMedicationCommandHandler
 import com.vitahealth.tata.treatment.infrastructure.remote.RemoteTreatmentRepository
 import com.vitahealth.tata.treatment.infrastructure.remote.TreatmentApiService
+import com.vitahealth.tata.treatment.presentation.medication.MedicationManagementViewModel
 import com.vitahealth.tata.treatment.presentation.medication.MedicationRegistrationViewModel
 import com.vitahealth.tata.treatment.presentation.treatment.TreatmentCreationViewModel
 import com.vitahealth.tata.treatment.presentation.treatment.TreatmentDetailViewModel
@@ -161,6 +165,19 @@ class AppContainer(
         olderAdultId = olderAdultId,
         olderAdultName = olderAdultName,
         registerMedicationHandler = RegisterMedicationCommandHandler(treatmentRepository),
+    )
+
+    fun medicationManagementViewModelFactory(
+        caregiverId: String,
+        olderAdultId: String,
+        olderAdultName: String,
+    ) = MedicationManagementViewModel.Factory(
+        caregiverId = caregiverId,
+        olderAdultId = olderAdultId,
+        olderAdultName = olderAdultName,
+        listMedications = ListMedicationsQueryHandler(treatmentRepository),
+        updateMedication = UpdateMedicationCommandHandler(treatmentRepository),
+        deactivateMedication = DeactivateMedicationCommandHandler(treatmentRepository),
     )
 
     fun treatmentCreationViewModelFactory(

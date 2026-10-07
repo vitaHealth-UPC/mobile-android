@@ -23,6 +23,7 @@ import com.vitahealth.tata.intake.presentation.home.NextDoseHomeRoute
 import com.vitahealth.tata.preferences.presentation.accessibility.AccessibilityRoute
 import com.vitahealth.tata.preferences.presentation.notifications.NotificationPreferencesRoute
 import com.vitahealth.tata.shared.design.accessibility.LocalTataAccessibility
+import com.vitahealth.tata.treatment.presentation.medication.MedicationManagementRoute
 import com.vitahealth.tata.treatment.presentation.medication.MedicationRegistrationRoute
 import com.vitahealth.tata.treatment.presentation.treatment.TreatmentCreationRoute
 import com.vitahealth.tata.treatment.presentation.treatment.TreatmentDoseFrequencyRoute
@@ -106,6 +107,7 @@ fun TataNavHost(
                 onChangePerson = { navController.navigate(RootDestination.CareLink.createRoute(caregiver)) },
                 onAccessibility = { navController.navigate(RootDestination.Accessibility.createRoute(caregiver)) },
                 onNotificationPreferences = { navController.navigate(RootDestination.NotificationPreferences.createRoute(caregiver)) },
+                onMedications = { navController.navigate(RootDestination.MedicationManagement.createRoute(caregiver, adult, name)) },
             )
         }
 
@@ -138,6 +140,35 @@ fun TataNavHost(
             AccessibilityRoute(
                 factory = app.container.accessibilityViewModelFactory(userId),
                 onBack = { navController.popBackStack() },
+            )
+        }
+
+        composable(
+            route = RootDestination.MedicationManagement.route,
+            arguments = listOf(
+                navArgument(RootDestination.MedicationManagement.caregiverIdArgument) { type = NavType.StringType },
+                navArgument(RootDestination.MedicationManagement.olderAdultIdArgument) { type = NavType.StringType },
+                navArgument(RootDestination.MedicationManagement.olderAdultNameArgument) { type = NavType.StringType },
+            ),
+        ) { backStackEntry ->
+            val app = androidx.compose.ui.platform.LocalContext.current.applicationContext as TataApplication
+            val caregiverId = requireNotNull(
+                backStackEntry.arguments?.getString(RootDestination.MedicationManagement.caregiverIdArgument),
+            )
+            val olderAdultId = requireNotNull(
+                backStackEntry.arguments?.getString(RootDestination.MedicationManagement.olderAdultIdArgument),
+            )
+            val olderAdultName = requireNotNull(
+                backStackEntry.arguments?.getString(RootDestination.MedicationManagement.olderAdultNameArgument),
+            )
+            MedicationManagementRoute(
+                factory = app.container.medicationManagementViewModelFactory(caregiverId, olderAdultId, olderAdultName),
+                onBack = { navController.popBackStack() },
+                onAddMedication = {
+                    navController.navigate(
+                        RootDestination.MedicationRegistration.createRoute(caregiverId, olderAdultId, olderAdultName),
+                    )
+                },
             )
         }
 

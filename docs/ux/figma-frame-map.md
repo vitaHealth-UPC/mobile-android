@@ -60,3 +60,10 @@ Frame `563:1219` (Notification Preferences) and `563:5090` (Preferences Saved): 
 Not implemented on purpose, because the backend has no field or endpoint for them (US-28 asks for notification categories): the "Medication reminders" cadence card, the "Caregiver alerts" card with its delays and daily summary, the "Emergency escalation" card, and the "Calls" channel. The backend only stores quiet hours and the channels PUSH, SMS and EMAIL.
 
 Entry point: the "More" menu of the family summary offers "Preferencias de notificación".
+## US-04 edit and deactivate a medication
+
+Frames `563:1554` (Treatment Management), `563:2455` (Medication Updated), `563:2537` (Medication Deactivated), `563:2404` (required fields) and `563:3092` (Access Denied): `MedicationManagementScreen` (route `medication-management/{caregiverId}/{olderAdultId}/{olderAdultName}`). One card per medication with its Active / Inactive state, an inline edit form, a confirmation dialog before deactivating, and the "Protected history" note. The updated, deactivated and error banners are `MedicationManagementMessage` UI states; the restricted access card is `accessDenied`.
+
+Not implemented on purpose: "Pause" is the treatment lifecycle of US-18 (`TreatmentLifecycleScreen`), "Reactivate" has no backend endpoint, and the 92% adherence chart belongs to `:analytics`.
+
+Entry point: the "More" menu of the family summary offers "Medicamentos". This screen uses the colour constants that exist in `develop`; once the accessibility branches are merged it can switch to `tataTextColor()` / `tataMutedColor()` so it follows high contrast.

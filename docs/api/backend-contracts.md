@@ -37,3 +37,6 @@ The app keeps a copy in DataStore (`tata_accessibility`) and applies it before a
 `PUT /api/v1/users/{userId}/preferences/reading-assistance` (US-38) takes `{ "enabled": true }` and returns the preferences representation.
 
 `PUT /api/v1/users/{userId}/notification-preferences` (US-39) takes `{ "quietHours": {"start": "22:00", "end": "07:00"} | absent, "channels": [{"type": "PUSH", "enabled": true}, ...] }`, replaces both settings and returns the preferences representation. A `400` means an empty interval or a repeated channel. These two settings have no device copy: they are read and saved online only.
+## Medications of an older adult (US-04)
+
+`GET /api/v1/older-adults/{olderAdultId}/medications?caregiverId=` lists the medications ordered by name, inactive ones included. `PUT /api/v1/medications/{medicationId}` takes `{ caregiverId, name, presentation }`; `POST /api/v1/medications/{medicationId}/deactivation?caregiverId=` deactivates and keeps the history. Both return the medication. `403` means no active care link, `404` an unknown medication, `409` that an inactive medication cannot be edited and `400` a missing field. There is no reactivation endpoint.
