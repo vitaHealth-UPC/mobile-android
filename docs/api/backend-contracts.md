@@ -104,3 +104,15 @@ Source: the deployed OpenAPI document (`/v3/api-docs`, tags "Alerts" and "Family
 The alert `id` is a numeric `int64` (`Long` in Android), unlike the UUID `String` identifiers listed in the intake section; `intakeId` stays a `String`. The status names are the backend ones: the app shows OPEN as Pending / Pendiente, ATTENDED as Attended / Atendida and CLOSED as Closed / Cerrada. There is no "Resolved" status.
 
 `PUT /api/v1/older-adults/{olderAdultId}/alerts/{alertId}/status?caregiverId=` with `{ "status": "ATTENDED" | "CLOSED" }` exists for US-31 and is not consumed by US-27.
+
+## Omission push (US-22)
+
+There is no REST endpoint for this flow: the backend Omission & Escalation context (TS-05 / TS-06) sends pushes on its own, and the OpenAPI document has no endpoint to register an FCM device token.
+
+- When an intake stays unconfirmed, the backend opens an omission case and sends one reinforced reminder to `user-<olderAdultId>`: title "Medication reminder", body "Your <medication> is still pending. Please confirm it when you take it." Quiet hours and the PUSH channel of the notification preferences can suppress it.
+- When the grace period ends (30 minutes by default) without confirmation, the intake becomes omitted and one caregiver alert goes to `caregivers-of-<olderAdultId>`: title "Medication not confirmed", body "<medication> was not confirmed. Please check how they are doing."
+- The message (`PushProviderMessage`) carries only `recipient`, `title` and `body`: no alert id and no data fields.
+
+The app follows those recipients as FCM topics: the caregiver when the family summary opens, the older adult when the home opens. It shows its own localized text from the topic and the medication in the body. A tapped caregiver alert opens the alert list of that older adult and, on top of it, the detail of its most recent OPEN alert for that medication, read from `openAlerts` of `GET /api/v1/older-adults/{olderAdultId}/status?caregiverId=`, because the push has no alert id. A tapped reminder opens the older adult home. The token registration is behind `DeviceTokenRegistry`, pending until the backend publishes an endpoint. Delivery needs a Firebase project (`app/google-services.json`, not versioned) and a backend provider that publishes to those topics; the deployed backend logs the messages instead of sending them.
+
+On the home, the "Second reminder" card shows while the next dose is `PENDING` after its scheduled time; the intake resource does not say whether the reminder push went out.
