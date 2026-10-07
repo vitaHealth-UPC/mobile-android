@@ -12,6 +12,7 @@ data class CaregiverRegistrationUiState(
     val email: String = "",
     val password: String = "",
     val verificationCode: String = "",
+    val accountId: String? = null,
     val step: RegistrationStep = RegistrationStep.Account,
     val isLoading: Boolean = false,
     val errorMessage: String? = null,

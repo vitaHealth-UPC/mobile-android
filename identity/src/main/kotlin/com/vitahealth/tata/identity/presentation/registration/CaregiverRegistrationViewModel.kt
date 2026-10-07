@@ -41,6 +41,7 @@ class CaregiverRegistrationViewModel(
                 is AppResult.Success -> _state.update {
                     it.copy(
                         isLoading = false,
+                        accountId = result.value.id,
                         step = RegistrationStep.Verification,
                         verificationCode = "",
                     )
@@ -64,7 +65,11 @@ class CaregiverRegistrationViewModel(
                 VerifyCaregiverEmailCommand(current.email, current.verificationCode),
             )) {
                 is AppResult.Success -> _state.update {
-                    it.copy(isLoading = false, step = RegistrationStep.Complete)
+                    it.copy(
+                        isLoading = false,
+                        accountId = result.value.id,
+                        step = RegistrationStep.Complete,
+                    )
                 }
                 is AppResult.Failure -> {
                     if (result.code == "VERIFICATION_EXPIRED") {
@@ -99,6 +104,7 @@ class CaregiverRegistrationViewModel(
                 is AppResult.Success -> _state.update {
                     it.copy(
                         isLoading = false,
+                        accountId = result.value.id,
                         step = RegistrationStep.Verification,
                         verificationCode = "",
                     )

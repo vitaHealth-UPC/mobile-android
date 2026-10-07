@@ -27,6 +27,7 @@ fun TataFormField(
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     singleLine: Boolean = true,
+    enabled: Boolean = true,
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
         Text(
@@ -37,6 +38,7 @@ fun TataFormField(
         OutlinedTextField(
             value = value,
             onValueChange = onValueChange,
+            enabled = enabled,
             modifier = Modifier.fillMaxWidth(),
             placeholder = { if (placeholder.isNotEmpty()) Text(placeholder) },
             keyboardOptions = keyboardOptions,
@@ -46,10 +48,13 @@ fun TataFormField(
             colors = OutlinedTextFieldDefaults.colors(
                 focusedContainerColor = Color.White,
                 unfocusedContainerColor = Color.White,
+                disabledContainerColor = Color.White,
                 focusedBorderColor = TataBorder,
                 unfocusedBorderColor = TataBorder,
+                disabledBorderColor = TataBorder,
                 focusedTextColor = TataText,
                 unfocusedTextColor = TataText,
+                disabledTextColor = TataMuted,
             ),
         )
     }
