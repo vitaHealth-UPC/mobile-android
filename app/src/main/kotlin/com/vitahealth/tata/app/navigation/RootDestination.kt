@@ -281,4 +281,20 @@ sealed interface RootDestination {
             "dose-detail/" + Uri.encode(intakeId)
     }
 
+    data object AdherenceHistory : RootDestination {
+        const val olderAdultIdArgument = "olderAdultId"
+        override val route: String = "adherence-history/{$olderAdultIdArgument}"
+
+        fun createRoute(olderAdultId: String): String =
+            "adherence-history/" + Uri.encode(olderAdultId)
+    }
+
+    data object AdherenceRecommendations : RootDestination {
+        const val olderAdultIdArgument = "olderAdultId"
+        override val route: String = "adherence-recommendations/{$olderAdultIdArgument}"
+
+        fun createRoute(olderAdultId: String): String =
+            "adherence-recommendations/" + Uri.encode(olderAdultId)
+    }
+
 }

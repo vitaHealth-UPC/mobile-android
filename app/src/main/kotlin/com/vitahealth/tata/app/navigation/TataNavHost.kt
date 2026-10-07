@@ -8,6 +8,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.vitahealth.tata.analytics.presentation.history.AdherenceHistoryRoute
+import com.vitahealth.tata.analytics.presentation.recommendations.AdherenceRecommendationsRoute
 import com.vitahealth.tata.app.TataApplication
 import com.vitahealth.tata.carelink.presentation.link.CareLinkRoute
 import com.vitahealth.tata.identity.presentation.registration.CaregiverRegistrationRoute
@@ -85,6 +87,7 @@ fun TataNavHost(
                 factory = app.container.familySummaryViewModelFactory(caregiver, adult, name),
                 olderAdultName = name,
                 onAgenda = { navController.navigate(RootDestination.IntakeAgenda.createRoute(adult)) },
+                onHistory = { navController.navigate(RootDestination.AdherenceHistory.createRoute(adult)) },
                 onAddMedication = { navController.navigate(RootDestination.MedicationRegistration.createRoute(caregiver, adult, name)) },
                 onChangePerson = { navController.navigate(RootDestination.CareLink.createRoute(caregiver)) },
             )
@@ -587,6 +590,46 @@ fun TataNavHost(
             DoseDetailRoute(
                 factory = app.container.doseDetailViewModelFactory(intakeId),
                 onBack = { navController.popBackStack() },
+            )
+        }
+
+        composable(
+            route = RootDestination.AdherenceHistory.route,
+            arguments = listOf(
+                navArgument(RootDestination.AdherenceHistory.olderAdultIdArgument) { type = NavType.StringType },
+            ),
+        ) { backStackEntry ->
+            val app = androidx.compose.ui.platform.LocalContext.current.applicationContext as TataApplication
+            val olderAdultId = requireNotNull(
+                backStackEntry.arguments?.getString(RootDestination.AdherenceHistory.olderAdultIdArgument),
+            )
+
+            AdherenceHistoryRoute(
+                factory = app.container.adherenceHistoryViewModelFactory(olderAdultId),
+                onOpenRecommendations = {
+                    navController.navigate(RootDestination.AdherenceRecommendations.createRoute(olderAdultId))
+                },
+                onTabSelected = { navController.popBackStack(RootDestination.FamilySummary.route, inclusive = false) },
+            )
+        }
+
+        composable(
+            route = RootDestination.AdherenceRecommendations.route,
+            arguments = listOf(
+                navArgument(RootDestination.AdherenceRecommendations.olderAdultIdArgument) {
+                    type = NavType.StringType
+                },
+            ),
+        ) { backStackEntry ->
+            val app = androidx.compose.ui.platform.LocalContext.current.applicationContext as TataApplication
+            val olderAdultId = requireNotNull(
+                backStackEntry.arguments?.getString(RootDestination.AdherenceRecommendations.olderAdultIdArgument),
+            )
+
+            AdherenceRecommendationsRoute(
+                factory = app.container.adherenceRecommendationsViewModelFactory(olderAdultId),
+                onBackToHistory = { navController.popBackStack() },
+                onTabSelected = { navController.popBackStack(RootDestination.FamilySummary.route, inclusive = false) },
             )
         }
 
