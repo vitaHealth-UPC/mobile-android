@@ -2,7 +2,6 @@ package com.vitahealth.tata.monitoring.presentation.alerts
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -26,6 +25,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.vitahealth.tata.monitoring.R
 import com.vitahealth.tata.monitoring.domain.model.AlertStatus
 import com.vitahealth.tata.monitoring.domain.model.CaregiverAlert
+import com.vitahealth.tata.monitoring.domain.model.ContactChannel
+import com.vitahealth.tata.monitoring.domain.model.ContactChannelType
+import com.vitahealth.tata.monitoring.domain.model.ContactOption
+import com.vitahealth.tata.monitoring.presentation.notes.NoteComposerDialog
 import com.vitahealth.tata.shared.design.components.CaregiverTab
 import com.vitahealth.tata.shared.design.components.CaregiverTabBar
 import com.vitahealth.tata.shared.design.components.TataCard
@@ -33,20 +36,21 @@ import com.vitahealth.tata.shared.design.theme.TataSurface
 import com.vitahealth.tata.shared.design.theme.TataTheme
 import com.vitahealth.tata.shared.design.theme.tataTextColor
 
-/**
- * [actions] is the follow-up slot of the alert (contact, note, attend). This screen only reads the alert,
- * so the slot stays empty until those actions exist.
- */
 @Composable
 fun AlertDetailRoute(
     factory: AlertDetailViewModel.Factory,
     onBack: () -> Unit,
     onTabSelected: (CaregiverTab) -> Unit,
-    actions: @Composable ColumnScope.(CaregiverAlert) -> Unit = {},
 ) {
     val model: AlertDetailViewModel = viewModel(factory = factory)
     val state by model.state.collectAsState()
-    AlertDetailScreen(state, onBack, model::load, onTabSelected, actions)
+    val composer by model.noteComposer.state.collectAsState()
+    val contact by model.contact.collectAsState()
+    AlertDetailScreen(
+        state, onBack, model::load, onTabSelected, model::updateStatus, composer.saved, model.noteComposer::open,
+        contact, model::loadContact,
+    )
+    NoteComposerDialog(composer, onSave = { model.noteComposer.save(it) }, onDismiss = model.noteComposer::dismiss)
 }
 
 @Composable
@@ -55,7 +59,11 @@ fun AlertDetailScreen(
     onBack: () -> Unit = {},
     onRetry: () -> Unit = {},
     onTabSelected: (CaregiverTab) -> Unit = {},
-    actions: @Composable ColumnScope.(CaregiverAlert) -> Unit = {},
+    onUpdateStatus: (AlertStatus) -> Unit = {},
+    noteSaved: Boolean = false,
+    onAddNote: () -> Unit = {},
+    contact: ContactUiState = ContactUiState.Loading,
+    onRetryContact: () -> Unit = {},
 ) {
     val formatter = rememberAlertDateFormatter()
     Column(modifier = Modifier.fillMaxSize().background(TataSurface)) {
@@ -101,9 +109,7 @@ fun AlertDetailScreen(
                             AlertInfoRow(stringResource(R.string.alert_detail_closed), formatter.format(it))
                         }
                     }
-                    Column(modifier = Modifier.fillMaxWidth().padding(top = 20.dp)) {
-                        actions(state.alert)
-                    }
+                    AlertFollowUpActions(state, onUpdateStatus, Modifier.padding(top = 20.dp), noteSaved, onAddNote, contact, onRetryContact)
                 }
             }
         }
@@ -154,6 +160,43 @@ private fun AlertDetailClosedPreview() {
         closedAt = java.time.Instant.parse("2026-10-05T15:10:00Z"),
     )
     TataTheme { AlertDetailScreen(state = AlertDetailUiState.Content(closed)) }
+}
+
+@Preview(name = "Detalle atendida con aviso", showBackground = true, widthDp = 393, heightDp = 852)
+@Composable
+private fun AlertDetailAttendedPreview() {
+    val attended = previewAlerts.first().copy(status = AlertStatus.ATTENDED)
+    TataTheme {
+        AlertDetailScreen(state = AlertDetailUiState.Content(attended, feedback = AlertFeedback.StatusChanged(AlertStatus.ATTENDED)))
+    }
+}
+
+@Preview(name = "Detalle con conflicto (409)", showBackground = true, widthDp = 393, heightDp = 852)
+@Composable
+private fun AlertDetailConflictPreview() {
+    TataTheme {
+        AlertDetailScreen(state = AlertDetailUiState.Content(previewAlerts.first(), feedback = AlertFeedback.Failed(AlertsProblem.CONFLICT)))
+    }
+}
+
+@Preview(name = "Detalle con contacto", showBackground = true, widthDp = 393, heightDp = 1100)
+@Composable
+private fun AlertDetailContactPreview() {
+    val option = ContactOption(ContactChannel(ContactChannelType.PHONE, "+51 999 888 777"), firstName = "Rosa")
+    TataTheme {
+        AlertDetailScreen(state = AlertDetailUiState.Content(previewAlerts.first()), contact = ContactUiState.Ready(option))
+    }
+}
+
+@Preview(name = "Contacto no disponible", showBackground = true, widthDp = 393, heightDp = 1100)
+@Composable
+private fun AlertDetailNoContactPreview() {
+    TataTheme {
+        AlertDetailScreen(
+            state = AlertDetailUiState.Content(previewAlerts.first()),
+            contact = ContactUiState.Ready(ContactOption(channel = null, firstName = "Rosa")),
+        )
+    }
 }
 
 @Preview(name = "Alerta no encontrada (404)", showBackground = true, widthDp = 393, heightDp = 852)

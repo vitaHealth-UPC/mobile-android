@@ -4,6 +4,7 @@ import com.google.gson.Gson
 import com.vitahealth.tata.monitoring.domain.model.AlertStatus
 import com.vitahealth.tata.monitoring.infrastructure.remote.AlertSummaryResponse
 import com.vitahealth.tata.monitoring.infrastructure.remote.StatusResponse
+import com.vitahealth.tata.monitoring.infrastructure.remote.UpdateAlertStatusRequest
 import com.vitahealth.tata.monitoring.infrastructure.remote.toDomain
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -80,4 +81,15 @@ class AlertsContractTest {
 
         assertTrue(gson.fromJson(json, StatusResponse::class.java).openAlerts.orEmpty().isEmpty())
     }
+
+    @Test fun statusUpdateRequestMatchesUpdateAlertStatusResource() {
+        assertEquals("""{"status":"ATTENDED"}""", gson.toJson(UpdateAlertStatusRequest(AlertStatus.ATTENDED.name)))
+    }
+
+    @Test fun statusUpdateAnswerIsTheAttendedAlert() {
+        val json = alertJson.replace("\"OPEN\"", "\"ATTENDED\"")
+
+        assertEquals(AlertStatus.ATTENDED, gson.fromJson(json, AlertSummaryResponse::class.java).toDomain().status)
+    }
 }
+

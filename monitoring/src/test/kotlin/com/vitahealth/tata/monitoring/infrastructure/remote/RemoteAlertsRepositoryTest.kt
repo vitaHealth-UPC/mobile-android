@@ -65,6 +65,12 @@ class RemoteAlertsRepositoryTest {
         val offline = object : AlertsApiService {
             override suspend fun detail(olderAdultId: String, alertId: Long, caregiverId: String): Response<AlertSummaryResponse> =
                 throw IOException("offline")
+            override suspend fun updateStatus(
+                olderAdultId: String,
+                alertId: Long,
+                caregiverId: String,
+                request: UpdateAlertStatusRequest,
+            ): Response<AlertSummaryResponse> = throw IOException("offline")
         }
         val result = RemoteAlertsRepository(proxy<FamilyMonitoringApiService> { error("unexpected status") }, offline).alert("c", "a", 1)
 
@@ -88,5 +94,27 @@ class RemoteAlertsRepositoryTest {
         val result = repository(detail = { Response.success(swaggerAlertResponse(id = 2)) }).alert("c", "a", 1)
 
         assertEquals(AlertFailureCodes.INVALID_RESPONSE, failureCode(result))
+    }
+
+    @Test fun sendsTheRequestedStatusWithTheCaregiverQuery() = runBlocking {
+        val attended = swaggerAlertResponse(status = "ATTENDED")
+        val result = repository(detail = { Response.success(attended) }).updateStatus("caregiver-1", "adult-1", 1, AlertStatus.ATTENDED)
+
+        assertEquals(AlertStatus.ATTENDED, (result as AppResult.Success).value.status)
+        assertEquals(listOf("updateStatus", "adult-1", 1L, "caregiver-1", UpdateAlertStatusRequest("ATTENDED")), calls.single())
+    }
+
+    @Test fun mapsTheStatusUpdateFailures() = runBlocking {
+        val expected = mapOf(
+            400 to AlertFailureCodes.STATUS_NOT_ACCEPTED,
+            403 to AlertFailureCodes.ACCESS_DENIED,
+            404 to AlertFailureCodes.NOT_FOUND,
+            409 to AlertFailureCodes.STATUS_CONFLICT,
+            500 to AlertFailureCodes.REQUEST_FAILED,
+        )
+        expected.forEach { (status, code) ->
+            val result = repository(detail = { httpError<AlertSummaryResponse>(status) }).updateStatus("c", "a", 1, AlertStatus.CLOSED)
+            assertEquals("HTTP $status", code, failureCode(result))
+        }
     }
 }
