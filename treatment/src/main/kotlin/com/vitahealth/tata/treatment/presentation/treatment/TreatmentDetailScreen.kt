@@ -21,9 +21,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.vitahealth.tata.treatment.R
 import com.vitahealth.tata.shared.design.components.TataButton
 import com.vitahealth.tata.shared.design.components.TataCard
 import com.vitahealth.tata.shared.design.theme.TataErrorSurface
@@ -40,6 +42,7 @@ import com.vitahealth.tata.treatment.domain.model.TreatmentStatus
 fun TreatmentDetailRoute(
     factory: TreatmentDetailViewModel.Factory,
     onBack: () -> Unit,
+    onOpenInventory: (medicationId: String, medicationName: String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val viewModel: TreatmentDetailViewModel = viewModel(factory = factory)
@@ -49,6 +52,7 @@ fun TreatmentDetailRoute(
         state = state,
         onBack = onBack,
         onRetry = viewModel::retry,
+        onOpenInventory = onOpenInventory,
         modifier = modifier,
     )
 }
@@ -58,6 +62,7 @@ fun TreatmentDetailScreen(
     state: TreatmentDetailUiState,
     onBack: () -> Unit,
     onRetry: () -> Unit,
+    onOpenInventory: (medicationId: String, medicationName: String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -70,7 +75,7 @@ fun TreatmentDetailScreen(
         Spacer(Modifier.height(8.dp))
         when (state) {
             TreatmentDetailUiState.Loading -> LoadingState()
-            is TreatmentDetailUiState.Loaded -> LoadedState(state)
+            is TreatmentDetailUiState.Loaded -> LoadedState(state, onOpenInventory)
             is TreatmentDetailUiState.Restricted -> RestrictedState(state, onBack)
             is TreatmentDetailUiState.NotFound -> NotFoundState(state, onBack)
             is TreatmentDetailUiState.Error -> ErrorState(state, onBack, onRetry)
@@ -102,6 +107,7 @@ private fun LoadingState() {
 @Composable
 private fun LoadedState(
     state: TreatmentDetailUiState.Loaded,
+    onOpenInventory: (medicationId: String, medicationName: String) -> Unit,
 ) {
     val detail = state.detail
     Text(
@@ -232,6 +238,17 @@ private fun LoadedState(
                 modifier = Modifier.padding(top = 5.dp),
             )
         }
+    }
+
+    // Inventory is keyed by medicationId, so only offer it once the medication is configured.
+    detail.medicationId?.let { medicationId ->
+        TataButton(
+            text = stringResource(R.string.treatment_open_inventory),
+            onClick = { onOpenInventory(medicationId, medicationLabel(detail, state.medicationLabelHint)) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 18.dp),
+        )
     }
 }
 
