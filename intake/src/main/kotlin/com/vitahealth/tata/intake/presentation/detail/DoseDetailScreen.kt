@@ -91,7 +91,10 @@ fun DoseDetailScreen(
                 TataButton("Reintentar", onRetry, Modifier.padding(top = 16.dp))
             }
             is DoseDetailUiState.Content -> {
-                if (state.confirmationSucceeded) {
+                val outcome = state.outcome
+                if (outcome == ConfirmationOutcome.LATE || outcome == ConfirmationOutcome.OMISSION_PRESERVED) {
+                    ConfirmationResult(outcome, state.dose, onBack)
+                } else if (state.confirmationSucceeded) {
                     TataCard(containerColor = TataMint, modifier = Modifier.fillMaxWidth()) {
                         Text("✓ ¡Bien hecho!", style = MaterialTheme.typography.headlineMedium, color = TataNavy)
                         Text("Toma confirmada ♡", color = TataNavy, modifier = Modifier.padding(top = 8.dp))
@@ -104,7 +107,9 @@ fun DoseDetailScreen(
                 } else {
                     DoseContent(state.dose)
                     state.confirmationMessage?.let { Text(it, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(bottom = 12.dp)) }
-                    if (state.dose.status == DoseStatus.PENDING) {
+                    if (state.confirmationUnavailable) {
+                        TataButton("Reintentar", onRetry)
+                    } else if (state.dose.status == DoseStatus.PENDING) {
                         TataButton(if (state.confirming) "Confirmando..." else "Confirmar toma", onConfirm, enabled = !state.confirming)
                     }
                 }

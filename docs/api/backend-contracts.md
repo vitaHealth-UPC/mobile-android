@@ -16,6 +16,8 @@ Account, OlderAdult, CareLink, Medication, Treatment and Intake IDs and referenc
 
 Touch confirmation is implemented. Device voice recognition and its permission/error states remain pending; accepting VOICE in REST does not implement speech recognition.
 
+US-23 uses the same endpoint: a `200` whose intake comes back `LATE` shows "Dose confirmed late" (confirmed within the tolerance period); a `409` shows "Missed dose": the app reads the intake again and keeps the omission, because a later confirmation does not replace it.
+
 ## Daily/weekly agenda (TS-08 / US-24)
 
 `GET /api/v1/older-adults/{olderAdultId}/intakes/agenda?from=<ISO instant>&to=<ISO instant>` returns an array of intake resources, chronologically ordered, including persisted outcomes. `200 []` is an empty agenda. Both bounds are required; start is inclusive and end exclusive. The server rejects invalid or ranges exceeding eight elapsed days with `400`.
