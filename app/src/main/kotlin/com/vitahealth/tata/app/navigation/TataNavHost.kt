@@ -207,6 +207,7 @@ fun TataNavHost(
                 onSubscription = { navController.navigate(RootDestination.PlanSubscription.createRoute(caregiver)) },
                 onNotes = { navController.navigate(RootDestination.Notes.createRoute(caregiver, adult)) },
             )
+            FollowOmissionPush(caregiver + adult) { app.container.followCaregiverAlerts(caregiver, adult) }
         }
 
         composable(
@@ -223,7 +224,6 @@ fun TataNavHost(
                 factory = app.container.planSubscriptionViewModelFactory(accountId),
                 onBack = { navController.popBackStack() },
             )
-            FollowOmissionPush(caregiver + adult) { app.container.followCaregiverAlerts(caregiver, adult) }
         }
 
         composable(RootDestination.Alerts.route, arguments = listOf(
