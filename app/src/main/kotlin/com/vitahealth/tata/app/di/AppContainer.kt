@@ -46,6 +46,7 @@ import com.vitahealth.tata.intake.presentation.home.NextDoseHomeViewModel
 import com.vitahealth.tata.inventory.application.handlers.GetInventoryStockQueryHandler
 import com.vitahealth.tata.monitoring.application.handlers.GetAlertDetailQueryHandler
 import com.vitahealth.tata.monitoring.application.handlers.GetOpenAlertsQueryHandler
+import com.vitahealth.tata.monitoring.application.handlers.UpdateAlertStatusCommandHandler
 import com.vitahealth.tata.monitoring.infrastructure.remote.AlertsApiService
 import com.vitahealth.tata.monitoring.infrastructure.remote.FamilyMonitoringApiService
 import com.vitahealth.tata.monitoring.infrastructure.remote.RemoteAlertsRepository
@@ -137,7 +138,11 @@ class AppContainer(
     fun alertsViewModelFactory(caregiverId: String, olderAdultId: String) =
         AlertsViewModel.Factory(caregiverId, olderAdultId, GetOpenAlertsQueryHandler(alertsRepository))
     fun alertDetailViewModelFactory(caregiverId: String, olderAdultId: String, alertId: Long) =
-        AlertDetailViewModel.Factory(caregiverId, olderAdultId, alertId, GetAlertDetailQueryHandler(alertsRepository))
+        AlertDetailViewModel.Factory(
+            caregiverId, olderAdultId, alertId,
+            GetAlertDetailQueryHandler(alertsRepository),
+            UpdateAlertStatusCommandHandler(alertsRepository),
+        )
 
     private val identityApi: IdentityApiService = retrofit.create(IdentityApiService::class.java)
     private val identityRepository = RemoteIdentityRepository(identityApi, sessions)

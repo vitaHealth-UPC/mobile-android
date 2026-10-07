@@ -2,7 +2,6 @@ package com.vitahealth.tata.monitoring.presentation.alerts
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -33,20 +32,15 @@ import com.vitahealth.tata.shared.design.theme.TataSurface
 import com.vitahealth.tata.shared.design.theme.TataTheme
 import com.vitahealth.tata.shared.design.theme.tataTextColor
 
-/**
- * [actions] is the follow-up slot of the alert (contact, note, attend). This screen only reads the alert,
- * so the slot stays empty until those actions exist.
- */
 @Composable
 fun AlertDetailRoute(
     factory: AlertDetailViewModel.Factory,
     onBack: () -> Unit,
     onTabSelected: (CaregiverTab) -> Unit,
-    actions: @Composable ColumnScope.(CaregiverAlert) -> Unit = {},
 ) {
     val model: AlertDetailViewModel = viewModel(factory = factory)
     val state by model.state.collectAsState()
-    AlertDetailScreen(state, onBack, model::load, onTabSelected, actions)
+    AlertDetailScreen(state, onBack, model::load, onTabSelected, model::updateStatus)
 }
 
 @Composable
@@ -55,7 +49,7 @@ fun AlertDetailScreen(
     onBack: () -> Unit = {},
     onRetry: () -> Unit = {},
     onTabSelected: (CaregiverTab) -> Unit = {},
-    actions: @Composable ColumnScope.(CaregiverAlert) -> Unit = {},
+    onUpdateStatus: (AlertStatus) -> Unit = {},
 ) {
     val formatter = rememberAlertDateFormatter()
     Column(modifier = Modifier.fillMaxSize().background(TataSurface)) {
@@ -101,9 +95,7 @@ fun AlertDetailScreen(
                             AlertInfoRow(stringResource(R.string.alert_detail_closed), formatter.format(it))
                         }
                     }
-                    Column(modifier = Modifier.fillMaxWidth().padding(top = 20.dp)) {
-                        actions(state.alert)
-                    }
+                    AlertFollowUpActions(state, onUpdateStatus, Modifier.padding(top = 20.dp))
                 }
             }
         }
@@ -154,6 +146,23 @@ private fun AlertDetailClosedPreview() {
         closedAt = java.time.Instant.parse("2026-10-05T15:10:00Z"),
     )
     TataTheme { AlertDetailScreen(state = AlertDetailUiState.Content(closed)) }
+}
+
+@Preview(name = "Detalle atendida con aviso", showBackground = true, widthDp = 393, heightDp = 852)
+@Composable
+private fun AlertDetailAttendedPreview() {
+    val attended = previewAlerts.first().copy(status = AlertStatus.ATTENDED)
+    TataTheme {
+        AlertDetailScreen(state = AlertDetailUiState.Content(attended, feedback = AlertFeedback.StatusChanged(AlertStatus.ATTENDED)))
+    }
+}
+
+@Preview(name = "Detalle con conflicto (409)", showBackground = true, widthDp = 393, heightDp = 852)
+@Composable
+private fun AlertDetailConflictPreview() {
+    TataTheme {
+        AlertDetailScreen(state = AlertDetailUiState.Content(previewAlerts.first(), feedback = AlertFeedback.Failed(AlertsProblem.CONFLICT)))
+    }
 }
 
 @Preview(name = "Alerta no encontrada (404)", showBackground = true, widthDp = 393, heightDp = 852)

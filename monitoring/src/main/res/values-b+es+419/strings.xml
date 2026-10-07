@@ -39,6 +39,22 @@
     <string name="alert_detail_closed">Cerrada</string>
     <string name="alert_detail_loading">Consultando la alerta…</string>
 
+    <!-- Seguimiento de la alerta (US-31) -->
+    <string name="alert_actions_title">Acciones de seguimiento</string>
+    <string name="alert_actions_subtitle">Actualiza la alerta según el resultado del seguimiento.</string>
+    <string name="alert_action_attend">Marcar como atendida</string>
+    <string name="alert_action_attended">Atendida</string>
+    <string name="alert_action_close">Cerrar alerta</string>
+    <string name="alert_action_saving">Guardando…</string>
+    <string name="alert_closed_note">Esta alerta está cerrada y se conserva en el historial.</string>
+    <string name="alert_close_confirm_title">¿Cerrar esta alerta?</string>
+    <string name="alert_close_confirm_message">Saldrá de la lista de pendientes y quedará en el historial. No se puede reabrir.</string>
+    <string name="alert_close_cancel">Cancelar</string>
+    <string name="alert_feedback_attended">Alerta marcada como atendida.</string>
+    <string name="alert_feedback_closed">Alerta cerrada.</string>
+    <string name="alert_feedback_conflict">La alerta ya había cambiado. Este es su estado actual.</string>
+    <string name="alert_feedback_failed">No pudimos actualizar la alerta. Inténtalo nuevamente.</string>
+
     <!-- Errores de lectura -->
     <string name="alerts_error_network">No hay conexión. Revisa tu internet e inténtalo nuevamente.</string>
     <string name="alerts_error_access">El vínculo de cuidado no está activo o falta el consentimiento, por eso no podemos mostrar las alertas.</string>

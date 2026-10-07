@@ -38,6 +38,22 @@
     <string name="alert_detail_closed">Closed</string>
     <string name="alert_detail_loading">Loading the alert…</string>
 
+    <!-- Alert follow-up (US-31) -->
+    <string name="alert_actions_title">Follow-up actions</string>
+    <string name="alert_actions_subtitle">Update the alert according to the follow-up result.</string>
+    <string name="alert_action_attend">Mark as attended</string>
+    <string name="alert_action_attended">Attended</string>
+    <string name="alert_action_close">Close alert</string>
+    <string name="alert_action_saving">Saving…</string>
+    <string name="alert_closed_note">This alert is closed and stays in the history.</string>
+    <string name="alert_close_confirm_title">Close this alert?</string>
+    <string name="alert_close_confirm_message">It will leave the pending list and stay in the history. It cannot be reopened.</string>
+    <string name="alert_close_cancel">Cancel</string>
+    <string name="alert_feedback_attended">Alert marked as attended.</string>
+    <string name="alert_feedback_closed">Alert closed.</string>
+    <string name="alert_feedback_conflict">The alert had already changed. This is its current status.</string>
+    <string name="alert_feedback_failed">We could not update the alert. Try again.</string>
+
     <!-- Read failures -->
     <string name="alerts_error_network">No connection. Check your internet and try again.</string>
     <string name="alerts_error_access">The care link is not active or consent is missing, so the alerts cannot be shown.</string>

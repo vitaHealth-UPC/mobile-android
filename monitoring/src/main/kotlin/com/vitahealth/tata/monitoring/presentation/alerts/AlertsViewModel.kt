@@ -5,8 +5,12 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.vitahealth.tata.monitoring.application.handlers.GetAlertDetailQueryHandler
 import com.vitahealth.tata.monitoring.application.handlers.GetOpenAlertsQueryHandler
+import com.vitahealth.tata.monitoring.application.handlers.UpdateAlertStatusCommandHandler
+import com.vitahealth.tata.monitoring.application.commands.UpdateAlertStatusCommand
 import com.vitahealth.tata.monitoring.application.queries.GetAlertDetailQuery
 import com.vitahealth.tata.monitoring.application.queries.GetOpenAlertsQuery
+import com.vitahealth.tata.monitoring.domain.model.AlertStatus
+import com.vitahealth.tata.monitoring.domain.model.canMoveTo
 import com.vitahealth.tata.shared.common.result.AppResult
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -65,6 +69,7 @@ class AlertDetailViewModel(
     private val olderAdultId: String,
     private val alertId: Long,
     private val handler: GetAlertDetailQueryHandler,
+    private val updateStatusHandler: UpdateAlertStatusCommandHandler,
     private val context: CoroutineContext = EmptyCoroutineContext,
 ) : ViewModel() {
     private val mutableState = MutableStateFlow<AlertDetailUiState>(AlertDetailUiState.Loading)
@@ -86,14 +91,39 @@ class AlertDetailViewModel(
         }
     }
 
+    /** Attends or closes the alert; a request already in flight or a move the alert cannot make is ignored. */
+    fun updateStatus(target: AlertStatus) {
+        val current = mutableState.value as? AlertDetailUiState.Content ?: return
+        if (current.updating != null || !current.alert.status.canMoveTo(target)) return
+        mutableState.value = current.copy(updating = target, feedback = null)
+        job = viewModelScope.launch(context) {
+            val command = UpdateAlertStatusCommand(caregiverId, olderAdultId, alertId, target)
+            mutableState.value = when (val result = updateStatusHandler(command)) {
+                is AppResult.Success -> AlertDetailUiState.Content(result.value, feedback = AlertFeedback.StatusChanged(result.value.status))
+                is AppResult.Failure -> afterFailedUpdate(current, problemOf(result.code))
+            }
+        }
+    }
+
+    /** On a 409 the alert moved elsewhere: show its current state instead of the stale one. */
+    private suspend fun afterFailedUpdate(current: AlertDetailUiState.Content, problem: AlertsProblem): AlertDetailUiState {
+        val failed = AlertFeedback.Failed(problem)
+        if (problem != AlertsProblem.CONFLICT) return current.copy(updating = null, feedback = failed)
+        return when (val fresh = handler(GetAlertDetailQuery(caregiverId, olderAdultId, alertId))) {
+            is AppResult.Success -> AlertDetailUiState.Content(fresh.value, feedback = failed)
+            is AppResult.Failure -> current.copy(updating = null, feedback = failed)
+        }
+    }
+
     class Factory(
         private val caregiverId: String,
         private val olderAdultId: String,
         private val alertId: Long,
         private val handler: GetAlertDetailQueryHandler,
+        private val updateStatusHandler: UpdateAlertStatusCommandHandler,
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T =
-            AlertDetailViewModel(caregiverId, olderAdultId, alertId, handler) as T
+            AlertDetailViewModel(caregiverId, olderAdultId, alertId, handler, updateStatusHandler) as T
     }
 }
