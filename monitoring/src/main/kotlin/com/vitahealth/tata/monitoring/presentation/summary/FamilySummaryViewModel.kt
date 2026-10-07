@@ -31,7 +31,6 @@ class FamilySummaryViewModel(private val caregiverId: String, private val olderA
     }
     fun dismissDialog() { dialogJob?.cancel(); mutableState.value = mutableState.value.copy(dialog = null) }
     fun history() = loadList("Historial de los últimos 7 días") { repository.history(caregiverId, olderAdultId) }
-    fun notes() = loadList("Notas del cuidador") { repository.notes(caregiverId, olderAdultId) }
     fun contact() {
         dialogJob?.cancel()
         mutableState.value = mutableState.value.copy(dialog = SummaryDialog("Contactar", loading = true))

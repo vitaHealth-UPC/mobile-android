@@ -32,7 +32,8 @@ private val summaryLocale = Locale("es", "PE")
 fun FamilySummaryRoute(factory: FamilySummaryViewModel.Factory, olderAdultName: String,
     onAgenda: () -> Unit, onHistory: () -> Unit, onAddMedication: () -> Unit, onChangePerson: () -> Unit,
     onAccessibility: () -> Unit = {}, onNotificationPreferences: () -> Unit = {},
-    onMedications: () -> Unit = {}, onTreatments: () -> Unit = {}, onAlerts: () -> Unit = {}) {
+    onMedications: () -> Unit = {}, onTreatments: () -> Unit = {}, onAlerts: () -> Unit = {},
+    onNotes: () -> Unit = {}) {
     val model: FamilySummaryViewModel = viewModel(factory = factory)
     val state by model.state.collectAsState()
     val owner = LocalLifecycleOwner.current
@@ -42,7 +43,7 @@ fun FamilySummaryRoute(factory: FamilySummaryViewModel.Factory, olderAdultName: 
         onDispose { owner.lifecycle.removeObserver(observer) }
     }
     FamilySummaryScreen(state, olderAdultName, model::refresh, onAgenda, onHistory, model::contact,
-        onAlerts, model::notes, onAddMedication, onChangePerson, onAccessibility, onNotificationPreferences, onMedications, onTreatments)
+        onAlerts, onNotes, onAddMedication, onChangePerson, onAccessibility, onNotificationPreferences, onMedications, onTreatments)
     state.dialog?.let { dialog ->
         val context = LocalContext.current
         AlertDialog(onDismissRequest = model::dismissDialog, title = { Text(dialog.title) },

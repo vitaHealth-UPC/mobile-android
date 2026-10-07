@@ -50,12 +50,6 @@ class RemoteFamilyMonitoringRepository(private val api: FamilyMonitoringApiServi
         if (!response.isSuccessful || body == null) failed()
         else AppResult.Success(body.map { "${it.medicationName} · ${statusLabel(it.status)}\n${displayTime(it.scheduledAt)}" })
     }
-    override suspend fun notes(caregiverId: String, olderAdultId: String): AppResult<List<String>> = guarded {
-        val response = api.notes(olderAdultId, caregiverId)
-        val body = response.body()
-        if (!response.isSuccessful || body == null) failed()
-        else AppResult.Success(body.map { "${it.text}\n${displayTime(it.recordedAt)}" })
-    }
     private fun DoseResponse.toDose(): MonitoredDose {
         require(status in setOf("PENDING", "CONFIRMED", "LATE", "OMITTED"))
         return MonitoredDose(id, medicationId, medicationName, dose, Instant.parse(scheduledAt), status)

@@ -10,7 +10,6 @@ data class DoseResponse(val id: String, val medicationId: String, val medication
 data class InventoryResponse(val medicationId: String, val remainingStock: Int, val lowStock: Boolean)
 data class ContactResponse(val type: String, val value: String)
 data class HistoryResponse(val medicationName: String, val scheduledAt: String, val status: String)
-data class NoteResponse(val text: String, val recordedAt: String, val familiarId: String)
 
 interface FamilyMonitoringApiService {
     @GET("api/v1/older-adults/{id}/status")
@@ -26,6 +25,4 @@ interface FamilyMonitoringApiService {
     @GET("api/v1/older-adults/{id}/intakes")
     suspend fun history(@Path("id") id: String, @Query("caregiverId") caregiver: String,
         @Query("days") days: Int = 7): Response<List<HistoryResponse>>
-    @GET("api/v1/older-adults/{id}/notes")
-    suspend fun notes(@Path("id") id: String, @Query("caregiverId") caregiver: String): Response<List<NoteResponse>>
 }
