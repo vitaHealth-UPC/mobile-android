@@ -5,8 +5,13 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.vitahealth.tata.app.navigation.TataNavHost
+import com.vitahealth.tata.preferences.domain.model.AccessibilityPreferences
+import com.vitahealth.tata.shared.design.accessibility.TataAccessibility
 import com.vitahealth.tata.shared.design.theme.TataTheme
 
 class MainActivity : ComponentActivity() {
@@ -14,9 +19,19 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
+        val container = (application as TataApplication).container
+
         setContent {
-            TataTheme {
-                TataNavHost(modifier = Modifier.fillMaxSize())
+            val preferences by container.accessibilityPreferences
+                .collectAsState(initial = AccessibilityPreferences.Defaults)
+
+            TataTheme(accessibility = TataAccessibility(
+                    fontScale = preferences.textSize.scaleFactor,
+                    highContrast = preferences.highContrast,
+                    reducedMotion = preferences.reducedMotion,
+                    readingAssistance = preferences.readingAssistance,
+                )) {
+                TataNavHost(modifier = Modifier.fillMaxSize().safeDrawingPadding())
             }
         }
     }
