@@ -34,10 +34,15 @@ class NextDoseVisualAuditTest {
             }
         }
         capture("home-existing-dose")
+        compose.onNodeWithText("Inicio").assertIsSelected()
+        compose.onNodeWithText("Medicamentos").assertIsNotEnabled()
+        compose.onNodeWithText("Notas").assertIsNotEnabled()
+        compose.onNodeWithText("Más").assertIsNotEnabled()
+        compose.onNodeWithText("Agenda").performClick()
         compose.onNodeWithText("Losartán 50 mg").performClick()
         compose.runOnIdle { assertEquals("dose-test", opened) }
         compose.onNodeWithText("Ver todas\nmis tomas").performScrollTo().performClick()
-        compose.runOnIdle { assertEquals(1, agenda); state = NextDoseHomeUiState.NoNextDose("Rosa Vargas") }
+        compose.runOnIdle { assertEquals(2, agenda); state = NextDoseHomeUiState.NoNextDose("Rosa Vargas") }
         compose.onNodeWithText("Hoy").performScrollTo()
         compose.onNodeWithText("Sin próxima toma").assertExists()
         capture("home-existing-empty")
