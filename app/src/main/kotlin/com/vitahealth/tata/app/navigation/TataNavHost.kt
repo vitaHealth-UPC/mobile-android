@@ -13,6 +13,7 @@ import com.vitahealth.tata.carelink.presentation.link.CareLinkRoute
 import com.vitahealth.tata.identity.presentation.registration.CaregiverRegistrationRoute
 import com.vitahealth.tata.intake.presentation.detail.DoseDetailRoute
 import com.vitahealth.tata.intake.presentation.home.NextDoseHomeRoute
+import com.vitahealth.tata.treatment.presentation.medication.MedicationManagementRoute
 import com.vitahealth.tata.treatment.presentation.medication.MedicationRegistrationRoute
 import com.vitahealth.tata.treatment.presentation.treatment.TreatmentCreationRoute
 import com.vitahealth.tata.treatment.presentation.treatment.TreatmentDoseFrequencyRoute
@@ -87,6 +88,36 @@ fun TataNavHost(
                 onAgenda = { navController.navigate(RootDestination.IntakeAgenda.createRoute(adult)) },
                 onAddMedication = { navController.navigate(RootDestination.MedicationRegistration.createRoute(caregiver, adult, name)) },
                 onChangePerson = { navController.navigate(RootDestination.CareLink.createRoute(caregiver)) },
+                onMedications = { navController.navigate(RootDestination.MedicationManagement.createRoute(caregiver, adult, name)) },
+            )
+        }
+
+        composable(
+            route = RootDestination.MedicationManagement.route,
+            arguments = listOf(
+                navArgument(RootDestination.MedicationManagement.caregiverIdArgument) { type = NavType.StringType },
+                navArgument(RootDestination.MedicationManagement.olderAdultIdArgument) { type = NavType.StringType },
+                navArgument(RootDestination.MedicationManagement.olderAdultNameArgument) { type = NavType.StringType },
+            ),
+        ) { backStackEntry ->
+            val app = androidx.compose.ui.platform.LocalContext.current.applicationContext as TataApplication
+            val caregiverId = requireNotNull(
+                backStackEntry.arguments?.getString(RootDestination.MedicationManagement.caregiverIdArgument),
+            )
+            val olderAdultId = requireNotNull(
+                backStackEntry.arguments?.getString(RootDestination.MedicationManagement.olderAdultIdArgument),
+            )
+            val olderAdultName = requireNotNull(
+                backStackEntry.arguments?.getString(RootDestination.MedicationManagement.olderAdultNameArgument),
+            )
+            MedicationManagementRoute(
+                factory = app.container.medicationManagementViewModelFactory(caregiverId, olderAdultId, olderAdultName),
+                onBack = { navController.popBackStack() },
+                onAddMedication = {
+                    navController.navigate(
+                        RootDestination.MedicationRegistration.createRoute(caregiverId, olderAdultId, olderAdultName),
+                    )
+                },
             )
         }
 

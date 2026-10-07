@@ -30,7 +30,8 @@ private val summaryLocale = Locale("es", "PE")
 
 @Composable
 fun FamilySummaryRoute(factory: FamilySummaryViewModel.Factory, olderAdultName: String,
-    onAgenda: () -> Unit, onAddMedication: () -> Unit, onChangePerson: () -> Unit) {
+    onAgenda: () -> Unit, onAddMedication: () -> Unit, onChangePerson: () -> Unit,
+    onMedications: () -> Unit = {}) {
     val model: FamilySummaryViewModel = viewModel(factory = factory)
     val state by model.state.collectAsState()
     val owner = LocalLifecycleOwner.current
@@ -40,7 +41,7 @@ fun FamilySummaryRoute(factory: FamilySummaryViewModel.Factory, olderAdultName: 
         onDispose { owner.lifecycle.removeObserver(observer) }
     }
     FamilySummaryScreen(state, olderAdultName, model::refresh, onAgenda, model::history, model::contact,
-        model::alerts, model::notes, onAddMedication, onChangePerson)
+        model::alerts, model::notes, onAddMedication, onChangePerson, onMedications)
     state.dialog?.let { dialog ->
         val context = LocalContext.current
         AlertDialog(onDismissRequest = model::dismissDialog, title = { Text(dialog.title) },
@@ -63,7 +64,8 @@ fun FamilySummaryRoute(factory: FamilySummaryViewModel.Factory, olderAdultName: 
 @Composable
 fun FamilySummaryScreen(state: FamilySummaryUiState, olderAdultName: String, onRetry: () -> Unit,
     onAgenda: () -> Unit, onHistory: () -> Unit, onContact: () -> Unit, onAlerts: () -> Unit,
-    onNotes: () -> Unit, onAddMedication: () -> Unit, onChangePerson: () -> Unit) {
+    onNotes: () -> Unit, onAddMedication: () -> Unit, onChangePerson: () -> Unit,
+    onMedications: () -> Unit = {}) {
     var more by remember { mutableStateOf(false) }
     val summary = state.summary
     Column(Modifier.fillMaxSize().background(Brush.horizontalGradient(listOf(Color.White, TataSurface, Color(0xFFFCFBFF))))) {
@@ -170,7 +172,8 @@ fun FamilySummaryScreen(state: FamilySummaryUiState, olderAdultName: String, onR
         }
     }
     if (more) AlertDialog(onDismissRequest = { more = false }, title = { Text("Más opciones") }, text = {
-        Column { TextButton(onClick = { more = false; onAddMedication() }) { Text("Agregar medicamento") }
+        Column { TextButton(onClick = { more = false; onMedications() }) { Text("Medicamentos") }
+            TextButton(onClick = { more = false; onAddMedication() }) { Text("Agregar medicamento") }
             TextButton(onClick = { more = false; onChangePerson() }) { Text("Vincular otra persona") }
             TextButton(onClick = { more = false; onRetry() }) { Text("Actualizar resumen") } }
     }, confirmButton = { TextButton(onClick = { more = false }) { Text("Cerrar") } })

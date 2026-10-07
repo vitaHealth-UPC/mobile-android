@@ -50,6 +50,24 @@ sealed interface RootDestination {
             Uri.encode(olderAdultName)
     }
 
+    data object MedicationManagement : RootDestination {
+        const val caregiverIdArgument = "caregiverId"
+        const val olderAdultIdArgument = "olderAdultId"
+        const val olderAdultNameArgument = "olderAdultName"
+
+        override val route: String =
+            "medication-management/{$caregiverIdArgument}/{$olderAdultIdArgument}/{$olderAdultNameArgument}"
+
+        fun createRoute(
+            caregiverId: String,
+            olderAdultId: String,
+            olderAdultName: String,
+        ): String = "medication-management/" +
+            Uri.encode(caregiverId) + "/" +
+            Uri.encode(olderAdultId) + "/" +
+            Uri.encode(olderAdultName)
+    }
+
     data object TreatmentCreation : RootDestination {
         const val caregiverIdArgument = "caregiverId"
         const val olderAdultIdArgument = "olderAdultId"
