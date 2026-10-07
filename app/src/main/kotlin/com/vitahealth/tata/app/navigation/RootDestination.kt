@@ -5,6 +5,12 @@ import android.net.Uri
 sealed interface RootDestination {
     val route: String
 
+    data object FamilySummary : RootDestination {
+        override val route = "family-summary/{caregiverId}/{olderAdultId}/{olderAdultName}"
+        fun createRoute(caregiverId: String, olderAdultId: String, olderAdultName: String) =
+            "family-summary/" + Uri.encode(caregiverId) + "/" + Uri.encode(olderAdultId) + "/" + Uri.encode(olderAdultName)
+    }
+
     data object IntakeAgenda : RootDestination {
         const val olderAdultIdArgument = "olderAdultId"
         override val route = "intake-agenda/{$olderAdultIdArgument}"
