@@ -412,7 +412,7 @@ class AppContainer(
         olderAdultId = olderAdultId,
         olderAdultName = olderAdultName,
         handler = GetNextDoseQueryHandler(nextDoseRepository),
-        agendaRepository = intakeAgendaRepository,
+        progressHandler = com.vitahealth.tata.intake.application.handlers.GetDailyDoseProgressQueryHandler(intakeAgendaRepository),
     )
 
     fun doseDetailViewModelFactory(

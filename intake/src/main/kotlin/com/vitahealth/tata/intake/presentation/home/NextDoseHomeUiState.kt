@@ -2,7 +2,7 @@ package com.vitahealth.tata.intake.presentation.home
 
 import com.vitahealth.tata.intake.application.readmodels.NextDoseReadModel
 
-data class DailyDoseProgress(val completed: Int, val total: Int)
+import com.vitahealth.tata.intake.application.readmodels.DailyDoseProgress
 
 sealed interface NextDoseHomeUiState {
     data object Loading : NextDoseHomeUiState

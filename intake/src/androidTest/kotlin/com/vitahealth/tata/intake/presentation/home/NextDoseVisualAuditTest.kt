@@ -7,6 +7,7 @@ import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import com.vitahealth.tata.intake.application.readmodels.DailyDoseProgress
 import com.vitahealth.tata.intake.application.readmodels.NextDoseReadModel
 import com.vitahealth.tata.intake.domain.model.DoseStatus
 import com.vitahealth.tata.shared.design.theme.TataTheme
