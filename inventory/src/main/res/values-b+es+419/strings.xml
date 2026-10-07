@@ -8,6 +8,7 @@
     <string name="inventory_status_low">Stock bajo</string>
     <string name="inventory_status_available">Stock disponible</string>
     <string name="inventory_units_remaining">%1$d %2$s restantes</string>
+    <string name="inventory_units_remaining_no_unit">%1$d restantes</string>
     <string name="inventory_days_estimate">≈ %1$d días de tratamiento</string>
     <string name="inventory_days_no_estimate">Sin estimación</string>
 
@@ -27,6 +28,7 @@
     <string name="inventory_last_replenishment">Última reposición</string>
     <string name="inventory_registered_badge">Registrado</string>
     <string name="inventory_batch_summary">%1$d %2$s</string>
+    <string name="inventory_batch_summary_no_unit">%1$d</string>
 
     <!-- Acciones comunes -->
     <string name="inventory_retry">Reintentar</string>

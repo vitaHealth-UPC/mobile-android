@@ -192,7 +192,11 @@ private fun StockCard(state: InventoryUiState.Ready) {
         }
         Spacer(Modifier.height(8.dp))
         Text(
-            text = stringResource(R.string.inventory_units_remaining, stock.remainingStock, state.unit),
+            text = if (state.unit.isBlank()) {
+                stringResource(R.string.inventory_units_remaining_no_unit, stock.remainingStock)
+            } else {
+                stringResource(R.string.inventory_units_remaining, stock.remainingStock, state.unit)
+            },
             color = TataText,
             fontSize = 22.sp,
             fontWeight = FontWeight.Bold,
@@ -210,7 +214,14 @@ private fun LastReplenishmentCard(batch: InventoryBatch, unit: String) {
         }
         Spacer(Modifier.height(4.dp))
         Text(text = batchDateFormatter.format(batch.registeredAt), color = TataText, fontWeight = FontWeight.Bold)
-        Text(text = stringResource(R.string.inventory_batch_summary, batch.quantity, unit), color = TataMuted)
+        Text(
+            text = if (unit.isBlank()) {
+                stringResource(R.string.inventory_batch_summary_no_unit, batch.quantity)
+            } else {
+                stringResource(R.string.inventory_batch_summary, batch.quantity, unit)
+            },
+            color = TataMuted,
+        )
     }
 }
 
@@ -280,8 +291,8 @@ private fun InventoryQuantityField(
     onValueChange: (String) -> Unit,
     isError: Boolean,
     enabled: Boolean,
-    errorLabel: String? = null,
     modifier: Modifier = Modifier,
+    errorLabel: String? = null,
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
         Text(
