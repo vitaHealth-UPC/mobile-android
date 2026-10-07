@@ -295,10 +295,12 @@ class RemoteTreatmentRepository(
             else -> "REQUEST_FAILED"
         }
 
-    private fun networkFailure(exception: Exception): AppResult.Failure =
-        AppResult.Failure(
+    private fun networkFailure(exception: Exception): AppResult.Failure {
+        if(exception is kotlinx.coroutines.CancellationException) throw exception
+        return AppResult.Failure(
             message = "No hay conexión disponible.",
             cause = exception,
             code = "NETWORK_UNAVAILABLE",
         )
+    }
 }

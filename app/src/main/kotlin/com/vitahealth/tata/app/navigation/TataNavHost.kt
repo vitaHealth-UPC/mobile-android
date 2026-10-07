@@ -76,6 +76,15 @@ fun TataNavHost(
                 onBack={navController.popBackStack()})
         }
 
+        composable(RootDestination.TreatmentList.route,arguments=listOf(navArgument("caregiverId"){type=NavType.StringType},navArgument("olderAdultId"){type=NavType.StringType},navArgument("olderAdultName"){type=NavType.StringType})) { entry ->
+            val app=androidx.compose.ui.platform.LocalContext.current.applicationContext as TataApplication
+            val caregiver=requireNotNull(entry.arguments?.getString("caregiverId"));val adult=requireNotNull(entry.arguments?.getString("olderAdultId"));val name=requireNotNull(entry.arguments?.getString("olderAdultName"))
+            com.vitahealth.tata.treatment.presentation.treatment.TreatmentListRoute(app.container.treatmentListViewModelFactory(caregiver,adult),name,
+                onOpen={id->navController.navigate(RootDestination.TreatmentDetail.createRoute(caregiver,name,id,""))},
+                onAddMedication={navController.navigate(RootDestination.MedicationRegistration.createRoute(caregiver,adult,name))},
+                onBack={navController.popBackStack()})
+        }
+
         composable(RootDestination.CaregiverProfiles.route,arguments=listOf(navArgument("caregiverId"){type=NavType.StringType})) { entry ->
             val app=androidx.compose.ui.platform.LocalContext.current.applicationContext as TataApplication
             val caregiver=requireNotNull(entry.arguments?.getString("caregiverId"))
@@ -143,6 +152,7 @@ fun TataNavHost(
                 onChangePerson = { navController.navigate(RootDestination.CaregiverProfiles.createRoute(caregiver)) },
                 onAccessibility = { navController.navigate(RootDestination.Accessibility.createRoute(caregiver)) },
                 onNotificationPreferences = { navController.navigate(RootDestination.NotificationPreferences.createRoute(caregiver)) },
+                onTreatments = { navController.navigate(RootDestination.TreatmentList.createRoute(caregiver,adult,name)) },
                 onMedications = { navController.navigate(RootDestination.MedicationManagement.createRoute(caregiver, adult, name)) },
             )
         }
