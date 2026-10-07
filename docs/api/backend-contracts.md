@@ -112,3 +112,14 @@ The alert `id` is a numeric `int64` (`Long` in Android), unlike the UUID `String
 `GET /api/v1/plans` returns `[{ code, name, monthlyPrice, currency, capabilities[] }]`; today ESSENTIAL (S/ 9.90) and FAMILY (S/ 19.90). `GET /api/v1/accounts/{accountId}/subscription` returns `{ accountId, plan, status, renewsAt }` with status `ACTIVE` and `renewsAt` as an ISO instant. Errors are a problem detail whose `title` is the code: `ACCOUNT_NOT_FOUND` and `PLAN_NOT_FOUND` (404), `ACCOUNT_NOT_ACTIVE` (403). A capability this app does not know is ignored, so the backend can add capabilities without breaking old versions.
 
 `PUT /api/v1/accounts/{accountId}/subscription` takes `{ "planCode": "ESSENTIAL" }` and returns the subscription representation. Choosing the plan the account already has changes nothing. `404 PLAN_NOT_FOUND` for an unknown code and `403 ACCOUNT_NOT_ACTIVE` for an account that is not active.
+## Omission push (US-22)
+
+There is no REST endpoint for this flow: the backend Omission & Escalation context (TS-05 / TS-06) sends pushes on its own, and the OpenAPI document has no endpoint to register an FCM device token.
+
+- When an intake stays unconfirmed, the backend opens an omission case and sends one reinforced reminder to `user-<olderAdultId>`: title "Medication reminder", body "Your <medication> is still pending. Please confirm it when you take it." Quiet hours and the PUSH channel of the notification preferences can suppress it.
+- When the grace period ends (30 minutes by default) without confirmation, the intake becomes omitted and one caregiver alert goes to `caregivers-of-<olderAdultId>`: title "Medication not confirmed", body "<medication> was not confirmed. Please check how they are doing."
+- The message (`PushProviderMessage`) carries only `recipient`, `title` and `body`: no alert id and no data fields.
+
+The app follows those recipients as FCM topics: the caregiver when the family summary opens, the older adult when the home opens. It shows its own localized text from the topic and the medication in the body. A tapped caregiver alert opens the alert list of that older adult and, on top of it, the detail of its most recent OPEN alert for that medication, read from `openAlerts` of `GET /api/v1/older-adults/{olderAdultId}/status?caregiverId=`, because the push has no alert id. A tapped reminder opens the older adult home. The token registration is behind `DeviceTokenRegistry`, pending until the backend publishes an endpoint. Delivery needs a Firebase project (`app/google-services.json`, not versioned) and a backend provider that publishes to those topics; the deployed backend logs the messages instead of sending them.
+
+On the home, the "Second reminder" card shows while the next dose is `PENDING` after its scheduled time; the intake resource does not say whether the reminder push went out.

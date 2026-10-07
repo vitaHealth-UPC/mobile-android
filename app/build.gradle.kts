@@ -3,6 +3,11 @@ plugins {
     alias(libs.plugins.kotlin.compose)
 }
 
+// Firebase reads app/google-services.json, which is not versioned. Without it the app builds and push stays off.
+if (file("google-services.json").exists()) {
+    apply(plugin = "com.google.gms.google-services")
+}
+
 android {
     namespace = "com.vitahealth.tata"
     compileSdk = 36
