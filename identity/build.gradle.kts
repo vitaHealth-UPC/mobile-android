@@ -49,4 +49,5 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     debugImplementation("androidx.compose.ui:ui-test-manifest")
     testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
 }

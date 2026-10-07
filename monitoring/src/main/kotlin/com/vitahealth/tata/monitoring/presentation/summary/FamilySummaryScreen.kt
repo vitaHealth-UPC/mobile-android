@@ -32,7 +32,8 @@ private val summaryLocale = Locale("es", "PE")
 fun FamilySummaryRoute(factory: FamilySummaryViewModel.Factory, olderAdultName: String,
     onAgenda: () -> Unit, onHistory: () -> Unit, onAddMedication: () -> Unit, onChangePerson: () -> Unit,
     onAccessibility: () -> Unit = {}, onNotificationPreferences: () -> Unit = {},
-    onMedications: () -> Unit = {}, onTreatments: () -> Unit = {}, onAlerts: () -> Unit = {}) {
+    onMedications: () -> Unit = {}, onTreatments: () -> Unit = {}, onAlerts: () -> Unit = {},
+    onSubscription: () -> Unit = {}) {
     val model: FamilySummaryViewModel = viewModel(factory = factory)
     val state by model.state.collectAsState()
     val owner = LocalLifecycleOwner.current
@@ -42,7 +43,7 @@ fun FamilySummaryRoute(factory: FamilySummaryViewModel.Factory, olderAdultName: 
         onDispose { owner.lifecycle.removeObserver(observer) }
     }
     FamilySummaryScreen(state, olderAdultName, model::refresh, onAgenda, onHistory, model::contact,
-        onAlerts, model::notes, onAddMedication, onChangePerson, onAccessibility, onNotificationPreferences, onMedications, onTreatments)
+        onAlerts, model::notes, onAddMedication, onChangePerson, onAccessibility, onNotificationPreferences, onMedications, onTreatments, onSubscription)
     state.dialog?.let { dialog ->
         val context = LocalContext.current
         AlertDialog(onDismissRequest = model::dismissDialog, title = { Text(dialog.title) },
@@ -67,7 +68,8 @@ fun FamilySummaryScreen(state: FamilySummaryUiState, olderAdultName: String, onR
     onAgenda: () -> Unit, onHistory: () -> Unit, onContact: () -> Unit, onAlerts: () -> Unit,
     onNotes: () -> Unit, onAddMedication: () -> Unit, onChangePerson: () -> Unit,
     onAccessibility: () -> Unit = {}, onNotificationPreferences: () -> Unit = {},
-    onMedications: () -> Unit = {}, onTreatments: () -> Unit = {}) {
+    onMedications: () -> Unit = {}, onTreatments: () -> Unit = {},
+    onSubscription: () -> Unit = {}) {
     var more by remember { mutableStateOf(false) }
     val summary = state.summary
     Column(Modifier.fillMaxSize().background(Brush.horizontalGradient(listOf(Color.White, TataSurface, Color(0xFFFCFBFF))))) {
@@ -179,6 +181,7 @@ fun FamilySummaryScreen(state: FamilySummaryUiState, olderAdultName: String, onR
             TextButton(onClick = { more = false; onAddMedication() }) { Text("Agregar medicamento") }
             TextButton(onClick = { more = false; onAccessibility() }) { Text("Accesibilidad") }
             TextButton(onClick = { more = false; onNotificationPreferences() }) { Text("Preferencias de notificación") }
+            TextButton(onClick = { more = false; onSubscription() }) { Text("Plan y suscripción") }
             TextButton(onClick = { more = false; onChangePerson() }) { Text("Vincular otra persona") }
             TextButton(onClick = { more = false; onRetry() }) { Text("Actualizar resumen") } }
     }, confirmButton = { TextButton(onClick = { more = false }) { Text("Cerrar") } })

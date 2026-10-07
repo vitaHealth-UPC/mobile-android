@@ -107,7 +107,9 @@ fun DoseDetailScreen(
                 } else {
                     DoseContent(state.dose)
                     state.confirmationMessage?.let { Text(it, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(bottom = 12.dp)) }
-                    if (state.dose.status == DoseStatus.PENDING) {
+                    if (state.confirmationUnavailable) {
+                        TataButton("Reintentar", onRetry)
+                    } else if (state.dose.status == DoseStatus.PENDING) {
                         TataButton(if (state.confirming) "Confirmando..." else "Confirmar toma", onConfirm, enabled = !state.confirming)
                     }
                 }

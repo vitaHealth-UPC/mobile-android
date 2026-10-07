@@ -23,6 +23,7 @@ sealed interface DoseDetailUiState {
         val confirmationMessage: String? = null,
         val confirmationSucceeded: Boolean = false,
         val outcome: ConfirmationOutcome? = null,
+        val confirmationUnavailable: Boolean = false,
     ) : DoseDetailUiState
     data class Error(val message: String) : DoseDetailUiState
 }

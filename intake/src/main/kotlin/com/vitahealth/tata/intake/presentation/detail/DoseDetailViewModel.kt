@@ -37,7 +37,7 @@ class DoseDetailViewModel(
 
     fun confirm() {
         val content = _state.value as? DoseDetailUiState.Content ?: return
-        if (content.confirming || content.dose.status != DoseStatus.PENDING) return
+        if (content.confirming || content.confirmationUnavailable || content.dose.status != DoseStatus.PENDING) return
         _state.value = content.copy(confirming = true, confirmationMessage = null)
         viewModelScope.launch(context) {
             _state.value = when (val result = confirmHandler(ConfirmDoseCommand(intakeId, ConfirmationChannel.TOUCH))) {
@@ -46,19 +46,28 @@ class DoseDetailViewModel(
                     confirmationSucceeded = true,
                     outcome = if (result.value.status == DoseStatus.LATE) ConfirmationOutcome.LATE else ConfirmationOutcome.CONFIRMED,
                 )
-                is AppResult.Failure -> if (result.code == NOT_CONFIRMABLE) omissionPreserved(content) else content.copy(confirmationMessage = result.message)
+                is AppResult.Failure -> if (result.code == NOT_CONFIRMABLE) refreshRejectedConfirmation(content) else content.copy(confirmationMessage = result.message)
             }
         }
     }
 
     /**
-     * 409: the backend already registered the omission and keeps it. The dose is read again so the screen
-     * shows the stored outcome instead of the pending one it had.
+     * A conflict says the intake cannot be confirmed. Read its persisted status before showing an
+     * outcome; another device may have confirmed it, and a failed read cannot prove an omission.
      */
-    private suspend fun omissionPreserved(content: DoseDetailUiState.Content): DoseDetailUiState.Content {
-        val dose = (handler(GetDoseDetailQuery(intakeId)) as? AppResult.Success)?.value ?: content.dose.copy(status = DoseStatus.OMITTED)
-        return DoseDetailUiState.Content(dose, outcome = ConfirmationOutcome.OMISSION_PRESERVED)
-    }
+    private suspend fun refreshRejectedConfirmation(content: DoseDetailUiState.Content): DoseDetailUiState.Content =
+        when (val result = handler(GetDoseDetailQuery(intakeId))) {
+            is AppResult.Success -> DoseDetailUiState.Content(
+                dose = result.value,
+                outcome = if (result.value.status == DoseStatus.OMITTED) ConfirmationOutcome.OMISSION_PRESERVED else null,
+                confirmationUnavailable = result.value.status == DoseStatus.PENDING,
+            )
+            is AppResult.Failure -> content.copy(
+                confirming = false,
+                confirmationUnavailable = true,
+                confirmationMessage = result.message,
+            )
+        }
 
     private fun load() {
         _state.value = DoseDetailUiState.Loading

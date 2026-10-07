@@ -14,4 +14,5 @@
     <string name="intake_result_scheduled_at">Scheduled</string>
     <string name="intake_result_today">Today, %1$s</string>
     <string name="intake_result_back_home">Back to home</string>
+    <string name="intake_result_time_unknown">Hora de confirmación no disponible</string>
 </resources>

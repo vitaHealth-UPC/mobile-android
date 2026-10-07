@@ -73,15 +73,29 @@ class LateConfirmationTest {
         assertNull(content(model).confirmationMessage)
     }
 
-    @Test fun anOmissionIsStillShownWhenTheDetailCannotBeReadAgain() {
+    @Test fun aFailedReadDoesNotInventAnOmissionOrAllowAnotherConfirmation() {
         val model = model()
         confirmations.answer = AppResult.Failure("Esta toma ya no puede confirmarse.", code = "INTAKE_NOT_CONFIRMABLE")
         details.answers = mutableListOf(AppResult.Failure("No hay conexión.", code = "NETWORK_UNAVAILABLE"))
 
         model.confirm()
 
-        assertEquals(ConfirmationOutcome.OMISSION_PRESERVED, content(model).outcome)
-        assertEquals(DoseStatus.OMITTED, content(model).dose.status)
+        assertNull(content(model).outcome)
+        assertEquals(DoseStatus.PENDING, content(model).dose.status)
+        assertTrue(content(model).confirmationUnavailable)
+        assertEquals("No hay conexión.", content(model).confirmationMessage)
+        confirmations.answer = AppResult.Success(pending.copy(status = DoseStatus.CONFIRMED))
+        model.confirm()
+        assertEquals(DoseStatus.PENDING, content(model).dose.status)
+    }
+
+    @Test fun aDoseConfirmedElsewhereIsNotPresentedAsOmitted() {
+        val model = model()
+        confirmations.answer = AppResult.Failure("Already confirmed", code = "INTAKE_NOT_CONFIRMABLE")
+        details.answers = mutableListOf(AppResult.Success(pending.copy(status = DoseStatus.CONFIRMED)))
+        model.confirm()
+        assertEquals(DoseStatus.CONFIRMED, content(model).dose.status)
+        assertNull(content(model).outcome)
     }
 
     @Test fun otherFailuresKeepTheDoseWithTheirMessage() {

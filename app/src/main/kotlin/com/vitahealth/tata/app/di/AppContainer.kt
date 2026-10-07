@@ -122,6 +122,31 @@ class AppContainer(
     val sessionAccessViewModelFactory = com.vitahealth.tata.identity.presentation.access.SessionAccessViewModel.Factory(sessionAccessRepository)
 
     suspend fun signOut() = sessionAccessRepository.signOut()
+
+    private val subscriptionRepository = com.vitahealth.tata.identity.infrastructure.remote.RemoteSubscriptionRepository(
+        retrofit.create(com.vitahealth.tata.identity.infrastructure.remote.SubscriptionApiService::class.java),
+    )
+
+    fun planSubscriptionViewModelFactory(accountId: String) =
+        com.vitahealth.tata.identity.presentation.subscription.PlanSubscriptionViewModel.Factory(
+            accountId = accountId,
+            getSubscription = com.vitahealth.tata.identity.application.handlers.GetCurrentSubscriptionQueryHandler(subscriptionRepository),
+            listPlans = com.vitahealth.tata.identity.application.handlers.ListAvailablePlansQueryHandler(subscriptionRepository),
+            changeSubscription = com.vitahealth.tata.identity.application.handlers.ChangeSubscriptionCommandHandler(subscriptionRepository),
+        )
+
+    private val onboardingRepository =
+        com.vitahealth.tata.identity.infrastructure.local.SharedPreferencesOnboardingRepository(context)
+    private val getOnboardingStatus =
+        com.vitahealth.tata.identity.application.handlers.GetOnboardingStatusQueryHandler(onboardingRepository)
+    private val completeOnboardingHandler =
+        com.vitahealth.tata.identity.application.handlers.CompleteOnboardingCommandHandler(onboardingRepository)
+
+    /** False on the first launch of the app, so the welcome screen is shown once. */
+    fun hasSeenOnboarding(): Boolean = getOnboardingStatus()
+
+    fun completeOnboarding() = completeOnboardingHandler()
+
     private val caregiverProfilesRepository = com.vitahealth.tata.carelink.infrastructure.remote.RemoteCaregiverProfilesRepository(retrofit.create(com.vitahealth.tata.carelink.infrastructure.remote.CaregiverProfilesApiService::class.java))
     fun caregiverProfilesViewModelFactory(caregiverId: String) = com.vitahealth.tata.carelink.presentation.profiles.CaregiverProfilesViewModel.Factory(caregiverId,caregiverProfilesRepository)
 
@@ -387,7 +412,7 @@ class AppContainer(
         olderAdultId = olderAdultId,
         olderAdultName = olderAdultName,
         handler = GetNextDoseQueryHandler(nextDoseRepository),
-        agendaRepository = intakeAgendaRepository,
+        progressHandler = com.vitahealth.tata.intake.application.handlers.GetDailyDoseProgressQueryHandler(intakeAgendaRepository),
     )
 
     fun doseDetailViewModelFactory(

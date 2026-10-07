@@ -7,6 +7,7 @@ import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import com.vitahealth.tata.intake.application.readmodels.DailyDoseProgress
 import com.vitahealth.tata.intake.application.readmodels.NextDoseReadModel
 import com.vitahealth.tata.intake.domain.model.DoseStatus
 import com.vitahealth.tata.shared.design.theme.TataTheme
@@ -69,10 +70,10 @@ class NextDoseVisualAuditTest {
         compose.runOnIdle { assertEquals(1, confirmations); state = state.copy(confirmationSucceeded = true) }
         capture("dose-existing-success")
         compose.onNodeWithText("Volver al inicio").assertExists()
-        compose.runOnIdle { state = state.copy(dose = dose.copy(status = DoseStatus.LATE, confirmedAt = Instant.now()), confirmationSucceeded = true) }
+        compose.runOnIdle { state = state.copy(dose = dose.copy(status = DoseStatus.LATE, confirmedAt = Instant.now()), confirmationSucceeded = true, outcome = com.vitahealth.tata.intake.presentation.detail.ConfirmationOutcome.LATE) }
         capture("dose-existing-late-success")
         compose.runOnIdle { state = state.copy(dose = dose.copy(status = DoseStatus.OMITTED), confirmationSucceeded = false,
-            confirmationMessage = "El periodo de confirmación finalizó.") }
+            confirmationMessage = "El periodo de confirmación finalizó.", outcome = com.vitahealth.tata.intake.presentation.detail.ConfirmationOutcome.OMISSION_PRESERVED) }
         capture("dose-existing-omission-preserved")
         compose.onNodeWithText("Confirmar toma").assertDoesNotExist()
     }

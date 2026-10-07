@@ -90,7 +90,7 @@ internal fun ConfirmationResult(
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(top = 6.dp),
         )
-        val shownAt = if (late) dose.confirmedAt ?: dose.scheduledAt else dose.scheduledAt
+        val shownAt = if (late) dose.confirmedAt else dose.scheduledAt
         TimeCard(
             label = stringResource(if (late) R.string.intake_result_confirmed_at else R.string.intake_result_scheduled_at),
             medication = dose.medicationName,
@@ -128,11 +128,13 @@ internal fun ConfirmationResult(
 }
 
 @Composable
-private fun TimeCard(label: String, medication: String, at: Instant, modifier: Modifier) {
+private fun TimeCard(label: String, medication: String, at: Instant?, modifier: Modifier) {
     val locale = LocalConfiguration.current.locales[0]
     val zone = ZoneId.systemDefault()
-    val day = at.atZone(zone).toLocalDate()
-    val dayText = if (day == LocalDate.now(zone)) {
+    val day = at?.atZone(zone)?.toLocalDate()
+    val dayText = if (day == null) {
+        stringResource(R.string.intake_result_time_unknown)
+    } else if (day == LocalDate.now(zone)) {
         stringResource(R.string.intake_result_today, day.format(DateTimeFormatter.ofPattern("d MMMM", locale)))
     } else {
         day.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG).withLocale(locale))
@@ -147,7 +149,7 @@ private fun TimeCard(label: String, medication: String, at: Instant, modifier: M
         Text(text = "$label · $medication", color = TataHighContrastMuted, fontSize = 14.sp)
         Text(text = dayText, color = TataHighContrastMuted, fontSize = 14.sp)
         Text(
-            text = at.atZone(zone).toLocalTime().format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(locale)),
+            text = at?.atZone(zone)?.toLocalTime()?.format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(locale)) ?: "—",
             color = tataTextColor(),
             fontSize = 30.sp,
             fontWeight = FontWeight.Bold,
