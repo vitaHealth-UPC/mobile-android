@@ -31,7 +31,7 @@ private val summaryLocale = Locale("es", "PE")
 @Composable
 fun FamilySummaryRoute(factory: FamilySummaryViewModel.Factory, olderAdultName: String,
     onAgenda: () -> Unit, onHistory: () -> Unit, onAddMedication: () -> Unit, onChangePerson: () -> Unit,
-    onAccessibility: () -> Unit = {}) {
+    onAccessibility: () -> Unit = {}, onNotificationPreferences: () -> Unit = {}) {
     val model: FamilySummaryViewModel = viewModel(factory = factory)
     val state by model.state.collectAsState()
     val owner = LocalLifecycleOwner.current
@@ -41,7 +41,7 @@ fun FamilySummaryRoute(factory: FamilySummaryViewModel.Factory, olderAdultName: 
         onDispose { owner.lifecycle.removeObserver(observer) }
     }
     FamilySummaryScreen(state, olderAdultName, model::refresh, onAgenda, onHistory, model::contact,
-        model::alerts, model::notes, onAddMedication, onChangePerson, onAccessibility)
+        model::alerts, model::notes, onAddMedication, onChangePerson, onAccessibility, onNotificationPreferences)
     state.dialog?.let { dialog ->
         val context = LocalContext.current
         AlertDialog(onDismissRequest = model::dismissDialog, title = { Text(dialog.title) },
@@ -65,7 +65,7 @@ fun FamilySummaryRoute(factory: FamilySummaryViewModel.Factory, olderAdultName: 
 fun FamilySummaryScreen(state: FamilySummaryUiState, olderAdultName: String, onRetry: () -> Unit,
     onAgenda: () -> Unit, onHistory: () -> Unit, onContact: () -> Unit, onAlerts: () -> Unit,
     onNotes: () -> Unit, onAddMedication: () -> Unit, onChangePerson: () -> Unit,
-    onAccessibility: () -> Unit = {}) {
+    onAccessibility: () -> Unit = {}, onNotificationPreferences: () -> Unit = {}) {
     var more by remember { mutableStateOf(false) }
     val summary = state.summary
     Column(Modifier.fillMaxSize().background(Brush.horizontalGradient(listOf(Color.White, TataSurface, Color(0xFFFCFBFF))))) {
@@ -174,6 +174,7 @@ fun FamilySummaryScreen(state: FamilySummaryUiState, olderAdultName: String, onR
     if (more) AlertDialog(onDismissRequest = { more = false }, title = { Text("Más opciones") }, text = {
         Column { TextButton(onClick = { more = false; onAddMedication() }) { Text("Agregar medicamento") }
             TextButton(onClick = { more = false; onAccessibility() }) { Text("Accesibilidad") }
+            TextButton(onClick = { more = false; onNotificationPreferences() }) { Text("Preferencias de notificación") }
             TextButton(onClick = { more = false; onChangePerson() }) { Text("Vincular otra persona") }
             TextButton(onClick = { more = false; onRetry() }) { Text("Actualizar resumen") } }
     }, confirmButton = { TextButton(onClick = { more = false }) { Text("Cerrar") } })

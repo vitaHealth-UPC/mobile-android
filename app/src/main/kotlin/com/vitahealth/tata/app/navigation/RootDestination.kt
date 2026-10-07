@@ -17,6 +17,12 @@ sealed interface RootDestination {
         fun createRoute(userId: String) = "accessibility/" + Uri.encode(userId)
     }
 
+    data object NotificationPreferences : RootDestination {
+        const val userIdArgument = "userId"
+        override val route = "notification-preferences/{$userIdArgument}"
+        fun createRoute(userId: String) = "notification-preferences/" + Uri.encode(userId)
+    }
+
     data object IntakeAgenda : RootDestination {
         const val olderAdultIdArgument = "olderAdultId"
         override val route = "intake-agenda/{$olderAdultIdArgument}"

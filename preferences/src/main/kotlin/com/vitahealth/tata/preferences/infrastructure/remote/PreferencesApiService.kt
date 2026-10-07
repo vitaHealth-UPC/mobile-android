@@ -31,6 +31,12 @@ data class UpdateTextSizeRequest(
     val textSize: String,
 )
 
+/** Quiet hours are sent as null to remove them; Gson leaves the field out, which the backend reads as null. */
+data class UpdateNotificationPreferencesRequest(
+    val quietHours: QuietHoursDto?,
+    val channels: List<ChannelDto>,
+)
+
 /** Body of every on/off preference endpoint. */
 data class EnabledRequest(
     val enabled: Boolean,
@@ -70,5 +76,11 @@ interface PreferencesApiService {
     suspend fun updateReadingAssistance(
         @Path("userId") userId: String,
         @Body request: EnabledRequest,
+    ): Response<UserPreferencesResponse>
+
+    @PUT("api/v1/users/{userId}/notification-preferences")
+    suspend fun updateNotificationPreferences(
+        @Path("userId") userId: String,
+        @Body request: UpdateNotificationPreferencesRequest,
     ): Response<UserPreferencesResponse>
 }

@@ -17,4 +17,9 @@ data class QuietHours(
             "quiet hours must start and end at different times"
         }
     }
+
+    companion object {
+        /** Suggested interval the first time the user turns quiet hours on. */
+        val Default = QuietHours(startHour = 22, startMinute = 0, endHour = 7, endMinute = 0)
+    }
 }
