@@ -7,6 +7,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -75,25 +76,26 @@ fun FamilySummaryScreen(state: FamilySummaryUiState, olderAdultName: String, onR
     onSubscription: () -> Unit = {}) {
     var more by remember { mutableStateOf(false) }
     val summary = state.summary
+    ProvideTextStyle(MaterialTheme.typography.bodyMedium.copy(fontFamily = FontFamily(Font(com.vitahealth.tata.shared.R.font.tata_inter)), fontSize = 11.sp, lineHeight = 14.sp)) {
     Column(Modifier.fillMaxSize().background(Brush.horizontalGradient(listOf(Color.White, TataSurface, Color(0xFFFCFBFF))))) {
         Box(Modifier.weight(1f)) {
-            Image(painterResource(R.drawable.family_glow), null, Modifier.align(Alignment.TopEnd).offset(x = 72.dp, y = 4.dp).size(386.dp))
+            TataSvgIcon(R.raw.family_glow, Modifier.align(Alignment.TopEnd).offset(x = 72.dp, y = 4.dp).size(386.dp))
             Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 22.dp)) {
                 Spacer(Modifier.height(28.dp))
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                     Column(Modifier.weight(1f)) {
                         Text("Resumen familiar", fontFamily = FontFamily(Font(com.vitahealth.tata.shared.R.font.tata_serif)),
-                            fontSize = 29.sp, color = TataText)
+                            fontSize = 29.sp, lineHeight = 34.sp, color = TataText)
                         TextButton(onClick = onChangePerson, contentPadding = PaddingValues(0.dp)) {
-                            Text(olderAdultName.substringBefore(" ") + " ⌄", color = TataDeepNavy, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+                            Text(olderAdultName.substringBefore(" ") + " ⌄", color = TataDeepNavy, fontSize = 16.sp, lineHeight = 20.sp, fontWeight = FontWeight.SemiBold)
                         }
                     }
                     Box(Modifier.size(48.dp).clip(CircleShape).background(TataLavender), contentAlignment = Alignment.Center) {
-                        Text(olderAdultName.take(1).uppercase(summaryLocale), color = TataDeepNavy, fontSize = 20.sp)
+                        Text(olderAdultName.take(1).uppercase(summaryLocale), color = TataDeepNavy, fontSize = 20.sp, lineHeight = 24.sp)
                     }
                     Box(Modifier.size(48.dp).clickable(role = Role.Button, onClickLabel = "Ver alertas", onClick = onAlerts), contentAlignment = Alignment.Center) {
-                        Image(painterResource(R.drawable.family_bell), null, Modifier.requiredSize(100.dp).offset(y = 14.dp))
-                        Image(painterResource(R.drawable.family_header_bell), "Ver alertas", Modifier.size(22.dp))
+                        TataSvgIcon(R.raw.family_bell, Modifier.requiredSize(100.dp).offset(y = 14.dp))
+                        TataSvgIcon(R.raw.family_header_bell, Modifier.size(22.dp))
                     }
                 }
                 when {
@@ -107,23 +109,23 @@ fun FamilySummaryScreen(state: FamilySummaryUiState, olderAdultName: String, onR
                             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                                 Column(Modifier.weight(1f)) {
                                     Text("Adherencia esta semana", fontSize = 12.sp, color = Color(0xFF296345))
-                                    Text(summary.weekly.percentage?.let { "${it.roundToInt()}%" } ?: "Sin datos", fontSize = 30.sp,
+                                    Text(summary.weekly.percentage?.let { "${it.roundToInt()}%" } ?: "Sin datos", fontSize = 30.sp, lineHeight = 36.sp,
                                         fontWeight = FontWeight.Bold, color = TataText, modifier = Modifier.padding(top = 6.dp))
                                     Text(if (summary.weekly.total == 0) "Aún no hay tomas resueltas" else "${summary.weekly.confirmed} de ${summary.weekly.total} tomas confirmadas",
                                         fontSize = 12.sp, color = TataText, modifier = Modifier.padding(top = 2.dp))
                                 }
-                                Image(painterResource(R.drawable.family_gauge), null, Modifier.size(112.dp, 84.dp))
+                                Image(painterResource(R.drawable.family_gauge_high_res), null, Modifier.size(112.dp, 84.dp))
                             }
                         }
                         Spacer(Modifier.height(20.dp))
                         SummaryCard(listOf(Color.White, Color.White)) {
                             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                                 Column(Modifier.weight(1f)) {
-                                    Text("Hoy", fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = TataText)
+                                    Text("Hoy", fontSize = 16.sp, lineHeight = 20.sp, fontWeight = FontWeight.SemiBold, color = TataText)
                                     Text(summary.date.format(DateTimeFormatter.ofPattern("d 'de' MMMM, EEEE", summaryLocale)), fontSize = 11.sp, color = TataMuted)
                                 }
                                 Column(horizontalAlignment = Alignment.End) {
-                                    Text("${summary.today.confirmed} / ${summary.today.total}", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = TataText)
+                                    Text("${summary.today.confirmed} / ${summary.today.total}", fontSize = 22.sp, lineHeight = 27.sp, fontWeight = FontWeight.Bold, color = TataText)
                                     Text("dosis completadas", fontSize = 10.sp, color = TataMuted)
                                 }
                             }
@@ -140,7 +142,7 @@ fun FamilySummaryScreen(state: FamilySummaryUiState, olderAdultName: String, onR
                                     summary.nextDose?.let { Text(it.dose, fontSize = 11.sp, color = TataText) }
                                 }
                                 summary.nextDose?.let { Text(it.scheduledAt.atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("h:mm a", summaryLocale)),
-                                    fontSize = 18.sp, fontWeight = FontWeight.Bold, color = TataText) }
+                                    fontSize = 18.sp, lineHeight = 23.sp, fontWeight = FontWeight.Bold, color = TataText) }
                             }
                         }
                         Spacer(Modifier.height(18.dp))
@@ -155,9 +157,9 @@ fun FamilySummaryScreen(state: FamilySummaryUiState, olderAdultName: String, onR
                         Text("Monitoreo rápido", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = TataText)
                         Spacer(Modifier.height(14.dp))
                         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(9.dp)) {
-                            QuickAction("Ver agenda", R.drawable.family_agenda, TataMint, onAgenda, Modifier.weight(1f))
-                            QuickAction("Historial", R.drawable.family_history, TataLavender, onHistory, Modifier.weight(1f))
-                            QuickAction("Contactar", R.drawable.family_contact, Color(0xFFECF5FB), onContact, Modifier.weight(1f))
+                            QuickAction("Ver agenda", R.raw.family_agenda, TataMint, onAgenda, Modifier.weight(1f))
+                            QuickAction("Historial", R.raw.family_history, TataLavender, onHistory, Modifier.weight(1f))
+                            QuickAction("Contactar", R.raw.family_contact, Color(0xFFECF5FB), onContact, Modifier.weight(1f))
                         }
                         TextButton(onClick = onAddMedication, modifier = Modifier.align(Alignment.CenterHorizontally)) { Text("Agregar medicamento", color = TataDeepNavy) }
                     }
@@ -175,6 +177,7 @@ fun FamilySummaryScreen(state: FamilySummaryUiState, olderAdultName: String, onR
             }
         })
     }
+    }
     if (more) AlertDialog(onDismissRequest = { more = false }, title = { Text("Más opciones") }, text = {
         Column { TextButton(onClick = { more = false; onTreatments() }) { Text("Tratamientos") }
             TextButton(onClick = { more = false; onMedications() }) { Text("Medicamentos") }
@@ -189,11 +192,11 @@ fun FamilySummaryScreen(state: FamilySummaryUiState, olderAdultName: String, onR
 
 @Composable private fun SummaryCard(colors: List<Color>, onClick: (() -> Unit)? = null, content: @Composable ColumnScope.() -> Unit) {
     val click = if (onClick == null) Modifier else Modifier.clickable(role = Role.Button, onClick = onClick)
-    Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(Brush.horizontalGradient(colors)).then(click).padding(16.dp), content = content)
+    Column(Modifier.fillMaxWidth().shadow(6.dp, RoundedCornerShape(18.dp), ambientColor = Color(0x141A2138), spotColor = Color(0x141A2138)).clip(RoundedCornerShape(18.dp)).background(Brush.horizontalGradient(colors)).then(click).padding(16.dp), content = content)
 }
 @Composable private fun QuickAction(label: String, icon: Int, color: Color, onClick: () -> Unit, modifier: Modifier) {
-    Column(modifier.clip(RoundedCornerShape(16.dp)).background(color).clickable(role = Role.Button, onClick = onClick).padding(vertical = 19.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-        Image(painterResource(icon), null, Modifier.size(22.dp))
+    Column(modifier.shadow(6.dp, RoundedCornerShape(16.dp), ambientColor = Color(0x141A2138), spotColor = Color(0x141A2138)).clip(RoundedCornerShape(16.dp)).background(color).clickable(role = Role.Button, onClick = onClick).heightIn(min = 82.dp).padding(vertical = 17.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+        TataSvgIcon(icon, Modifier.size(22.dp))
         Text(label, fontSize = 12.sp, color = TataText, modifier = Modifier.padding(top = 10.dp))
     }
 }
