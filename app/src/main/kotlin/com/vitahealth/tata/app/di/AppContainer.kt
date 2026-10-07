@@ -93,10 +93,14 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 class AppContainer(
     context: Context,
-    baseUrl: String = "http://10.0.2.2:8080/",
+    baseUrl: String = com.vitahealth.tata.BuildConfig.API_BASE_URL,
 ) {
     private val sessions = com.vitahealth.tata.shared.infrastructure.security.EncryptedSessionStore(context)
-    private val httpClient = okhttp3.OkHttpClient.Builder().addInterceptor { chain ->
+    private val httpClient = okhttp3.OkHttpClient.Builder()
+        .connectTimeout(20, java.util.concurrent.TimeUnit.SECONDS)
+        .readTimeout(90, java.util.concurrent.TimeUnit.SECONDS)
+        .callTimeout(110, java.util.concurrent.TimeUnit.SECONDS)
+        .addInterceptor { chain ->
         val request = chain.request().newBuilder()
         sessions.accessToken()?.let { request.header("Authorization", "Bearer $it") }
         chain.proceed(request.build())

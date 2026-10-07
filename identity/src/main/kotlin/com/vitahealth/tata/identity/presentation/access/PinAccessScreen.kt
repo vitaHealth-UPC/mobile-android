@@ -23,17 +23,17 @@ fun PinAccessScreen(state: SessionAccessUiState, olderAdultName: String, setup: 
     val locked = state.error in setOf("PIN_LOCKED", "PIN_TEMPORARILY_BLOCKED")
     val incorrect = state.error in setOf("INVALID_PIN", "INVALID_CREDENTIALS", "PIN_INCORRECT")
     Box(Modifier.fillMaxSize().background(TataSurface)) {
-        // Export includes the glow's original effect bounds: 346 dp around a 230 dp layer.
+        // Original SVG effect bounds, rasterized at 4x with transparency.
         Image(painterResource(R.drawable.figma_pin_glow), null,
-            Modifier.offset(x = 92.dp, y = (-4).dp).size(width = 301.dp, height = 346.dp))
+            Modifier.offset(x = 92.dp, y = tataPrototypeTopPadding() - 32.dp).size(346.dp))
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 22.dp)
-            .padding(top = 28.dp, bottom = 24.dp)) {
+            .padding(top = tataPrototypeTopPadding(), bottom = 24.dp)) {
             Text(if (setup) "Crea tu PIN" else "Ingresa a Tata", fontFamily = PinSerif,
                 fontSize = 29.sp, lineHeight = 38.sp, color = tataTextColor(), modifier = Modifier.padding(start = 2.dp))
             PinText(if (setup) "Elige 4 dígitos para futuros ingresos." else "Acceso simple para el adulto mayor.",
                 12, tataMutedColor(), modifier = Modifier.padding(start = 2.dp, top = 2.dp))
             Spacer(Modifier.height(22.dp))
-            Surface(shape = RoundedCornerShape(18.dp), shadowElevation = 8.dp, color = Color.Transparent) {
+            Surface(shape = RoundedCornerShape(18.dp), shadowElevation = 0.dp, color = Color.Transparent, modifier = Modifier.tataPrototypeShadow(8.dp, RoundedCornerShape(18.dp))) {
                 Box(Modifier.fillMaxWidth().heightIn(min = 90.dp)
                     .background(Brush.horizontalGradient(listOf(Color(0xFFE8F5EB), Color(0xFFDDEDE1))))) {
                     Row(Modifier.padding(start = 14.dp, top = 14.dp, end = 14.dp, bottom = 14.dp),
@@ -56,8 +56,8 @@ fun PinAccessScreen(state: SessionAccessUiState, olderAdultName: String, setup: 
             Spacer(Modifier.height(24.dp))
             PinText("PIN", 12, tataMutedColor(), FontWeight.Medium, Modifier.padding(start = 2.dp))
             Spacer(Modifier.height(8.dp))
-            Surface(shape = RoundedCornerShape(18.dp), shadowElevation = 8.dp, color = Color.White,
-                border = BorderStroke(1.dp, TataBorder), modifier = Modifier.fillMaxWidth()) {
+            Surface(shape = RoundedCornerShape(18.dp), shadowElevation = 0.dp, color = Color.White,
+                border = BorderStroke(1.dp, TataBorder), modifier = Modifier.fillMaxWidth().tataPrototypeShadow(8.dp, RoundedCornerShape(18.dp))) {
                 Row(Modifier.height(78.dp).padding(horizontal = 22.dp), verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceEvenly) {
                     repeat(4) { index -> Box(Modifier.size(32.dp).background(TataLavender, CircleShape)
@@ -73,10 +73,8 @@ fun PinAccessScreen(state: SessionAccessUiState, olderAdultName: String, setup: 
                         digits.forEach { digit ->
                             Box(Modifier.size(54.dp), contentAlignment = Alignment.Center) {
                                 if (digit.isNotEmpty()) {
-                                    // Exact Figma key export includes the shadow outside the 54 dp hit target.
-                                    Image(painterResource(R.drawable.figma_pin_key), null,
-                                        Modifier.requiredSize(width = 90.dp, height = 90.dp).offset(y = 6.dp))
-                                    Box(Modifier.fillMaxSize().clip(CircleShape)
+                                    Box(Modifier.fillMaxSize().tataPrototypeShadow(8.dp, CircleShape)
+                                        .background(Color.White, CircleShape).clip(CircleShape)
                                         .clickable(enabled = !state.busy && !locked, onClick = { onDigit(digit) }),
                                         contentAlignment = Alignment.Center) {
                                         PinText(digit, if (digit == "\u232b") 18 else 19, TataDeepNavy, FontWeight.SemiBold)
@@ -89,8 +87,8 @@ fun PinAccessScreen(state: SessionAccessUiState, olderAdultName: String, setup: 
                 }
             Spacer(Modifier.height(if (setup || state.error != null) 8.dp else 34.dp))
             Surface(onClick = onSubmit, enabled = !state.busy && !locked && state.pin.length == 4,
-                shape = CircleShape, color = TataNavy, contentColor = Color.White, shadowElevation = 8.dp,
-                modifier = Modifier.fillMaxWidth().height(56.dp)) {
+                shape = CircleShape, color = TataNavy, contentColor = Color.White, shadowElevation = 0.dp,
+                modifier = Modifier.fillMaxWidth().height(56.dp).tataPrototypeShadow(8.dp, CircleShape)) {
                 Box(contentAlignment = Alignment.Center) {
                     PinText(when { state.busy -> "Procesando…"; locked -> "Intenta más tarde"; setup -> "Guardar PIN"; else -> "Ingresar" },
                         15, Color.White, FontWeight.SemiBold)

@@ -54,7 +54,7 @@ fun CareLinkScreen(state: CareLinkUiState, onCodeChange: (String) -> Unit,
     onSendRequest: () -> Unit, onAcceptConsent: () -> Unit, onRejectConsent: () -> Unit,
     modifier: Modifier = Modifier) {
     Column(modifier.fillMaxSize().background(TataSurface).verticalScroll(rememberScrollState())
-        .padding(horizontal = 22.dp).padding(top = 28.dp, bottom = 32.dp)) {
+        .padding(horizontal = 22.dp).padding(top = tataPrototypeTopPadding(), bottom = 32.dp)) {
         Text("Vincula a tu familiar", fontFamily = LinkSerif, fontSize = 29.sp,
             lineHeight = 38.sp, color = tataTextColor(), modifier = Modifier.padding(horizontal = 2.dp))
         LinkText("La relación de cuidado requiere consentimiento.", 12, tataMutedColor(),
@@ -64,7 +64,7 @@ fun CareLinkScreen(state: CareLinkUiState, onCodeChange: (String) -> Unit,
         Spacer(Modifier.height(4.dp))
         LinkText("Código temporal", 11, tataMutedColor(), FontWeight.Medium)
         Spacer(Modifier.height(8.dp))
-        Box(Modifier.fillMaxWidth().height(58.dp).shadow(8.dp, RoundedCornerShape(15.dp))
+        Box(Modifier.fillMaxWidth().height(58.dp).tataPrototypeShadow(8.dp, RoundedCornerShape(15.dp))
             .background(Color.White, RoundedCornerShape(15.dp)).padding(horizontal = 14.dp),
             contentAlignment = Alignment.CenterStart) {
             BasicTextField(value = state.code, onValueChange = onCodeChange,
@@ -110,7 +110,7 @@ private fun LinkProgress(step: CareLinkStep) {
     val context = LocalContext.current
     val imageLoader = remember(context) { ImageLoader.Builder(context).components { add(SvgDecoder.Factory()) }.build() }
     val activeIndex = when (step) { CareLinkStep.Code -> 0; CareLinkStep.AwaitingConsent -> 1; else -> 2 }
-    Box(Modifier.fillMaxWidth().height(58.dp).shadow(8.dp, LinkShape).background(Color.White, LinkShape)) {
+    Box(Modifier.fillMaxWidth().height(58.dp).tataPrototypeShadow(8.dp, LinkShape).background(Color.White, LinkShape)) {
         Box(Modifier.fillMaxWidth().padding(horizontal = 49.dp).padding(top = 18.dp)
             .height(2.dp).background(Color(0xFFDBE0ED)))
         Row(Modifier.fillMaxWidth().padding(horizontal = 6.dp, vertical = 10.dp)) {
@@ -134,7 +134,7 @@ private fun LinkProgress(step: CareLinkStep) {
 
 @Composable
 private fun OlderAdultCard(profile: OlderAdultProfile?, step: CareLinkStep) {
-    Row(Modifier.fillMaxWidth().heightIn(min = 94.dp).shadow(8.dp, LinkShape)
+    Row(Modifier.fillMaxWidth().heightIn(min = 94.dp).tataPrototypeShadow(8.dp, LinkShape)
         .background(Color.White, LinkShape).border(1.dp, Color(0xFFE8EAF1), LinkShape)
         .padding(horizontal = 13.dp, vertical = 15.dp), verticalAlignment = Alignment.CenterVertically) {
         Image(painterResource(R.drawable.figma_link_avatar), contentDescription = null,
@@ -157,7 +157,7 @@ private fun OlderAdultCard(profile: OlderAdultProfile?, step: CareLinkStep) {
 
 @Composable
 private fun GradientCard(colors: List<Color>, content: @Composable ColumnScope.() -> Unit) {
-    Column(Modifier.fillMaxWidth().shadow(8.dp, LinkShape).background(Brush.horizontalGradient(colors), LinkShape)
+    Column(Modifier.fillMaxWidth().tataPrototypeShadow(8.dp, LinkShape).background(Brush.horizontalGradient(colors), LinkShape)
         .padding(horizontal = 16.dp, vertical = 14.dp), content = content)
 }
 
@@ -185,8 +185,8 @@ private fun ConsentCard(profile: OlderAdultProfile?, step: CareLinkStep, loading
 
 @Composable
 private fun LinkButton(text: String, onClick: () -> Unit, enabled: Boolean, modifier: Modifier, secondary: Boolean = false) {
-    Surface(onClick = onClick, enabled = enabled, modifier = modifier,
-        shape = CircleShape, shadowElevation = 6.dp,
+    Surface(onClick = onClick, enabled = enabled, modifier = modifier.tataPrototypeShadow(6.dp, CircleShape),
+        shape = CircleShape, shadowElevation = 0.dp,
         color = if (secondary) Color(0xFFF1ECFF) else TataNavy,
         contentColor = if (secondary) TataNavy else Color.White,
         border = if (secondary) BorderStroke(1.dp, Color(0xFFC2B5E5)) else null) {

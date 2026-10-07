@@ -29,7 +29,7 @@ fun SessionAccessScreen(state: SessionAccessUiState, onEmail: (String) -> Unit,
     val context = LocalContext.current
     val imageLoader = remember(context) { ImageLoader.Builder(context).components { add(SvgDecoder.Factory()) }.build() }
     Column(Modifier.fillMaxSize().background(TataSurface).verticalScroll(rememberScrollState())
-        .imePadding().padding(horizontal = 22.dp).padding(top = 28.dp, bottom = 32.dp)) {
+        .imePadding().padding(horizontal = 22.dp).padding(top = tataPrototypeTopPadding(), bottom = 32.dp)) {
         Text("Inicia sesión", fontFamily = FontFamily(Font(com.vitahealth.tata.shared.R.font.tata_serif)),
             fontSize = 29.sp, lineHeight = 38.sp, color = tataTextColor(), modifier = Modifier.padding(start = 2.dp))
         LoginText("Accede a tu cuenta para continuar.", 12, tataMutedColor(), modifier = Modifier.padding(top = 2.dp, start = 2.dp))
@@ -49,7 +49,7 @@ fun SessionAccessScreen(state: SessionAccessUiState, onEmail: (String) -> Unit,
         }
         state.error?.let { AccessError(it) }
         Surface(onClick = onSignIn, enabled = !state.busy, shape = CircleShape, color = TataNavy,
-            shadowElevation = 8.dp, modifier = Modifier.fillMaxWidth().height(56.dp)) {
+            shadowElevation = 0.dp, modifier = Modifier.fillMaxWidth().height(56.dp).tataPrototypeShadow(8.dp, CircleShape)) {
             Box(contentAlignment = Alignment.Center) {
                 LoginText(if (state.busy) "Ingresando…" else "Iniciar sesión", 15, Color.White, FontWeight.SemiBold)
             }
@@ -65,8 +65,8 @@ fun SessionAccessScreen(state: SessionAccessUiState, onEmail: (String) -> Unit,
         listOf("Google" to R.raw.figma_google, "Facebook" to R.raw.figma_facebook).forEachIndexed { index, (provider, asset) ->
             if (index > 0) Spacer(Modifier.height(12.dp))
             Surface(onClick = { information = provider }, enabled = !state.busy,
-                shape = RoundedCornerShape(18.dp), color = Color.White, shadowElevation = 8.dp,
-                border = BorderStroke(1.dp, TataBorder), modifier = Modifier.fillMaxWidth().height(52.dp)) {
+                shape = RoundedCornerShape(18.dp), color = Color.White, shadowElevation = 0.dp,
+                border = BorderStroke(1.dp, TataBorder), modifier = Modifier.fillMaxWidth().height(52.dp).tataPrototypeShadow(8.dp, RoundedCornerShape(18.dp))) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
                     AsyncImage("android.resource://${context.packageName}/$asset", null, imageLoader = imageLoader,
                         modifier = Modifier.size(24.dp))

@@ -11,8 +11,8 @@ This is a source-level contrast, not a claim that every listed state has been te
 | 3 | Onboarding | 563:5 | Dedicated screen/state not implemented | Not yet validated against installed app |
 | 4 | Caregiver Registration | 563:1398 | CaregiverRegistrationScreen: Screen and account/verification states exist | Not yet validated against installed app |
 | 5 | Link & Consent | 563:1440 | CareLinkScreen: Screen and invalid-code state exist | Not yet validated against installed app |
-| 6 | PIN Access | 563:1338 | PinAccessScreen: Rebuilt from MCP; setup/incorrect/locked states | Not yet validated against installed app |
-| 7 | Login | 641:16 | SessionAccessScreen: Rebuilt from MCP; password login works; social/recovery options need integrations | Not yet validated against installed app |
+| 6 | PIN Access | 563:1338 | PinAccessScreen: Rebuilt from MCP; setup/incorrect/locked states | Installed-app baseline compared with Figma; native system bars and dynamic data retained |
+| 7 | Login | 641:16 | SessionAccessScreen: Rebuilt from MCP; password login works; social/recovery options need integrations | Installed-app baseline compared with Figma; native system bars and dynamic data retained |
 | 8 | Home | 563:58 | NextDoseHomeScreen: Screen exists; reminder variants require full comparison | Not yet validated against installed app |
 | 9 | My Medications | 563:361 | Dedicated screen/state not implemented | Not yet validated against installed app |
 | 10 | Medication Detail | 563:142 | DoseDetailScreen: Detail/outcome states exist; compare each variant | Not yet validated against installed app |
@@ -79,5 +79,9 @@ This is a source-level contrast, not a claim that every listed state has been te
 
 ## Asset resolution
 
-Exact link avatar export: 232×232 at 4× for a 58 dp slot. PIN avatar: 248×248 for 62 dp; key: 360×360 including effect bounds for a 54 dp key; glow: 1204×1384 including clipped effect bounds, rendered at 301×346 dp. Preserve those geometries instead of stretching assets. Glow is stored as lossless WebP with unchanged pixels. Source photo in Figma is 96×96: exporting cannot restore missing photographic detail. SVG social icons retain vector resolution. Whole-screen Figma screenshots are references, never application assets.
+Exact link avatar export: 232×232 at 4× for a 58 dp slot. PIN avatar: 248×248 for 62 dp; glow: 1384×1384 from the original SVG, rendered at its 346×346 dp effect bounds. Preserve those geometries instead of stretching assets. PIN keys are native Compose circles with shadows, text and click handlers. The decorative glow is rasterized from the original SVG at 4× with transparency; the initial opaque export was discarded after emulator comparison. Buttons, cards, inputs and navigation are native Compose components. Source photo in Figma is 96×96: exporting cannot restore missing photographic detail. SVG social icons retain vector resolution. Whole-screen Figma screenshots are references, never application assets.
 
+
+## Runtime target
+
+Android defaults to `https://web-services-yzxl.onrender.com/`. The published OpenAPI exposes 64 operations and retains the session, PIN and care-link paths used by these screens. Override `TATA_API_BASE_URL` when testing a local server. Existing repository tests validate authentication requests and error mappings; a signed-in production account was not used for this visual pass. PIN variants also have dedicated Compose previews for frames 06, 29, 30 and 31.
