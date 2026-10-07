@@ -90,3 +90,7 @@ Frames `563:1554` (Treatment Management), `563:2455` (Medication Updated), `563:
 Not implemented on purpose: "Pause" is the treatment lifecycle of US-18 (`TreatmentLifecycleScreen`), "Reactivate" has no backend endpoint, and the 92% adherence chart belongs to `:analytics`.
 
 Entry point: the "More" menu of the family summary offers "Medicamentos". This screen uses the colour constants that exist in `develop`; once the accessibility branches are merged it can switch to `tataTextColor()` / `tataMutedColor()` so it follows high contrast.
+
+## US-01 session entry and PIN
+
+Prototype `641:18` supplies the password entry form; `563:1340` supplies the PIN keypad. Setup, incorrect and blocked PINs are states of `PinAccessScreen`. The screens use the existing Compose form, button, serif and accessibility tokens and call the live session API.

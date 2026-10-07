@@ -43,13 +43,38 @@ fun TataNavHost(
     val reducedMotion = LocalTataAccessibility.current.reducedMotion
     NavHost(
         navController = navController,
-        startDestination = RootDestination.CaregiverRegistration.route,
+        startDestination = RootDestination.SessionAccess.route,
         modifier = modifier,
         enterTransition = { if (reducedMotion) EnterTransition.None else fadeIn(animationSpec = tween(700)) },
         exitTransition = { if (reducedMotion) ExitTransition.None else fadeOut(animationSpec = tween(700)) },
         popEnterTransition = { if (reducedMotion) EnterTransition.None else fadeIn(animationSpec = tween(700)) },
         popExitTransition = { if (reducedMotion) ExitTransition.None else fadeOut(animationSpec = tween(700)) },
     ) {
+        composable(RootDestination.SessionAccess.route) {
+            val context = androidx.compose.ui.platform.LocalContext.current
+            val app = context.applicationContext as TataApplication
+            val deviceProfile = context.getSharedPreferences("tata_adult_profile",android.content.Context.MODE_PRIVATE)
+            com.vitahealth.tata.identity.presentation.access.SessionAccessRoute(
+                factory=app.container.sessionAccessViewModelFactory,
+                onAuthenticated={ subject ->
+                    val route=if(subject.role=="CAREGIVER") RootDestination.CareLink.createRoute(subject.subjectId)
+                    else RootDestination.NextDoseHome.createRoute(subject.subjectId,deviceProfile.getString("name","Adulto mayor") ?: "Adulto mayor")
+                    navController.navigate(route) { popUpTo(RootDestination.SessionAccess.route) { inclusive=true } }
+                },
+                onRegister={navController.navigate(RootDestination.CaregiverRegistration.route)},
+                onPin={navController.navigate(RootDestination.PinAccess.createRoute(requireNotNull(deviceProfile.getString("id",null)),deviceProfile.getString("name","Adulto mayor") ?: "Adulto mayor",false))},
+                showPin=deviceProfile.contains("id"),
+            )
+        }
+        composable(RootDestination.PinAccess.route,arguments=listOf(navArgument("olderAdultId"){type=NavType.StringType},navArgument("olderAdultName"){type=NavType.StringType},navArgument("setup"){type=NavType.BoolType})) { entry ->
+            val app=androidx.compose.ui.platform.LocalContext.current.applicationContext as TataApplication
+            val id=requireNotNull(entry.arguments?.getString("olderAdultId"))
+            val name=requireNotNull(entry.arguments?.getString("olderAdultName"))
+            com.vitahealth.tata.identity.presentation.access.PinAccessRoute(app.container.sessionAccessViewModelFactory,id,name,entry.arguments?.getBoolean("setup") ?: false,
+                onComplete={navController.navigate(RootDestination.NextDoseHome.createRoute(id,name)){popUpTo(RootDestination.PinAccess.route){inclusive=true}}},
+                onBack={navController.popBackStack()})
+        }
+
         composable(RootDestination.CaregiverRegistration.route) {
             val app = androidx.compose.ui.platform.LocalContext.current.applicationContext as TataApplication
             CaregiverRegistrationRoute(
@@ -77,13 +102,8 @@ fun TataNavHost(
             CareLinkRoute(
                 factory = app.container.careLinkViewModelFactory(caregiverId),
                 onConfirmed = { olderAdultId, olderAdultName ->
-                    navController.navigate(
-                        RootDestination.FamilySummary.createRoute(
-                            caregiverId = caregiverId,
-                            olderAdultId = olderAdultId,
-                            olderAdultName = olderAdultName,
-                        ),
-                    ) {
+                    app.getSharedPreferences("tata_adult_profile",android.content.Context.MODE_PRIVATE).edit().putString("id",olderAdultId).putString("name",olderAdultName).apply()
+                    navController.navigate(RootDestination.PinAccess.createRoute(olderAdultId,olderAdultName,true)) {
                         popUpTo(RootDestination.CareLink.route) { inclusive = true }
                     }
                 },
@@ -205,7 +225,7 @@ fun TataNavHost(
                             olderAdultId = olderAdultId,
                             olderAdultName = olderAdultName,
                             medicationId = medication.id,
-                            medicationLabel = medication.name + " · " + medication.presentation,
+                            medicationLabel = medication.name + " Â· " + medication.presentation,
                         ),
                     ) {
                         popUpTo(RootDestination.MedicationRegistration.route) { inclusive = true }

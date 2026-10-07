@@ -5,6 +5,11 @@ import android.net.Uri
 sealed interface RootDestination {
     val route: String
 
+    data object SessionAccess : RootDestination { override val route = "session-access" }
+    data object PinAccess : RootDestination {
+        override val route = "pin-access/{olderAdultId}/{olderAdultName}/{setup}"
+        fun createRoute(id: String, name: String, setup: Boolean) = "pin-access/${Uri.encode(id)}/${Uri.encode(name)}/$setup"
+    }
     data object FamilySummary : RootDestination {
         override val route = "family-summary/{caregiverId}/{olderAdultId}/{olderAdultName}"
         fun createRoute(caregiverId: String, olderAdultId: String, olderAdultName: String) =
