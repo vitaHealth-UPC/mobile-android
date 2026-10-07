@@ -46,7 +46,7 @@ fun AdultTabBar(
     val shape = RoundedCornerShape(28.dp)
     Row(
         modifier.padding(horizontal = 14.dp, vertical = 10.dp).fillMaxWidth()
-            .shadow(6.dp, shape).background(Color.White, shape).padding(vertical = 10.dp),
+            .shadow(6.dp, shape, ambientColor = Color(0x141A2138), spotColor = Color(0x141A2138)).background(Color.White, shape).padding(vertical = 10.dp),
         horizontalArrangement = Arrangement.SpaceEvenly,
     ) {
         AdultTab.entries.forEach { tab ->

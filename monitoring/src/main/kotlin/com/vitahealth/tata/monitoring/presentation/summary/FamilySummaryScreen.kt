@@ -165,18 +165,15 @@ fun FamilySummaryScreen(state: FamilySummaryUiState, olderAdultName: String, onR
                 Spacer(Modifier.height(18.dp))
             }
         }
-        Row(Modifier.padding(horizontal = 14.dp, vertical = 8.dp).fillMaxWidth().background(Color.White, RoundedCornerShape(28.dp)).padding(8.dp), horizontalArrangement = Arrangement.SpaceAround) {
-            listOf(Triple("Inicio", R.drawable.family_home, onRetry), Triple("Alertas", R.drawable.family_alerts, onAlerts),
-                Triple("Notas", R.drawable.family_notes, onNotes), Triple("Persona", R.drawable.family_person, onChangePerson),
-                Triple("Más", R.drawable.family_more, { more = true })).forEachIndexed { index, item ->
-                Column(Modifier.widthIn(min = 48.dp).heightIn(min = 48.dp).clickable(role = Role.Button, onClick = item.third), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Box(Modifier.size(38.dp, 30.dp).background(if (index == 0) TataNavy else Color.Transparent, RoundedCornerShape(15.dp)), contentAlignment = Alignment.Center) {
-                        Image(painterResource(item.second), null, Modifier.size(22.dp))
-                    }
-                    Text(item.first, fontSize = 9.sp, color = if (index == 0) TataNavy else TataMuted)
-                }
+        CaregiverTabBar(CaregiverTab.Home, { tab ->
+            when (tab) {
+                CaregiverTab.Home -> onRetry()
+                CaregiverTab.Alerts -> onAlerts()
+                CaregiverTab.Notes -> onNotes()
+                CaregiverTab.Person -> onChangePerson()
+                CaregiverTab.More -> more = true
             }
-        }
+        })
     }
     if (more) AlertDialog(onDismissRequest = { more = false }, title = { Text("Más opciones") }, text = {
         Column { TextButton(onClick = { more = false; onTreatments() }) { Text("Tratamientos") }
