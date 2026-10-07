@@ -19,6 +19,7 @@ import com.vitahealth.tata.identity.presentation.registration.CaregiverRegistrat
 import com.vitahealth.tata.intake.presentation.detail.DoseDetailRoute
 import com.vitahealth.tata.intake.presentation.home.NextDoseHomeRoute
 import com.vitahealth.tata.preferences.presentation.accessibility.AccessibilityRoute
+import com.vitahealth.tata.preferences.presentation.notifications.NotificationPreferencesRoute
 import com.vitahealth.tata.shared.design.accessibility.LocalTataAccessibility
 import com.vitahealth.tata.treatment.presentation.medication.MedicationRegistrationRoute
 import com.vitahealth.tata.treatment.presentation.treatment.TreatmentCreationRoute
@@ -101,6 +102,23 @@ fun TataNavHost(
                 onAddMedication = { navController.navigate(RootDestination.MedicationRegistration.createRoute(caregiver, adult, name)) },
                 onChangePerson = { navController.navigate(RootDestination.CareLink.createRoute(caregiver)) },
                 onAccessibility = { navController.navigate(RootDestination.Accessibility.createRoute(caregiver)) },
+                onNotificationPreferences = { navController.navigate(RootDestination.NotificationPreferences.createRoute(caregiver)) },
+            )
+        }
+
+        composable(
+            route = RootDestination.NotificationPreferences.route,
+            arguments = listOf(
+                navArgument(RootDestination.NotificationPreferences.userIdArgument) { type = NavType.StringType },
+            ),
+        ) { backStackEntry ->
+            val app = androidx.compose.ui.platform.LocalContext.current.applicationContext as TataApplication
+            val userId = requireNotNull(
+                backStackEntry.arguments?.getString(RootDestination.NotificationPreferences.userIdArgument),
+            )
+            NotificationPreferencesRoute(
+                factory = app.container.notificationPreferencesViewModelFactory(userId),
+                onBack = { navController.popBackStack() },
             )
         }
 

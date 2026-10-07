@@ -36,4 +36,24 @@
     <string name="accessibility_error_rejected">El servicio no aceptó este cambio. Inténtalo de nuevo.</string>
     <string name="accessibility_error_user">No pudimos identificar tu cuenta. Inicia sesión de nuevo.</string>
     <string name="accessibility_error_generic">Algo salió mal. Inténtalo de nuevo.</string>
+
+    <string name="notifications_title">Preferencias de notificaciones</string>
+    <string name="notifications_loading">Cargando tus preferencias…</string>
+    <string name="notifications_retry">Reintentar</string>
+    <string name="notifications_quiet_title">Horario de silencio</string>
+    <string name="notifications_quiet_off">Desactivado</string>
+    <string name="notifications_quiet_range">%1$s a %2$s</string>
+    <string name="notifications_quiet_from">Desde %1$s</string>
+    <string name="notifications_quiet_to">Hasta %1$s</string>
+    <string name="notifications_quiet_hint">Los avisos no críticos esperan a que termine el horario de silencio. Las alertas por una toma omitida siempre se envían.</string>
+    <string name="notifications_channels_title">Canales de notificación</string>
+    <string name="notifications_channel_push">Notificaciones push</string>
+    <string name="notifications_channel_push_hint">En este teléfono</string>
+    <string name="notifications_channel_sms">Mensaje de texto</string>
+    <string name="notifications_channel_sms_hint">A tu número de celular</string>
+    <string name="notifications_channel_email">Correo electrónico</string>
+    <string name="notifications_channel_email_hint">Al correo de tu cuenta</string>
+    <string name="notifications_saved">Se actualizaron el horario de silencio y los canales.</string>
+    <string name="notifications_error_hours">El horario de silencio debe empezar y terminar a horas distintas.</string>
+    <string name="notifications_error_offline">No hay conexión. Inténtalo cuando vuelvas a estar en línea.</string>
 </resources>

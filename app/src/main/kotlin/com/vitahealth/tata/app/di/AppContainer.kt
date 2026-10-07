@@ -47,9 +47,11 @@ import com.vitahealth.tata.treatment.presentation.treatment.TreatmentDoseFrequen
 import com.vitahealth.tata.treatment.presentation.treatment.TreatmentLifecycleViewModel
 import com.vitahealth.tata.treatment.presentation.treatment.TreatmentReminderViewModel
 import com.vitahealth.tata.treatment.presentation.treatment.TreatmentScheduleInstructionsViewModel
+import com.vitahealth.tata.preferences.application.handlers.GetNotificationPreferencesQueryHandler
 import com.vitahealth.tata.preferences.application.handlers.ObserveAccessibilityPreferencesQueryHandler
 import com.vitahealth.tata.preferences.application.handlers.SyncUserPreferencesCommandHandler
 import com.vitahealth.tata.preferences.application.handlers.UpdateHighContrastCommandHandler
+import com.vitahealth.tata.preferences.application.handlers.UpdateNotificationPreferencesCommandHandler
 import com.vitahealth.tata.preferences.application.handlers.UpdateReadingAssistanceCommandHandler
 import com.vitahealth.tata.preferences.application.handlers.UpdateReducedMotionCommandHandler
 import com.vitahealth.tata.preferences.application.handlers.UpdateTextSizeCommandHandler
@@ -58,8 +60,10 @@ import com.vitahealth.tata.preferences.domain.model.AccessibilityPreferences
 import com.vitahealth.tata.preferences.infrastructure.OfflineFirstUserPreferencesRepository
 import com.vitahealth.tata.preferences.infrastructure.local.DataStoreAccessibilityLocalStore
 import com.vitahealth.tata.preferences.infrastructure.remote.PreferencesApiService
+import com.vitahealth.tata.preferences.infrastructure.remote.RemoteNotificationPreferencesRepository
 import com.vitahealth.tata.preferences.infrastructure.remote.RemoteUserPreferences
 import com.vitahealth.tata.preferences.presentation.accessibility.AccessibilityViewModel
+import com.vitahealth.tata.preferences.presentation.notifications.NotificationPreferencesViewModel
 import kotlinx.coroutines.flow.Flow
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -93,6 +97,8 @@ class AppContainer(
         remote = RemoteUserPreferences(preferencesApi),
         local = DataStoreAccessibilityLocalStore(context),
     )
+
+    private val notificationPreferencesRepository = RemoteNotificationPreferencesRepository(preferencesApi)
 
     private val intakeApi: IntakeApiService = retrofit.create(IntakeApiService::class.java)
     private val intakeLocalStore = SQLiteIntakeLocalStore(context)
@@ -284,6 +290,12 @@ class AppContainer(
         updateVoiceConfirmation = UpdateVoiceConfirmationCommandHandler(preferencesRepository),
         updateReadingAssistance = UpdateReadingAssistanceCommandHandler(preferencesRepository),
         syncPreferences = SyncUserPreferencesCommandHandler(preferencesRepository),
+    )
+
+    fun notificationPreferencesViewModelFactory(userId: String) = NotificationPreferencesViewModel.Factory(
+        userId = userId,
+        getPreferences = GetNotificationPreferencesQueryHandler(notificationPreferencesRepository),
+        updatePreferences = UpdateNotificationPreferencesCommandHandler(notificationPreferencesRepository),
     )
 
     fun intakeAgendaViewModelFactory(

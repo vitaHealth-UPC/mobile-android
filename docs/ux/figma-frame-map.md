@@ -52,3 +52,11 @@ The "Voice confirmation" row of the same section only stores the preference (`vo
 Frame `563:4977` (Reading Assistance Enabled) is the "Help" section of `AccessibilityScreen`. The setting has real behaviour: `TataTheme` builds the Material typography through `tataTypography(readingAssistance)`, which lifts every text style to at least Medium weight and raises the line height to 1.6 times the font size, with slightly more letter spacing. Font sizes do not change (that is the text size setting).
 
 Text that sets its own `fontSize` / `lineHeight` / `fontWeight` directly does not follow this setting; screens should use the Material text styles.
+
+## US-39 quiet hours and channels (US-28 only in part)
+
+Frame `563:1219` (Notification Preferences) and `563:5090` (Preferences Saved): `NotificationPreferencesScreen` (route `notification-preferences/{userId}`) holds the "Quiet hours" card and the "Notification channels" card; saved / error banners are `NotificationMessage` UI states. Quiet hours start from 10:00 p. m. - 7:00 a. m. when turned on and the times are picked with the system time dialog. Every change is sent at once, because the backend replaces quiet hours and channels together.
+
+Not implemented on purpose, because the backend has no field or endpoint for them (US-28 asks for notification categories): the "Medication reminders" cadence card, the "Caregiver alerts" card with its delays and daily summary, the "Emergency escalation" card, and the "Calls" channel. The backend only stores quiet hours and the channels PUSH, SMS and EMAIL.
+
+Entry point: the "More" menu of the family summary offers "Preferencias de notificación".

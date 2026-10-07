@@ -35,3 +35,5 @@ The app keeps a copy in DataStore (`tata_accessibility`) and applies it before a
 `PUT /api/v1/users/{userId}/preferences/reduced-motion` (US-37) and `PUT /api/v1/users/{userId}/preferences/voice-confirmation` take `{ "enabled": true }` and return the preferences representation.
 
 `PUT /api/v1/users/{userId}/preferences/reading-assistance` (US-38) takes `{ "enabled": true }` and returns the preferences representation.
+
+`PUT /api/v1/users/{userId}/notification-preferences` (US-39) takes `{ "quietHours": {"start": "22:00", "end": "07:00"} | absent, "channels": [{"type": "PUSH", "enabled": true}, ...] }`, replaces both settings and returns the preferences representation. A `400` means an empty interval or a repeated channel. These two settings have no device copy: they are read and saved online only.

@@ -36,4 +36,24 @@
     <string name="accessibility_error_rejected">The service did not accept this change. Try again.</string>
     <string name="accessibility_error_user">We could not identify your account. Sign in again.</string>
     <string name="accessibility_error_generic">Something went wrong. Try again.</string>
+
+    <string name="notifications_title">Notification preferences</string>
+    <string name="notifications_loading">Loading your preferences…</string>
+    <string name="notifications_retry">Try again</string>
+    <string name="notifications_quiet_title">Quiet hours</string>
+    <string name="notifications_quiet_off">Off</string>
+    <string name="notifications_quiet_range">%1$s to %2$s</string>
+    <string name="notifications_quiet_from">From %1$s</string>
+    <string name="notifications_quiet_to">To %1$s</string>
+    <string name="notifications_quiet_hint">Non-critical notices wait until quiet hours end. Alerts about a missed dose are always sent.</string>
+    <string name="notifications_channels_title">Notification channels</string>
+    <string name="notifications_channel_push">Push notifications</string>
+    <string name="notifications_channel_push_hint">On this phone</string>
+    <string name="notifications_channel_sms">Text message</string>
+    <string name="notifications_channel_sms_hint">To your mobile number</string>
+    <string name="notifications_channel_email">Email</string>
+    <string name="notifications_channel_email_hint">To your account email</string>
+    <string name="notifications_saved">Quiet hours and channels were updated.</string>
+    <string name="notifications_error_hours">Quiet hours must start and end at different times.</string>
+    <string name="notifications_error_offline">There is no connection. Try again when you are back online.</string>
 </resources>
