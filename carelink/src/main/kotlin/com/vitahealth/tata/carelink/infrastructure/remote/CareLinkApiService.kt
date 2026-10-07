@@ -26,6 +26,8 @@ data class CareLinkResponse(
     val consentGranted: Boolean,
     val consentRecordedAt: String?,
     val confirmedAt: String?,
+    val accessToken: String? = null,
+    val expiresAt: String? = null,
 )
 
 data class OlderAdultProfileResponse(
