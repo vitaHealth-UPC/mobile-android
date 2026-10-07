@@ -42,6 +42,31 @@ import org.junit.runner.RunWith
 class ExistingScreensVisualAuditTest {
     @get:Rule val compose = createComposeRule()
 
+    @Test fun captureOnboardingAndPlanVariants() {
+        val essential = com.vitahealth.tata.identity.domain.model.Plan("ESSENTIAL", "Esencial",
+            java.math.BigDecimal("9.90"), "PEN", setOf(com.vitahealth.tata.identity.domain.model.PlanCapability.REMINDERS))
+        val family = essential.copy(code = "FAMILY", name = "Familiar", monthlyPrice = java.math.BigDecimal("19.90"),
+            capabilities = com.vitahealth.tata.identity.domain.model.PlanCapability.entries.toSet())
+        val state = com.vitahealth.tata.identity.presentation.subscription.PlanSubscriptionUiState(
+            isLoading = false, plans = listOf(essential, family), subscription =
+                com.vitahealth.tata.identity.domain.model.Subscription("account-test", family,
+                    com.vitahealth.tata.identity.domain.model.SubscriptionStatus.ACTIVE,
+                    java.time.Instant.parse("2026-10-28T00:00:00Z")))
+        var variant by mutableStateOf(0)
+        compose.setContent { AuditTheme { Box(Modifier.safeDrawingPadding()) {
+            if (variant == 0) com.vitahealth.tata.identity.presentation.onboarding.OnboardingScreen({}, {})
+            else com.vitahealth.tata.identity.presentation.subscription.PlanSubscriptionScreen(
+                state.copy(changeMessage = if (variant == 2)
+                    com.vitahealth.tata.identity.presentation.subscription.PlanChangeMessage.Updated else null),
+                {}, {}, {}, {}, {}, {})
+        } } }
+        capture("onboarding")
+        compose.runOnIdle { variant = 1 }
+        capture("plan-subscription")
+        compose.runOnIdle { variant = 2 }
+        capture("plan-updated")
+    }
+
     @Test fun captureHistoryVariants() {
         val summary = AdherenceSummaryUi("Últimos 30 días", 92, "+4%", 87, "+3%", 2, 1,
             "2 tardías · 1 omitida", listOf(AdherenceTrendPoint("S1", 80), AdherenceTrendPoint("S2", 87),

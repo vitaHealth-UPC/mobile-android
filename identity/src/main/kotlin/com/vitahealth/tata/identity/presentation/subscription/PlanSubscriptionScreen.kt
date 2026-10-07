@@ -28,6 +28,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -63,6 +64,8 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
+
+private val PlanFont = FontFamily(Font(com.vitahealth.tata.shared.R.font.tata_inter))
 
 private val StatusGreen = androidx.compose.ui.graphics.Color(0xFF296345)
 
@@ -141,7 +144,7 @@ fun PlanSubscriptionScreen(
                 if (state.selectedPlan == null) {
                     Text(
                         text = stringResource(R.string.plan_select_hint),
-                        style = MaterialTheme.typography.bodySmall,
+                        style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp, lineHeight = 15.sp, fontFamily = PlanFont),
                         color = TataMuted,
                         modifier = Modifier.padding(top = 6.dp, start = 4.dp),
                     )
@@ -214,13 +217,13 @@ private fun ChangeBanner(message: PlanChangeMessage, isError: Boolean) {
     TataCard(Modifier.fillMaxWidth(), if (isError) TataErrorSurface else TataMint) {
         Text(
             text = stringResource(if (isError) R.string.plan_change_error_title else R.string.plan_updated_title),
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.bodyMedium.copy(fontSize = 11.sp, lineHeight = 15.sp, fontFamily = PlanFont),
             fontWeight = FontWeight.SemiBold,
             color = if (isError) TataError else StatusGreen,
         )
         Text(
             text = body,
-            style = MaterialTheme.typography.bodySmall,
+            style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp, lineHeight = 15.sp, fontFamily = PlanFont),
             color = if (isError) TataError else TataMuted,
         )
     }
@@ -248,7 +251,7 @@ private fun Header(onBack: () -> Unit) {
             )
             Text(
                 text = stringResource(R.string.plan_subtitle),
-                style = MaterialTheme.typography.bodySmall,
+                style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp, lineHeight = 15.sp, fontFamily = PlanFont),
                 color = TataMuted,
             )
         }
@@ -265,7 +268,7 @@ private fun CurrentPlanCard(subscription: Subscription) {
         ) {
             Text(
                 text = stringResource(R.string.plan_header, subscription.plan.name),
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleMedium.copy(fontSize = 16.sp, lineHeight = 20.sp, fontFamily = PlanFont),
                 fontWeight = FontWeight.SemiBold,
                 color = TataText,
                 modifier = Modifier.weight(1f),
@@ -275,25 +278,26 @@ private fun CurrentPlanCard(subscription: Subscription) {
                     R.string.plan_price_per_month,
                     formatPlanPrice(subscription.plan.monthlyPrice, subscription.plan.currency),
                 ),
-                style = MaterialTheme.typography.titleSmall,
+                style = MaterialTheme.typography.titleSmall.copy(fontSize = 14.sp, lineHeight = 18.sp, fontFamily = PlanFont),
                 fontWeight = FontWeight.Bold,
                 color = TataNavy,
             )
         }
-        val renews = subscription.renewsAt?.let { formatShortDate(it) }
+        val locale = LocalConfiguration.current.locales[0]
+        val renews = subscription.renewsAt?.let { formatShortDate(it, locale) }
         Text(
             text = if (renews != null) {
                 stringResource(R.string.plan_active_renews, renews)
             } else {
                 stringResource(R.string.plan_status_active)
             },
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.bodyMedium.copy(fontSize = 11.sp, lineHeight = 15.sp, fontFamily = PlanFont),
             color = TataMuted,
             modifier = Modifier.padding(top = 6.dp),
         )
         Text(
             text = stringResource(statusLabel(subscription.status)),
-            style = MaterialTheme.typography.labelLarge,
+            style = MaterialTheme.typography.labelLarge.copy(fontSize = 11.sp, lineHeight = 15.sp, fontFamily = PlanFont),
             fontWeight = FontWeight.SemiBold,
             color = StatusGreen,
             modifier = Modifier
@@ -338,7 +342,7 @@ private fun PlanCard(
         ) {
             Text(
                 text = plan.name,
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleMedium.copy(fontSize = 16.sp, lineHeight = 20.sp, fontFamily = PlanFont),
                 fontWeight = FontWeight.SemiBold,
                 color = TataText,
                 modifier = Modifier.weight(1f),
@@ -349,7 +353,7 @@ private fun PlanCard(
                 } else {
                     stringResource(R.string.plan_price_per_month, formatPlanPrice(plan.monthlyPrice, plan.currency))
                 },
-                style = MaterialTheme.typography.titleSmall,
+                style = MaterialTheme.typography.titleSmall.copy(fontSize = 14.sp, lineHeight = 18.sp, fontFamily = PlanFont),
                 fontWeight = FontWeight.Bold,
                 color = TataNavy,
             )
@@ -362,7 +366,7 @@ private fun PlanCard(
             plan.capabilities.sortedBy { it.ordinal }.forEach { capability ->
                 Text(
                     text = "✓ " + stringResource(capabilityLabel(capability)),
-                    style = MaterialTheme.typography.labelMedium,
+                    style = MaterialTheme.typography.labelMedium.copy(fontSize = 11.sp, lineHeight = 15.sp, fontFamily = PlanFont),
                     color = TataText,
                 )
             }
@@ -372,23 +376,24 @@ private fun PlanCard(
 
 @Composable
 private fun RenewalCard(subscription: Subscription) {
+    val locale = LocalConfiguration.current.locales[0]
     TataCard(Modifier.fillMaxWidth(), TataBlueSurface) {
         Text(
             text = stringResource(R.string.plan_renewal_title),
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.bodyMedium.copy(fontSize = 11.sp, lineHeight = 15.sp, fontFamily = PlanFont),
             fontWeight = FontWeight.SemiBold,
             color = TataText,
         )
         Text(
-            text = subscription.renewsAt?.let { formatLongDate(it) } ?: stringResource(R.string.plan_renewal_unknown),
-            style = MaterialTheme.typography.titleLarge,
+            text = subscription.renewsAt?.let { formatLongDate(it, locale) } ?: stringResource(R.string.plan_renewal_unknown),
+            style = MaterialTheme.typography.titleLarge.copy(fontSize = 18.sp, lineHeight = 23.sp, fontFamily = PlanFont),
             fontWeight = FontWeight.Bold,
             color = TataText,
             modifier = Modifier.padding(top = 4.dp),
         )
         Text(
             text = stringResource(R.string.plan_renewal_note),
-            style = MaterialTheme.typography.bodySmall,
+            style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp, lineHeight = 15.sp, fontFamily = PlanFont),
             color = TataMuted,
             modifier = Modifier.padding(top = 6.dp),
         )
@@ -408,11 +413,11 @@ private fun ErrorBanner(message: PlanMessage) {
     TataCard(Modifier.fillMaxWidth(), TataErrorSurface) {
         Text(
             text = stringResource(R.string.plan_error_title),
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.bodyMedium.copy(fontSize = 11.sp, lineHeight = 15.sp, fontFamily = PlanFont),
             fontWeight = FontWeight.SemiBold,
             color = TataError,
         )
-        Text(text = body, style = MaterialTheme.typography.bodySmall, color = TataError)
+        Text(text = body, style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp, lineHeight = 15.sp, fontFamily = PlanFont), color = TataError)
     }
 }
 
@@ -431,11 +436,11 @@ private fun capabilityLabel(capability: PlanCapability): Int =
         PlanCapability.ADHERENCE_INSIGHTS -> R.string.plan_capability_insights
     }
 
-private fun formatShortDate(instant: Instant): String =
-    DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(instant.atZone(ZoneId.systemDefault()))
+private fun formatShortDate(instant: Instant, locale: java.util.Locale): String =
+    DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(locale).format(instant.atZone(ZoneId.systemDefault()))
 
-private fun formatLongDate(instant: Instant): String =
-    DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG).format(instant.atZone(ZoneId.systemDefault()))
+private fun formatLongDate(instant: Instant, locale: java.util.Locale): String =
+    DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG).withLocale(locale).format(instant.atZone(ZoneId.systemDefault()))
 
 @Preview(showBackground = true)
 @Composable
