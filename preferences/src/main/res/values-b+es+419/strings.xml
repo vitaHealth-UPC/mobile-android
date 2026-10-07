@@ -56,4 +56,8 @@
     <string name="notifications_saved">Se actualizaron el horario de silencio y los canales.</string>
     <string name="notifications_error_hours">El horario de silencio debe empezar y terminar a horas distintas.</string>
     <string name="notifications_error_offline">No hay conexión. Inténtalo cuando vuelvas a estar en línea.</string>
+    <string name="accessibility_help_title">¿Necesitas ayuda?</string>
+    <string name="accessibility_help_subtitle">Te guiamos para configurar tu app.</string>
+    <string name="accessibility_help_body">Toca un ajuste para activarlo o desactivarlo. Texto grande facilita la lectura, el contraste refuerza textos y controles, y reducir movimiento elimina las transiciones. Ayuda al leer aumenta el espacio entre textos. Los cambios se guardan automáticamente.</string>
+    <string name="accessibility_help_close">Entendido</string>
 </resources>

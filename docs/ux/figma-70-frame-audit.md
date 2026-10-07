@@ -19,7 +19,7 @@ This is a source-level contrast, not a claim that every listed state has been te
 | 11 | Weekly Schedule | 563:500 | IntakeAgendaScreen: Agenda and outcome labels exist | Not yet validated against installed app |
 | 12 | Voice Confirmation | 563:242 | Dedicated screen/state not implemented | Not yet validated against installed app |
 | 13 | Dose Confirmed | 563:291 | DoseDetailScreen: Detail/outcome states exist; compare each variant | Not yet validated against installed app |
-| 14 | Accessibility | 563:618 | AccessibilityScreen: Preference controls exist; compare each enabled variant | Not yet validated against installed app |
+| 14 | Accessibility | 563:618 | AccessibilityScreen: Five native preference controls restyled from MCP; exact vector icons and help dialog. Dark theme and adult tab bar remain missing | Not yet validated against installed app |
 | 15 | Family Summary | 563:727 | FamilySummaryScreen: Summary exists; consent-required presentation needs comparison | Not yet validated against installed app |
 | 16 | Linked Person | 563:1121 | CaregiverProfilesScreen: Partial: linked-profile selection; not the full linked-person mockup | Not yet validated against installed app |
 | 17 | Alerts | 563:819 | FamilySummaryScreen dialogs: Partial: alerts/contact dialogs; dedicated Figma screens missing | Not yet validated against installed app |
@@ -31,7 +31,7 @@ This is a source-level contrast, not a claim that every listed state has been te
 | 23 | Create Treatment | 563:1490 | TreatmentCreationScreen + regimen steps: Split into steps; full single-frame form comparison needed | Not yet validated against installed app |
 | 24 | Treatment Management | 563:1554 | TreatmentListScreen / MedicationManagementScreen / TreatmentLifecycleScreen: Partial composition across separate screens | Not yet validated against installed app |
 | 25 | Inventory & Restock | 563:1632 | InventoryScreen: Inventory/replenishment and validation states exist | Not yet validated against installed app |
-| 26 | Notification Preferences | 563:1219 | NotificationPreferencesScreen: Partial: channels/quiet hours; compare all categories | Not yet validated against installed app |
+| 26 | Notification Preferences | 563:1219 | NotificationPreferencesScreen: MCP comparison confirms missing medication cadence, caregiver alert thresholds/daily summary, emergency contacts/escalation and CALL channel; only quiet hours and PUSH/SMS/EMAIL implemented | Not yet validated against installed app |
 | 27 | Notes - Caregiver | 576:2859 | FamilySummaryScreen notes dialog: Partial: read-only notes; editor missing | Not yet validated against installed app |
 | 28 | Plan & Subscription | 563:1701 | Dedicated screen/state not implemented | Not yet validated against installed app |
 | 29 | PIN Setup | 563:1970 | PinAccessScreen: Rebuilt from MCP; setup/incorrect/locked states | Not yet validated against installed app |
@@ -66,11 +66,11 @@ This is a source-level contrast, not a claim that every listed state has been te
 | 58 | Alert Attended | 563:4345 | Dedicated screen/state not implemented | Not yet validated against installed app |
 | 59 | Adherence Period Changed | 563:4445 | AdherenceHistoryScreen: Screen, period controls and empty states exist | Not yet validated against installed app |
 | 60 | Insufficient Evidence | 563:4550 | AdherenceRecommendationsScreen: Screen and evidence states exist | Not yet validated against installed app |
-| 61 | Large Text Enabled | 563:4638 | AccessibilityScreen: Preference controls exist; compare each enabled variant | Not yet validated against installed app |
-| 62 | High Contrast Enabled | 563:4751 | AccessibilityScreen: Preference controls exist; compare each enabled variant | Not yet validated against installed app |
-| 63 | Reduced Motion Enabled | 563:4864 | AccessibilityScreen: Preference controls exist; compare each enabled variant | Not yet validated against installed app |
-| 64 | Reading Assistance Enabled | 563:4977 | AccessibilityScreen: Preference controls exist; compare each enabled variant | Not yet validated against installed app |
-| 65 | Notification Preferences Saved | 563:5090 | NotificationPreferencesScreen: Partial: channels/quiet hours; compare all categories | Not yet validated against installed app |
+| 61 | Large Text Enabled | 563:4638 | AccessibilityScreen: Five native preference controls restyled from MCP; exact vector icons and help dialog. Dark theme and adult tab bar remain missing | Not yet validated against installed app |
+| 62 | High Contrast Enabled | 563:4751 | AccessibilityScreen: Five native preference controls restyled from MCP; exact vector icons and help dialog. Dark theme and adult tab bar remain missing | Not yet validated against installed app |
+| 63 | Reduced Motion Enabled | 563:4864 | AccessibilityScreen: Five native preference controls restyled from MCP; exact vector icons and help dialog. Dark theme and adult tab bar remain missing | Not yet validated against installed app |
+| 64 | Reading Assistance Enabled | 563:4977 | AccessibilityScreen: Five native preference controls restyled from MCP; exact vector icons and help dialog. Dark theme and adult tab bar remain missing | Not yet validated against installed app |
+| 65 | Notification Preferences Saved | 563:5090 | NotificationPreferencesScreen: MCP comparison confirms missing medication cadence, caregiver alert thresholds/daily summary, emergency contacts/escalation and CALL channel; only quiet hours and PUSH/SMS/EMAIL implemented | Not yet validated against installed app |
 | 66 | Invalid Inventory Quantity | 563:5213 | InventoryScreen: Inventory/replenishment and validation states exist | Not yet validated against installed app |
 | 67 | Stock Replenished | 563:5284 | InventoryScreen: Inventory/replenishment and validation states exist | Not yet validated against installed app |
 | 68 | Subscription Updated | 563:5354 | Dedicated screen/state not implemented | Not yet validated against installed app |
@@ -85,3 +85,7 @@ Exact link avatar export: 232×232 at 4× for a 58 dp slot. PIN avatar: 248×248
 ## Runtime target
 
 Android defaults to `https://web-services-yzxl.onrender.com/`. The published OpenAPI exposes 64 operations and retains the session, PIN and care-link paths used by these screens. Override `TATA_API_BASE_URL` when testing a local server. Existing repository tests validate authentication requests and error mappings; a signed-in production account was not used for this visual pass. PIN variants also have dedicated Compose previews for frames 06, 29, 30 and 31.
+
+## Accessibility visual pass
+
+Compared frame 14 and variants 61–64 through MCP. The five existing settings retain their command handlers and persistence. Restyled native switches, row dimensions, type, separators, SVG icon slots (all 24×24), help banner and responsive header. This is partial fidelity: dark theme, the adult bottom navigation and complete variant positioning remain open; do not count these five frames as fully accepted. Notification frames 26/65 were compared at source level and their missing categories are listed above.
