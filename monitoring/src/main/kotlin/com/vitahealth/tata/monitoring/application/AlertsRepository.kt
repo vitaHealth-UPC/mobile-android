@@ -21,4 +21,7 @@ object AlertFailureCodes {
     const val INVALID_REFERENCE = "INVALID_ALERT_REFERENCE"
     const val STATUS_CONFLICT = "ALERT_STATUS_CONFLICT"
     const val STATUS_NOT_ACCEPTED = "ALERT_STATUS_NOT_ACCEPTED"
+    const val NOTE_BLANK = "NOTE_BLANK"
+    const val NOTE_TOO_LONG = "NOTE_TOO_LONG"
+    const val NOTE_REJECTED = "INVALID_NOTE"
 }
