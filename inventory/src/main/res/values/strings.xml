@@ -20,6 +20,8 @@
     <!-- Replenishment (US-43) -->
     <string name="inventory_replenishment_section">Register replenishment</string>
     <string name="inventory_quantity_received_label">Quantity received</string>
+    <string name="inventory_invalid_quantity_label">Invalid quantity</string>
+    <string name="inventory_invalid_threshold_label">Invalid threshold</string>
     <string name="inventory_save_replenishment">Save replenishment</string>
     <string name="inventory_replenishment_saved">Replenishment registered.</string>
     <string name="inventory_last_replenishment">Last replenishment</string>

@@ -20,6 +20,8 @@
     <!-- Reposición (US-43) -->
     <string name="inventory_replenishment_section">Registrar reposición</string>
     <string name="inventory_quantity_received_label">Cantidad recibida</string>
+    <string name="inventory_invalid_quantity_label">Cantidad inválida</string>
+    <string name="inventory_invalid_threshold_label">Umbral inválido</string>
     <string name="inventory_save_replenishment">Guardar reposición</string>
     <string name="inventory_replenishment_saved">Reposición registrada.</string>
     <string name="inventory_last_replenishment">Última reposición</string>

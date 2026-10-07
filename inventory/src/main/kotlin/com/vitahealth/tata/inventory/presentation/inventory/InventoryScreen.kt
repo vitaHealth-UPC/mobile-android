@@ -12,9 +12,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -35,9 +38,8 @@ import com.vitahealth.tata.inventory.application.readmodels.InventoryStockReadMo
 import com.vitahealth.tata.inventory.domain.model.InventoryBatch
 import com.vitahealth.tata.inventory.domain.model.StockStatus
 import com.vitahealth.tata.shared.design.components.TataButton
-import com.vitahealth.tata.shared.design.components.TataButtonStyle
 import com.vitahealth.tata.shared.design.components.TataCard
-import com.vitahealth.tata.shared.design.components.TataFormField
+import com.vitahealth.tata.shared.design.theme.TataBorder
 import com.vitahealth.tata.shared.design.theme.TataCream
 import com.vitahealth.tata.shared.design.theme.TataError
 import com.vitahealth.tata.shared.design.theme.TataMint
@@ -49,7 +51,7 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
-private val AvailableGreen = Color(0xFF2E7D4F)
+private val AvailableGreen = Color(0xFF2E754A)
 
 private val batchDateFormatter: DateTimeFormatter =
     DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withZone(ZoneId.systemDefault())
@@ -143,12 +145,13 @@ private fun ReadyBody(
             color = TataText,
             fontWeight = FontWeight.SemiBold,
         )
-        TataFormField(
+        InventoryQuantityField(
             label = stringResource(R.string.inventory_quantity_received_label),
             value = state.replenishmentInput,
             onValueChange = onReplenishmentChange,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            isError = state.replenishmentErrorCode == "INVALID_QUANTITY",
             enabled = !state.submitting,
+            errorLabel = stringResource(R.string.inventory_invalid_quantity_label),
         )
         state.replenishmentErrorCode?.let { code ->
             Text(text = stringResource(inventoryErrorMessageRes(code)), color = TataError)
@@ -162,7 +165,6 @@ private fun ReadyBody(
             ),
             onClick = onSaveReplenishment,
             enabled = !state.submitting,
-            style = TataButtonStyle.Secondary,
         )
     }
 
@@ -221,19 +223,21 @@ private fun NotInitializedBody(
 ) {
     Text(text = stringResource(R.string.inventory_not_initialized), color = TataMuted)
 
-    TataFormField(
+    InventoryQuantityField(
         label = stringResource(R.string.inventory_initial_quantity_label),
         value = state.initialQuantityInput,
         onValueChange = onInitialQuantityChange,
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+        isError = state.formErrorCode == "INVALID_QUANTITY",
         enabled = !state.submitting,
+        errorLabel = stringResource(R.string.inventory_invalid_quantity_label),
     )
-    TataFormField(
+    InventoryQuantityField(
         label = stringResource(R.string.inventory_threshold_label),
         value = state.thresholdInput,
         onValueChange = onThresholdChange,
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+        isError = state.formErrorCode == "INVALID_THRESHOLD",
         enabled = !state.submitting,
+        errorLabel = stringResource(R.string.inventory_invalid_threshold_label),
     )
     state.formErrorCode?.let { code ->
         Text(text = stringResource(inventoryErrorMessageRes(code)), color = TataError)
@@ -260,6 +264,52 @@ private fun ErrorBody(code: String?, onRetry: () -> Unit) {
             textAlign = TextAlign.Center,
         )
         TataButton(text = stringResource(R.string.inventory_retry), onClick = onRetry)
+    }
+}
+
+/**
+ * Numeric field that turns red and swaps its label to [errorLabel] when [isError] (e.g. the
+ * "Cantidad inválida" state in frame 294-3255). A local variant because the shared
+ * [com.vitahealth.tata.shared.design.components.TataFormField] has no error state and lives in
+ * another module.
+ */
+@Composable
+private fun InventoryQuantityField(
+    label: String,
+    value: String,
+    onValueChange: (String) -> Unit,
+    isError: Boolean,
+    enabled: Boolean,
+    errorLabel: String? = null,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier = modifier.fillMaxWidth()) {
+        Text(
+            text = if (isError && errorLabel != null) errorLabel else label,
+            color = if (isError) TataError else TataMuted,
+            modifier = Modifier.padding(bottom = 8.dp),
+        )
+        OutlinedTextField(
+            value = value,
+            onValueChange = onValueChange,
+            enabled = enabled,
+            isError = isError,
+            singleLine = true,
+            shape = RoundedCornerShape(15.dp),
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedContainerColor = Color.White,
+                unfocusedContainerColor = Color.White,
+                disabledContainerColor = Color.White,
+                errorContainerColor = Color.White,
+                focusedBorderColor = if (isError) TataError else TataBorder,
+                unfocusedBorderColor = if (isError) TataError else TataBorder,
+                errorBorderColor = TataError,
+                focusedTextColor = TataText,
+                unfocusedTextColor = TataText,
+            ),
+        )
     }
 }
 
@@ -355,6 +405,41 @@ private fun InventoryInvalidQuantityPreview() {
 @Preview(name = "Not initialized (404)", showBackground = true)
 @Composable
 private fun InventoryNotInitializedPreview() {
+    InventoryScreen(
+        state = InventoryUiState.NotInitialized(
+            medicationName = "Losartán 50 mg",
+            unit = "comprimidos",
+        ),
+        onInitialQuantityChange = noopStr,
+        onThresholdChange = noopStr,
+        onDefineInitial = noop,
+        onReplenishmentChange = noopStr,
+        onSaveReplenishment = noop,
+        onRetry = noop,
+    )
+}
+
+@Preview(name = "Stock bajo (es-419)", locale = "es-419", showBackground = true)
+@Composable
+private fun InventoryLowStockEsPreview() {
+    InventoryScreen(
+        state = InventoryUiState.Ready(
+            stock = sampleStock(5, StockStatus.LOW),
+            medicationName = "Losartán 50 mg",
+            unit = "comprimidos",
+        ),
+        onInitialQuantityChange = noopStr,
+        onThresholdChange = noopStr,
+        onDefineInitial = noop,
+        onReplenishmentChange = noopStr,
+        onSaveReplenishment = noop,
+        onRetry = noop,
+    )
+}
+
+@Preview(name = "No inicializado (es-419)", locale = "es-419", showBackground = true)
+@Composable
+private fun InventoryNotInitializedEsPreview() {
     InventoryScreen(
         state = InventoryUiState.NotInitialized(
             medicationName = "Losartán 50 mg",
