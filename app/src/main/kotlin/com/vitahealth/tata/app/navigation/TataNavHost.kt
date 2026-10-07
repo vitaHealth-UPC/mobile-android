@@ -92,7 +92,7 @@ fun TataNavHost(
             com.vitahealth.tata.carelink.presentation.profiles.CaregiverProfilesRoute(
                 factory=app.container.caregiverProfilesViewModelFactory(caregiver),
                 onOpenAdult={adult->navController.navigate(RootDestination.FamilySummary.createRoute(caregiver,adult.id,adult.name))},
-                onAdultConsent={code->navController.navigate(RootDestination.CareLink.createRoute(caregiver,code))},
+                onAdultConsent={link->navController.navigate(RootDestination.CareLink.createRoute(caregiver,link.code,link.olderAdultId))},
                 onSignOut={scope.launch{app.container.signOut();navController.navigate(RootDestination.SessionAccess.route){popUpTo(navController.graph.id){inclusive=true}}}},
             )
         }
@@ -116,6 +116,7 @@ fun TataNavHost(
             arguments = listOf(
                 navArgument(RootDestination.CareLink.caregiverIdArgument) { type = NavType.StringType },
                 navArgument("code") { type = NavType.StringType; defaultValue = "" },
+                navArgument("previewAdult") { type = NavType.StringType; defaultValue = "" },
             ),
         ) { backStackEntry ->
             val app = androidx.compose.ui.platform.LocalContext.current.applicationContext as TataApplication
@@ -125,6 +126,7 @@ fun TataNavHost(
             CareLinkRoute(
                 factory = app.container.careLinkViewModelFactory(caregiverId),
                 initialCode = backStackEntry.arguments?.getString("code") ?: "",
+                initialOlderAdultId = backStackEntry.arguments?.getString("previewAdult") ?: "",
                 onConfirmed = { olderAdultId, olderAdultName ->
                     app.getSharedPreferences("tata_adult_profile",android.content.Context.MODE_PRIVATE).edit().putString("id",olderAdultId).putString("name",olderAdultName).apply()
                     navController.navigate(RootDestination.PinAccess.createRoute(olderAdultId,olderAdultName,true)) {
