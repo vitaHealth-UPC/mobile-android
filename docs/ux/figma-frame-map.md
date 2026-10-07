@@ -34,3 +34,9 @@ Figma file `jCppvxtSpLpHOrC3ZWUIVC`, Mobile Prototyping `563:2`: Accessibility `
 Not implemented on purpose: the "Dark theme" and "Language" rows and the "Need help?" card of the frame have no User Story and no backend field. The row icons are text glyphs until the Figma vector assets are exported.
 
 Entry point: the "More" menu of the family summary (`FamilySummaryScreen`) now offers "Accesibilidad". The older-adult shell has no "More" tab yet.
+
+## US-36 high contrast
+
+Frame `563:4751` (High Contrast Enabled) is the same `AccessibilityScreen` with the contrast row on: the banner message is the `HighContrastSaved` UI state. `TataTheme` swaps to a high contrast colour scheme and `TataCard` draws a border; `tataTextColor()` and `tataMutedColor()` give the stronger text colours.
+
+Screens of other modules that still use the `TataText` / `TataMuted` constants directly keep their normal colours until they switch to those two functions.

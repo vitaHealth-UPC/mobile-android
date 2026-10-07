@@ -6,6 +6,7 @@ import com.vitahealth.tata.preferences.NetworkDown
 import com.vitahealth.tata.preferences.RejectedByServer
 import com.vitahealth.tata.preferences.application.handlers.ObserveAccessibilityPreferencesQueryHandler
 import com.vitahealth.tata.preferences.application.handlers.SyncUserPreferencesCommandHandler
+import com.vitahealth.tata.preferences.application.handlers.UpdateHighContrastCommandHandler
 import com.vitahealth.tata.preferences.application.handlers.UpdateTextSizeCommandHandler
 import com.vitahealth.tata.preferences.domain.model.AccessibilityPreferences
 import com.vitahealth.tata.preferences.domain.model.TextSizeLevel
@@ -43,6 +44,7 @@ class AccessibilityViewModelTest {
             userId = userId,
             observeAccessibility = ObserveAccessibilityPreferencesQueryHandler(repository),
             updateTextSize = UpdateTextSizeCommandHandler(repository),
+            updateHighContrast = UpdateHighContrastCommandHandler(repository),
             syncPreferences = SyncUserPreferencesCommandHandler(repository),
         )
     }
@@ -122,6 +124,49 @@ class AccessibilityViewModelTest {
         model.onLargeTextChange(false)
 
         assertEquals(AccessibilityMessage.SavedOffline, model.state.value.message)
+    }
+
+    @Test
+    fun turningHighContrastOnSavesItAndShowsTheConfirmation() {
+        val model = viewModel()
+
+        model.onHighContrastChange(true)
+
+        assertTrue(model.state.value.preferences.highContrast)
+        assertEquals(AccessibilityMessage.HighContrastSaved, model.state.value.message)
+    }
+
+    @Test
+    fun turningHighContrastOffRestoresTheStandardContrast() {
+        val model = viewModel()
+        model.onHighContrastChange(true)
+
+        model.onHighContrastChange(false)
+
+        assertFalse(model.state.value.preferences.highContrast)
+        assertEquals(AccessibilityMessage.StandardContrastSaved, model.state.value.message)
+    }
+
+    @Test
+    fun highContrastChangedWithoutConnectionStillApplies() {
+        val model = viewModel()
+        remote.failWith = NetworkDown
+
+        model.onHighContrastChange(true)
+
+        assertTrue(model.state.value.preferences.highContrast)
+        assertEquals(AccessibilityMessage.SavedOffline, model.state.value.message)
+    }
+
+    @Test
+    fun aRejectedHighContrastChangeKeepsTheOldValue() {
+        val model = viewModel()
+        remote.failWith = RejectedByServer
+
+        model.onHighContrastChange(true)
+
+        assertFalse(model.state.value.preferences.highContrast)
+        assertEquals(AccessibilityMessage.ErrorRejected, model.state.value.message)
     }
 
     private fun FakeAccessibilityLocalStore.setInitialLarge() {

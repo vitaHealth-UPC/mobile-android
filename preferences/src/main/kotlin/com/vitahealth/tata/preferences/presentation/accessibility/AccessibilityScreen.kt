@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -39,6 +40,8 @@ import com.vitahealth.tata.preferences.domain.model.AccessibilityPreferences
 import com.vitahealth.tata.preferences.domain.model.TextSizeLevel
 import com.vitahealth.tata.shared.design.components.TataCard
 import com.vitahealth.tata.shared.design.components.TataToggleRow
+import com.vitahealth.tata.shared.design.theme.TataBlueSurface
+import com.vitahealth.tata.shared.design.theme.TataBorder
 import com.vitahealth.tata.shared.design.theme.TataError
 import com.vitahealth.tata.shared.design.theme.TataErrorSurface
 import com.vitahealth.tata.shared.design.theme.TataLavender
@@ -49,6 +52,8 @@ import com.vitahealth.tata.shared.design.theme.TataPurple
 import com.vitahealth.tata.shared.design.theme.TataSurface
 import com.vitahealth.tata.shared.design.theme.TataText
 import com.vitahealth.tata.shared.design.theme.TataTheme
+import com.vitahealth.tata.shared.design.theme.tataMutedColor
+import com.vitahealth.tata.shared.design.theme.tataTextColor
 
 @Composable
 fun AccessibilityRoute(
@@ -63,6 +68,7 @@ fun AccessibilityRoute(
         state = state,
         onBack = onBack,
         onLargeTextChange = viewModel::onLargeTextChange,
+        onHighContrastChange = viewModel::onHighContrastChange,
         modifier = modifier,
     )
 }
@@ -72,6 +78,7 @@ fun AccessibilityScreen(
     state: AccessibilityUiState,
     onBack: () -> Unit,
     onLargeTextChange: (Boolean) -> Unit,
+    onHighContrastChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -96,13 +103,13 @@ fun AccessibilityScreen(
                 text = stringResource(R.string.accessibility_title),
                 fontFamily = FontFamily(Font(com.vitahealth.tata.shared.R.font.tata_serif)),
                 fontSize = 29.sp,
-                color = TataText,
+                color = tataTextColor(),
             )
         }
         Text(
             text = stringResource(R.string.accessibility_subtitle),
             style = MaterialTheme.typography.bodyMedium,
-            color = TataMuted,
+            color = tataMutedColor(),
             modifier = Modifier.padding(start = 48.dp, bottom = 20.dp),
         )
 
@@ -116,6 +123,15 @@ fun AccessibilityScreen(
                 enabled = !state.isSaving,
                 leading = { IconBadge(glyph = "A", background = TataLavender, tint = TataPurple) },
             )
+            RowDivider()
+            TataToggleRow(
+                title = stringResource(R.string.accessibility_contrast_title),
+                subtitle = stringResource(R.string.accessibility_contrast_subtitle),
+                checked = state.preferences.highContrast,
+                onCheckedChange = onHighContrastChange,
+                enabled = !state.isSaving,
+                leading = { IconBadge(glyph = "◐", background = TataBlueSurface, tint = TataNavy) },
+            )
         }
 
         state.message?.let { message ->
@@ -126,12 +142,17 @@ fun AccessibilityScreen(
 }
 
 @Composable
+private fun RowDivider() {
+    HorizontalDivider(color = TataBorder, modifier = Modifier.padding(start = 58.dp))
+}
+
+@Composable
 private fun SectionTitle(text: String) {
     Text(
         text = text,
         style = MaterialTheme.typography.titleSmall,
         fontWeight = FontWeight.SemiBold,
-        color = TataText,
+        color = tataTextColor(),
         modifier = Modifier.padding(start = 4.dp, bottom = 8.dp),
     )
 }
@@ -157,6 +178,8 @@ private fun MessageBanner(message: AccessibilityMessage, isError: Boolean) {
         when (message) {
             AccessibilityMessage.LargeTextSaved -> R.string.accessibility_large_text_saved
             AccessibilityMessage.StandardTextSaved -> R.string.accessibility_standard_text_saved
+            AccessibilityMessage.HighContrastSaved -> R.string.accessibility_contrast_saved
+            AccessibilityMessage.StandardContrastSaved -> R.string.accessibility_standard_contrast_saved
             AccessibilityMessage.SavedOffline -> R.string.accessibility_saved_offline
             AccessibilityMessage.ErrorRejected -> R.string.accessibility_error_rejected
             AccessibilityMessage.ErrorUser -> R.string.accessibility_error_user
@@ -172,12 +195,12 @@ private fun MessageBanner(message: AccessibilityMessage, isError: Boolean) {
                 text = title,
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.SemiBold,
-                color = if (isError) TataError else TataText,
+                color = if (isError) TataError else tataTextColor(),
             )
             Text(
                 text = body,
                 style = MaterialTheme.typography.bodySmall,
-                color = if (isError) TataError else TataMuted,
+                color = if (isError) TataError else tataMutedColor(),
             )
         }
     }
@@ -194,6 +217,7 @@ private fun AccessibilityScreenPreview() {
             ),
             onBack = {},
             onLargeTextChange = {},
+            onHighContrastChange = {},
         )
     }
 }

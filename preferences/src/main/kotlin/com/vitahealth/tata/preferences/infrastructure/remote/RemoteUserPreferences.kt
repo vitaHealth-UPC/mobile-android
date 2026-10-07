@@ -15,6 +15,9 @@ class RemoteUserPreferences(
     override suspend fun updateTextSize(userId: String, textSize: TextSizeLevel): AppResult<UserPreferences> =
         request(userId) { api.updateTextSize(userId, UpdateTextSizeRequest(textSize.name)) }
 
+    override suspend fun updateHighContrast(userId: String, enabled: Boolean): AppResult<UserPreferences> =
+        request(userId) { api.updateHighContrast(userId, EnabledRequest(enabled)) }
+
     private suspend fun request(
         userId: String,
         call: suspend () -> Response<UserPreferencesResponse>,

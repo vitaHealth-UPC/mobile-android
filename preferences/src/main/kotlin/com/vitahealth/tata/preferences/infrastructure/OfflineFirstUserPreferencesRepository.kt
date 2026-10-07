@@ -38,6 +38,13 @@ class OfflineFirstUserPreferencesRepository(
         remote.updateTextSize(userId, textSize)
     }
 
+    override suspend fun updateHighContrast(
+        userId: String,
+        enabled: Boolean,
+    ): AppResult<PreferenceUpdate> = apply(change = { it.copy(highContrast = enabled) }) {
+        remote.updateHighContrast(userId, enabled)
+    }
+
     private suspend fun apply(
         change: (AccessibilityPreferences) -> AccessibilityPreferences,
         send: suspend () -> AppResult<UserPreferences>,
@@ -64,6 +71,10 @@ class OfflineFirstUserPreferencesRepository(
     }
 
     /** Every preference that can be changed offline must be sent here. */
-    private suspend fun pushLocalChanges(userId: String): AppResult<UserPreferences> =
-        remote.updateTextSize(userId, local.current().textSize)
+    private suspend fun pushLocalChanges(userId: String): AppResult<UserPreferences> {
+        val current = local.current()
+        val textSize = remote.updateTextSize(userId, current.textSize)
+        if (textSize is AppResult.Failure) return textSize
+        return remote.updateHighContrast(userId, current.highContrast)
+    }
 }

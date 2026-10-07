@@ -38,6 +38,7 @@ class FakeUserPreferencesRemote(
 ) : UserPreferencesRemote {
     var failWith: AppResult.Failure? = null
     val textSizeCalls = mutableListOf<TextSizeLevel>()
+    val contrastCalls = mutableListOf<Boolean>()
     var getCalls = 0
 
     override suspend fun get(userId: String): AppResult<UserPreferences> {
@@ -49,6 +50,13 @@ class FakeUserPreferencesRemote(
         textSizeCalls += textSize
         failWith?.let { return it }
         stored = stored.copy(textSize = textSize)
+        return AppResult.Success(snapshot(userId))
+    }
+
+    override suspend fun updateHighContrast(userId: String, enabled: Boolean): AppResult<UserPreferences> {
+        contrastCalls += enabled
+        failWith?.let { return it }
+        stored = stored.copy(highContrast = enabled)
         return AppResult.Success(snapshot(userId))
     }
 

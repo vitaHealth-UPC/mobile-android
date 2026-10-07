@@ -13,4 +13,6 @@ interface UserPreferencesRepository {
     suspend fun sync(userId: String): AppResult<UserPreferences>
 
     suspend fun updateTextSize(userId: String, textSize: TextSizeLevel): AppResult<PreferenceUpdate>
+
+    suspend fun updateHighContrast(userId: String, enabled: Boolean): AppResult<PreferenceUpdate>
 }

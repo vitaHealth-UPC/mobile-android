@@ -9,6 +9,8 @@ import androidx.compose.runtime.staticCompositionLocalOf
 data class TataAccessibility(
     /** Multiplies the system font scale, so a user's OS-level setting is respected on top of it. */
     val fontScale: Float = 1f,
+    /** Stronger text, borders and controls. Components read it through [LocalTataAccessibility]. */
+    val highContrast: Boolean = false,
 )
 
 val LocalTataAccessibility = staticCompositionLocalOf { TataAccessibility() }

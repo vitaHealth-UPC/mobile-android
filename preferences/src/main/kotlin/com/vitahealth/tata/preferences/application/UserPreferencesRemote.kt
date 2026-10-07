@@ -9,4 +9,6 @@ interface UserPreferencesRemote {
     suspend fun get(userId: String): AppResult<UserPreferences>
 
     suspend fun updateTextSize(userId: String, textSize: TextSizeLevel): AppResult<UserPreferences>
+
+    suspend fun updateHighContrast(userId: String, enabled: Boolean): AppResult<UserPreferences>
 }

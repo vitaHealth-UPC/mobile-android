@@ -31,6 +31,11 @@ data class UpdateTextSizeRequest(
     val textSize: String,
 )
 
+/** Body of every on/off preference endpoint. */
+data class EnabledRequest(
+    val enabled: Boolean,
+)
+
 interface PreferencesApiService {
     @GET("api/v1/users/{userId}/preferences")
     suspend fun getPreferences(
@@ -41,5 +46,11 @@ interface PreferencesApiService {
     suspend fun updateTextSize(
         @Path("userId") userId: String,
         @Body request: UpdateTextSizeRequest,
+    ): Response<UserPreferencesResponse>
+
+    @PUT("api/v1/users/{userId}/preferences/contrast")
+    suspend fun updateHighContrast(
+        @Path("userId") userId: String,
+        @Body request: EnabledRequest,
     ): Response<UserPreferencesResponse>
 }
