@@ -73,6 +73,10 @@ private val OnTimeCardStart = Color(0xFFECF5FB)
 private val OnTimeCardEnd = Color(0xFFDFECF6)
 private val LateOmittedCardStart = Color(0xFFECF7EF)
 private val LateOmittedCardEnd = Color(0xFFDFF0E4)
+private val PatternCardStart = Color(0xFFFFF3E2)
+private val PatternCardEnd = Color(0xFFFBE8C9)
+private val PatternIcon = Color(0xFFC78E2A)
+private val PatternLink = Color(0xFF5261B8)
 private val OmittedText = Color(0xFFB83D47)
 private val ChartLabel = Color(0xFF637087)
 private val ChartGrid = Color(0xCCE8E8EF)
@@ -84,6 +88,7 @@ private val ChartAreaBottom = Color(0x006576E6)
 @Composable
 fun AdherenceHistoryRoute(
     factory: AdherenceHistoryViewModel.Factory,
+    onOpenRecommendations: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val viewModel: AdherenceHistoryViewModel = viewModel(factory = factory)
@@ -93,6 +98,7 @@ fun AdherenceHistoryRoute(
         state = state,
         selectedPeriod = selectedPeriod,
         onPeriodSelected = viewModel::selectPeriod,
+        onOpenRecommendations = onOpenRecommendations,
         onRetry = viewModel::retry,
         modifier = modifier,
     )
@@ -104,6 +110,7 @@ fun AdherenceHistoryScreen(
     modifier: Modifier = Modifier,
     selectedPeriod: AdherencePeriod = AdherencePeriod.LastMonth,
     onPeriodSelected: (AdherencePeriod) -> Unit = {},
+    onOpenRecommendations: () -> Unit = {},
     onRetry: () -> Unit = {},
 ) {
     Column(
@@ -123,6 +130,10 @@ fun AdherenceHistoryScreen(
                 MetricsRow(summary = state.summary)
                 Spacer(Modifier.height(12.dp))
                 TrendCard(points = state.summary.trend)
+                state.summary.pattern?.let { pattern ->
+                    Spacer(Modifier.height(12.dp))
+                    PatternCard(pattern = pattern, onOpenRecommendations = onOpenRecommendations)
+                }
                 if (state.summary.recentIntakes.isNotEmpty()) {
                     Spacer(Modifier.height(12.dp))
                     RecentIntakesCard(intakes = state.summary.recentIntakes)
@@ -197,6 +208,77 @@ private fun PeriodSelector(
                     },
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun PatternCard(
+    pattern: PatternUi,
+    onOpenRecommendations: () -> Unit,
+) {
+    val shape = RoundedCornerShape(18.dp)
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .shadow(elevation = 3.dp, shape = shape)
+            .background(Brush.horizontalGradient(listOf(PatternCardStart, PatternCardEnd)), shape)
+            .padding(horizontal = 15.dp, vertical = 14.dp),
+    ) {
+        SunIcon(modifier = Modifier.padding(top = 4.dp))
+        Column(modifier = Modifier.padding(start = 12.dp)) {
+            Text(
+                text = "Patrón detectado",
+                fontSize = 12.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = TataText,
+            )
+            Text(
+                text = pattern.headline,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = TataText,
+                modifier = Modifier.padding(top = 6.dp),
+            )
+            Text(
+                text = pattern.summary,
+                fontSize = 11.sp,
+                color = TataText.copy(alpha = 0.7f),
+                modifier = Modifier.padding(top = 6.dp),
+            )
+            Text(
+                text = "Ver recomendaciones  ›",
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Medium,
+                color = PatternLink,
+                modifier = Modifier
+                    .heightIn(min = 44.dp)
+                    .clickable(onClick = onOpenRecommendations)
+                    .padding(top = 14.dp),
+            )
+        }
+    }
+}
+
+@Composable
+private fun SunIcon(modifier: Modifier = Modifier) {
+    Canvas(modifier = modifier.size(22.dp)) {
+        val unit = size.width / 22f
+        val strokeWidth = 1.7f * unit
+        val center = Offset(11f * unit, 11f * unit)
+        drawCircle(
+            color = PatternIcon,
+            radius = 3.2f * unit,
+            center = center,
+            style = Stroke(width = strokeWidth, cap = StrokeCap.Round),
+        )
+        listOf(
+            0f to -9.2f, 0f to 9.2f, -9.2f to 0f, 9.2f to 0f,
+            -6.5f to -6.5f, 6.5f to -6.5f, -6.5f to 6.5f, 6.5f to 6.5f,
+        ).forEach { (dx, dy) ->
+            val inner = Offset(center.x + dx * 0.55f * unit, center.y + dy * 0.55f * unit)
+            val outer = Offset(center.x + dx * unit, center.y + dy * unit)
+            drawLine(PatternIcon, inner, outer, strokeWidth, StrokeCap.Round)
         }
     }
 }
@@ -508,6 +590,11 @@ private fun ErrorCard(
     }
 }
 
+private val previewPattern = PatternUi(
+    headline = "Excelente progreso",
+    summary = "4 omisiones y 6 tomas tardías se concentran en la tarde.",
+)
+
 private val previewRecentIntakes = listOf(
     RecentIntakeUi("Hoy, 8:00 a. m.", "Losartán", "a tiempo", IntakeOutcomeStatus.OnTime),
     RecentIntakeUi("Ayer, 8:00 p. m.", "Amlodipino", "24 min tarde", IntakeOutcomeStatus.Late),
@@ -523,6 +610,7 @@ private val previewSummary = AdherenceSummaryUi(
     lateCount = 6,
     omittedCount = 4,
     lateOmittedCaption = "últ. 30 días",
+    pattern = previewPattern,
     trend = listOf(
         AdherenceTrendPoint("20 jun", 57),
         AdherenceTrendPoint("24 jun", 74),
@@ -552,6 +640,7 @@ private val previewWeekSummary = AdherenceSummaryUi(
     lateCount = 3,
     omittedCount = 1,
     lateOmittedCaption = "últ. 7 días",
+    pattern = previewPattern,
     trend = listOf(
         AdherenceTrendPoint("30 sep", 88),
         AdherenceTrendPoint("1 oct", 90),

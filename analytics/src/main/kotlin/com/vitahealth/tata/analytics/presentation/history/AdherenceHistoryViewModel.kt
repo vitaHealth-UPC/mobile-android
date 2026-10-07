@@ -116,6 +116,7 @@ private fun AdherenceSummaryReadModel.toUi(): AdherenceSummaryUi =
             )
         },
         recentIntakes = recentIntakes.map { it.toUi() },
+        pattern = pattern?.let { PatternUi(headline = it.headline, summary = it.summary) },
     )
 
 private val spanishLocale: Locale = Locale.forLanguageTag("es-PE")

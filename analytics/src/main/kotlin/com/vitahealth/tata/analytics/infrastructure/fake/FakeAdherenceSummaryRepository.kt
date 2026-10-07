@@ -3,6 +3,7 @@ package com.vitahealth.tata.analytics.infrastructure.fake
 import com.vitahealth.tata.analytics.application.AdherenceSummaryRepository
 import com.vitahealth.tata.analytics.application.readmodels.AdherenceSummaryReadModel
 import com.vitahealth.tata.analytics.application.readmodels.AdherenceTrendPointReadModel
+import com.vitahealth.tata.analytics.application.readmodels.DetectedPatternReadModel
 import com.vitahealth.tata.analytics.application.readmodels.RecentIntakeReadModel
 import com.vitahealth.tata.analytics.domain.model.IntakeOutcomeStatus
 import com.vitahealth.tata.shared.common.result.AppResult
@@ -80,6 +81,10 @@ class FakeAdherenceSummaryRepository(
                     status = IntakeOutcomeStatus.Omitted,
                     minutesLate = null,
                 ),
+            ),
+            pattern = DetectedPatternReadModel(
+                headline = "Excelente progreso",
+                summary = "4 omisiones y 6 tomas tardías se concentran en la tarde.",
             ),
         )
     }

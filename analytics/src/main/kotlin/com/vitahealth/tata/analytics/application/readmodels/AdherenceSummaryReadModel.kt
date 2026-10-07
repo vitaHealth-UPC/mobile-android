@@ -9,6 +9,11 @@ data class AdherenceTrendPointReadModel(
     val adherencePercent: Int,
 )
 
+data class DetectedPatternReadModel(
+    val headline: String,
+    val summary: String,
+)
+
 data class RecentIntakeReadModel(
     val scheduledAt: LocalDateTime,
     val medicationName: String,
@@ -27,4 +32,5 @@ data class AdherenceSummaryReadModel(
     val omittedCount: Int,
     val trend: List<AdherenceTrendPointReadModel>,
     val recentIntakes: List<RecentIntakeReadModel> = emptyList(),
+    val pattern: DetectedPatternReadModel? = null,
 )

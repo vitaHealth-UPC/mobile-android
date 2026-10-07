@@ -573,6 +573,9 @@ fun TataNavHost(
 
             AdherenceHistoryRoute(
                 factory = app.container.adherenceHistoryViewModelFactory(olderAdultId),
+                onOpenRecommendations = {
+                    navController.navigate(RootDestination.AdherenceRecommendations.createRoute(olderAdultId))
+                },
             )
         }
 

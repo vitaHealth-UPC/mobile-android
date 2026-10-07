@@ -15,6 +15,11 @@ data class RecentIntakeUi(
     val status: IntakeOutcomeStatus,
 )
 
+data class PatternUi(
+    val headline: String,
+    val summary: String,
+)
+
 data class AdherenceSummaryUi(
     val periodLabel: String,
     val adherencePercent: Int,
@@ -26,6 +31,7 @@ data class AdherenceSummaryUi(
     val lateOmittedCaption: String,
     val trend: List<AdherenceTrendPoint>,
     val recentIntakes: List<RecentIntakeUi> = emptyList(),
+    val pattern: PatternUi? = null,
 )
 
 fun AdherencePeriod.label(): String = "Últimos $days días"
