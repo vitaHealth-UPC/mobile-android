@@ -36,6 +36,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.vitahealth.tata.analytics.application.readmodels.AdherenceRecommendationsReadModel
 import com.vitahealth.tata.analytics.application.readmodels.RecommendationReadModel
 import com.vitahealth.tata.analytics.presentation.components.AnalyticsEmptyStateCard
+import com.vitahealth.tata.shared.design.components.CaregiverTab
+import com.vitahealth.tata.shared.design.components.CaregiverTabBar
 import com.vitahealth.tata.shared.design.components.TataButton
 import com.vitahealth.tata.shared.design.components.TataButtonStyle
 import com.vitahealth.tata.shared.design.components.TataCard
@@ -60,6 +62,7 @@ fun AdherenceRecommendationsRoute(
     factory: AdherenceRecommendationsViewModel.Factory,
     onApplyAdjustments: () -> Unit = {},
     onBackToHistory: () -> Unit = {},
+    onTabSelected: (CaregiverTab) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val viewModel: AdherenceRecommendationsViewModel = viewModel(factory = factory)
@@ -69,6 +72,7 @@ fun AdherenceRecommendationsRoute(
         onApplyAdjustments = onApplyAdjustments,
         onBackToHistory = onBackToHistory,
         onRetry = viewModel::retry,
+        onTabSelected = onTabSelected,
         modifier = modifier,
     )
 }
@@ -80,11 +84,31 @@ fun AdherenceRecommendationsScreen(
     onApplyAdjustments: () -> Unit = {},
     onBackToHistory: () -> Unit = {},
     onRetry: () -> Unit = {},
+    onTabSelected: (CaregiverTab) -> Unit = {},
+) {
+    Column(modifier = modifier.fillMaxSize().background(TataSurface)) {
+        AdherenceRecommendationsBody(
+            state = state,
+            onApplyAdjustments = onApplyAdjustments,
+            onBackToHistory = onBackToHistory,
+            onRetry = onRetry,
+            modifier = Modifier.weight(1f),
+        )
+        CaregiverTabBar(selected = CaregiverTab.Home, onSelect = onTabSelected)
+    }
+}
+
+@Composable
+private fun AdherenceRecommendationsBody(
+    state: AdherenceRecommendationsUiState,
+    onApplyAdjustments: () -> Unit,
+    onBackToHistory: () -> Unit,
+    onRetry: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(TataSurface)
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 22.dp, vertical = 28.dp),
     ) {

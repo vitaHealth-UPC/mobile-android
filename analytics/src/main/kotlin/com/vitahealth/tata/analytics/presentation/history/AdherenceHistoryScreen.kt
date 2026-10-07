@@ -54,6 +54,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.vitahealth.tata.analytics.domain.model.AdherencePeriod
 import com.vitahealth.tata.analytics.domain.model.IntakeOutcomeStatus
 import com.vitahealth.tata.analytics.presentation.components.AnalyticsEmptyStateCard
+import com.vitahealth.tata.shared.design.components.CaregiverTab
+import com.vitahealth.tata.shared.design.components.CaregiverTabBar
 import com.vitahealth.tata.shared.design.components.TataButton
 import com.vitahealth.tata.shared.design.components.TataButtonStyle
 import com.vitahealth.tata.shared.design.components.TataCard
@@ -89,6 +91,7 @@ private val ChartAreaBottom = Color(0x006576E6)
 fun AdherenceHistoryRoute(
     factory: AdherenceHistoryViewModel.Factory,
     onOpenRecommendations: () -> Unit = {},
+    onTabSelected: (CaregiverTab) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val viewModel: AdherenceHistoryViewModel = viewModel(factory = factory)
@@ -100,6 +103,7 @@ fun AdherenceHistoryRoute(
         onPeriodSelected = viewModel::selectPeriod,
         onOpenRecommendations = onOpenRecommendations,
         onRetry = viewModel::retry,
+        onTabSelected = onTabSelected,
         modifier = modifier,
     )
 }
@@ -112,11 +116,33 @@ fun AdherenceHistoryScreen(
     onPeriodSelected: (AdherencePeriod) -> Unit = {},
     onOpenRecommendations: () -> Unit = {},
     onRetry: () -> Unit = {},
+    onTabSelected: (CaregiverTab) -> Unit = {},
+) {
+    Column(modifier = modifier.fillMaxSize().background(TataSurface)) {
+        AdherenceHistoryBody(
+            state = state,
+            selectedPeriod = selectedPeriod,
+            onPeriodSelected = onPeriodSelected,
+            onOpenRecommendations = onOpenRecommendations,
+            onRetry = onRetry,
+            modifier = Modifier.weight(1f),
+        )
+        CaregiverTabBar(selected = CaregiverTab.Home, onSelect = onTabSelected)
+    }
+}
+
+@Composable
+private fun AdherenceHistoryBody(
+    state: AdherenceHistoryUiState,
+    selectedPeriod: AdherencePeriod,
+    onPeriodSelected: (AdherencePeriod) -> Unit,
+    onOpenRecommendations: () -> Unit,
+    onRetry: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(TataSurface)
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 22.dp, vertical = 28.dp),
     ) {
