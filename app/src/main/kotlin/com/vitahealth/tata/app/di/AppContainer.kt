@@ -59,6 +59,12 @@ class AppContainer(
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
+    private val monitoringRepository = com.vitahealth.tata.monitoring.infrastructure.remote.RemoteFamilyMonitoringRepository(
+        retrofit.create(com.vitahealth.tata.monitoring.infrastructure.remote.FamilyMonitoringApiService::class.java),
+    )
+    fun familySummaryViewModelFactory(caregiverId: String, olderAdultId: String, name: String) =
+        com.vitahealth.tata.monitoring.presentation.summary.FamilySummaryViewModel.Factory(caregiverId, olderAdultId, name, monitoringRepository)
+
     private val identityApi: IdentityApiService = retrofit.create(IdentityApiService::class.java)
     private val identityRepository = RemoteIdentityRepository(identityApi)
 
