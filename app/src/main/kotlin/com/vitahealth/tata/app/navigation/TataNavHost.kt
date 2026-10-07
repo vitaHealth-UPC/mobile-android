@@ -43,15 +43,39 @@ fun TataNavHost(
 ) {
     // Reduced motion removes the screen transitions; otherwise the Navigation default (700 ms fade) applies.
     val reducedMotion = LocalTataAccessibility.current.reducedMotion
+    val container = (androidx.compose.ui.platform.LocalContext.current.applicationContext as TataApplication).container
+    // Read once: a changing start destination would reset the navigation graph.
+    val startRoute = androidx.compose.runtime.remember {
+        if (container.hasSeenOnboarding()) RootDestination.SessionAccess.route else RootDestination.Onboarding.route
+    }
     NavHost(
         navController = navController,
-        startDestination = RootDestination.SessionAccess.route,
+        startDestination = startRoute,
         modifier = modifier,
         enterTransition = { if (reducedMotion) EnterTransition.None else fadeIn(animationSpec = tween(700)) },
         exitTransition = { if (reducedMotion) ExitTransition.None else fadeOut(animationSpec = tween(700)) },
         popEnterTransition = { if (reducedMotion) EnterTransition.None else fadeIn(animationSpec = tween(700)) },
         popExitTransition = { if (reducedMotion) ExitTransition.None else fadeOut(animationSpec = tween(700)) },
     ) {
+        composable(RootDestination.Onboarding.route) {
+            com.vitahealth.tata.identity.presentation.onboarding.OnboardingScreen(
+                onStart = {
+                    container.completeOnboarding()
+                    // Sign-in goes underneath so going back from the registration lands on it.
+                    navController.navigate(RootDestination.SessionAccess.route) {
+                        popUpTo(RootDestination.Onboarding.route) { inclusive = true }
+                    }
+                    navController.navigate(RootDestination.CaregiverRegistration.route)
+                },
+                onSignIn = {
+                    container.completeOnboarding()
+                    navController.navigate(RootDestination.SessionAccess.route) {
+                        popUpTo(RootDestination.Onboarding.route) { inclusive = true }
+                    }
+                },
+            )
+        }
+
         composable(RootDestination.SessionAccess.route) {
             val context = androidx.compose.ui.platform.LocalContext.current
             val app = context.applicationContext as TataApplication

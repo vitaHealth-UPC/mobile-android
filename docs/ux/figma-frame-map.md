@@ -98,3 +98,9 @@ Prototype `641:18` supplies the password entry form; `563:1340` supplies the PIN
 ## US-12 profile entry and care-link handoff
 
 `CaregiverProfilesScreen` presents real confirmed links, an empty state, profile registration and the temporary code. It follows the person identity hierarchy and shared card/form tokens consulted in prototype `563:1123`, using actual names and avoiding the prototype's sample adherence figures. Date selection uses the accessible Android date picker. Existing link/consent states receive the generated code; the adult reviews and grants consent explicitly.
+
+## Onboarding (identity)
+
+Frame `563:5` (Onboarding): `OnboardingScreen`, the first screen of a fresh install. "Comenzar" opens the caregiver registration and "Iniciar sesión" opens the sign-in; both remember on the device that the welcome was seen, so the next launches open on the sign-in. The sunlight, heart and leaf decorations and the butterfly are the Figma assets; the "Tata" wordmark is drawn with the system cursive font (Dancing Script on Android), because the wordmark layer cannot be exported on its own.
+
+The three reminder cards are decoration with sample medications and are hidden from TalkBack. Their position follows the 393 dp prototype frame, scaled to the real width. The glow washes are approximated with gradients instead of the blurred ellipses.
