@@ -5,9 +5,11 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.vitahealth.tata.preferences.application.PreferenceUpdate
 import com.vitahealth.tata.preferences.application.commands.SyncUserPreferencesCommand
+import com.vitahealth.tata.preferences.application.commands.UpdateHighContrastCommand
 import com.vitahealth.tata.preferences.application.commands.UpdateTextSizeCommand
 import com.vitahealth.tata.preferences.application.handlers.ObserveAccessibilityPreferencesQueryHandler
 import com.vitahealth.tata.preferences.application.handlers.SyncUserPreferencesCommandHandler
+import com.vitahealth.tata.preferences.application.handlers.UpdateHighContrastCommandHandler
 import com.vitahealth.tata.preferences.application.handlers.UpdateTextSizeCommandHandler
 import com.vitahealth.tata.preferences.domain.model.TextSizeLevel
 import com.vitahealth.tata.shared.common.result.AppResult
@@ -21,6 +23,7 @@ class AccessibilityViewModel(
     private val userId: String,
     observeAccessibility: ObserveAccessibilityPreferencesQueryHandler,
     private val updateTextSize: UpdateTextSizeCommandHandler,
+    private val updateHighContrast: UpdateHighContrastCommandHandler,
     private val syncPreferences: SyncUserPreferencesCommandHandler,
 ) : ViewModel() {
     private val _state = MutableStateFlow(AccessibilityUiState())
@@ -38,13 +41,32 @@ class AccessibilityViewModel(
 
     fun onLargeTextChange(enabled: Boolean) {
         val textSize = if (enabled) TextSizeLevel.LARGE else TextSizeLevel.MEDIUM
-        if (_state.value.isSaving || _state.value.preferences.textSize == textSize) return
+        if (_state.value.preferences.textSize == textSize) return
+        save(
+            send = { updateTextSize(UpdateTextSizeCommand(userId, textSize)) },
+            onSaved = if (enabled) AccessibilityMessage.LargeTextSaved else AccessibilityMessage.StandardTextSaved,
+        )
+    }
 
+    fun onHighContrastChange(enabled: Boolean) {
+        if (_state.value.preferences.highContrast == enabled) return
+        save(
+            send = { updateHighContrast(UpdateHighContrastCommand(userId, enabled)) },
+            onSaved = if (enabled) AccessibilityMessage.HighContrastSaved else AccessibilityMessage.StandardContrastSaved,
+        )
+    }
+
+    private fun save(
+        send: suspend () -> AppResult<PreferenceUpdate>,
+        onSaved: AccessibilityMessage,
+    ) {
+        if (_state.value.isSaving) return
         _state.update { it.copy(isSaving = true, message = null) }
         viewModelScope.launch {
-            when (val result = updateTextSize(UpdateTextSizeCommand(userId, textSize))) {
+            when (val result = send()) {
                 is AppResult.Success -> _state.update {
-                    it.copy(isSaving = false, message = savedMessage(result.value, enabled))
+                    val message = if (result.value.syncedWithServer) onSaved else AccessibilityMessage.SavedOffline
+                    it.copy(isSaving = false, message = message)
                 }
 
                 is AppResult.Failure -> _state.update {
@@ -53,13 +75,6 @@ class AccessibilityViewModel(
             }
         }
     }
-
-    private fun savedMessage(update: PreferenceUpdate, largeText: Boolean): AccessibilityMessage =
-        when {
-            !update.syncedWithServer -> AccessibilityMessage.SavedOffline
-            largeText -> AccessibilityMessage.LargeTextSaved
-            else -> AccessibilityMessage.StandardTextSaved
-        }
 
     private fun errorMessage(failure: AppResult.Failure): AccessibilityMessage =
         when (failure.code) {
@@ -72,6 +87,7 @@ class AccessibilityViewModel(
         private val userId: String,
         private val observeAccessibility: ObserveAccessibilityPreferencesQueryHandler,
         private val updateTextSize: UpdateTextSizeCommandHandler,
+        private val updateHighContrast: UpdateHighContrastCommandHandler,
         private val syncPreferences: SyncUserPreferencesCommandHandler,
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
@@ -80,6 +96,7 @@ class AccessibilityViewModel(
                 userId = userId,
                 observeAccessibility = observeAccessibility,
                 updateTextSize = updateTextSize,
+                updateHighContrast = updateHighContrast,
                 syncPreferences = syncPreferences,
             ) as T
     }

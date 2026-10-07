@@ -7,10 +7,14 @@
     <string name="accessibility_section_view">View</string>
     <string name="accessibility_large_text_title">Large text</string>
     <string name="accessibility_large_text_subtitle">Makes the text bigger</string>
+    <string name="accessibility_contrast_title">Enhanced contrast</string>
+    <string name="accessibility_contrast_subtitle">Improves legibility</string>
 
     <string name="accessibility_saved_title">Preference saved</string>
     <string name="accessibility_large_text_saved">The larger text will be kept the next time you open the app.</string>
     <string name="accessibility_standard_text_saved">The standard text size will be kept the next time you open the app.</string>
+    <string name="accessibility_contrast_saved">Text, borders and controls use enhanced contrast.</string>
+    <string name="accessibility_standard_contrast_saved">Standard contrast was restored.</string>
     <string name="accessibility_saved_offline">Saved on this device. It will be sent when you are back online.</string>
     <string name="accessibility_error_title">Could not save</string>
     <string name="accessibility_error_rejected">The service did not accept this change. Try again.</string>

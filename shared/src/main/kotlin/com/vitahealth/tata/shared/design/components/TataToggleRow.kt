@@ -19,9 +19,9 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.vitahealth.tata.shared.design.theme.TataBorder
-import com.vitahealth.tata.shared.design.theme.TataMuted
 import com.vitahealth.tata.shared.design.theme.TataNavy
-import com.vitahealth.tata.shared.design.theme.TataText
+import com.vitahealth.tata.shared.design.theme.tataMutedColor
+import com.vitahealth.tata.shared.design.theme.tataTextColor
 
 /** A labelled on/off setting. The whole row is the touch target and is announced as a switch. */
 @Composable
@@ -54,12 +54,12 @@ fun TataToggleRow(
                 text = title,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
-                color = TataText,
+                color = tataTextColor(),
             )
             Text(
                 text = subtitle,
                 style = MaterialTheme.typography.bodySmall,
-                color = TataMuted,
+                color = tataMutedColor(),
             )
         }
         // The row handles the click; the switch only shows the state.

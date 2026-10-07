@@ -96,4 +96,37 @@ class OfflineFirstUserPreferencesRepositoryTest {
         assertTrue(local.isPendingSync())
         assertEquals(TextSizeLevel.LARGE, local.current().textSize)
     }
+
+    @Test
+    fun highContrastIsKeptOnTheDeviceAndSentToTheBackend() = runBlocking {
+        val result = repository.updateHighContrast("user-1", true)
+
+        assertTrue((result as AppResult.Success).value.syncedWithServer)
+        assertTrue(local.current().highContrast)
+        assertEquals(listOf(true), remote.contrastCalls)
+    }
+
+    @Test
+    fun highContrastChangedOfflineIsSentOnTheNextSync() = runBlocking {
+        remote.failWith = NetworkDown
+        repository.updateHighContrast("user-1", true)
+        remote.failWith = null
+
+        repository.sync("user-1")
+
+        // the first call failed offline, the second one is the retry made by sync
+        assertEquals(listOf(true, true), remote.contrastCalls)
+        assertTrue(local.current().highContrast)
+        assertFalse(local.isPendingSync())
+    }
+
+    @Test
+    fun aRejectedHighContrastChangeIsRolledBack() = runBlocking {
+        remote.failWith = RejectedByServer
+
+        val result = repository.updateHighContrast("user-1", true)
+
+        assertTrue(result is AppResult.Failure)
+        assertFalse(local.current().highContrast)
+    }
 }

@@ -49,6 +49,7 @@ import com.vitahealth.tata.treatment.presentation.treatment.TreatmentReminderVie
 import com.vitahealth.tata.treatment.presentation.treatment.TreatmentScheduleInstructionsViewModel
 import com.vitahealth.tata.preferences.application.handlers.ObserveAccessibilityPreferencesQueryHandler
 import com.vitahealth.tata.preferences.application.handlers.SyncUserPreferencesCommandHandler
+import com.vitahealth.tata.preferences.application.handlers.UpdateHighContrastCommandHandler
 import com.vitahealth.tata.preferences.application.handlers.UpdateTextSizeCommandHandler
 import com.vitahealth.tata.preferences.domain.model.AccessibilityPreferences
 import com.vitahealth.tata.preferences.infrastructure.OfflineFirstUserPreferencesRepository
@@ -275,6 +276,7 @@ class AppContainer(
         userId = userId,
         observeAccessibility = ObserveAccessibilityPreferencesQueryHandler(preferencesRepository),
         updateTextSize = UpdateTextSizeCommandHandler(preferencesRepository),
+        updateHighContrast = UpdateHighContrastCommandHandler(preferencesRepository),
         syncPreferences = SyncUserPreferencesCommandHandler(preferencesRepository),
     )
 

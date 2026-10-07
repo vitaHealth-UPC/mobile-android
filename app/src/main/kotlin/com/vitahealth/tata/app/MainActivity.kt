@@ -24,7 +24,10 @@ class MainActivity : ComponentActivity() {
             val preferences by container.accessibilityPreferences
                 .collectAsState(initial = AccessibilityPreferences.Defaults)
 
-            TataTheme(accessibility = TataAccessibility(fontScale = preferences.textSize.scaleFactor)) {
+            TataTheme(accessibility = TataAccessibility(
+                    fontScale = preferences.textSize.scaleFactor,
+                    highContrast = preferences.highContrast,
+                )) {
                 TataNavHost(modifier = Modifier.fillMaxSize())
             }
         }

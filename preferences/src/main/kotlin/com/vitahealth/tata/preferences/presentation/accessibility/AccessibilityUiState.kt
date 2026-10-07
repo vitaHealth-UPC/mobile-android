@@ -6,6 +6,8 @@ import com.vitahealth.tata.preferences.domain.model.AccessibilityPreferences
 enum class AccessibilityMessage {
     LargeTextSaved,
     StandardTextSaved,
+    HighContrastSaved,
+    StandardContrastSaved,
     SavedOffline,
     ErrorRejected,
     ErrorUser,
