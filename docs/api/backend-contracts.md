@@ -117,3 +117,10 @@ The app offers OPEN → ATTENDED ("Mark as attended"), OPEN or ATTENDED → CLOS
 `CaregiverNoteResource`: `{ id: int64, text: String, recordedAt: date-time, familiarId: String }`.
 
 `text` has `maxLength` 1000 and `minLength` 0. The app trims the text, refuses blank notes before sending them and allows up to 1000 characters. Notes belong to the follow-up of the older adult: there is no `alertId`, so "Add follow-up note" on an alert stores a general note that does not show which alert it came from. A note written by another caregiver of the same adult appears as "Another caregiver", because the resource carries only `familiarId`, not a name.
+
+## Contact from an alert (US-29)
+
+- Channel: `GET /api/v1/older-adults/{olderAdultId}/contact-channel?caregiverId=` returns `ContactChannelResource` `{ type: "PHONE" | "WHATSAPP", value: String }`. `404` means no follow-up or no contact channel; the app shows the disabled "Contact unavailable" button.
+- Name: `GET /api/v1/older-adults/{olderAdultId}` returns `OlderAdultProfileResource`; only `fullName` is read, for "Contact <first name>". It has no `caregiverId` query. If it fails, the button reads "Contact" and contact still works.
+
+PHONE opens the dialer with the number typed (`ACTION_DIAL`, no `CALL_PHONE` permission). WHATSAPP opens `https://wa.me/<digits>`, which WhatsApp or the browser handles. The API returns one channel, so the app never offers a choice between phone and WhatsApp. The family summary "Contact" action uses the same lookup and launcher.
