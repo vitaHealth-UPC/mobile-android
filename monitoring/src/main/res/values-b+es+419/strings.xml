@@ -61,4 +61,28 @@
     <string name="alerts_error_list_not_found">Esta persona no tiene un seguimiento activo.</string>
     <string name="alerts_error_detail_not_found">Esta alerta no existe o ya no está disponible.</string>
     <string name="alerts_error_unknown">No pudimos consultar las alertas. Inténtalo nuevamente.</string>
+
+    <!-- Notas de seguimiento (US-30) -->
+    <string name="notes_title">Notas</string>
+    <string name="notes_subtitle">Seguimiento y observaciones sobre la persona que cuidas.</string>
+    <string name="notes_section">Notas del cuidador</string>
+    <string name="notes_add">Agregar nota</string>
+    <string name="notes_empty_title">Aún no hay notas</string>
+    <string name="notes_empty_message">Registra lo que hiciste u observaste para que el seguimiento tenga historial.</string>
+    <string name="notes_loading">Consultando notas…</string>
+    <string name="notes_author_you">Tú</string>
+    <string name="notes_author_other">Otro cuidador</string>
+    <string name="notes_meta">%1$s · %2$s</string>
+    <string name="notes_error_unknown">No pudimos consultar las notas. Inténtalo nuevamente.</string>
+    <string name="note_saved">Nota guardada</string>
+    <string name="note_add_followup">Agregar nota de seguimiento</string>
+    <string name="note_dialog_title">Nueva nota de seguimiento</string>
+    <string name="note_dialog_label">¿Qué hiciste u observaste?</string>
+    <string name="note_dialog_counter">%1$d/%2$d caracteres</string>
+    <string name="note_dialog_save">Guardar nota</string>
+    <string name="note_dialog_cancel">Cancelar</string>
+    <string name="note_error_blank">Escribe la nota antes de guardarla.</string>
+    <string name="note_error_too_long">La nota puede tener hasta %1$d caracteres.</string>
+    <string name="note_error_rejected">El servidor no aceptó la nota. Revísala e inténtalo nuevamente.</string>
+    <string name="note_error_save">No pudimos guardar la nota. Inténtalo nuevamente.</string>
 </resources>

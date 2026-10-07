@@ -5,12 +5,14 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.vitahealth.tata.monitoring.application.handlers.GetAlertDetailQueryHandler
 import com.vitahealth.tata.monitoring.application.handlers.GetOpenAlertsQueryHandler
+import com.vitahealth.tata.monitoring.application.handlers.RegisterFollowUpNoteCommandHandler
 import com.vitahealth.tata.monitoring.application.handlers.UpdateAlertStatusCommandHandler
 import com.vitahealth.tata.monitoring.application.commands.UpdateAlertStatusCommand
 import com.vitahealth.tata.monitoring.application.queries.GetAlertDetailQuery
 import com.vitahealth.tata.monitoring.application.queries.GetOpenAlertsQuery
 import com.vitahealth.tata.monitoring.domain.model.AlertStatus
 import com.vitahealth.tata.monitoring.domain.model.canMoveTo
+import com.vitahealth.tata.monitoring.presentation.notes.NoteComposer
 import com.vitahealth.tata.shared.common.result.AppResult
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -70,10 +72,14 @@ class AlertDetailViewModel(
     private val alertId: Long,
     private val handler: GetAlertDetailQueryHandler,
     private val updateStatusHandler: UpdateAlertStatusCommandHandler,
+    registerNoteHandler: RegisterFollowUpNoteCommandHandler,
     private val context: CoroutineContext = EmptyCoroutineContext,
 ) : ViewModel() {
     private val mutableState = MutableStateFlow<AlertDetailUiState>(AlertDetailUiState.Loading)
     val state: StateFlow<AlertDetailUiState> = mutableState.asStateFlow()
+
+    /** "Agregar nota de seguimiento": the backend links notes to the older adult, not to this alert. */
+    val noteComposer = NoteComposer(caregiverId, olderAdultId, registerNoteHandler, viewModelScope, context)
     private var job: Job? = null
 
     init {
@@ -121,9 +127,10 @@ class AlertDetailViewModel(
         private val alertId: Long,
         private val handler: GetAlertDetailQueryHandler,
         private val updateStatusHandler: UpdateAlertStatusCommandHandler,
+        private val registerNoteHandler: RegisterFollowUpNoteCommandHandler,
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T =
-            AlertDetailViewModel(caregiverId, olderAdultId, alertId, handler, updateStatusHandler) as T
+            AlertDetailViewModel(caregiverId, olderAdultId, alertId, handler, updateStatusHandler, registerNoteHandler) as T
     }
 }

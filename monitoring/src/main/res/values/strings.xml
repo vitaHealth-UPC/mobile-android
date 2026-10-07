@@ -60,4 +60,28 @@
     <string name="alerts_error_list_not_found">This person has no active follow-up.</string>
     <string name="alerts_error_detail_not_found">This alert does not exist or is no longer available.</string>
     <string name="alerts_error_unknown">We could not load the alerts. Try again.</string>
+
+    <!-- Follow-up notes (US-30) -->
+    <string name="notes_title">Notes</string>
+    <string name="notes_subtitle">Follow-up and observations about the person you care for.</string>
+    <string name="notes_section">Caregiver notes</string>
+    <string name="notes_add">Add note</string>
+    <string name="notes_empty_title">No notes yet</string>
+    <string name="notes_empty_message">Write what you did or noticed so the follow-up has a history.</string>
+    <string name="notes_loading">Loading notes…</string>
+    <string name="notes_author_you">You</string>
+    <string name="notes_author_other">Another caregiver</string>
+    <string name="notes_meta">%1$s · %2$s</string>
+    <string name="notes_error_unknown">We could not load the notes. Try again.</string>
+    <string name="note_saved">Note saved</string>
+    <string name="note_add_followup">Add follow-up note</string>
+    <string name="note_dialog_title">New follow-up note</string>
+    <string name="note_dialog_label">What did you do or notice?</string>
+    <string name="note_dialog_counter">%1$d/%2$d characters</string>
+    <string name="note_dialog_save">Save note</string>
+    <string name="note_dialog_cancel">Cancel</string>
+    <string name="note_error_blank">Write the note before saving it.</string>
+    <string name="note_error_too_long">The note can have up to %1$d characters.</string>
+    <string name="note_error_rejected">The server did not accept the note. Review it and try again.</string>
+    <string name="note_error_save">We could not save the note. Try again.</string>
 </resources>

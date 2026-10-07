@@ -25,6 +25,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.vitahealth.tata.monitoring.R
 import com.vitahealth.tata.monitoring.domain.model.AlertStatus
 import com.vitahealth.tata.monitoring.domain.model.CaregiverAlert
+import com.vitahealth.tata.monitoring.presentation.notes.NoteComposerDialog
 import com.vitahealth.tata.shared.design.components.CaregiverTab
 import com.vitahealth.tata.shared.design.components.CaregiverTabBar
 import com.vitahealth.tata.shared.design.components.TataCard
@@ -40,7 +41,9 @@ fun AlertDetailRoute(
 ) {
     val model: AlertDetailViewModel = viewModel(factory = factory)
     val state by model.state.collectAsState()
-    AlertDetailScreen(state, onBack, model::load, onTabSelected, model::updateStatus)
+    val composer by model.noteComposer.state.collectAsState()
+    AlertDetailScreen(state, onBack, model::load, onTabSelected, model::updateStatus, composer.saved, model.noteComposer::open)
+    NoteComposerDialog(composer, onSave = { model.noteComposer.save(it) }, onDismiss = model.noteComposer::dismiss)
 }
 
 @Composable
@@ -50,6 +53,8 @@ fun AlertDetailScreen(
     onRetry: () -> Unit = {},
     onTabSelected: (CaregiverTab) -> Unit = {},
     onUpdateStatus: (AlertStatus) -> Unit = {},
+    noteSaved: Boolean = false,
+    onAddNote: () -> Unit = {},
 ) {
     val formatter = rememberAlertDateFormatter()
     Column(modifier = Modifier.fillMaxSize().background(TataSurface)) {
@@ -95,7 +100,7 @@ fun AlertDetailScreen(
                             AlertInfoRow(stringResource(R.string.alert_detail_closed), formatter.format(it))
                         }
                     }
-                    AlertFollowUpActions(state, onUpdateStatus, Modifier.padding(top = 20.dp))
+                    AlertFollowUpActions(state, onUpdateStatus, Modifier.padding(top = 20.dp), noteSaved, onAddNote)
                 }
             }
         }

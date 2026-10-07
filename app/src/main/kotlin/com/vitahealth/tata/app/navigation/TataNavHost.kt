@@ -156,6 +156,7 @@ fun TataNavHost(
                 onTreatments = { navController.navigate(RootDestination.TreatmentList.createRoute(caregiver,adult,name)) },
                 onMedications = { navController.navigate(RootDestination.MedicationManagement.createRoute(caregiver, adult, name)) },
                 onAlerts = { navController.navigate(RootDestination.Alerts.createRoute(caregiver, adult)) },
+                onNotes = { navController.navigate(RootDestination.Notes.createRoute(caregiver, adult)) },
             )
         }
 
@@ -169,7 +170,7 @@ fun TataNavHost(
             com.vitahealth.tata.monitoring.presentation.alerts.AlertsRoute(
                 factory = app.container.alertsViewModelFactory(caregiver, adult),
                 onOpenAlert = { alertId -> navController.navigate(RootDestination.AlertDetail.createRoute(caregiver, adult, alertId)) },
-                onTabSelected = { tab -> if (tab != CaregiverTab.Alerts) navController.popBackStack(RootDestination.FamilySummary.route, inclusive = false) },
+                onTabSelected = { tab -> if (tab != CaregiverTab.Alerts) navController.openCaregiverTab(tab, caregiver, adult) },
             )
         }
 
@@ -187,8 +188,21 @@ fun TataNavHost(
                 onBack = { navController.popBackStack() },
                 onTabSelected = { tab ->
                     if (tab == CaregiverTab.Alerts) navController.popBackStack()
-                    else navController.popBackStack(RootDestination.FamilySummary.route, inclusive = false)
+                    else navController.openCaregiverTab(tab, caregiver, adult)
                 },
+            )
+        }
+
+        composable(RootDestination.Notes.route, arguments = listOf(
+            navArgument("caregiverId") { type = NavType.StringType },
+            navArgument("olderAdultId") { type = NavType.StringType },
+        )) { entry ->
+            val app = androidx.compose.ui.platform.LocalContext.current.applicationContext as TataApplication
+            val caregiver = requireNotNull(entry.arguments?.getString("caregiverId"))
+            val adult = requireNotNull(entry.arguments?.getString("olderAdultId"))
+            com.vitahealth.tata.monitoring.presentation.notes.NotesRoute(
+                factory = app.container.notesViewModelFactory(caregiver, adult),
+                onTabSelected = { tab -> if (tab != CaregiverTab.Notes) navController.openCaregiverTab(tab, caregiver, adult) },
             )
         }
 

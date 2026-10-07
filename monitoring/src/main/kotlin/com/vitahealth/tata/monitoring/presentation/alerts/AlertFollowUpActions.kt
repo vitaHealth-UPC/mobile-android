@@ -49,6 +49,8 @@ internal fun AlertFollowUpActions(
     state: AlertDetailUiState.Content,
     onUpdateStatus: (AlertStatus) -> Unit,
     modifier: Modifier = Modifier,
+    noteSaved: Boolean = false,
+    onAddNote: () -> Unit = {},
 ) {
     var confirmClose by rememberSaveable { mutableStateOf(false) }
     val alert = state.alert
@@ -90,6 +92,19 @@ internal fun AlertFollowUpActions(
                     )
                 }
             }
+        }
+        // Notes can be added at any status: the follow-up history stays useful after closing.
+        TextButton(onClick = onAddNote, modifier = Modifier.fillMaxWidth().height(48.dp).padding(top = 4.dp)) {
+            Text(text = stringResource(R.string.note_add_followup), color = TataNavy, fontWeight = FontWeight.SemiBold)
+        }
+        if (noteSaved) {
+            Text(
+                text = "✓ " + stringResource(R.string.note_saved),
+                color = TataSuccess,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+            )
         }
         state.feedback?.let { FeedbackText(it) }
     }
