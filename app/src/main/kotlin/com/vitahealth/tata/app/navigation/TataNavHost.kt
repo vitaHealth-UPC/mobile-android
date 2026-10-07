@@ -240,7 +240,7 @@ fun TataNavHost(
                             olderAdultId = olderAdultId,
                             olderAdultName = olderAdultName,
                             medicationId = medication.id,
-                            medicationLabel = medication.name + " Â· " + medication.presentation,
+                            medicationLabel = medication.name + " · " + medication.presentation,
                         ),
                     ) {
                         popUpTo(RootDestination.MedicationRegistration.route) { inclusive = true }
