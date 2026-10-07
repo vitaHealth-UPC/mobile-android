@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="treatment_open_inventory">Inventory</string>
     <string name="medications_title">Medications</string>
     <string name="medications_subtitle">Manage %1$s\'s plan without losing history</string>
     <string name="medications_back">Back</string>

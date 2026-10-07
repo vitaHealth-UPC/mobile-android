@@ -311,6 +311,26 @@ sealed interface RootDestination {
             "dose-detail/" + Uri.encode(intakeId)
     }
 
+    data object Inventory : RootDestination {
+        const val medicationIdArgument = "medicationId"
+        const val medicationNameArgument = "medicationName"
+        const val unitArgument = "unit"
+
+        override val route: String =
+            "inventory/{$medicationIdArgument}/{$medicationNameArgument}/{$unitArgument}"
+
+        // medicationName/unit carry spaces and accents; encode them (blank -> " ") so the route
+        // never breaks, and trim them back when read.
+        fun createRoute(
+            medicationId: String,
+            medicationName: String,
+            unit: String,
+        ): String = "inventory/" +
+            Uri.encode(medicationId) + "/" +
+            Uri.encode(medicationName.ifBlank { " " }) + "/" +
+            Uri.encode(unit.ifBlank { " " })
+    }
+
     data object AdherenceHistory : RootDestination {
         const val olderAdultIdArgument = "olderAdultId"
         override val route: String = "adherence-history/{$olderAdultIdArgument}"

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="treatment_open_inventory">Inventario</string>
     <string name="medications_title">Medicamentos</string>
     <string name="medications_subtitle">Gestiona la pauta de %1$s sin perder historial</string>
     <string name="medications_back">Volver</string>

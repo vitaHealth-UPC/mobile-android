@@ -20,6 +20,7 @@ import com.vitahealth.tata.carelink.presentation.link.CareLinkRoute
 import com.vitahealth.tata.identity.presentation.registration.CaregiverRegistrationRoute
 import com.vitahealth.tata.intake.presentation.detail.DoseDetailRoute
 import com.vitahealth.tata.intake.presentation.home.NextDoseHomeRoute
+import com.vitahealth.tata.inventory.presentation.inventory.InventoryRoute
 import com.vitahealth.tata.preferences.presentation.accessibility.AccessibilityRoute
 import com.vitahealth.tata.preferences.presentation.notifications.NotificationPreferencesRoute
 import com.vitahealth.tata.shared.design.accessibility.LocalTataAccessibility
@@ -613,6 +614,15 @@ fun TataNavHost(
                     medicationLabelHint = medicationLabelHint,
                 ),
                 onBack = { navController.popBackStack() },
+                onOpenInventory = { medicationId, medicationName ->
+                    navController.navigate(
+                        RootDestination.Inventory.createRoute(
+                            medicationId = medicationId,
+                            medicationName = medicationName,
+                            unit = "",
+                        ),
+                    )
+                },
             )
         }
         composable(
@@ -669,6 +679,34 @@ fun TataNavHost(
             DoseDetailRoute(
                 factory = app.container.doseDetailViewModelFactory(intakeId),
                 onBack = { navController.popBackStack() },
+            )
+        }
+
+        composable(
+            route = RootDestination.Inventory.route,
+            arguments = listOf(
+                navArgument(RootDestination.Inventory.medicationIdArgument) { type = NavType.StringType },
+                navArgument(RootDestination.Inventory.medicationNameArgument) { type = NavType.StringType },
+                navArgument(RootDestination.Inventory.unitArgument) { type = NavType.StringType },
+            ),
+        ) { backStackEntry ->
+            val app = androidx.compose.ui.platform.LocalContext.current.applicationContext as TataApplication
+            val medicationId = requireNotNull(
+                backStackEntry.arguments?.getString(RootDestination.Inventory.medicationIdArgument),
+            )
+            val medicationName = requireNotNull(
+                backStackEntry.arguments?.getString(RootDestination.Inventory.medicationNameArgument),
+            ).trim()
+            val unit = requireNotNull(
+                backStackEntry.arguments?.getString(RootDestination.Inventory.unitArgument),
+            ).trim()
+
+            InventoryRoute(
+                factory = app.container.inventoryViewModelFactory(
+                    medicationId = medicationId,
+                    medicationName = medicationName,
+                    unit = unit,
+                ),
             )
         }
 
