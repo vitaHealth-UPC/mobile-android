@@ -2,6 +2,7 @@ package com.vitahealth.tata.monitoring.infrastructure.remote
 
 import com.vitahealth.tata.monitoring.application.AlertFailureCodes
 import com.vitahealth.tata.monitoring.application.AlertsRepository
+import com.vitahealth.tata.monitoring.domain.model.AlertStatus
 import com.vitahealth.tata.monitoring.domain.model.CaregiverAlert
 import com.vitahealth.tata.shared.common.result.AppResult
 import kotlinx.coroutines.CancellationException
@@ -38,10 +39,28 @@ class RemoteAlertsRepository(
         }
     }
 
+    override suspend fun updateStatus(
+        caregiverId: String,
+        olderAdultId: String,
+        alertId: Long,
+        status: AlertStatus,
+    ): AppResult<CaregiverAlert> = guarded {
+        val response = alertsApi.updateStatus(olderAdultId, alertId, caregiverId, UpdateAlertStatusRequest(status.name))
+        val body = response.body()
+        failureOf(response) ?: if (body == null) {
+            failure(AlertFailureCodes.INVALID_RESPONSE)
+        } else {
+            val alert = body.toDomain()
+            if (alert.id != alertId) failure(AlertFailureCodes.INVALID_RESPONSE) else AppResult.Success(alert)
+        }
+    }
+
     private fun failureOf(response: Response<*>): AppResult.Failure? = when {
         response.isSuccessful -> null
+        response.code() == 400 -> failure(AlertFailureCodes.STATUS_NOT_ACCEPTED)
         response.code() == 403 -> failure(AlertFailureCodes.ACCESS_DENIED)
         response.code() == 404 -> failure(AlertFailureCodes.NOT_FOUND)
+        response.code() == 409 -> failure(AlertFailureCodes.STATUS_CONFLICT)
         else -> failure(AlertFailureCodes.REQUEST_FAILED)
     }
 
@@ -51,6 +70,8 @@ class RemoteAlertsRepository(
             AlertFailureCodes.NOT_FOUND -> "No encontramos la alerta o el seguimiento."
             AlertFailureCodes.NETWORK -> "No hay conexión. Inténtalo nuevamente."
             AlertFailureCodes.INVALID_RESPONSE -> "La información recibida no es válida."
+            AlertFailureCodes.STATUS_CONFLICT -> "La alerta ya cambió de estado."
+            AlertFailureCodes.STATUS_NOT_ACCEPTED -> "El estado solicitado no es válido."
             else -> "No pudimos consultar las alertas. Inténtalo nuevamente."
         },
         cause = cause,
