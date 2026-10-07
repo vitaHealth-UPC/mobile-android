@@ -22,6 +22,12 @@ data class MedicationResponse(
     val active: Boolean,
 )
 
+data class UpdateMedicationRequest(
+    val caregiverId: String,
+    val name: String,
+    val presentation: String,
+)
+
 data class CreateTreatmentRequest(
     val caregiverId: String,
     val name: String,
@@ -57,11 +63,32 @@ interface TreatmentApiService {
         @Body request: RegisterMedicationRequest,
     ): Response<MedicationResponse>
 
+    @GET("api/v1/older-adults/{olderAdultId}/medications")
+    suspend fun listMedications(
+        @Path("olderAdultId") olderAdultId: String,
+        @Query("caregiverId") caregiverId: String,
+    ): Response<List<MedicationResponse>>
+
+    @PUT("api/v1/medications/{medicationId}")
+    suspend fun updateMedication(
+        @Path("medicationId") medicationId: String,
+        @Body request: UpdateMedicationRequest,
+    ): Response<MedicationResponse>
+
+    @POST("api/v1/medications/{medicationId}/deactivation")
+    suspend fun deactivateMedication(
+        @Path("medicationId") medicationId: String,
+        @Query("caregiverId") caregiverId: String,
+    ): Response<MedicationResponse>
+
     @POST("api/v1/older-adults/{olderAdultId}/treatments")
     suspend fun createTreatment(
         @Path("olderAdultId") olderAdultId: String,
         @Body request: CreateTreatmentRequest,
     ): Response<TreatmentResponse>
+
+    @GET("api/v1/older-adults/{olderAdultId}/treatments")
+    suspend fun listTreatments(@Path("olderAdultId") olderAdultId: String,@Query("caregiverId") caregiverId: String): Response<List<TreatmentResponse>>
 
     @PUT("api/v1/treatments/{treatmentId}/regimen")
     suspend fun configureTreatment(

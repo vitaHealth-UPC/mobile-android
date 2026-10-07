@@ -1,6 +1,5 @@
 package com.vitahealth.tata.intake.presentation.agenda
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -11,12 +10,17 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -34,6 +38,9 @@ import com.vitahealth.tata.intake.application.readmodels.DoseDetailReadModel
 import com.vitahealth.tata.intake.domain.model.DoseStatus
 import com.vitahealth.tata.shared.design.components.TataButton
 import com.vitahealth.tata.shared.design.components.TataCard
+import com.vitahealth.tata.shared.design.components.AdultTab
+import com.vitahealth.tata.shared.design.components.AdultTabBar
+import com.vitahealth.tata.shared.design.components.TataSvgIcon
 import com.vitahealth.tata.shared.design.theme.*
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -63,26 +70,27 @@ fun IntakeAgendaScreen(
     onOpenDose: (String) -> Unit,
     onHome: () -> Unit,
 ) {
+    ProvideTextStyle(MaterialTheme.typography.bodyMedium.copy(fontFamily = FontFamily(Font(com.vitahealth.tata.shared.R.font.tata_inter)), fontSize = 11.sp, lineHeight = 14.sp)) {
     Column(Modifier.fillMaxSize().background(Brush.horizontalGradient(listOf(Color.White, TataSurface, Color(0xFFFCFBFF))))) {
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = 24.dp)) {
             Spacer(Modifier.height(28.dp))
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
-                    Text("Agenda semanal", fontFamily = FontFamily(Font(R.font.agenda_serif)), fontSize = 29.sp, color = TataText)
-                    Text(
-                        state.week.start.format(DateTimeFormatter.ofPattern("d MMM", agendaLocale)) + " – " +
-                            state.week.start.plusDays(6).format(DateTimeFormatter.ofPattern("d MMM yyyy", agendaLocale)),
-                        fontSize = 13.sp, color = TataDeepNavy, modifier = Modifier.padding(top = 6.dp),
-                    )
+                    Text("Agenda semanal", fontFamily = FontFamily(Font(R.font.agenda_serif)), fontSize = 29.sp, lineHeight = 34.sp, color = TataText)
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(state.week.start.format(DateTimeFormatter.ofPattern("d", agendaLocale)) + " – " +
+                            state.week.start.plusDays(6).format(DateTimeFormatter.ofPattern("d 'de' MMMM", agendaLocale)),
+                            fontSize = 13.sp, color = TataDeepNavy, modifier = Modifier.weight(1f))
+                        IconButton(onClick = { onMoveWeek(-1) }, modifier = Modifier.size(32.dp).semantics { contentDescription = "Anterior" }) { Text("‹", color = TataDeepNavy) }
+                        IconButton(onClick = { onMoveWeek(1) }, modifier = Modifier.size(32.dp).semantics { contentDescription = "Siguiente" }) { Text("›", color = TataDeepNavy) }
+                    }
                 }
                 Box(Modifier.size(44.dp), contentAlignment = Alignment.Center) {
-                    Image(painterResource(R.drawable.agenda_calendar), null, Modifier.requiredSize(76.dp).offset(y = 5.dp))
+                    TataSvgIcon(R.raw.agenda_calendar, Modifier.requiredSize(76.dp).offset(y = 5.dp))
+                    TataSvgIcon(R.raw.agenda_calendar_header, Modifier.size(22.dp))
                 }
             }
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                TextButton(onClick = { onMoveWeek(-1) }) { Text("Anterior", color = TataDeepNavy) }
-                TextButton(onClick = { onMoveWeek(1) }) { Text("Siguiente", color = TataDeepNavy) }
-            }
+            Spacer(Modifier.height(12.dp))
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 state.week.days.forEach { day ->
                     val selected = day == state.selectedDay
@@ -94,13 +102,13 @@ fun IntakeAgendaScreen(
                                 .semantics { contentDescription = day.format(DateTimeFormatter.ofPattern("EEEE d MMMM", agendaLocale)) + if (selected) ", seleccionado" else "" },
                             contentAlignment = Alignment.Center,
                         ) {
-                            if (selected) Image(painterResource(R.drawable.agenda_selected), null, Modifier.size(36.dp))
+                            if (selected) TataSvgIcon(R.raw.agenda_selected, Modifier.size(36.dp))
                             Text(day.dayOfMonth.toString(), color = if (selected) Color.White else TataText, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
                         }
                     }
                 }
             }
-            Spacer(Modifier.height(24.dp))
+            Spacer(Modifier.height(32.dp))
             when {
                 state.loading -> TataCard(Modifier.fillMaxWidth(), TataLavender) { Text("Consultando tu agenda…", color = TataText) }
                 state.error != null -> TataCard(Modifier.fillMaxWidth()) {
@@ -112,27 +120,20 @@ fun IntakeAgendaScreen(
                 }
                 else -> state.selectedDoses.forEach { dose -> AgendaDoseRow(dose, state, onOpenDose) }
             }
-            Spacer(Modifier.height(12.dp))
-            Row(Modifier.padding(start = 68.dp).fillMaxWidth().background(Color(0xFFEEF2FF), RoundedCornerShape(16.dp)).padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                Image(painterResource(R.drawable.agenda_bell), null, Modifier.size(22.dp))
-                Text("Un horario fijo facilita la rutina.", fontSize = 11.sp, color = TataText, modifier = Modifier.padding(start = 12.dp))
+            Row(Modifier.padding(start = 68.dp).fillMaxWidth().shadow(6.dp, RoundedCornerShape(14.dp), ambientColor = Color(0x141A2138), spotColor = Color(0x141A2138))
+                .background(Brush.horizontalGradient(listOf(Color(0xFFEEF6FC), Color(0xFFE2EEF9))), RoundedCornerShape(14.dp))
+                .heightIn(min = 64.dp).padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                TataSvgIcon(R.raw.agenda_bell, Modifier.size(22.dp))
+                Column(Modifier.padding(start = 8.dp)) {
+                    Text(stringResource(R.string.agenda_tip_title), fontSize = 11.sp, color = TataDeepNavy)
+                    Spacer(Modifier.height(5.dp))
+                    Text(stringResource(R.string.agenda_tip_body), fontSize = 11.sp, lineHeight = 14.sp, color = TataText)
+                }
             }
             Spacer(Modifier.height(20.dp))
         }
-        Row(
-            Modifier.padding(horizontal = 14.dp, vertical = 12.dp).fillMaxWidth()
-                .background(Color.White, RoundedCornerShape(24.dp)).padding(vertical = 12.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly, verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Column(Modifier.clickable(role = Role.Button, onClick = onHome).padding(horizontal = 18.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                Image(painterResource(R.drawable.agenda_home), null, Modifier.size(22.dp))
-                Text("Inicio", fontSize = 10.sp, color = TataDeepNavy)
-            }
-            Column(Modifier.background(TataLavender, RoundedCornerShape(14.dp)).padding(horizontal = 18.dp, vertical = 4.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                Image(painterResource(R.drawable.agenda_tab), null, Modifier.size(22.dp))
-                Text("Agenda", fontSize = 10.sp, color = TataDeepNavy, fontWeight = FontWeight.SemiBold)
-            }
-        }
+        AdultTabBar(AdultTab.Agenda, { if (it == AdultTab.Home) onHome() }, setOf(AdultTab.Home, AdultTab.Agenda))
+    }
     }
 }
 
@@ -145,32 +146,39 @@ private fun AgendaDoseRow(dose: DoseDetailReadModel, state: IntakeAgendaUiState,
         DoseStatus.LATE -> "Tardía"
         DoseStatus.OMITTED -> "Omitida"
     }
-    val color = when (dose.status) {
-        DoseStatus.PENDING -> TataLavender
-        DoseStatus.CONFIRMED -> TataMint
-        DoseStatus.LATE -> TataCream
-        DoseStatus.OMITTED -> TataErrorSurface
+    val colors = when {
+        dose.status == DoseStatus.OMITTED -> listOf(TataErrorSurface, Color(0xFFFADFE1))
+        dose.status == DoseStatus.LATE || localTime.hour in 12..17 -> listOf(Color(0xFFFFF5E3), Color(0xFFFBE9C7))
+        localTime.hour >= 21 -> listOf(Color(0xFFEEF6FC), Color(0xFFE2EEF9))
+        else -> listOf(Color(0xFFF1ECFF), Color(0xFFE7DFFC))
     }
-    Row(Modifier.fillMaxWidth().padding(bottom = 20.dp), verticalAlignment = Alignment.CenterVertically) {
-        Column(Modifier.width(68.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+    Row(Modifier.fillMaxWidth().drawBehind {
+        drawLine(Color(0xFFE6E3F1), Offset(49.dp.toPx(), 0f), Offset(49.dp.toPx(), size.height), 2.dp.toPx())
+    }.padding(bottom = if (dose.id == state.selectedDoses.lastOrNull()?.id) 12.dp else 28.dp), verticalAlignment = Alignment.CenterVertically) {
+        Column(Modifier.width(68.dp), horizontalAlignment = Alignment.End) {
             Text(localTime.format(DateTimeFormatter.ofPattern("h:mm a", agendaLocale)).lowercase(agendaLocale), fontSize = 10.sp, color = TataMuted)
-            Image(painterResource(if (localTime.hour < 18) R.drawable.agenda_sun else R.drawable.agenda_moon), null, Modifier.padding(top = 6.dp).size(22.dp))
+            TataSvgIcon(if (localTime.hour < 18) R.raw.agenda_sun else R.raw.agenda_moon, Modifier.padding(top = 6.dp, end = 8.dp).size(22.dp).background(TataSurface))
         }
-        TataCard(Modifier.weight(1f).clickable(role = Role.Button) { onOpenDose(dose.id) }, color) {
-            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        Row(Modifier.weight(1f).shadow(6.dp, RoundedCornerShape(16.dp), ambientColor = Color(0x141A2138), spotColor = Color(0x141A2138))
+            .background(Brush.horizontalGradient(colors), RoundedCornerShape(16.dp))
+            .clickable(role = Role.Button) { onOpenDose(dose.id) }
+            .semantics { contentDescription = "${dose.medicationName}, $label" }
+            .heightIn(min = 88.dp).padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
-                    Text(dose.medicationName, color = TataText, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
-                    Text(dose.dose, color = TataText, fontSize = 11.sp, modifier = Modifier.padding(top = 4.dp))
-                    if (dose.instructions.isNotBlank()) Text(dose.instructions, color = TataText, fontSize = 11.sp, modifier = Modifier.padding(top = 5.dp))
-                    Text(label, color = TataDeepNavy, fontSize = 11.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(top = 5.dp))
+                    Text(dose.medicationName, color = TataText, fontSize = 14.sp, lineHeight = 18.sp, fontWeight = FontWeight.SemiBold)
+                    Spacer(Modifier.height(4.dp))
+                    Text(dose.dose, color = TataText, fontSize = 11.sp, lineHeight = 14.sp)
+                    if (dose.instructions.isNotBlank()) {
+                        Spacer(Modifier.height(7.dp))
+                        Text(dose.instructions, color = TataText, fontSize = 11.sp, lineHeight = 14.sp)
+                    }
                 }
                 Box(Modifier.padding(start = 8.dp).size(28.dp), contentAlignment = Alignment.Center) {
-                    Image(painterResource(R.drawable.agenda_status_outer), null, Modifier.size(28.dp))
-                    Image(painterResource(R.drawable.agenda_status_inner), null, Modifier.size(23.dp))
-                    if (dose.status == DoseStatus.CONFIRMED || dose.status == DoseStatus.LATE) Text("✓", color = TataDeepNavy, fontSize = 14.sp)
+                    TataSvgIcon(R.raw.agenda_status_outer, Modifier.size(28.dp))
+                    TataSvgIcon(R.raw.agenda_status_inner, Modifier.size(23.dp))
+                    if (dose.status == DoseStatus.CONFIRMED || dose.status == DoseStatus.LATE) Text("✓", color = TataSuccess, fontSize = 16.sp, fontWeight = FontWeight.Bold)
                     if (dose.status == DoseStatus.OMITTED) Text("×", color = TataError, fontSize = 14.sp)
                 }
-            }
         }
     }
 }
