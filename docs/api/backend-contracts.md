@@ -108,3 +108,12 @@ The alert `id` is a numeric `int64` (`Long` in Android), unlike the UUID `String
 `PUT /api/v1/older-adults/{olderAdultId}/alerts/{alertId}/status?caregiverId=` with body `UpdateAlertStatusResource` `{ "status": "ATTENDED" | "CLOSED" }` returns the updated `AlertSummaryResource` (`200`). The schema enum also lists `OPEN`, but the backend only accepts `ATTENDED` and `CLOSED`, so the app never sends `OPEN`. Errors: `400` status not accepted, `404` follow-up or alert not found, `409` the alert cannot move to that status. No `403` is documented; the app treats one like the reads.
 
 The app offers OPEN → ATTENDED ("Mark as attended"), OPEN or ATTENDED → CLOSED ("Close alert", after a confirmation because a closed alert cannot be reopened) and no action on a CLOSED alert. On `409` it reloads the alert detail and shows its current status. A CLOSED alert leaves `openAlerts`; the list refreshes when it is shown again.
+
+## Follow-up notes (US-30)
+
+- List: `GET /api/v1/older-adults/{olderAdultId}/notes?caregiverId=` returns `CaregiverNoteResource[]`, most recent first; `200 []` means no notes. `404` means the older adult has no active follow-up.
+- Register: `POST /api/v1/older-adults/{olderAdultId}/notes` with body `CreateCaregiverNoteResource` `{ "familiarId": String, "text": String }` returns the stored note (`201`). This endpoint has no `caregiverId` query: the app sends the signed-in caregiver id as `familiarId`. `400` invalid note, `404` no active follow-up.
+
+`CaregiverNoteResource`: `{ id: int64, text: String, recordedAt: date-time, familiarId: String }`.
+
+`text` has `maxLength` 1000 and `minLength` 0. The app trims the text, refuses blank notes before sending them and allows up to 1000 characters. Notes belong to the follow-up of the older adult: there is no `alertId`, so "Add follow-up note" on an alert stores a general note that does not show which alert it came from. A note written by another caregiver of the same adult appears as "Another caregiver", because the resource carries only `familiarId`, not a name.
