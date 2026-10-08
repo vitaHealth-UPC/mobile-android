@@ -16,7 +16,7 @@ USER STORY
 US-XX — <title>
 
 OWNING BOUNDED CONTEXT
-:<module>
+com.vitahealth.tata.<context>
 
 SOURCE OF TRUTH
 1. Product Backlog User Story + Acceptance Criteria
@@ -29,7 +29,8 @@ SOURCE OF TRUTH
 8. Course materials relevant to the feature
 
 ARCHITECTURE
-Bounded Context = Gradle module.
+One Gradle module: :app.
+Bounded Context = package under app/src/main/kotlin/com/vitahealth/tata.
 Inside the BC:
 domain/
 application/
@@ -42,9 +43,9 @@ Read = Query + QueryHandler + ReadModel.
 Do not create parallel generic UseCase classes for the same behavior.
 
 DEPENDENCY RULE
-Business BC may depend on :shared.
+Business BC may depend on the shared package.
 Business BC MUST NOT depend on another business BC.
-:app performs composition and cross-context wiring.
+The app package performs composition and cross-context wiring.
 
 DOMAIN
 Pure Kotlin.
