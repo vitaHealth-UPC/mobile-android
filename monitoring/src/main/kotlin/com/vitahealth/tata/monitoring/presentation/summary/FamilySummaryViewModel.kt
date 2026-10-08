@@ -2,6 +2,9 @@ package com.vitahealth.tata.monitoring.presentation.summary
 
 import androidx.lifecycle.*
 import com.vitahealth.tata.monitoring.application.FamilyMonitoringRepository
+import com.vitahealth.tata.monitoring.application.handlers.GetContactOptionQueryHandler
+import com.vitahealth.tata.monitoring.application.queries.GetContactOptionQuery
+import com.vitahealth.tata.monitoring.domain.model.ContactChannel
 import com.vitahealth.tata.monitoring.domain.model.FamilySummary
 import com.vitahealth.tata.shared.common.result.AppResult
 import kotlinx.coroutines.Job
@@ -9,12 +12,13 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.time.*
 
-data class SummaryDialog(val title: String, val rows: List<String> = emptyList(), val loading: Boolean = false, val phone: String? = null)
+data class SummaryDialog(val title: String, val rows: List<String> = emptyList(), val loading: Boolean = false, val contact: ContactChannel? = null)
 data class FamilySummaryUiState(val loading: Boolean = true, val summary: FamilySummary? = null,
     val error: String? = null, val dialog: SummaryDialog? = null)
 
 class FamilySummaryViewModel(private val caregiverId: String, private val olderAdultId: String,
-    private val name: String, private val repository: FamilyMonitoringRepository) : ViewModel() {
+    private val name: String, private val repository: FamilyMonitoringRepository,
+    private val contactHandler: GetContactOptionQueryHandler) : ViewModel() {
     private val mutableState = MutableStateFlow(FamilySummaryUiState())
     val state = mutableState.asStateFlow()
     private var refreshJob: Job? = null
@@ -30,16 +34,14 @@ class FamilySummaryViewModel(private val caregiverId: String, private val olderA
         }
     }
     fun dismissDialog() { dialogJob?.cancel(); mutableState.value = mutableState.value.copy(dialog = null) }
-    fun alerts() { mutableState.value = mutableState.value.copy(dialog = SummaryDialog("Alertas",
-        mutableState.value.summary?.openAlerts?.map { "${it.medicationName}\n${it.reason}" }.orEmpty())) }
     fun history() = loadList("Historial de los últimos 7 días") { repository.history(caregiverId, olderAdultId) }
-    fun notes() = loadList("Notas del cuidador") { repository.notes(caregiverId, olderAdultId) }
     fun contact() {
         dialogJob?.cancel()
         mutableState.value = mutableState.value.copy(dialog = SummaryDialog("Contactar", loading = true))
         dialogJob = viewModelScope.launch {
-            val dialog = when (val result = repository.contact(caregiverId, olderAdultId)) {
-                is AppResult.Success -> SummaryDialog("Contactar", listOf(result.value), phone = result.value)
+            val dialog = when (val result = contactHandler(GetContactOptionQuery(caregiverId, olderAdultId))) {
+                is AppResult.Success -> result.value.channel?.let { SummaryDialog("Contactar", listOf(it.value), contact = it) }
+                    ?: SummaryDialog("Contactar", listOf("No hay un canal de contacto registrado."))
                 is AppResult.Failure -> SummaryDialog("Contactar", listOf(result.message))
             }
             mutableState.value = mutableState.value.copy(dialog = dialog)
@@ -57,8 +59,9 @@ class FamilySummaryViewModel(private val caregiverId: String, private val olderA
         }
     }
     class Factory(private val caregiverId: String, private val olderAdultId: String, private val name: String,
-        private val repository: FamilyMonitoringRepository) : ViewModelProvider.Factory {
+        private val repository: FamilyMonitoringRepository,
+        private val contactHandler: GetContactOptionQueryHandler) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(modelClass: Class<T>): T = FamilySummaryViewModel(caregiverId, olderAdultId, name, repository) as T
+        override fun <T : ViewModel> create(modelClass: Class<T>): T = FamilySummaryViewModel(caregiverId, olderAdultId, name, repository, contactHandler) as T
     }
 }

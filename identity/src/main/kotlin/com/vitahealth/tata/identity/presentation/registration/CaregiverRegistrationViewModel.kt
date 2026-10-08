@@ -24,16 +24,16 @@ class CaregiverRegistrationViewModel(
     private val _state = MutableStateFlow(CaregiverRegistrationUiState())
     val state: StateFlow<CaregiverRegistrationUiState> = _state.asStateFlow()
 
-    fun onNameChange(value: String) = _state.update { it.copy(name = value, errorMessage = null) }
-    fun onEmailChange(value: String) = _state.update { it.copy(email = value, errorMessage = null) }
-    fun onPasswordChange(value: String) = _state.update { it.copy(password = value, errorMessage = null) }
+    fun onNameChange(value: String) = _state.update { it.copy(name = value, errorMessage = null, errorCode = null) }
+    fun onEmailChange(value: String) = _state.update { it.copy(email = value, errorMessage = null, errorCode = null) }
+    fun onPasswordChange(value: String) = _state.update { it.copy(password = value, errorMessage = null, errorCode = null) }
     fun onVerificationCodeChange(value: String) =
-        _state.update { it.copy(verificationCode = value.filter(Char::isDigit).take(6), errorMessage = null) }
+        _state.update { it.copy(verificationCode = value.filter(Char::isDigit).take(6), errorMessage = null, errorCode = null) }
 
     fun createAccount() {
         val current = _state.value
         if (current.isLoading || current.step != RegistrationStep.Account) return
-        _state.update { it.copy(isLoading = true, errorMessage = null) }
+        _state.update { it.copy(isLoading = true, errorMessage = null, errorCode = null) }
         viewModelScope.launch {
             when (val result = registerHandler(
                 RegisterCaregiverCommand(current.name, current.email, current.password),
@@ -50,6 +50,7 @@ class CaregiverRegistrationViewModel(
                     it.copy(
                         isLoading = false,
                         errorMessage = registrationMessage(result),
+                        errorCode = result.code,
                     )
                 }
             }
@@ -59,7 +60,7 @@ class CaregiverRegistrationViewModel(
     fun verifyEmail() {
         val current = _state.value
         if (current.isLoading || current.step != RegistrationStep.Verification) return
-        _state.update { it.copy(isLoading = true, errorMessage = null) }
+        _state.update { it.copy(isLoading = true, errorMessage = null, errorCode = null) }
         viewModelScope.launch {
             when (val result = verifyHandler(
                 VerifyCaregiverEmailCommand(current.email, current.verificationCode),
@@ -77,7 +78,7 @@ class CaregiverRegistrationViewModel(
                             it.copy(
                                 isLoading = false,
                                 step = RegistrationStep.VerificationExpired,
-                                errorMessage = null,
+                                errorMessage = null, errorCode = null,
                             )
                         }
                     } else {
@@ -85,6 +86,7 @@ class CaregiverRegistrationViewModel(
                             it.copy(
                                 isLoading = false,
                                 errorMessage = verificationMessage(result),
+                                errorCode = result.code,
                             )
                         }
                     }
@@ -96,7 +98,7 @@ class CaregiverRegistrationViewModel(
     fun requestNewVerification() {
         val current = _state.value
         if (current.isLoading || current.step != RegistrationStep.VerificationExpired) return
-        _state.update { it.copy(isLoading = true, errorMessage = null) }
+        _state.update { it.copy(isLoading = true, errorMessage = null, errorCode = null) }
         viewModelScope.launch {
             when (val result = requestNewVerificationHandler(
                 RequestNewVerificationCommand(current.email),
@@ -113,6 +115,7 @@ class CaregiverRegistrationViewModel(
                     it.copy(
                         isLoading = false,
                         errorMessage = requestVerificationMessage(result),
+                        errorCode = result.code,
                     )
                 }
             }
@@ -122,6 +125,9 @@ class CaregiverRegistrationViewModel(
     private fun registrationMessage(failure: AppResult.Failure): String =
         when (failure.code) {
             "DUPLICATE_EMAIL" -> "Este correo ya está registrado."
+            "NAME_REQUIRED" -> "Escribe tu nombre."
+            "INVALID_EMAIL" -> "Escribe un correo válido."
+            "WEAK_PASSWORD" -> "La contraseña debe tener al menos 8 caracteres."
             "NETWORK_UNAVAILABLE" -> "No hay conexión. Inténtalo nuevamente."
             else -> "No pudimos crear la cuenta."
         }
