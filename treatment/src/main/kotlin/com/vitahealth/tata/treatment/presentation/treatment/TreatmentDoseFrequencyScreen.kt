@@ -44,9 +44,13 @@ fun TreatmentDoseFrequencyRoute(
     factory: TreatmentDoseFrequencyViewModel.Factory,
     modifier: Modifier = Modifier,
     onCompleted: (RegimenBasics) -> Unit = {},
+    initialFrequency: String = "",
 ) {
     val viewModel: TreatmentDoseFrequencyViewModel = viewModel(factory = factory)
     val state by viewModel.state.collectAsState()
+    LaunchedEffect(viewModel) {
+        if (state.frequency.isBlank() && initialFrequency.isNotBlank()) viewModel.onFrequencyChange(initialFrequency)
+    }
 
     LaunchedEffect(state.validatedBasics) {
         state.validatedBasics?.let(onCompleted)

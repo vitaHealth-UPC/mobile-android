@@ -10,8 +10,20 @@ import retrofit2.Response
 import java.lang.reflect.Proxy
 import java.time.LocalDate
 import java.time.ZoneId
+import okhttp3.ResponseBody.Companion.toResponseBody
 
 class FamilySummaryRepositoryTest {
+    @Test fun unauthorizedRelationshipDoesNotRequestProtectedDoseData() = runBlocking {
+        val requests = mutableListOf<String>()
+        val repository = RemoteFamilyMonitoringRepository(api { method ->
+            requests += method
+            check(method == "status") { "Protected data was requested after access denial" }
+            Response.error<StatusResponse>(403, "{}".toResponseBody())
+        })
+        val result = repository.summary("caregiver", "adult", "Ana", LocalDate.of(2026, 10, 7), ZoneId.of("America/Bogota"))
+        assertEquals("CARE_RELATIONSHIP_REQUIRED", (result as AppResult.Failure).code)
+        assertEquals(listOf("status"), requests)
+    }
     private fun api(answer: (String) -> Any): FamilyMonitoringApiService = Proxy.newProxyInstance(
         FamilyMonitoringApiService::class.java.classLoader, arrayOf(FamilyMonitoringApiService::class.java)
     ) { _, method, _ -> answer(method.name) } as FamilyMonitoringApiService

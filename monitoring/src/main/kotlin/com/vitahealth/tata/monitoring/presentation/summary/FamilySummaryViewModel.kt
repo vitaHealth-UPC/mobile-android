@@ -14,7 +14,7 @@ import java.time.*
 
 data class SummaryDialog(val title: String, val rows: List<String> = emptyList(), val loading: Boolean = false, val contact: ContactChannel? = null)
 data class FamilySummaryUiState(val loading: Boolean = true, val summary: FamilySummary? = null,
-    val error: String? = null, val dialog: SummaryDialog? = null)
+    val error: String? = null, val dialog: SummaryDialog? = null, val errorCode: String? = null)
 
 class FamilySummaryViewModel(private val caregiverId: String, private val olderAdultId: String,
     private val name: String, private val repository: FamilyMonitoringRepository,
@@ -25,11 +25,11 @@ class FamilySummaryViewModel(private val caregiverId: String, private val olderA
     private var dialogJob: Job? = null
     fun refresh() {
         refreshJob?.cancel()
-        mutableState.value = mutableState.value.copy(loading = true, error = null)
+        mutableState.value = mutableState.value.copy(loading = true, error = null, errorCode = null)
         refreshJob = viewModelScope.launch {
             when (val result = repository.summary(caregiverId, olderAdultId, name, LocalDate.now(), ZoneId.systemDefault())) {
                 is AppResult.Success -> mutableState.value = mutableState.value.copy(loading = false, summary = result.value)
-                is AppResult.Failure -> mutableState.value = mutableState.value.copy(loading = false, summary = null, error = result.message)
+                is AppResult.Failure -> mutableState.value = mutableState.value.copy(loading = false, summary = null, error = result.message, errorCode = result.code)
             }
         }
     }

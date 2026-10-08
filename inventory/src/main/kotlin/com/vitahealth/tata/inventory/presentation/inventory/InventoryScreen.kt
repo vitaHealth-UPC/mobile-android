@@ -10,6 +10,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.AlertDialog
+import com.vitahealth.tata.shared.design.components.CaregiverTab
+import com.vitahealth.tata.shared.design.components.CaregiverTabBar
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Brush
@@ -74,12 +80,15 @@ import java.time.format.FormatStyle
 private val AvailableGreen = Color(0xFF2E754A)
 
 private val batchDateFormatter: DateTimeFormatter =
-    DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withZone(ZoneId.systemDefault())
+    DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(java.util.Locale.forLanguageTag("es-419"))
+        .withZone(ZoneId.systemDefault())
 
 @Composable
 fun InventoryRoute(
     factory: InventoryViewModel.Factory,
     modifier: Modifier = Modifier,
+    olderAdultName: String = "",
+    onTabSelected: (CaregiverTab) -> Unit = {},
 ) {
     val viewModel: InventoryViewModel = viewModel(factory = factory)
     val state by viewModel.state.collectAsState()
@@ -94,6 +103,8 @@ fun InventoryRoute(
         onLotChange = viewModel::onLotChange,
         onRetry = viewModel::retry,
         modifier = modifier,
+        olderAdultName = olderAdultName,
+        onTabSelected = onTabSelected,
     )
 }
 
@@ -108,13 +119,14 @@ fun InventoryScreen(
     onRetry: () -> Unit,
     modifier: Modifier = Modifier,
     onLotChange: (String) -> Unit = {},
+    olderAdultName: String = "",
+    onTabSelected: (CaregiverTab) -> Unit = {},
 ) {
+    Column(modifier.fillMaxSize().background(TataSurface)) {
     Column(
-        modifier = modifier
-            .fillMaxSize()
-            .background(TataSurface)
+        modifier = Modifier.weight(1f)
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 22.dp).padding(top = tataPrototypeTopPadding(), bottom = 24.dp),
+            .padding(horizontal = 22.dp).padding(top = 28.dp, bottom = 24.dp),
     ) {
         Text(
             text = stringResource(R.string.inventory_title),
@@ -124,7 +136,8 @@ fun InventoryScreen(
             modifier = Modifier.padding(start = 2.dp),
         )
         Text(
-            text = stringResource(R.string.inventory_subtitle),
+            text = if (olderAdultName.isBlank()) stringResource(R.string.inventory_subtitle)
+                else stringResource(R.string.inventory_subtitle_for_person, olderAdultName.substringBefore(' ')),
             color = TataMuted, fontSize = 12.sp, lineHeight = 16.sp,
             fontFamily = FontFamily(Font(com.vitahealth.tata.shared.R.font.tata_inter)),
             modifier = Modifier.padding(start = 2.dp, top = 2.dp, bottom = 20.dp),
@@ -147,6 +160,8 @@ fun InventoryScreen(
             is InventoryUiState.Error -> ErrorBody(code = state.code, onRetry = onRetry)
         }
     }
+    CaregiverTabBar(CaregiverTab.Person, onTabSelected)
+    }
 }
 
 @Composable
@@ -164,8 +179,13 @@ private fun ReadyBody(
     onLotChange: (String) -> Unit,
 ) {
     val quantityFocus = remember { FocusRequester() }
+    var showInitialInfo by remember { mutableStateOf(false) }
     StockCard(state)
-    Spacer(Modifier.height(28.dp))
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+        TextButton(onClick = { showInitialInfo = true }) {
+            InventoryText(stringResource(R.string.inventory_define_initial), 12, TataNavy, FontWeight.SemiBold)
+        }
+    }
     InventoryAction(stringResource(R.string.inventory_replenishment_section),
         onClick = { quantityFocus.requestFocus() }, enabled = !state.submitting)
     Spacer(Modifier.height(22.dp))
@@ -181,18 +201,16 @@ private fun ReadyBody(
         onSaveReplenishment, !state.submitting, secondary = true)
     Spacer(Modifier.height(10.dp))
     state.stock.lastReplenishment?.let { LastReplenishmentCard(it, state.unit) }
-    state.replenishmentErrorCode?.let { code ->
+    state.replenishmentErrorCode?.takeUnless { it == "INVALID_QUANTITY" }?.let { code ->
         Spacer(Modifier.height(12.dp))
         TataCard(containerColor = com.vitahealth.tata.shared.design.theme.TataErrorSurface) {
             InventoryText(stringResource(inventoryErrorMessageRes(code)), 11, TataError)
         }
     }
-    if (state.justRegistered) {
-        Spacer(Modifier.height(12.dp))
-        TataCard(containerColor = TataMint) {
-            InventoryText(stringResource(R.string.inventory_replenishment_saved), 11, AvailableGreen, FontWeight.SemiBold)
-        }
-    }
+    if (showInitialInfo) AlertDialog(onDismissRequest = { showInitialInfo = false },
+        title = { Text(stringResource(R.string.inventory_define_initial)) },
+        text = { Text(stringResource(R.string.inventory_initialized_info)) },
+        confirmButton = { TextButton(onClick = { showInitialInfo = false }) { Text(stringResource(R.string.inventory_close)) } })
 }
 
 @Composable
@@ -202,8 +220,7 @@ private fun StockCard(state: InventoryUiState.Ready) {
     Surface(shape = RoundedCornerShape(18.dp), color = Color.Transparent,
         modifier = Modifier.fillMaxWidth().tataPrototypeShadow(8.dp, RoundedCornerShape(18.dp))) {
         Box(Modifier.fillMaxWidth().heightIn(min = 150.dp)
-            .background(Brush.horizontalGradient(if (isLow) listOf(Color(0xFFFFF3E2), Color(0xFFFBE8C7))
-                else listOf(Color(0xFFE8F5EB), Color(0xFFDDEDE1))))) {
+            .background(Brush.horizontalGradient(listOf(Color(0xFFFFF3E2), Color(0xFFFBE8C7))))) {
             Column(Modifier.padding(start = 16.dp, top = 16.dp, bottom = 18.dp).widthIn(max = 190.dp)) {
                 InventoryText(state.medicationName, 17, TataText, FontWeight.SemiBold)
                 Spacer(Modifier.height(12.dp))
@@ -217,8 +234,8 @@ private fun StockCard(state: InventoryUiState.Ready) {
                 InventoryText(stringResource(if (isLow) R.string.inventory_status_low else R.string.inventory_status_available),
                     12, if (isLow) Color(0xFFD94759) else AvailableGreen, FontWeight.SemiBold)
                 Spacer(Modifier.height(8.dp))
-                // Native ring represents stock status; the day estimate always comes from the API.
-                Box(Modifier.size(78.dp).border(9.dp, if (isLow) Color(0xFFE1AE4B) else AvailableGreen, CircleShape), contentAlignment = Alignment.Center) {
+                // Decorative ring from the mockup; both stock and day estimate come from the API.
+                Box(Modifier.size(78.dp).border(9.dp, Color(0xFFE1AE4B), CircleShape), contentAlignment = Alignment.Center) {
                     Column(Modifier.size(54.dp).background(Color.White, CircleShape), horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center) {
                         InventoryText(stock.daysRemaining?.toString() ?: "—", 20, TataDeepNavy, FontWeight.Bold)
@@ -349,8 +366,8 @@ private fun InventoryQuantityField(
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
         Text(
-            text = if (isError && errorLabel != null) errorLabel else label,
-            color = if (isError) TataError else TataMuted,
+            text = label,
+            color = TataMuted,
             fontSize = 11.sp, lineHeight = 14.sp,
             fontFamily = FontFamily(Font(com.vitahealth.tata.shared.R.font.tata_inter)),
             modifier = Modifier.padding(bottom = 8.dp),
@@ -360,6 +377,9 @@ private fun InventoryQuantityField(
             onValueChange = onValueChange,
             enabled = enabled,
             isError = isError,
+            placeholder = { if (isError && errorLabel != null) Text(errorLabel, color = TataError) },
+            supportingText = if (isError) ({ Text(stringResource(R.string.inventory_error_invalid_quantity), color = TataError,
+                fontFamily = FontFamily(Font(com.vitahealth.tata.shared.R.font.tata_inter)), fontSize = 11.sp, lineHeight = 14.sp) }) else null,
             singleLine = true,
             shape = RoundedCornerShape(15.dp),
             textStyle = TextStyle(fontFamily = FontFamily(Font(com.vitahealth.tata.shared.R.font.tata_inter)), fontSize = 14.sp),
