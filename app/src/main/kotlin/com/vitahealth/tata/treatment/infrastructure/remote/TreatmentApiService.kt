@@ -56,7 +56,12 @@ data class TreatmentResponse(
     val reminderLeadMinutes: Int?,
 )
 
+data class MyMedicationResponse(val medication: MedicationResponse, val treatments: List<TreatmentResponse>)
+
 interface TreatmentApiService {
+    @GET("api/v1/me/medications")
+    suspend fun getMyMedications(): Response<List<MyMedicationResponse>>
+
     @POST("api/v1/older-adults/{olderAdultId}/medications")
     suspend fun registerMedication(
         @Path("olderAdultId") olderAdultId: String,
