@@ -121,9 +121,10 @@ class ExistingScreensVisualAuditTest {
         var state by mutableStateOf(CareLinkUiState("caregiver-test", code = "TATA-4821",
             olderAdult = com.vitahealth.tata.carelink.domain.model.OlderAdultProfile("adult-test", "Rosa Vargas",
                 java.time.LocalDate.of(1958, 5, 12), null, null, null)))
-        compose.setContent { AuditTheme { CareLinkScreen(state, {}, {}, {}, {}, Modifier.safeDrawingPadding()) } }
+        compose.setContent { AuditTheme { CareLinkScreen(state, {}, {}, {}, {}, Modifier.safeDrawingPadding(),
+            avatarResource = com.vitahealth.tata.carelink.R.drawable.figma_link_avatar) } }
         capture("link-code")
-        compose.runOnIdle { state = state.copy(errorMessage = "El código no es válido o expiró.") }
+        compose.runOnIdle { state = state.copy(code = "INVALIDO", errorMessage = "El código ya venció o fue utilizado.") }
         capture("link-invalid")
     }
 
