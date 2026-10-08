@@ -49,13 +49,13 @@ class ExistingScreensVisualAuditTest {
             return context.createConfigurationContext(config)
         }
         val spanish = localized("fr-FR") // An unsupported device language must use the Spanish fallback.
-        check(spanish.getString(com.vitahealth.tata.identity.R.string.onboarding_start) == "Comenzar")
-        check(spanish.getString(com.vitahealth.tata.monitoring.R.string.alerts_title) == "Alertas")
-        check(spanish.getString(com.vitahealth.tata.inventory.R.string.inventory_title) == "Inventario")
-        check(spanish.getString(com.vitahealth.tata.preferences.R.string.accessibility_title) == "Accesibilidad")
+        check(spanish.getString(com.vitahealth.tata.R.string.onboarding_start) == "Comenzar")
+        check(spanish.getString(com.vitahealth.tata.R.string.alerts_title) == "Alertas")
+        check(spanish.getString(com.vitahealth.tata.R.string.inventory_title) == "Inventario")
+        check(spanish.getString(com.vitahealth.tata.R.string.accessibility_title) == "Accesibilidad")
         val english = localized("en-US")
-        check(english.getString(com.vitahealth.tata.identity.R.string.onboarding_start) == "Get started")
-        check(english.getString(com.vitahealth.tata.monitoring.R.string.alerts_title) == "Alerts")
+        check(english.getString(com.vitahealth.tata.R.string.onboarding_start) == "Get started")
+        check(english.getString(com.vitahealth.tata.R.string.alerts_title) == "Alerts")
     }
 
     @Test fun captureOnboardingAndPlanVariants() {
@@ -122,7 +122,7 @@ class ExistingScreensVisualAuditTest {
             olderAdult = com.vitahealth.tata.carelink.domain.model.OlderAdultProfile("adult-test", "Rosa Vargas",
                 java.time.LocalDate.of(1958, 5, 12), null, null, null)))
         compose.setContent { AuditTheme { CareLinkScreen(state, {}, {}, {}, {}, Modifier.safeDrawingPadding(),
-            avatarResource = com.vitahealth.tata.carelink.R.drawable.figma_link_avatar) } }
+            avatarResource = com.vitahealth.tata.R.drawable.figma_link_avatar) } }
         capture("link-code")
         compose.runOnIdle { state = state.copy(code = "INVALIDO", errorMessage = "El código ya venció o fue utilizado.") }
         capture("link-invalid")
