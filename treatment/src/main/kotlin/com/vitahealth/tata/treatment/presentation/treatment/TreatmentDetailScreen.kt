@@ -390,4 +390,4 @@ private fun statusLabel(status: TreatmentStatus): String =
     }
 
 private fun firstNameDetail(fullName: String): String =
-    fullName.trim().substringBefore(" ").ifBlank { "Rosa" }
+    fullName.trim().substringBefore(" ").ifBlank { "la persona vinculada" }
