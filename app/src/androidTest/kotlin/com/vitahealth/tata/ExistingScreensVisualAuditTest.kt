@@ -42,6 +42,31 @@ import org.junit.runner.RunWith
 class ExistingScreensVisualAuditTest {
     @get:Rule val compose = createComposeRule()
 
+    @Test fun captureOnboardingAndPlanVariants() {
+        val essential = com.vitahealth.tata.identity.domain.model.Plan("ESSENTIAL", "Esencial",
+            java.math.BigDecimal("9.90"), "PEN", setOf(com.vitahealth.tata.identity.domain.model.PlanCapability.REMINDERS))
+        val family = essential.copy(code = "FAMILY", name = "Familiar", monthlyPrice = java.math.BigDecimal("19.90"),
+            capabilities = com.vitahealth.tata.identity.domain.model.PlanCapability.entries.toSet())
+        val state = com.vitahealth.tata.identity.presentation.subscription.PlanSubscriptionUiState(
+            isLoading = false, plans = listOf(essential, family), subscription =
+                com.vitahealth.tata.identity.domain.model.Subscription("account-test", family,
+                    com.vitahealth.tata.identity.domain.model.SubscriptionStatus.ACTIVE,
+                    java.time.Instant.parse("2026-10-28T00:00:00Z")))
+        var variant by mutableStateOf(0)
+        compose.setContent { AuditTheme { Box(Modifier.safeDrawingPadding()) {
+            if (variant == 0) com.vitahealth.tata.identity.presentation.onboarding.OnboardingScreen({}, {})
+            else com.vitahealth.tata.identity.presentation.subscription.PlanSubscriptionScreen(
+                state.copy(changeMessage = if (variant == 2)
+                    com.vitahealth.tata.identity.presentation.subscription.PlanChangeMessage.Updated else null),
+                {}, {}, {}, {}, {}, {})
+        } } }
+        capture("onboarding")
+        compose.runOnIdle { variant = 1 }
+        capture("plan-subscription")
+        compose.runOnIdle { variant = 2 }
+        capture("plan-updated")
+    }
+
     @Test fun captureHistoryVariants() {
         val summary = AdherenceSummaryUi("Últimos 30 días", 92, "+4%", 87, "+3%", 2, 1,
             "2 tardías · 1 omitida", listOf(AdherenceTrendPoint("S1", 80), AdherenceTrendPoint("S2", 87),
@@ -220,6 +245,26 @@ class ExistingScreensVisualAuditTest {
         } } }
         compose.waitUntil(5_000) { compose.onAllNodes(androidx.compose.ui.test.hasText("Control de presión")).fetchSemanticsNodes().isNotEmpty() }
         capture("treatment-list")
+    }
+
+    @Test fun captureCaregiverNotesVariants() {
+        val note = FollowUpNote(1, "Prefiere recibir una llamada si no responde al segundo recordatorio.", java.time.Instant.now(), "caregiver-test")
+        var saved by mutableStateOf(false)
+        var showAlert by mutableStateOf(false)
+        compose.setContent { AuditTheme { Box(Modifier.safeDrawingPadding()) {
+            if (showAlert) com.vitahealth.tata.monitoring.presentation.alerts.AlertDetailScreen(
+                com.vitahealth.tata.monitoring.presentation.alerts.AlertDetailUiState.Content(
+                    CaregiverAlert(1, "dose-test", "Losartán 50 mg", note.recordedAt, "Toma pendiente", AlertStatus.OPEN, note.recordedAt, null)),
+                noteSaved = true)
+            else com.vitahealth.tata.monitoring.presentation.notes.NotesScreen(
+                com.vitahealth.tata.monitoring.presentation.notes.NotesUiState.Content(listOf(note)),
+                caregiverId = "caregiver-test", noteSaved = saved)
+        } } }
+        capture("caregiver-notes")
+        compose.runOnIdle { saved = true }
+        capture("caregiver-notes-saved")
+        compose.runOnIdle { showAlert = true }
+        capture("alert-followup-note-saved")
     }
 
     @Test fun captureAlertsAndDetail() {

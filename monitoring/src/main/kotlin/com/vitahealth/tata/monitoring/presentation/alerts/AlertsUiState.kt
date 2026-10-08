@@ -3,14 +3,16 @@ package com.vitahealth.tata.monitoring.presentation.alerts
 import com.vitahealth.tata.monitoring.application.AlertFailureCodes
 import com.vitahealth.tata.monitoring.domain.model.AlertStatus
 import com.vitahealth.tata.monitoring.domain.model.CaregiverAlert
+import com.vitahealth.tata.monitoring.domain.model.ContactOption
 
 /** Why an alert read failed, as the screens explain it. */
-enum class AlertsProblem { NETWORK, ACCESS_DENIED, NOT_FOUND, UNKNOWN }
+enum class AlertsProblem { NETWORK, ACCESS_DENIED, NOT_FOUND, CONFLICT, UNKNOWN }
 
 internal fun problemOf(code: String?): AlertsProblem = when (code) {
     AlertFailureCodes.NETWORK -> AlertsProblem.NETWORK
     AlertFailureCodes.ACCESS_DENIED -> AlertsProblem.ACCESS_DENIED
     AlertFailureCodes.NOT_FOUND -> AlertsProblem.NOT_FOUND
+    AlertFailureCodes.STATUS_CONFLICT -> AlertsProblem.CONFLICT
     else -> AlertsProblem.UNKNOWN
 }
 
@@ -36,6 +38,24 @@ sealed interface AlertsUiState {
 
 sealed interface AlertDetailUiState {
     data object Loading : AlertDetailUiState
-    data class Content(val alert: CaregiverAlert) : AlertDetailUiState
+    /** [updating] is the status being sent; [feedback] reports the last follow-up action. */
+    data class Content(
+        val alert: CaregiverAlert,
+        val updating: AlertStatus? = null,
+        val feedback: AlertFeedback? = null,
+    ) : AlertDetailUiState
     data class Error(val problem: AlertsProblem) : AlertDetailUiState
+}
+
+/** Contact offer of the alert detail (US-29); a missing channel is [Ready] with a null channel. */
+sealed interface ContactUiState {
+    data object Loading : ContactUiState
+    data class Ready(val option: ContactOption) : ContactUiState
+    data class Failed(val problem: AlertsProblem) : ContactUiState
+}
+
+/** Outcome of a follow-up action on the alert detail. */
+sealed interface AlertFeedback {
+    data class StatusChanged(val status: AlertStatus) : AlertFeedback
+    data class Failed(val problem: AlertsProblem) : AlertFeedback
 }

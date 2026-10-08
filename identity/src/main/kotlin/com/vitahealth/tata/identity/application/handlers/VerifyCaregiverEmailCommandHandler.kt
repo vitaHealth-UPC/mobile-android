@@ -10,7 +10,7 @@ class VerifyCaregiverEmailCommandHandler(
 ) {
     suspend operator fun invoke(command: VerifyCaregiverEmailCommand): AppResult<CaregiverAccount> {
         if (!command.code.matches(Regex("\\d{6}"))) {
-            return AppResult.Failure("Verification code must contain 6 digits")
+            return AppResult.Failure("Verification code must contain 6 digits", code = "INVALID_VERIFICATION")
         }
         return repository.verifyEmail(command.email.trim(), command.code)
     }

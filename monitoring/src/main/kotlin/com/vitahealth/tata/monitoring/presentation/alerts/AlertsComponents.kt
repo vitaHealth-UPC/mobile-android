@@ -35,6 +35,7 @@ import com.vitahealth.tata.monitoring.R
 import com.vitahealth.tata.monitoring.domain.model.AlertStatus
 import com.vitahealth.tata.shared.design.components.TataButton
 import com.vitahealth.tata.shared.design.components.TataCard
+import com.vitahealth.tata.shared.design.components.TataSvgIcon
 import com.vitahealth.tata.shared.design.theme.TataBorder
 import com.vitahealth.tata.shared.design.theme.TataError
 import com.vitahealth.tata.shared.design.theme.TataErrorSurface
@@ -109,7 +110,7 @@ internal fun AlertStatusChip(status: AlertStatus, modifier: Modifier = Modifier)
     )
 }
 
-/** Warning mark of the alert cards, drawn with a glyph so the module needs no icon asset. */
+/** Original Figma status artwork, kept separate from the native card. */
 @Composable
 internal fun AlertMark(status: AlertStatus, modifier: Modifier = Modifier) {
     val color = if (status == AlertStatus.OPEN) TataError else TataSuccess
@@ -117,7 +118,7 @@ internal fun AlertMark(status: AlertStatus, modifier: Modifier = Modifier) {
         modifier = modifier.size(36.dp).background(Color.White.copy(alpha = 0.7f), CircleShape),
         contentAlignment = Alignment.Center,
     ) {
-        Text(text = if (status == AlertStatus.OPEN) "!" else "✓", color = color, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+        TataSvgIcon(if (status == AlertStatus.OPEN) R.raw.alerts_warning else R.raw.alerts_check, Modifier.size(24.dp))
     }
 }
 
@@ -127,6 +128,7 @@ internal fun AlertsTitle(text: String, modifier: Modifier = Modifier) {
         text = text,
         fontFamily = alertsSerif,
         fontSize = 28.sp,
+        lineHeight = 34.sp,
         color = tataTextColor(),
         modifier = modifier.semantics { heading() },
     )
@@ -169,12 +171,12 @@ internal fun AlertsProblemCard(
         AlertsProblem.NETWORK -> R.string.alerts_error_network
         AlertsProblem.ACCESS_DENIED -> R.string.alerts_error_access
         AlertsProblem.NOT_FOUND -> notFoundMessage
-        AlertsProblem.UNKNOWN -> R.string.alerts_error_unknown
+        AlertsProblem.CONFLICT, AlertsProblem.UNKNOWN -> R.string.alerts_error_unknown
     }
     TataCard(modifier = modifier.fillMaxWidth(), containerColor = TataWarningSurface) {
         Text(text = stringResource(message), color = tataTextColor(), style = MaterialTheme.typography.bodyLarge)
         // Retrying cannot fix a missing link, consent or alert: only transient failures offer it.
-        if (problem == AlertsProblem.NETWORK || problem == AlertsProblem.UNKNOWN) {
+        if (problem == AlertsProblem.NETWORK || problem == AlertsProblem.UNKNOWN || problem == AlertsProblem.CONFLICT) {
             TataButton(
                 text = stringResource(R.string.alerts_retry),
                 onClick = onRetry,
@@ -186,8 +188,8 @@ internal fun AlertsProblemCard(
 
 @Composable
 internal fun AlertInfoRow(label: String, value: String) {
-    Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
-        Text(text = label, color = AlertsSecondaryText, style = MaterialTheme.typography.labelLarge)
-        Text(text = value, color = tataTextColor(), style = MaterialTheme.typography.bodyLarge)
+    Row(modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Text(text = label, color = AlertsSecondaryText, fontSize = 11.sp, lineHeight = 14.sp, modifier = Modifier.weight(0.3f))
+        Text(text = value, color = tataTextColor(), fontSize = 11.sp, lineHeight = 14.sp, modifier = Modifier.weight(0.7f))
     }
 }

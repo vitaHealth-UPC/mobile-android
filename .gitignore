@@ -16,3 +16,6 @@
 local.properties
 
 .kotlin/
+
+# Firebase project configuration, kept out of the repository
+app/google-services.json
