@@ -1,0 +1,8 @@
+<resources>
+    <string name="confirmed_well_done">Well done!</string>
+    <string name="confirmed_title">Dose confirmed ♡</string>
+    <string name="confirmed_recorded">Dose recorded</string>
+    <string name="confirmed_next">Next dose</string>
+    <string name="confirmed_progress">Your progress is updated</string>
+    <string name="confirmed_history">Your dose is recorded in your history.</string>
+</resources>

@@ -910,6 +910,7 @@ fun TataNavHost(
             DoseDetailRoute(
                 factory = app.container.doseDetailViewModelFactory(intakeId),
                 onBack = { navController.popBackStack() },
+                onHome = { if (!navController.popBackStack(RootDestination.NextDoseHome.route, false)) navController.popBackStack() },
             )
         }
 
