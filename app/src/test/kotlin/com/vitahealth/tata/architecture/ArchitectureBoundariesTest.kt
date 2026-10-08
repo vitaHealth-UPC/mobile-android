@@ -33,6 +33,26 @@ class ArchitectureBoundariesTest {
         assertTrue("Private cross-context imports: $violations", violations.isEmpty())
     }
 
+    @Test
+    fun applicationDoesNotImportAndroidOrItsAdapters() {
+        val forbidden = Regex("import (android\\.|androidx\\.|retrofit2\\.|com\\.vitahealth\\.tata\\.\\w+\\.(infrastructure|presentation)\\.)")
+        val violations = kotlinFiles().filter { path ->
+            path.toString().replace('\\', '/').contains("/application/") &&
+                forbidden.containsMatchIn(path.toFile().readText())
+        }
+        assertTrue("Application depends on UI or adapters: $violations", violations.isEmpty())
+    }
+
+    @Test
+    fun presentationUsesContractsInsteadOfInfrastructureImplementations() {
+        val forbidden = Regex("import (retrofit2\\.|com\\.vitahealth\\.tata\\.\\w+\\.infrastructure\\.)")
+        val violations = kotlinFiles().filter { path ->
+            path.toString().replace('\\', '/').contains("/presentation/") &&
+                forbidden.containsMatchIn(path.toFile().readText())
+        }
+        assertTrue("Presentation imports infrastructure implementations: $violations", violations.isEmpty())
+    }
+
     private fun kotlinFiles(): List<Path> {
         assertTrue("App source root is missing", Files.isDirectory(root))
         return Files.walk(root).use { paths -> paths.filter { it.toString().endsWith(".kt") }.toList() }
