@@ -1,6 +1,9 @@
 package com.vitahealth.tata.treatment.presentation.medication
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.createSavedStateHandle
+import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.vitahealth.tata.shared.common.result.AppResult
@@ -12,17 +15,24 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+/** Keeps the editable draft across process recreation; registration remains an explicit action. */
 class MedicationRegistrationViewModel(
     caregiverId: String,
     olderAdultId: String,
     olderAdultName: String,
     private val registerMedicationHandler: RegisterMedicationCommandHandler,
+    private val savedStateHandle: SavedStateHandle = SavedStateHandle(),
 ) : ViewModel() {
     private val _state = MutableStateFlow(
         MedicationRegistrationUiState(
             caregiverId = caregiverId,
             olderAdultId = olderAdultId,
             olderAdultName = olderAdultName,
+            name = savedStateHandle["name"] ?: "",
+            presentation = savedStateHandle["presentation"] ?: "",
+            frequency = savedStateHandle["frequency"] ?: "",
+            timing = savedStateHandle["timing"] ?: "",
+            notes = savedStateHandle["notes"] ?: "",
         ),
     )
     val state: StateFlow<MedicationRegistrationUiState> = _state.asStateFlow()
@@ -77,6 +87,12 @@ class MedicationRegistrationViewModel(
             if (state.registeredMedication != null) state
             else state.transform().copy(errorMessage = null)
         }
+        val draft = _state.value
+        savedStateHandle["name"] = draft.name
+        savedStateHandle["presentation"] = draft.presentation
+        savedStateHandle["frequency"] = draft.frequency
+        savedStateHandle["timing"] = draft.timing
+        savedStateHandle["notes"] = draft.notes
     }
 
     private fun medicationMessage(failure: AppResult.Failure): String =
@@ -98,13 +114,22 @@ class MedicationRegistrationViewModel(
         private val olderAdultName: String,
         private val registerMedicationHandler: RegisterMedicationCommandHandler,
     ) : ViewModelProvider.Factory {
-        @Suppress("UNCHECKED_CAST")
+        override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T =
+            create(modelClass, extras.createSavedStateHandle())
+
         override fun <T : ViewModel> create(modelClass: Class<T>): T =
-            MedicationRegistrationViewModel(
+            create(modelClass, SavedStateHandle())
+
+        @Suppress("UNCHECKED_CAST")
+        private fun <T : ViewModel> create(modelClass: Class<T>, handle: SavedStateHandle): T {
+            require(modelClass.isAssignableFrom(MedicationRegistrationViewModel::class.java))
+            return MedicationRegistrationViewModel(
                 caregiverId = caregiverId,
                 olderAdultId = olderAdultId,
                 olderAdultName = olderAdultName,
                 registerMedicationHandler = registerMedicationHandler,
+                savedStateHandle = handle,
             ) as T
+        }
     }
 }
