@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Notificaciones de omisión (US-22, TS-06) -->
+    <string name="omission_channel_reminders">Recordatorios de medicamentos</string>
+    <string name="omission_channel_reminders_description">Segundo recordatorio mientras una toma sigue pendiente.</string>
+    <string name="omission_channel_alerts">Alertas para el cuidador</string>
+    <string name="omission_channel_alerts_description">Tomas que no se confirmaron a tiempo.</string>
+    <string name="omission_reminder_title">Segundo recordatorio</string>
+    <string name="omission_reminder_text">La toma sigue pendiente. Confírmala cuando la realices.</string>
+    <string name="omission_reminder_text_named">%1$s sigue pendiente. Confírmala cuando la realices.</string>
+    <string name="omission_alert_title">Toma no confirmada</string>
+    <string name="omission_alert_text">Una toma no se confirmó a tiempo. Revisa la alerta y cómo se encuentra.</string>
+    <string name="omission_alert_text_named">%1$s no se confirmó a tiempo. Revisa la alerta y cómo se encuentra.</string>
+</resources>
