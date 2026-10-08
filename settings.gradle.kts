@@ -17,14 +17,3 @@ dependencyResolutionManagement {
 rootProject.name = "TataAndroid"
 
 include(":app")
-include(":shared")
-
-include(":identity")
-include(":carelink")
-include(":treatment")
-include(":intake")
-include(":omission")
-include(":monitoring")
-include(":analytics")
-include(":inventory")
-include(":preferences")
