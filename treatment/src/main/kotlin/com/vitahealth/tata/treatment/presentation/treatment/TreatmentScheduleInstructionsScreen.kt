@@ -45,9 +45,13 @@ fun TreatmentScheduleInstructionsRoute(
     factory: TreatmentScheduleInstructionsViewModel.Factory,
     modifier: Modifier = Modifier,
     onCompleted: (ScheduleInstructions) -> Unit = {},
+    initialInstructions: String = "",
 ) {
     val viewModel: TreatmentScheduleInstructionsViewModel = viewModel(factory = factory)
     val state by viewModel.state.collectAsState()
+    LaunchedEffect(viewModel) {
+        if (state.instructions.isBlank() && initialInstructions.isNotBlank()) viewModel.onInstructionsChange(initialInstructions)
+    }
 
     LaunchedEffect(state.validatedSchedule) {
         state.validatedSchedule?.let(onCompleted)

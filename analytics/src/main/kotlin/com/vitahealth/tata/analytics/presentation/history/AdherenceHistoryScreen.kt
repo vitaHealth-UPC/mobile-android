@@ -8,8 +8,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -25,6 +27,10 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -118,6 +124,10 @@ fun AdherenceHistoryScreen(
     onRetry: () -> Unit = {},
     onTabSelected: (CaregiverTab) -> Unit = {},
 ) {
+    CompositionLocalProvider(LocalTextStyle provides TextStyle(
+        fontFamily = FontFamily(Font(com.vitahealth.tata.shared.R.font.tata_inter)),
+        letterSpacing = 0.sp,
+    )) {
     Column(modifier = modifier.fillMaxSize().background(TataSurface)) {
         AdherenceHistoryBody(
             state = state,
@@ -128,6 +138,7 @@ fun AdherenceHistoryScreen(
             modifier = Modifier.weight(1f),
         )
         CaregiverTabBar(selected = CaregiverTab.Home, onSelect = onTabSelected)
+    }
     }
 }
 
@@ -169,14 +180,20 @@ private fun AdherenceHistoryBody(
                     PeriodUpdatedNotice()
                 }
             }
-            is AdherenceHistoryUiState.InsufficientData -> AnalyticsEmptyStateCard(
+            is AdherenceHistoryUiState.InsufficientData -> {
+                Spacer(Modifier.height(112.dp))
+                AnalyticsEmptyStateCard(
                 title = "Sin datos suficientes",
                 message = "No existen tomas en este periodo para calcular adherencia.",
             )
-            is AdherenceHistoryUiState.NoResults -> AnalyticsEmptyStateCard(
+            }
+            is AdherenceHistoryUiState.NoResults -> {
+                Spacer(Modifier.height(112.dp))
+                AnalyticsEmptyStateCard(
                 title = "Sin resultados",
                 message = "No existen tomas registradas dentro del periodo seleccionado.",
             )
+            }
             is AdherenceHistoryUiState.Error -> ErrorCard(message = state.message, onRetry = onRetry)
         }
         Spacer(Modifier.height(28.dp))
@@ -196,8 +213,10 @@ private fun HistoryHeader(
         Column {
             Text(
                 text = "Historial e insights",
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
+                fontFamily = FontFamily(Font(com.vitahealth.tata.shared.R.font.tata_serif)),
+                fontSize = 28.sp,
+                lineHeight = 36.sp,
+                fontWeight = FontWeight.Normal,
                 color = TataText,
             )
             PeriodSelector(selected = selectedPeriod, onSelected = onPeriodSelected)
@@ -397,7 +416,7 @@ private fun CalendarIcon(modifier: Modifier = Modifier) {
 @Composable
 private fun MetricsRow(summary: AdherenceSummaryUi) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
         horizontalArrangement = Arrangement.spacedBy(9.dp),
     ) {
         MetricCard(
@@ -439,15 +458,17 @@ private fun MetricCard(
     val shape = RoundedCornerShape(16.dp)
     Column(
         modifier = modifier
-            .height(92.dp)
+            .fillMaxHeight()
+            .heightIn(min = 92.dp)
             .shadow(elevation = 3.dp, shape = shape)
             .background(Brush.horizontalGradient(listOf(startColor, endColor)), shape)
             .padding(12.dp),
     ) {
-        Text(text = label, fontSize = 11.sp, fontWeight = FontWeight.Medium, color = TataText)
+        Text(text = label, fontSize = 11.sp, lineHeight = 14.sp, fontWeight = FontWeight.Medium, color = TataText)
         Text(
             text = value,
             fontSize = 25.sp,
+            lineHeight = 30.sp,
             fontWeight = FontWeight.Bold,
             color = TataText,
             modifier = Modifier.padding(top = 6.dp),
@@ -456,6 +477,7 @@ private fun MetricCard(
             Text(
                 text = caption,
                 fontSize = 9.sp,
+                lineHeight = 11.sp,
                 color = TataDeepNavy,
                 modifier = Modifier.padding(top = 4.dp),
             )

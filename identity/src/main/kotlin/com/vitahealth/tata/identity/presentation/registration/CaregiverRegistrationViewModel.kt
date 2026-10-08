@@ -125,6 +125,9 @@ class CaregiverRegistrationViewModel(
     private fun registrationMessage(failure: AppResult.Failure): String =
         when (failure.code) {
             "DUPLICATE_EMAIL" -> "Este correo ya está registrado."
+            "NAME_REQUIRED" -> "Escribe tu nombre."
+            "INVALID_EMAIL" -> "Escribe un correo válido."
+            "WEAK_PASSWORD" -> "La contraseña debe tener al menos 8 caracteres."
             "NETWORK_UNAVAILABLE" -> "No hay conexión. Inténtalo nuevamente."
             else -> "No pudimos crear la cuenta."
         }
