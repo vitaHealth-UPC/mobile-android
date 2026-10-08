@@ -184,6 +184,10 @@ class AppContainer(
         retrofit.create(com.vitahealth.tata.monitoring.infrastructure.remote.FamilyMonitoringApiService::class.java),
     )
 
+    private val personalNotesRepository = com.vitahealth.tata.monitoring.infrastructure.remote.RemotePersonalNotesRepository(
+        retrofit.create(com.vitahealth.tata.monitoring.infrastructure.remote.PersonalNotesApiService::class.java))
+    fun personalNotesViewModelFactory() = com.vitahealth.tata.monitoring.presentation.personalnotes.PersonalNotesViewModel.Factory(personalNotesRepository)
+
     private val notesRepository = RemoteNotesRepository(retrofit.create(NotesApiService::class.java))
     fun notesViewModelFactory(caregiverId: String, olderAdultId: String) = NotesViewModel.Factory(
         caregiverId, olderAdultId,
@@ -274,6 +278,20 @@ class AppContainer(
     init {
         intakeSyncScheduler.schedule()
     }
+
+    fun myMedicationsViewModelFactory(olderAdultId: String) =
+        com.vitahealth.tata.treatment.presentation.medication.MyMedicationsViewModel.Factory(
+            query = com.vitahealth.tata.treatment.application.handlers.GetMyMedicationsQueryHandler(
+                com.vitahealth.tata.treatment.infrastructure.remote.RemoteMyMedicationsRepository(treatmentApi)),
+            nextDoseQuery = {
+                when (val result = nextDoseRepository.getNextDose(olderAdultId)) {
+                    is com.vitahealth.tata.shared.common.result.AppResult.Success -> result.value?.let {
+                        com.vitahealth.tata.treatment.application.readmodels.MedicationNextDose(it.id, it.medicationId, it.scheduledAt)
+                    }
+                    is com.vitahealth.tata.shared.common.result.AppResult.Failure -> null
+                }
+            },
+        )
 
     val caregiverRegistrationViewModelFactory = CaregiverRegistrationViewModel.Factory(
         registerHandler = RegisterCaregiverCommandHandler(identityRepository),
@@ -483,6 +501,7 @@ class AppContainer(
         intakeId = intakeId,
         handler = GetDoseDetailQueryHandler(doseDetailRepository),
         confirmHandler = ConfirmDoseCommandHandler(doseConfirmationRepository),
+        nextDoseHandler = GetNextDoseQueryHandler(nextDoseRepository),
     )
 
     fun inventoryViewModelFactory(

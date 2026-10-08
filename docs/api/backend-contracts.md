@@ -60,7 +60,7 @@ Timestamps are ISO-8601 strings on the wire. The shared Retrofit uses the defaul
 - `registerReplenishment`: `400 -> INVALID_QUANTITY`, `404 -> INVENTORY_NOT_FOUND`, `409 -> CONCURRENT_UPDATE`, other -> `REQUEST_FAILED`.
 - A thrown I/O exception -> `NETWORK_UNAVAILABLE`; malformed responses or unparseable inventory/batch timestamps -> `INVALID_RESPONSE`. Coroutine cancellation propagates to the caller.
 
-Quantity/threshold are validated in the application layer with the `Quantity` (> 0) and `ReorderThreshold` (>= 0) value objects before any request, so invalid input (the "Cantidad inválida" case) never reaches the network. Those app-born failures use the codes `INVALID_QUANTITY`, `INVALID_THRESHOLD` and `INVALID_MEDICATION_REFERENCE`. `GetInventoryStockQueryHandler` passes `INVENTORY_NOT_FOUND` through unchanged; the ViewModel turns it into the "not initialized" state. Each code (backend and app-born) resolves to a localized string in `:inventory` `res/values` and `res/values-b+es+419`; the UI never shows the backend `message` directly.
+Quantity/threshold are validated in the application layer with the `Quantity` (> 0) and `ReorderThreshold` (>= 0) value objects before any request, so invalid input (the "Cantidad inválida" case) never reaches the network. Those app-born failures use the codes `INVALID_QUANTITY`, `INVALID_THRESHOLD` and `INVALID_MEDICATION_REFERENCE`. `GetInventoryStockQueryHandler` passes `INVENTORY_NOT_FOUND` through unchanged; the ViewModel turns it into the "not initialized" state. Each code (backend and app-born) resolves to a localized string in `app/src/main/res/values/inventory_strings.xml` and `app/src/main/res/values-b+es+419/inventory_strings.xml`; the UI never shows the backend `message` directly.
 
 ### Inventory metadata and coverage
 
@@ -144,3 +144,17 @@ The app offers OPEN → ATTENDED ("Mark as attended"), OPEN or ATTENDED → CLOS
 - Name: `GET /api/v1/older-adults/{olderAdultId}` returns `OlderAdultProfileResource`; only `fullName` is read, for "Contact <first name>". It has no `caregiverId` query. If it fails, the button reads "Contact" and contact still works.
 
 PHONE opens the dialer with the number typed (`ACTION_DIAL`, no `CALL_PHONE` permission). WHATSAPP opens `https://wa.me/<digits>`, which WhatsApp or the browser handles. The API returns one channel, so the app never offers a choice between phone and WhatsApp. The family summary "Contact" action uses the same lookup and launcher.
+
+## Older-adult medication catalog
+
+`GET /api/v1/me/medications` returns a list of `{ medication, treatments }`. The owner is derived from the PIN session. Caregiver sessions receive 403; missing sessions receive 401. The client does not send a caregiver ID or owner query parameter.
+
+`MyMedicationsScreen` displays active treatments and history using this catalog. The highlighted next-dose action uses the Intake next-dose contract and its actual intake ID. A missing next dose does not fabricate a time or hide the catalog. Session failures offer PIN access; network failures offer retry.
+
+### Notas personales del adulto
+
+- `GET /api/v1/me/notes`: lista privada, más reciente primero, con `id`, `title`, `text`, `category` y `recordedAt`.
+- `POST /api/v1/me/notes`: cuerpo `{title, text, category}`; categorías `MEDICATION` o `ROUTINE`, título hasta 100 caracteres y texto hasta 1000. Devuelve 201 y la nota persistida.
+- El propietario proviene de la sesión PIN. No se acepta selector de propietario. Las sesiones de cuidador y configuración reciben 403.
+- Las notas de intervención del cuidador conservan `/api/v1/older-adults/{olderAdultId}/notes`; las notas personales no se incorporan a ese historial.
+- Un error de guardado conserva el formulario y sus datos. La lista agrega la respuesta real del servidor y bloquea el doble envío.

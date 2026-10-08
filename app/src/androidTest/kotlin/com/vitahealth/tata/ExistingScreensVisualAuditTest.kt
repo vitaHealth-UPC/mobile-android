@@ -6,6 +6,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.captureToImage
+import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -41,6 +44,60 @@ import org.junit.runner.RunWith
 class ExistingScreensVisualAuditTest {
     @get:Rule val compose = createComposeRule()
 
+    @Test fun captureDoseConfirmed() {
+        val now=java.time.Instant.now()
+        val dose=com.vitahealth.tata.intake.application.readmodels.DoseDetailReadModel("done","t","med","adult","Losartán 50 mg","1 comprimido","",now,
+            com.vitahealth.tata.intake.domain.model.DoseStatus.CONFIRMED,now)
+        val next=com.vitahealth.tata.intake.application.readmodels.NextDoseReadModel("next","t2","med2","adult","Metformina 850 mg","1 comprimido","",now.plusSeconds(3600),com.vitahealth.tata.intake.domain.model.DoseStatus.PENDING)
+        compose.setContent { AuditTheme { Box(Modifier.safeDrawingPadding()) {
+            com.vitahealth.tata.intake.presentation.detail.DoseConfirmedScreen(
+                com.vitahealth.tata.intake.presentation.detail.DoseDetailUiState.Content(dose,nextDose=next,confirmationSucceeded=true),{})
+        } } }
+        compose.onNodeWithText("¡Bien hecho!").assertExists()
+        capture("dose-confirmed",composeOnly=true)
+    }
+
+    @Test fun capturePersonalNotesAndFilter() {
+        val zone=java.time.ZoneId.systemDefault()
+        val today=java.time.LocalDate.now()
+        fun date(days:Long,hour:Int,minute:Int)=today.minusDays(days).atTime(hour,minute).atZone(zone).toInstant()
+        val notes=listOf(
+            PersonalNote(1,"Tomar con agua","Losartán 50 mg. Mantener el mismo horario y preparar un vaso de agua antes de la toma.",PersonalNoteCategory.MEDICATION,date(0,8,5)),
+            PersonalNote(2,"Antes de salir","Revisar las próximas tomas si voy a estar fuera de casa.",PersonalNoteCategory.ROUTINE,date(1,17,40)),
+            PersonalNote(3,"Rutina de la noche","Dejar el medicamento junto al vaso de agua.",PersonalNoteCategory.ROUTINE,date(2,21,10)),
+        )
+        var category by mutableStateOf<PersonalNoteCategory?>(null)
+        compose.setContent { AuditTheme { Box(Modifier.safeDrawingPadding()) {
+            com.vitahealth.tata.monitoring.presentation.personalnotes.PersonalNotesScreen(
+                com.vitahealth.tata.monitoring.presentation.personalnotes.PersonalNotesUiState(notes=notes,loading=false,category=category),
+                {},{category=it},{},{},{})
+        } } }
+        capture("personal-notes",composeOnly=true)
+        compose.onNodeWithText("Rutina").performClick()
+        compose.onNodeWithText("Antes de salir").assertExists()
+        capture("personal-notes-routine",composeOnly=true)
+    }
+
+    @Test fun captureMyMedicationsAndHistory() {
+        val medications = listOf(
+            com.vitahealth.tata.treatment.application.readmodels.MyMedication("1", "Losartán 50 mg", "Comprimido", true, "1 comprimido", "Cada mañana", listOf("08:00")),
+            com.vitahealth.tata.treatment.application.readmodels.MyMedication("2", "Metformina\n850 mg", "Comprimido", true, "1 comprimido", "Con el desayuno", listOf("08:00")),
+            com.vitahealth.tata.treatment.application.readmodels.MyMedication("3", "Atorvastatina\n20 mg", "Comprimido", true, "1 comprimido", "Por la noche", listOf("20:00")),
+            com.vitahealth.tata.treatment.application.readmodels.MyMedication("4", "Vitamina D3\n1,000 UI", "Cápsula", true, "1 cápsula", "Cada mañana", listOf("08:00")),
+            com.vitahealth.tata.treatment.application.readmodels.MyMedication("5", "Amlodipino 5 mg", "Comprimido", true, "1 comprimido", "Cada noche", listOf("20:00")),
+        )
+        var history by mutableStateOf(false)
+        val state = MyMedicationsUiState(medications = medications, loading = false,
+            nextDose = com.vitahealth.tata.treatment.application.readmodels.MedicationNextDose("intake", "1", java.time.Instant.parse("2026-10-08T13:00:00Z")))
+        compose.setContent { AuditTheme { Box(Modifier.safeDrawingPadding()) {
+            MyMedicationsScreen(state.copy(history = history), {}, { history = it }, {}, {}, {})
+        } } }
+        capture("my-medications", composeOnly = true)
+        compose.onNodeWithText("Historial").performClick()
+        compose.onNodeWithText("No hay medicamentos en el historial.").assertExists()
+        capture("my-medications-history-empty", composeOnly = true)
+    }
+
     @Test fun defaultResourcesUseSpanishAndEnglishIsExplicit() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         fun localized(tag: String): android.content.Context {
@@ -49,13 +106,13 @@ class ExistingScreensVisualAuditTest {
             return context.createConfigurationContext(config)
         }
         val spanish = localized("fr-FR") // An unsupported device language must use the Spanish fallback.
-        check(spanish.getString(com.vitahealth.tata.identity.R.string.onboarding_start) == "Comenzar")
-        check(spanish.getString(com.vitahealth.tata.monitoring.R.string.alerts_title) == "Alertas")
-        check(spanish.getString(com.vitahealth.tata.inventory.R.string.inventory_title) == "Inventario")
-        check(spanish.getString(com.vitahealth.tata.preferences.R.string.accessibility_title) == "Accesibilidad")
+        check(spanish.getString(com.vitahealth.tata.R.string.onboarding_start) == "Comenzar")
+        check(spanish.getString(com.vitahealth.tata.R.string.alerts_title) == "Alertas")
+        check(spanish.getString(com.vitahealth.tata.R.string.inventory_title) == "Inventario")
+        check(spanish.getString(com.vitahealth.tata.R.string.accessibility_title) == "Accesibilidad")
         val english = localized("en-US")
-        check(english.getString(com.vitahealth.tata.identity.R.string.onboarding_start) == "Get started")
-        check(english.getString(com.vitahealth.tata.monitoring.R.string.alerts_title) == "Alerts")
+        check(english.getString(com.vitahealth.tata.R.string.onboarding_start) == "Get started")
+        check(english.getString(com.vitahealth.tata.R.string.alerts_title) == "Alerts")
     }
 
     @Test fun captureOnboardingAndPlanVariants() {
@@ -94,7 +151,7 @@ class ExistingScreensVisualAuditTest {
         compose.setContent { AuditTheme { AdherenceHistoryScreen(state, Modifier.safeDrawingPadding(), selectedPeriod = period,
             onPeriodSelected = { period = it }) } }
         capture("history-content")
-        compose.onNodeWithText("Últimos 30 días ⌄").performClick()
+        compose.onNodeWithText("Últimos 30 días âŒ„").performClick()
         compose.onNodeWithText("Últimos 7 días").performClick()
         compose.runOnIdle { check(period == com.vitahealth.tata.analytics.domain.model.AdherencePeriod.LastWeek)
             period = com.vitahealth.tata.analytics.domain.model.AdherencePeriod.LastMonth }
@@ -122,7 +179,7 @@ class ExistingScreensVisualAuditTest {
             olderAdult = com.vitahealth.tata.carelink.domain.model.OlderAdultProfile("adult-test", "Rosa Vargas",
                 java.time.LocalDate.of(1958, 5, 12), null, null, null)))
         compose.setContent { AuditTheme { CareLinkScreen(state, {}, {}, {}, {}, Modifier.safeDrawingPadding(),
-            avatarResource = com.vitahealth.tata.carelink.R.drawable.figma_link_avatar) } }
+            avatarResource = com.vitahealth.tata.R.drawable.figma_link_avatar) } }
         capture("link-code")
         compose.runOnIdle { state = state.copy(code = "INVALIDO", errorMessage = "El código ya venció o fue utilizado.") }
         capture("link-invalid")
@@ -364,7 +421,7 @@ class ExistingScreensVisualAuditTest {
         }
     }
 
-    private fun capture(name: String) {
+    private fun capture(name: String, composeOnly: Boolean = false) {
         compose.waitForIdle()
         InstrumentationRegistry.getInstrumentation().waitForIdleSync()
         // Capture the rendered window, including system insets and shared navigation.
@@ -372,7 +429,8 @@ class ExistingScreensVisualAuditTest {
         compose.waitForIdle()
         InstrumentationRegistry.getInstrumentation().waitForIdleSync()
         Thread.sleep(400) // Give the emulator render thread time to present the settled Compose frame.
-        val bitmap = requireNotNull(InstrumentationRegistry.getInstrumentation().uiAutomation.takeScreenshot())
+        val bitmap = if (composeOnly) compose.onRoot().captureToImage().asAndroidBitmap()
+            else requireNotNull(InstrumentationRegistry.getInstrumentation().uiAutomation.takeScreenshot())
         val resolver = InstrumentationRegistry.getInstrumentation().targetContext.contentResolver
         val values = android.content.ContentValues().apply {
             put(android.provider.MediaStore.Images.Media.DISPLAY_NAME, "audit-$name.png")
