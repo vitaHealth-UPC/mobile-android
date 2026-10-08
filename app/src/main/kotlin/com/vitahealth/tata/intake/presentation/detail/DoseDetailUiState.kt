@@ -19,6 +19,7 @@ sealed interface DoseDetailUiState {
     /** [outcome] is set once a confirmation attempt ends with a result screen (US-06 / US-23). */
     data class Content(
         val dose: DoseDetailReadModel,
+        val nextDose: com.vitahealth.tata.intake.application.readmodels.NextDoseReadModel? = null,
         val confirming: Boolean = false,
         val confirmationMessage: String? = null,
         val confirmationSucceeded: Boolean = false,
