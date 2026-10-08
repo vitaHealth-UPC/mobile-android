@@ -1,0 +1,21 @@
+<resources>
+<string name="my_medications_title">My medications</string>
+<string name="my_medications_subtitle">Your active treatments</string>
+<string name="my_medications_featured">Featured</string>
+<string name="my_medications_next_dose">Next dose</string>
+<string name="my_medications_active">Active %1$d</string>
+<string name="my_medications_history">History</string>
+<string name="my_medications_empty">You have no active treatments.</string>
+<string name="my_medications_history_empty">No medications in your history.</string>
+<string name="my_medications_error">We could not load your medications. Try again.</string>
+<string name="my_medications_offline">No connection. Try again.</string>
+<string name="my_medications_session">Sign in with your PIN to view your medications.</string>
+<string name="my_medications_retry">Retry</string>
+<string name="my_medications_add">Add medication</string>
+<string name="my_medications_add_help">Your caregiver can add medications and configure your treatments.</string>
+<string name="my_medications_ok">Got it</string>
+<string name="my_medications_details">Medication details</string>
+<string name="my_medications_unconfigured">No regimen configured</string>
+<string name="my_medications_schedule">Schedule: %1$s</string>
+<string name="my_medications_sign_in">Sign in with PIN</string>
+</resources>
