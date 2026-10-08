@@ -144,3 +144,9 @@ The app offers OPEN → ATTENDED ("Mark as attended"), OPEN or ATTENDED → CLOS
 - Name: `GET /api/v1/older-adults/{olderAdultId}` returns `OlderAdultProfileResource`; only `fullName` is read, for "Contact <first name>". It has no `caregiverId` query. If it fails, the button reads "Contact" and contact still works.
 
 PHONE opens the dialer with the number typed (`ACTION_DIAL`, no `CALL_PHONE` permission). WHATSAPP opens `https://wa.me/<digits>`, which WhatsApp or the browser handles. The API returns one channel, so the app never offers a choice between phone and WhatsApp. The family summary "Contact" action uses the same lookup and launcher.
+
+## Older-adult medication catalog
+
+`GET /api/v1/me/medications` returns a list of `{ medication, treatments }`. The owner is derived from the PIN session. Caregiver sessions receive 403; missing sessions receive 401. The client does not send a caregiver ID or owner query parameter.
+
+`MyMedicationsScreen` displays active treatments and history using this catalog. The highlighted next-dose action uses the Intake next-dose contract and its actual intake ID. A missing next dose does not fabricate a time or hide the catalog. Session failures offer PIN access; network failures offer retry.
