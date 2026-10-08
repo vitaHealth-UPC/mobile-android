@@ -1,5 +1,8 @@
 package com.vitahealth.tata.carelink.infrastructure.remote
 
+import com.vitahealth.tata.shared.application.SessionStore
+import com.vitahealth.tata.shared.application.NoSessionStore
+import kotlinx.coroutines.CancellationException
 import com.vitahealth.tata.carelink.application.CareLinkRepository
 import com.vitahealth.tata.carelink.domain.model.CareLink
 import com.vitahealth.tata.carelink.domain.model.CareLinkStatus
@@ -11,6 +14,7 @@ import java.time.LocalDate
 
 class RemoteCareLinkRepository(
     private val api: CareLinkApiService,
+    private val sessions: SessionStore = NoSessionStore,
 ) : CareLinkRepository {
     override suspend fun acceptLink(caregiverId: String, code: String): AppResult<CareLink> =
         requestCareLink {
@@ -52,6 +56,8 @@ class RemoteCareLinkRepository(
                 }
                 AppResult.Failure(message = message, code = code)
             }
+        } catch (exception: CancellationException) {
+            throw exception
         } catch (exception: Exception) {
             AppResult.Failure(
                 message = "No hay conexión disponible.",
@@ -68,6 +74,7 @@ class RemoteCareLinkRepository(
             val response = call()
             val body = response.body()
             if (response.isSuccessful && body != null) {
+                if (body.accessToken != null && body.expiresAt != null) sessions.save(body.accessToken, body.expiresAt)
                 AppResult.Success(
                     CareLink(
                         id = body.id,
@@ -92,6 +99,8 @@ class RemoteCareLinkRepository(
                 }
                 AppResult.Failure(message = message, code = code)
             }
+        } catch (exception: CancellationException) {
+            throw exception
         } catch (exception: Exception) {
             AppResult.Failure(
                 message = "No hay conexión disponible.",

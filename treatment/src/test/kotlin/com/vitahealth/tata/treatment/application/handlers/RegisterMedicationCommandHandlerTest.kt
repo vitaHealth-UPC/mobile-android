@@ -4,6 +4,7 @@ import com.vitahealth.tata.shared.common.result.AppResult
 import com.vitahealth.tata.treatment.application.TreatmentRepository
 import com.vitahealth.tata.treatment.application.commands.RegisterMedicationCommand
 import com.vitahealth.tata.treatment.domain.model.Medication
+import com.vitahealth.tata.treatment.domain.model.Treatment
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -79,5 +80,11 @@ class RegisterMedicationCommandHandlerTest {
                 ),
             )
         }
+
+        override suspend fun createTreatment(
+            caregiverId: String,
+            olderAdultId: String,
+            name: String,
+        ): AppResult<Treatment> = error("not used")
     }
 }
