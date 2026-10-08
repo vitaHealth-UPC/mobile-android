@@ -4,8 +4,8 @@ Checkpoint: 2026-10-07. Registro independiente del conteo de implementaciones.
 
 - 60 variantes tienen implementación, incluyendo composiciones parciales.
 - 10 carecen de implementación específica.
-- 10 aceptadas visualmente con el criterio proporcional acordado.
-- 50 implementadas requieren validación o correcciones.
+- 13 aceptadas visualmente con el criterio proporcional acordado.
+- 47 implementadas requieren validación o correcciones.
 - 58 tienen comparación visual; comparación no equivale a aceptación.
 
 Aceptación: composición, tipografía, proporciones, iconos, contraste y estado representado coherentes con Figma. Se permiten adaptaciones nativas, desplazamiento por contenido real y datos dinámicos; no se exige copiar nombres, fechas ni títulos a posiciones absolutas. La aceptación visual no certifica integraciones ni navegación completa. Cada variante requiere su propio resultado; reutilizar un composable no aprueba automáticamente todas sus variantes.
@@ -17,7 +17,7 @@ Evidencias PNG en el equipo de trabajo: C:/Users/david/Downloads/. Las capturas 
 | 1 | Landing - Value & Features | 563:1849 | Sin implementación específica | — |
 | 2 | Landing - Plans & Contact | 563:1913 | Sin implementación específica | — |
 | 3 | Onboarding | 563:5 | Aceptada visualmente | onboarding-final.png |
-| 4 | Caregiver Registration | 563:1398 | Requiere validar/corregir | — |
+| 4 | Caregiver Registration | 563:1398 | Aceptada visualmente; secuencia real de cuenta y verificación | registration-verification-final.png |
 | 5 | Link & Consent | 563:1440 | Requiere validar/corregir | — |
 | 6 | PIN Access | 563:1338 | Aceptada visualmente | pin-access-final.png |
 | 7 | Login | 641:16 | Requiere validar/corregir | — |
@@ -45,8 +45,8 @@ Evidencias PNG en el equipo de trabajo: C:/Users/david/Downloads/. Las capturas 
 | 29 | PIN Setup | 563:1970 | Aceptada visualmente | pin-setup-final.png |
 | 30 | PIN Incorrect | 563:2034 | Aceptada visualmente | pin-incorrect-final.png |
 | 31 | PIN Temporarily Blocked | 563:2098 | Aceptada visualmente | pin-blocked-final.png |
-| 32 | Duplicate Email | 563:2162 | Requiere validar/corregir | — |
-| 33 | Verification Expired | 563:2208 | Requiere validar/corregir | — |
+| 32 | Duplicate Email | 563:2162 | Aceptada visualmente; código todavía no enviado | registration-duplicate-final.png |
+| 33 | Verification Expired | 563:2208 | Aceptada visualmente | registration-expired-final.png |
 | 34 | Invalid Link Code | 563:2254 | Requiere validar/corregir | — |
 | 35 | Consent Required | 563:2308 | Requiere validar/corregir | — |
 | 36 | Medication Required Fields Error | 563:2404 | Requiere validar/corregir | — |
