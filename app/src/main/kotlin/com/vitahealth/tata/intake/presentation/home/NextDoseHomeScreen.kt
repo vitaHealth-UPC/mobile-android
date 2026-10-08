@@ -56,6 +56,7 @@ fun NextDoseHomeRoute(
     modifier: Modifier = Modifier,
     onSignOut: (() -> Unit)? = null,
     onOpenMedications: (() -> Unit)? = null,
+    onOpenNotes: (() -> Unit)? = null,
 ) {
     val viewModel: NextDoseHomeViewModel = viewModel(factory = factory)
     val state by viewModel.state.collectAsState()
@@ -73,6 +74,7 @@ fun NextDoseHomeRoute(
         modifier = modifier,
         onSignOut = onSignOut,
         onOpenMedications = onOpenMedications,
+        onOpenNotes = onOpenNotes,
     )
 }
 
@@ -85,6 +87,7 @@ fun NextDoseHomeScreen(
     modifier: Modifier = Modifier,
     onSignOut: (() -> Unit)? = null,
     onOpenMedications: (() -> Unit)? = null,
+    onOpenNotes: (() -> Unit)? = null,
 ) {
     val locale = Locale.forLanguageTag("es-PE")
     val name = when (state) {
@@ -155,10 +158,11 @@ fun NextDoseHomeScreen(
         }
         AdultTabBar(
             selected = AdultTab.Home,
-            availableTabs = setOfNotNull(AdultTab.Home, AdultTab.Agenda, AdultTab.Medications.takeIf { onOpenMedications != null }),
+            availableTabs = setOfNotNull(AdultTab.Home, AdultTab.Agenda, AdultTab.Medications.takeIf { onOpenMedications != null }, AdultTab.Notes.takeIf { onOpenNotes != null }),
             onSelect = { when(it) {
                 AdultTab.Agenda -> onOpenAgenda()
                 AdultTab.Medications -> onOpenMedications?.invoke()
+                AdultTab.Notes -> onOpenNotes?.invoke()
                 else -> Unit
             } },
         )

@@ -184,6 +184,10 @@ class AppContainer(
         retrofit.create(com.vitahealth.tata.monitoring.infrastructure.remote.FamilyMonitoringApiService::class.java),
     )
 
+    private val personalNotesRepository = com.vitahealth.tata.monitoring.infrastructure.remote.RemotePersonalNotesRepository(
+        retrofit.create(com.vitahealth.tata.monitoring.infrastructure.remote.PersonalNotesApiService::class.java))
+    fun personalNotesViewModelFactory() = com.vitahealth.tata.monitoring.presentation.personalnotes.PersonalNotesViewModel.Factory(personalNotesRepository)
+
     private val notesRepository = RemoteNotesRepository(retrofit.create(NotesApiService::class.java))
     fun notesViewModelFactory(caregiverId: String, olderAdultId: String) = NotesViewModel.Factory(
         caregiverId, olderAdultId,

@@ -44,6 +44,27 @@ import org.junit.runner.RunWith
 class ExistingScreensVisualAuditTest {
     @get:Rule val compose = createComposeRule()
 
+    @Test fun capturePersonalNotesAndFilter() {
+        val zone=java.time.ZoneId.systemDefault()
+        val today=java.time.LocalDate.now()
+        fun date(days:Long,hour:Int,minute:Int)=today.minusDays(days).atTime(hour,minute).atZone(zone).toInstant()
+        val notes=listOf(
+            PersonalNote(1,"Tomar con agua","Losartán 50 mg. Mantener el mismo horario y preparar un vaso de agua antes de la toma.",PersonalNoteCategory.MEDICATION,date(0,8,5)),
+            PersonalNote(2,"Antes de salir","Revisar las próximas tomas si voy a estar fuera de casa.",PersonalNoteCategory.ROUTINE,date(1,17,40)),
+            PersonalNote(3,"Rutina de la noche","Dejar el medicamento junto al vaso de agua.",PersonalNoteCategory.ROUTINE,date(2,21,10)),
+        )
+        var category by mutableStateOf<PersonalNoteCategory?>(null)
+        compose.setContent { AuditTheme { Box(Modifier.safeDrawingPadding()) {
+            com.vitahealth.tata.monitoring.presentation.personalnotes.PersonalNotesScreen(
+                com.vitahealth.tata.monitoring.presentation.personalnotes.PersonalNotesUiState(notes=notes,loading=false,category=category),
+                {},{category=it},{},{},{})
+        } } }
+        capture("personal-notes",composeOnly=true)
+        compose.onNodeWithText("Rutina").performClick()
+        compose.onNodeWithText("Antes de salir").assertExists()
+        capture("personal-notes-routine",composeOnly=true)
+    }
+
     @Test fun captureMyMedicationsAndHistory() {
         val medications = listOf(
             com.vitahealth.tata.treatment.application.readmodels.MyMedication("1", "Losartán 50 mg", "Comprimido", true, "1 comprimido", "Cada mañana", listOf("08:00")),
