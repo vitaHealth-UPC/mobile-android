@@ -44,6 +44,19 @@ import org.junit.runner.RunWith
 class ExistingScreensVisualAuditTest {
     @get:Rule val compose = createComposeRule()
 
+    @Test fun captureDoseConfirmed() {
+        val now=java.time.Instant.now()
+        val dose=com.vitahealth.tata.intake.application.readmodels.DoseDetailReadModel("done","t","med","adult","Losartán 50 mg","1 comprimido","",now,
+            com.vitahealth.tata.intake.domain.model.DoseStatus.CONFIRMED,now)
+        val next=com.vitahealth.tata.intake.application.readmodels.NextDoseReadModel("next","t2","med2","adult","Metformina 850 mg","1 comprimido","",now.plusSeconds(3600),com.vitahealth.tata.intake.domain.model.DoseStatus.PENDING)
+        compose.setContent { AuditTheme { Box(Modifier.safeDrawingPadding()) {
+            com.vitahealth.tata.intake.presentation.detail.DoseConfirmedScreen(
+                com.vitahealth.tata.intake.presentation.detail.DoseDetailUiState.Content(dose,nextDose=next,confirmationSucceeded=true),{})
+        } } }
+        compose.onNodeWithText("¡Bien hecho!").assertExists()
+        capture("dose-confirmed",composeOnly=true)
+    }
+
     @Test fun capturePersonalNotesAndFilter() {
         val zone=java.time.ZoneId.systemDefault()
         val today=java.time.LocalDate.now()
