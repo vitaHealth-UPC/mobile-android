@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Omission notifications (US-22, TS-06) -->
+    <string name="omission_channel_reminders">Medication reminders</string>
+    <string name="omission_channel_reminders_description">Second reminder while a dose is still pending.</string>
+    <string name="omission_channel_alerts">Caregiver alerts</string>
+    <string name="omission_channel_alerts_description">Doses that were not confirmed in time.</string>
+    <string name="omission_reminder_title">Second reminder</string>
+    <string name="omission_reminder_text">The dose is still pending. Confirm it when you take it.</string>
+    <string name="omission_reminder_text_named">%1$s is still pending. Confirm it when you take it.</string>
+    <string name="omission_alert_title">Dose not confirmed</string>
+    <string name="omission_alert_text">A dose was not confirmed in time. Check the alert and how they are doing.</string>
+    <string name="omission_alert_text_named">%1$s was not confirmed in time. Check the alert and how they are doing.</string>
+</resources>
