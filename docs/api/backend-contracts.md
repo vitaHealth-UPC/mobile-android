@@ -150,3 +150,11 @@ PHONE opens the dialer with the number typed (`ACTION_DIAL`, no `CALL_PHONE` per
 `GET /api/v1/me/medications` returns a list of `{ medication, treatments }`. The owner is derived from the PIN session. Caregiver sessions receive 403; missing sessions receive 401. The client does not send a caregiver ID or owner query parameter.
 
 `MyMedicationsScreen` displays active treatments and history using this catalog. The highlighted next-dose action uses the Intake next-dose contract and its actual intake ID. A missing next dose does not fabricate a time or hide the catalog. Session failures offer PIN access; network failures offer retry.
+
+### Notas personales del adulto
+
+- `GET /api/v1/me/notes`: lista privada, más reciente primero, con `id`, `title`, `text`, `category` y `recordedAt`.
+- `POST /api/v1/me/notes`: cuerpo `{title, text, category}`; categorías `MEDICATION` o `ROUTINE`, título hasta 100 caracteres y texto hasta 1000. Devuelve 201 y la nota persistida.
+- El propietario proviene de la sesión PIN. No se acepta selector de propietario. Las sesiones de cuidador y configuración reciben 403.
+- Las notas de intervención del cuidador conservan `/api/v1/older-adults/{olderAdultId}/notes`; las notas personales no se incorporan a ese historial.
+- Un error de guardado conserva el formulario y sus datos. La lista agrega la respuesta real del servidor y bloquea el doble envío.

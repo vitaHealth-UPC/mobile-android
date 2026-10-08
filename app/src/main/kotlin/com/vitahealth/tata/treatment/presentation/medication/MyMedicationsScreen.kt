@@ -46,6 +46,7 @@ fun MyMedicationsRoute(
     onAgenda: () -> Unit,
     onOpenDose: (String) -> Unit,
     onSignIn: () -> Unit,
+    onNotes: (() -> Unit)? = null,
 ) {
     val model: MyMedicationsViewModel = viewModel(factory = factory)
     val state by model.state.collectAsStateWithLifecycle()
@@ -57,7 +58,7 @@ fun MyMedicationsRoute(
         owner.lifecycle.addObserver(observer)
         onDispose { owner.lifecycle.removeObserver(observer) }
     }
-    MyMedicationsScreen(state, model::refresh, model::selectHistory, onHome, onAgenda, onOpenDose, onSignIn = onSignIn)
+    MyMedicationsScreen(state, model::refresh, model::selectHistory, onHome, onAgenda, onOpenDose, onSignIn = onSignIn, onNotes = onNotes)
 }
 
 @Composable
@@ -70,6 +71,7 @@ fun MyMedicationsScreen(
     onOpenDose: (String) -> Unit,
     modifier: Modifier = Modifier,
     onSignIn: (() -> Unit)? = null,
+    onNotes: (() -> Unit)? = null,
 ) {
     var showAddHelp by rememberSaveable { mutableStateOf(false) }
     var selectedMedication by remember { mutableStateOf<MyMedication?>(null) }
@@ -137,8 +139,8 @@ fun MyMedicationsScreen(
                 Spacer(Modifier.height(20.dp))
             }
             AdultTabBar(AdultTab.Medications, { tab ->
-                when(tab) { AdultTab.Home -> onHome(); AdultTab.Agenda -> onAgenda(); else -> Unit }
-            }, setOf(AdultTab.Home, AdultTab.Medications, AdultTab.Agenda))
+                when(tab) { AdultTab.Home -> onHome(); AdultTab.Agenda -> onAgenda(); AdultTab.Notes -> onNotes?.invoke(); else -> Unit }
+            }, setOfNotNull(AdultTab.Home, AdultTab.Medications, AdultTab.Agenda, AdultTab.Notes.takeIf { onNotes != null }))
         }
     }
     if (showAddHelp) AlertDialog(onDismissRequest = { showAddHelp = false },

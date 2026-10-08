@@ -389,4 +389,9 @@ sealed interface RootDestination {
             "adherence-recommendations/" + Uri.encode(olderAdultId)
     }
 
+    data object PersonalNotes : RootDestination {
+        override val route = "personal-notes/{olderAdultId}"
+        fun createRoute(olderAdultId: String) = "personal-notes/" + Uri.encode(olderAdultId)
+    }
+
 }
