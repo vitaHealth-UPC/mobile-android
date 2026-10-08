@@ -180,10 +180,10 @@ private fun PreferenceRow(title: Int, subtitle: Int, checked: Boolean, onChange:
         .toggleable(checked, enabled = enabled, role = Role.Switch, onValueChange = onChange)
         .padding(horizontal = 14.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
         Box(Modifier.size(34.dp).background(badgeColor, CircleShape), contentAlignment = Alignment.Center) {
-            val context = androidx.compose.ui.platform.LocalContext.current
-            coil3.compose.AsyncImage(model = coil3.request.ImageRequest.Builder(context)
-                .data(icon).decoderFactory(coil3.svg.SvgDecoder.Factory()).build(),
-                contentDescription = null, modifier = Modifier.size(24.dp))
+            com.vitahealth.tata.shared.design.components.TataSvgIcon(
+                resource = icon,
+                modifier = Modifier.size(24.dp),
+            )
         }
         Spacer(Modifier.width(12.dp))
         Column(Modifier.weight(1f)) {
