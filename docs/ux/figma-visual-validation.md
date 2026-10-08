@@ -4,9 +4,9 @@ Checkpoint: 2026-10-07. Registro independiente del conteo de implementaciones.
 
 - 60 variantes tienen implementación, incluyendo composiciones parciales.
 - 10 carecen de implementación específica.
-- 5 aceptadas visualmente con el criterio proporcional acordado.
-- 55 implementadas requieren validación o correcciones.
-- 55 tienen comparación visual; comparación no equivale a aceptación.
+- 6 aceptadas visualmente con el criterio proporcional acordado.
+- 54 implementadas requieren validación o correcciones.
+- 58 tienen comparación visual; comparación no equivale a aceptación.
 
 Aceptación: composición, tipografía, proporciones, iconos, contraste y estado representado coherentes con Figma. Se permiten adaptaciones nativas, desplazamiento por contenido real y datos dinámicos; no se exige copiar nombres, fechas ni títulos a posiciones absolutas. La aceptación visual no certifica integraciones ni navegación completa. Cada variante requiere su propio resultado; reutilizar un composable no aprueba automáticamente todas sus variantes.
 
@@ -16,7 +16,7 @@ Evidencias PNG en el equipo de trabajo: C:/Users/david/Downloads/. Las capturas 
 | --- | --- | --- | --- | --- |
 | 1 | Landing - Value & Features | 563:1849 | Sin implementación específica | — |
 | 2 | Landing - Plans & Contact | 563:1913 | Sin implementación específica | — |
-| 3 | Onboarding | 563:5 | Requiere validar/corregir | — |
+| 3 | Onboarding | 563:5 | Aceptada visualmente | onboarding-final.png |
 | 4 | Caregiver Registration | 563:1398 | Requiere validar/corregir | — |
 | 5 | Link & Consent | 563:1440 | Requiere validar/corregir | — |
 | 6 | PIN Access | 563:1338 | Requiere validar/corregir | — |
@@ -41,7 +41,7 @@ Evidencias PNG en el equipo de trabajo: C:/Users/david/Downloads/. Las capturas 
 | 25 | Inventory & Restock | 563:1632 | Requiere validar/corregir | — |
 | 26 | Notification Preferences | 563:1219 | Requiere validar/corregir | — |
 | 27 | Notes - Caregiver | 576:2859 | Requiere corregir: perfil y títulos no representados | audit-caregiver-notes.png |
-| 28 | Plan & Subscription | 563:1701 | Requiere validar/corregir | — |
+| 28 | Plan & Subscription | 563:1701 | Comparada; fechas y proporciones corregidas, falta barra y composición final | — |
 | 29 | PIN Setup | 563:1970 | Requiere validar/corregir | — |
 | 30 | PIN Incorrect | 563:2034 | Requiere validar/corregir | — |
 | 31 | PIN Temporarily Blocked | 563:2098 | Requiere validar/corregir | — |
@@ -81,6 +81,6 @@ Evidencias PNG en el equipo de trabajo: C:/Users/david/Downloads/. Las capturas 
 | 65 | Notification Preferences Saved | 563:5090 | Requiere validar/corregir | — |
 | 66 | Invalid Inventory Quantity | 563:5213 | Requiere validar/corregir | — |
 | 67 | Stock Replenished | 563:5284 | Requiere validar/corregir | — |
-| 68 | Subscription Updated | 563:5354 | Requiere validar/corregir | — |
+| 68 | Subscription Updated | 563:5354 | Comparada; falta barra y composición final | — |
 | 69 | External Destination Unavailable | 563:5425 | Sin implementación específica | — |
 | 70 | Internationalization | 665:183 | Sin implementación específica | — |
