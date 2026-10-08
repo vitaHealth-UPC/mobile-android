@@ -11,6 +11,7 @@ internal fun NavHostController.openCaregiverTab(tab: CaregiverTab, caregiverId: 
     val route = when (tab) {
         CaregiverTab.Alerts -> RootDestination.Alerts.createRoute(caregiverId, olderAdultId)
         CaregiverTab.Notes -> RootDestination.Notes.createRoute(caregiverId, olderAdultId)
+        CaregiverTab.Person -> RootDestination.CaregiverProfiles.createRoute(caregiverId)
         else -> null
     }
     if (route == null) {
@@ -21,4 +22,13 @@ internal fun NavHostController.openCaregiverTab(tab: CaregiverTab, caregiverId: 
         popUpTo(RootDestination.FamilySummary.route)
         launchSingleTop = true
     }
+}
+
+/** Resolve the caregiver context for detail screens whose route only carries an adult or medication. */
+internal fun NavHostController.openCaregiverTab(tab: CaregiverTab) {
+    val family = runCatching { getBackStackEntry(RootDestination.FamilySummary.route) }.getOrNull()
+    val caregiver = family?.arguments?.getString("caregiverId")
+    val adult = family?.arguments?.getString("olderAdultId")
+    if (caregiver != null && adult != null) openCaregiverTab(tab, caregiver, adult)
+    else popBackStack()
 }
