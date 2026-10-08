@@ -16,6 +16,8 @@ Account, OlderAdult, CareLink, Medication, Treatment and Intake IDs and referenc
 
 Touch confirmation is implemented. Device voice recognition and its permission/error states remain pending; accepting VOICE in REST does not implement speech recognition.
 
+US-23 uses the same endpoint: a `200` whose intake comes back `LATE` shows "Dose confirmed late" (confirmed within the tolerance period); a `409` shows "Missed dose": the app reads the intake again and keeps the omission, because a later confirmation does not replace it.
+
 ## Daily/weekly agenda (TS-08 / US-24)
 
 `GET /api/v1/older-adults/{olderAdultId}/intakes/agenda?from=<ISO instant>&to=<ISO instant>` returns an array of intake resources, chronologically ordered, including persisted outcomes. `200 []` is an empty agenda. Both bounds are required; start is inclusive and end exclusive. The server rejects invalid or ranges exceeding eight elapsed days with `400`.
@@ -105,6 +107,11 @@ The alert `id` is a numeric `int64` (`Long` in Android), unlike the UUID `String
 
 `PUT /api/v1/older-adults/{olderAdultId}/alerts/{alertId}/status?caregiverId=` with `{ "status": "ATTENDED" | "CLOSED" }` exists for US-31 and is not consumed by US-27.
 
+## Plans and subscription (US-44, US-45)
+
+`GET /api/v1/plans` returns `[{ code, name, monthlyPrice, currency, capabilities[] }]`; today ESSENTIAL (S/ 9.90) and FAMILY (S/ 19.90). `GET /api/v1/accounts/{accountId}/subscription` returns `{ accountId, plan, status, renewsAt }` with status `ACTIVE` and `renewsAt` as an ISO instant. Errors are a problem detail whose `title` is the code: `ACCOUNT_NOT_FOUND` and `PLAN_NOT_FOUND` (404), `ACCOUNT_NOT_ACTIVE` (403). A capability this app does not know is ignored, so the backend can add capabilities without breaking old versions.
+
+`PUT /api/v1/accounts/{accountId}/subscription` takes `{ "planCode": "ESSENTIAL" }` and returns the subscription representation. Choosing the plan the account already has changes nothing. `404 PLAN_NOT_FOUND` for an unknown code and `403 ACCOUNT_NOT_ACTIVE` for an account that is not active.
 ## Omission push (US-22)
 
 There is no REST endpoint for this flow: the backend Omission & Escalation context (TS-05 / TS-06) sends pushes on its own, and the OpenAPI document has no endpoint to register an FCM device token.
@@ -116,3 +123,24 @@ There is no REST endpoint for this flow: the backend Omission & Escalation conte
 The app follows those recipients as FCM topics: the caregiver when the family summary opens, the older adult when the home opens. It shows its own localized text from the topic and the medication in the body. A tapped caregiver alert opens the alert list of that older adult and, on top of it, the detail of its most recent OPEN alert for that medication, read from `openAlerts` of `GET /api/v1/older-adults/{olderAdultId}/status?caregiverId=`, because the push has no alert id. A tapped reminder opens the older adult home. The token registration is behind `DeviceTokenRegistry`, pending until the backend publishes an endpoint. Delivery needs a Firebase project (`app/google-services.json`, not versioned) and a backend provider that publishes to those topics; the deployed backend logs the messages instead of sending them.
 
 On the home, the "Second reminder" card shows while the next dose is `PENDING` after its scheduled time; the intake resource does not say whether the reminder push went out.
+### Alert follow-up status (US-31)
+
+`PUT /api/v1/older-adults/{olderAdultId}/alerts/{alertId}/status?caregiverId=` with body `UpdateAlertStatusResource` `{ "status": "ATTENDED" | "CLOSED" }` returns the updated `AlertSummaryResource` (`200`). The schema enum also lists `OPEN`, but the backend only accepts `ATTENDED` and `CLOSED`, so the app never sends `OPEN`. Errors: `400` status not accepted, `404` follow-up or alert not found, `409` the alert cannot move to that status. No `403` is documented; the app treats one like the reads.
+
+The app offers OPEN → ATTENDED ("Mark as attended"), OPEN or ATTENDED → CLOSED ("Close alert", after a confirmation because a closed alert cannot be reopened) and no action on a CLOSED alert. On `409` it reloads the alert detail and shows its current status. A CLOSED alert leaves `openAlerts`; the list refreshes when it is shown again.
+
+## Follow-up notes (US-30)
+
+- List: `GET /api/v1/older-adults/{olderAdultId}/notes?caregiverId=` returns `CaregiverNoteResource[]`, most recent first; `200 []` means no notes. `404` means the older adult has no active follow-up.
+- Register: `POST /api/v1/older-adults/{olderAdultId}/notes` with body `CreateCaregiverNoteResource` `{ "familiarId": String, "text": String }` returns the stored note (`201`). This endpoint has no `caregiverId` query: the app sends the signed-in caregiver id as `familiarId`. `400` invalid note, `404` no active follow-up.
+
+`CaregiverNoteResource`: `{ id: int64, text: String, recordedAt: date-time, familiarId: String }`.
+
+`text` has `maxLength` 1000 and `minLength` 0. The app trims the text, refuses blank notes before sending them and allows up to 1000 characters. Notes belong to the follow-up of the older adult: there is no `alertId`, so "Add follow-up note" on an alert stores a general note that does not show which alert it came from. A note written by another caregiver of the same adult appears as "Another caregiver", because the resource carries only `familiarId`, not a name.
+
+## Contact from an alert (US-29)
+
+- Channel: `GET /api/v1/older-adults/{olderAdultId}/contact-channel?caregiverId=` returns `ContactChannelResource` `{ type: "PHONE" | "WHATSAPP", value: String }`. `404` means no follow-up or no contact channel; the app shows the disabled "Contact unavailable" button.
+- Name: `GET /api/v1/older-adults/{olderAdultId}` returns `OlderAdultProfileResource`; only `fullName` is read, for "Contact <first name>". It has no `caregiverId` query. If it fails, the button reads "Contact" and contact still works.
+
+PHONE opens the dialer with the number typed (`ACTION_DIAL`, no `CALL_PHONE` permission). WHATSAPP opens `https://wa.me/<digits>`, which WhatsApp or the browser handles. The API returns one channel, so the app never offers a choice between phone and WhatsApp. The family summary "Contact" action uses the same lookup and launcher.
