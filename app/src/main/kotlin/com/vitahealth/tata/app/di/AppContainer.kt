@@ -275,6 +275,20 @@ class AppContainer(
         intakeSyncScheduler.schedule()
     }
 
+    fun myMedicationsViewModelFactory(olderAdultId: String) =
+        com.vitahealth.tata.treatment.presentation.medication.MyMedicationsViewModel.Factory(
+            query = com.vitahealth.tata.treatment.application.handlers.GetMyMedicationsQueryHandler(
+                com.vitahealth.tata.treatment.infrastructure.remote.RemoteMyMedicationsRepository(treatmentApi)),
+            nextDoseQuery = {
+                when (val result = nextDoseRepository.getNextDose(olderAdultId)) {
+                    is com.vitahealth.tata.shared.common.result.AppResult.Success -> result.value?.let {
+                        com.vitahealth.tata.treatment.application.readmodels.MedicationNextDose(it.id, it.medicationId, it.scheduledAt)
+                    }
+                    is com.vitahealth.tata.shared.common.result.AppResult.Failure -> null
+                }
+            },
+        )
+
     val caregiverRegistrationViewModelFactory = CaregiverRegistrationViewModel.Factory(
         registerHandler = RegisterCaregiverCommandHandler(identityRepository),
         verifyHandler = VerifyCaregiverEmailCommandHandler(identityRepository),
