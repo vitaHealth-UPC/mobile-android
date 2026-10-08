@@ -1,27 +1,11 @@
-# Module dependency map
+# Application package dependencies
 
-```text
-                    :app
-                     |
-   -----------------------------------------
-   |    |      |      |      |      |      |
-identity carelink treatment intake omission monitoring
-   |      |       |      |       |      |
- analytics inventory preferences
-          \      |      /
-              :shared
-```
+The Android build contains one module, `:app`. Its sources contain the composition package `app`, nine context packages and `shared`.
 
-Allowed:
+- `app` composes context factories, navigation and cross-context event routing.
+- Each context uses its own domain, application, infrastructure and presentation layers.
+- Context packages use shared design components and technical contracts.
+- Domain code does not import Android UI, Retrofit or persistence implementations.
+- Feature packages do not import another context implementation.
 
-- `:app -> :shared`
-- `:app -> every Bounded Context`
-- `each Bounded Context -> :shared`
-
-Not allowed:
-
-- `:treatment -> :intake`
-- `:intake -> :analytics`
-- any other Bounded Context to Bounded Context compile dependency
-
-Cross-context propagation is routed by the composition root using explicit events/contracts.
+These rules are checked by `ArchitectureBoundariesTest` in the app unit suite.
