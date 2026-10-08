@@ -18,80 +18,78 @@ Behavior comes from the backlog and Acceptance Criteria. Figma governs visual re
 
 ## Branch matrix
 
-| US | Branch | Owning module | Main responsibility |
+| US | Branch | Owning package | Main responsibility |
 | --- | --- | --- | --- |
-| US-01 | `feature/us-01-pin-access` | `:identity` | PIN setup/access, incorrect PIN and lockout |
-| US-02 | `feature/us-02-care-link` | `:carelink` | Family/caregiver link flow |
-| US-03 | `feature/us-03-register-medication` | `:treatment` | Register medication |
-| US-04 | `feature/us-04-update-deactivate-medication` | `:treatment` | Edit/deactivate medication |
-| US-05 | `feature/us-05-dose-reminder` | `:intake` | Scheduled dose reminder |
-| US-06 | `feature/us-06-dose-confirmation` | `:intake` | Touch/voice dose confirmation |
-| US-07 | `feature/us-07-missed-dose-alert` | `:omission` | Missed-dose alert representation |
-| US-08 | `feature/us-08-weekly-adherence-summary` | `:analytics` | Weekly adherence metrics |
-| US-09 | `feature/us-09-recurring-omission-pattern` | `:analytics` | Recurring omission patterns |
-| US-10 | `feature/us-10-caregiver-registration` | `:identity` | Caregiver account registration |
-| US-11 | `feature/us-11-email-verification` | `:identity` | Email verification lifecycle |
-| US-12 | `feature/us-12-older-adult-profile` | `:identity` | Older-adult profile |
-| US-13 | `feature/us-13-care-consent` | `:carelink` | Care-link consent |
-| US-14 | `feature/us-14-create-treatment` | `:treatment` | Treatment creation |
-| US-15 | `feature/us-15-dose-frequency` | `:treatment` | Dosage/frequency |
-| US-16 | `feature/us-16-schedule-instructions` | `:treatment` | Schedule/instructions |
-| US-17 | `feature/us-17-treatment-reminders` | `:treatment` | Treatment reminder policy |
-| US-18 | `feature/us-18-treatment-activation-pause` | `:treatment` | Activate/pause treatment |
-| US-19 | `feature/us-19-treatment-detail` | `:treatment` | Treatment detail |
-| US-20 | `feature/us-20-next-dose` | `:intake` | Next dose |
-| US-21 | `feature/us-21-dose-detail` | `:intake` | Dose detail by state |
-| US-22 | `feature/us-22-reinforced-reminder` | `:intake` | Reinforced reminder |
-| US-23 | `feature/us-23-late-dose-confirmation` | `:intake` | Late confirmation/tolerance |
-| US-24 | `feature/us-24-daily-schedule` | `:intake` | Daily/weekly schedule |
-| US-25 | `feature/us-25-recent-care-status` | `:monitoring` | Family summary/recent care |
-| US-26 | `feature/us-26-intake-history` | `:analytics` | Recent intake history |
-| US-27 | `feature/us-27-alert-detail` | `:omission` | Alert detail |
-| US-28 | `feature/us-28-notification-preferences` | `:preferences` | Notification preferences |
-| US-29 | `feature/us-29-alert-contact` | `:omission` | Contact action from alert |
-| US-30 | `feature/us-30-followup-note` | `:omission` | Caregiver follow-up note |
-| US-31 | `feature/us-31-alert-followup` | `:omission` | Mark alert attended/follow-up |
-| US-32 | `feature/us-32-adherence-history` | `:analytics` | Adherence history by period |
-| US-33 | `feature/us-33-late-omitted-classification` | `:analytics` | Consume late/omitted classification |
-| US-34 | `feature/us-34-adherence-recommendations` | `:analytics` | Recommendations with evidence |
-| US-35 | `feature/us-35-text-size` | `:preferences` | Large text |
-| US-36 | `feature/us-36-high-contrast` | `:preferences` | High contrast |
-| US-37 | `feature/us-37-reduced-motion` | `:preferences` | Reduced motion |
-| US-38 | `feature/us-38-reading-assistance` | `:preferences` | Reading assistance |
-| US-39 | `feature/us-39-quiet-hours-channels` | `:preferences` | Quiet hours/channels |
-| US-40 | `feature/us-40-initial-inventory` | `:inventory` | Initial inventory |
-| US-41 | `feature/us-41-stock-status` | `:inventory` | Stock status |
-| US-42 | `feature/us-42-low-stock-alert` | `:inventory` | Low-stock state |
-| US-43 | `feature/us-43-restock` | `:inventory` | Replenishment |
-| US-44 | `feature/us-44-current-plan` | `:identity` | Current plan/subscription |
-| US-45 | `feature/us-45-change-subscription` | `:identity` | Change subscription |
+| US-01 | `feature/us-01-pin-access` | `identity` | PIN setup/access, incorrect PIN and lockout |
+| US-02 | `feature/us-02-care-link` | `carelink` | Family/caregiver link flow |
+| US-03 | `feature/us-03-register-medication` | `treatment` | Register medication |
+| US-04 | `feature/us-04-update-deactivate-medication` | `treatment` | Edit/deactivate medication |
+| US-05 | `feature/us-05-dose-reminder` | `intake` | Scheduled dose reminder |
+| US-06 | `feature/us-06-dose-confirmation` | `intake` | Touch/voice dose confirmation |
+| US-07 | `feature/us-07-missed-dose-alert` | `omission` | Missed-dose alert representation |
+| US-08 | `feature/us-08-weekly-adherence-summary` | `analytics` | Weekly adherence metrics |
+| US-09 | `feature/us-09-recurring-omission-pattern` | `analytics` | Recurring omission patterns |
+| US-10 | `feature/us-10-caregiver-registration` | `identity` | Caregiver account registration |
+| US-11 | `feature/us-11-email-verification` | `identity` | Email verification lifecycle |
+| US-12 | `feature/us-12-older-adult-profile` | `identity` | Older-adult profile |
+| US-13 | `feature/us-13-care-consent` | `carelink` | Care-link consent |
+| US-14 | `feature/us-14-create-treatment` | `treatment` | Treatment creation |
+| US-15 | `feature/us-15-dose-frequency` | `treatment` | Dosage/frequency |
+| US-16 | `feature/us-16-schedule-instructions` | `treatment` | Schedule/instructions |
+| US-17 | `feature/us-17-treatment-reminders` | `treatment` | Treatment reminder policy |
+| US-18 | `feature/us-18-treatment-activation-pause` | `treatment` | Activate/pause treatment |
+| US-19 | `feature/us-19-treatment-detail` | `treatment` | Treatment detail |
+| US-20 | `feature/us-20-next-dose` | `intake` | Next dose |
+| US-21 | `feature/us-21-dose-detail` | `intake` | Dose detail by state |
+| US-22 | `feature/us-22-reinforced-reminder` | `intake` | Reinforced reminder |
+| US-23 | `feature/us-23-late-dose-confirmation` | `intake` | Late confirmation/tolerance |
+| US-24 | `feature/us-24-daily-schedule` | `intake` | Daily/weekly schedule |
+| US-25 | `feature/us-25-recent-care-status` | `monitoring` | Family summary/recent care |
+| US-26 | `feature/us-26-intake-history` | `analytics` | Recent intake history |
+| US-27 | `feature/us-27-alert-detail` | `omission` | Alert detail |
+| US-28 | `feature/us-28-notification-preferences` | `preferences` | Notification preferences |
+| US-29 | `feature/us-29-alert-contact` | `omission` | Contact action from alert |
+| US-30 | `feature/us-30-followup-note` | `omission` | Caregiver follow-up note |
+| US-31 | `feature/us-31-alert-followup` | `omission` | Mark alert attended/follow-up |
+| US-32 | `feature/us-32-adherence-history` | `analytics` | Adherence history by period |
+| US-33 | `feature/us-33-late-omitted-classification` | `analytics` | Consume late/omitted classification |
+| US-34 | `feature/us-34-adherence-recommendations` | `analytics` | Recommendations with evidence |
+| US-35 | `feature/us-35-text-size` | `preferences` | Large text |
+| US-36 | `feature/us-36-high-contrast` | `preferences` | High contrast |
+| US-37 | `feature/us-37-reduced-motion` | `preferences` | Reduced motion |
+| US-38 | `feature/us-38-reading-assistance` | `preferences` | Reading assistance |
+| US-39 | `feature/us-39-quiet-hours-channels` | `preferences` | Quiet hours/channels |
+| US-40 | `feature/us-40-initial-inventory` | `inventory` | Initial inventory |
+| US-41 | `feature/us-41-stock-status` | `inventory` | Stock status |
+| US-42 | `feature/us-42-low-stock-alert` | `inventory` | Low-stock state |
+| US-43 | `feature/us-43-restock` | `inventory` | Replenishment |
+| US-44 | `feature/us-44-current-plan` | `identity` | Current plan/subscription |
+| US-45 | `feature/us-45-change-subscription` | `identity` | Change subscription |
 
 US-46 to US-50 belong to the Landing Page product and are intentionally outside this repository.
 
 ## Architectural contract
 
-Each business Bounded Context is a Gradle module:
+The only Gradle module is `:app`. Business contexts are packages under
+`app/src/main/kotlin/com/vitahealth/tata`:
 
 ```text
-:identity
-:carelink
-:treatment
-:intake
-:omission
-:monitoring
-:analytics
-:inventory
-:preferences
+identity/
+carelink/
+treatment/
+intake/
+omission/
+monitoring/
+analytics/
+inventory/
+preferences/
 ```
 
-Support modules:
+The `app` package owns composition, root navigation, the role-aware shell and
+cross-context wiring. The `shared` package contains technical and design primitives;
+it does not own business aggregates.
 
-```text
-:app    -> composition root, root navigation, role-aware shell, cross-context wiring
-:shared -> technical/design primitives only; never shared business aggregates
-```
-
-Inside every business module:
+Inside every business context:
 
 ```text
 domain/
@@ -105,7 +103,7 @@ presentation/
 **Domain**
 - Pure Kotlin business model.
 - Aggregates, entities, value objects, domain services, events and repository contracts.
-- Must not import Android, Compose, Retrofit, Room or other business modules.
+- Must not import Android, Compose, Retrofit, Room or other business contexts.
 
 **Application**
 - CQRS orchestration.
@@ -127,8 +125,8 @@ presentation/
 
 ### Dependency rules
 
-- A business module may depend on `:shared`.
-- A business module must not depend directly on another business module.
+- A business context may depend on `shared`.
+- A business context must not depend directly on another business context.
 - `:app` performs composition and cross-context wiring.
 - Cross-context information uses backend read models, ports/ACLs, or routed events; never another module's DAO/repository.
 - Domain models are not Retrofit responses, Room entities or UI models.
@@ -155,7 +153,7 @@ Where useful, list/detail flows should become side-by-side in Expanded layouts r
 
 ---
 
-# Identity & Subscription — `:identity`
+# Identity & Subscription — `identity`
 
 ## US-01 — PIN access
 
@@ -225,7 +223,7 @@ The backend remains the authority for duplicate email and verification validity.
 
 ---
 
-# Care Link — `:carelink`
+# Care Link — `carelink`
 
 ## US-02 — care link
 
@@ -244,7 +242,7 @@ The backend remains the authority for duplicate email and verification validity.
 - linked-person view
 - states: entering code, pending consent, invalid/expired code, linked
 
-The module receives external account/older-adult identifiers from composition/session. It does not import `:identity`.
+The module receives external account/older-adult identifiers from composition/session. It does not import `identity`.
 
 ## US-13 — care consent
 
@@ -264,7 +262,7 @@ Authorization must be enforced by repository/API semantics, not only by hiding U
 
 ---
 
-# Treatment Management — `:treatment`
+# Treatment Management — `treatment`
 
 ## Aggregate model
 
@@ -316,7 +314,7 @@ Do not create a separate `TreatmentPausedScreen` solely because Figma contains a
 
 ---
 
-# Intake Execution — `:intake`
+# Intake Execution — `intake`
 
 ## Domain model
 
@@ -358,7 +356,7 @@ Do not derive this business rule from Compose labels/colors.
 
 ---
 
-# Omission & Escalation — `:omission`
+# Omission & Escalation — `omission`
 
 ## Domain model
 
@@ -391,7 +389,7 @@ Figma states such as pending, note saved, unavailable contact and attended are s
 
 ---
 
-# Family Monitoring — `:monitoring`
+# Family Monitoring — `monitoring`
 
 ## US-25 — recent care status
 
@@ -404,11 +402,11 @@ A `FamilySummaryReadModel` can include:
 - active alert summary
 - adherence summary
 
-Do not implement this by importing `:intake`, `:omission` or `:analytics`. Use a backend consolidated read model or a projection composed outside those module boundaries.
+Do not implement this by importing `intake`, `omission` or `analytics`. Use a backend consolidated read model or a projection composed outside those module boundaries.
 
 ---
 
-# Adherence Analytics — `:analytics`
+# Adherence Analytics — `analytics`
 
 ## Domain/read models
 
@@ -442,7 +440,7 @@ States: recommendations available / insufficient evidence.
 
 ---
 
-# Accessibility & Preferences — `:preferences`
+# Accessibility & Preferences — `preferences`
 
 DataStore is the preferred persistence mechanism for simple user preferences.
 
@@ -475,11 +473,11 @@ Figma variants are states of `AccessibilityScreen`.
 
 Commands/queries persist categories, channels and quiet hours. `NotificationPreferencesScreen` represents editing/saving/error states.
 
-`:shared` must not depend on `:preferences`. Shared abstractions may be implemented by `:preferences` and injected by `:app`.
+`shared` must not depend on `preferences`. Shared abstractions may be implemented by `preferences` and injected by `:app`.
 
 ---
 
-# Inventory & Replenishment — `:inventory`
+# Inventory & Replenishment — `inventory`
 
 ## Domain model
 
@@ -506,7 +504,7 @@ Register quantity, lot and timestamp transactionally. A successful replenishment
 
 # Shared design system
 
-Repeated visual primitives belong in `:shared/design` when they are genuinely reusable and contain no business rule.
+Repeated visual primitives belong in `shared/design` when they are genuinely reusable and contain no business rule.
 
 Examples:
 
