@@ -4,9 +4,9 @@ Checkpoint: 2026-10-08. Registro independiente del conteo de implementaciones.
 
 - 62 variantes tienen implementación, incluyendo composiciones parciales.
 - 8 carecen de implementación específica.
-- 28 aceptadas visualmente con el criterio proporcional acordado.
-- 34 implementadas requieren validación o correcciones.
-- 60 tienen comparación visual; comparación no equivale a aceptación.
+- 29 aceptadas visualmente con el criterio proporcional acordado.
+- 33 implementadas requieren validación o correcciones.
+- 61 tienen comparación visual; comparación no equivale a aceptación.
 
 Aceptación: composición, tipografía, proporciones, iconos, contraste y estado representado coherentes con Figma. Se permiten adaptaciones nativas, desplazamiento por contenido real y datos dinámicos; no se exige copiar nombres, fechas ni títulos a posiciones absolutas. La aceptación visual no certifica integraciones ni navegación completa. Cada variante requiere su propio resultado; reutilizar un composable no aprueba automáticamente todas sus variantes.
 
@@ -26,7 +26,7 @@ Evidencias PNG en el equipo de trabajo: C:/Users/david/Downloads/. Las capturas 
 | 10 | Medication Detail | 563:142 | Aceptada visualmente | dose-detail-polished.png |
 | 11 | Weekly Schedule | 563:500 | Aceptada visualmente | agenda-final.png |
 | 12 | Voice Confirmation | 563:242 | Sin implementación específica | — |
-| 13 | Dose Confirmed | 563:291 | Requiere validar/corregir | — |
+| 13 | Dose Confirmed | 563:291 | Aceptada visualmente; fecha persistida, próxima toma real y retorno al inicio | dose-confirmed-verified.png |
 | 14 | Accessibility | 563:618 | Requiere validar/corregir | — |
 | 15 | Family Summary | 563:727 | Aceptada visualmente | family-summary-final.png |
 | 16 | Linked Person | 563:1121 | Requiere validar/corregir | — |
@@ -94,3 +94,5 @@ La composición usa tarjetas, botones, texto y distribución Compose. La ilustra
 La captura se compara con `563:361`: encabezado, destacado, próxima dosis, filtros, cuadrícula y barra inferior. El contador usa los datos recibidos: el mockup muestra cinco medicamentos distintos y un contador de cuatro. La validación visual usa fixtures aislados; la comprobación de Render responde con 502 o timeout y no confirma integración contra el despliegue público.
 
 Notas del adulto: GET/POST `/api/v1/me/notes`, categorías `MEDICATION` y `ROUTINE`, propietario derivado de sesión PIN. Se verifican aislamiento entre propietarios, orden persistido y rechazo de sesiones de cuidador/configuración. Navegación Inicio, Medicamentos, Agenda y Notas disponible sin acumular destinos repetidos. La comprobación visual usa datos aislados; Render conserva la limitación de verificación pública registrada.
+
+Toma confirmada: próxima toma consultada después del registro, sin duplicar la toma confirmada. Un fallo de esa consulta conserva la confirmación exitosa. La tarjeta comunica progreso registrado y no afirma entrega de notificaciones familiares. Confeti y marca de éxito nativos; iconos vectoriales y medicamento en su slot de diseño.

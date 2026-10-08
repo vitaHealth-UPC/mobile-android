@@ -501,6 +501,7 @@ class AppContainer(
         intakeId = intakeId,
         handler = GetDoseDetailQueryHandler(doseDetailRepository),
         confirmHandler = ConfirmDoseCommandHandler(doseConfirmationRepository),
+        nextDoseHandler = GetNextDoseQueryHandler(nextDoseRepository),
     )
 
     fun inventoryViewModelFactory(
