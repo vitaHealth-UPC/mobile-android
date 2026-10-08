@@ -223,6 +223,17 @@ fun TataNavHost(
             PlanSubscriptionRoute(
                 factory = app.container.planSubscriptionViewModelFactory(accountId),
                 onBack = { navController.popBackStack() },
+                onTabSelected = { tab ->
+                    if (tab != CaregiverTab.More) {
+                        val family = runCatching { navController.getBackStackEntry(RootDestination.FamilySummary.route) }.getOrNull()
+                        val caregiver = family?.arguments?.getString("caregiverId")
+                        val adult = family?.arguments?.getString("olderAdultId")
+                        if (caregiver != null && adult != null) {
+                            if (tab == CaregiverTab.Person) navController.navigate(RootDestination.CaregiverProfiles.createRoute(caregiver))
+                            else navController.openCaregiverTab(tab, caregiver, adult)
+                        } else navController.popBackStack()
+                    }
+                },
             )
         }
 
@@ -353,12 +364,13 @@ fun TataNavHost(
             )
 
             MedicationRegistrationRoute(
+                onBack = { navController.popBackStack() },
                 factory = app.container.medicationRegistrationViewModelFactory(
                     caregiverId = caregiverId,
                     olderAdultId = olderAdultId,
                     olderAdultName = olderAdultName,
                 ),
-                onRegistered = { medication ->
+                onRegistered = { medication, draft ->
                     navController.navigate(
                         RootDestination.TreatmentCreation.createRoute(
                             caregiverId = caregiverId,
@@ -369,6 +381,10 @@ fun TataNavHost(
                         ),
                     ) {
                         popUpTo(RootDestination.MedicationRegistration.route) { inclusive = true }
+                    }
+                    navController.currentBackStackEntry?.savedStateHandle?.apply {
+                        set("draftFrequency", draft.frequency)
+                        set("draftInstructions", listOf(draft.timing, draft.notes).filter { it.isNotBlank() }.joinToString("\n"))
                     }
                 },
             )
@@ -423,6 +439,10 @@ fun TataNavHost(
                     ) {
                         popUpTo(RootDestination.TreatmentCreation.route) { inclusive = true }
                     }
+                    navController.currentBackStackEntry?.savedStateHandle?.apply {
+                        set("draftFrequency", backStackEntry.savedStateHandle.get<String>("draftFrequency") ?: "")
+                        set("draftInstructions", backStackEntry.savedStateHandle.get<String>("draftInstructions") ?: "")
+                    }
                 },
             )
         }
@@ -463,6 +483,7 @@ fun TataNavHost(
             )
 
             TreatmentDoseFrequencyRoute(
+                initialFrequency = backStackEntry.savedStateHandle.get<String>("draftFrequency") ?: "",
                 factory = app.container.treatmentDoseFrequencyViewModelFactory(
                     caregiverId = caregiverId,
                     olderAdultId = olderAdultId,
@@ -488,6 +509,8 @@ fun TataNavHost(
                     ) {
                         popUpTo(RootDestination.TreatmentDoseFrequency.route) { inclusive = true }
                     }
+                    navController.currentBackStackEntry?.savedStateHandle?.set("draftInstructions",
+                        backStackEntry.savedStateHandle.get<String>("draftInstructions") ?: "")
                 },
             )
         }
@@ -536,6 +559,7 @@ fun TataNavHost(
             )
 
             TreatmentScheduleInstructionsRoute(
+                initialInstructions = backStackEntry.savedStateHandle.get<String>("draftInstructions") ?: "",
                 factory = app.container.treatmentScheduleInstructionsViewModelFactory(
                     caregiverId = caregiverId,
                     olderAdultId = olderAdultId,
@@ -865,6 +889,9 @@ fun TataNavHost(
             ).trim()
 
             InventoryRoute(
+                olderAdultName = runCatching { navController.getBackStackEntry(RootDestination.FamilySummary.route) }
+                    .getOrNull()?.arguments?.getString("olderAdultName") ?: "",
+                onTabSelected = { tab -> navController.openCaregiverTab(tab) },
                 factory = app.container.inventoryViewModelFactory(
                     medicationId = medicationId,
                     medicationName = medicationName,
@@ -889,7 +916,7 @@ fun TataNavHost(
                 onOpenRecommendations = {
                     navController.navigate(RootDestination.AdherenceRecommendations.createRoute(olderAdultId))
                 },
-                onTabSelected = { navController.popBackStack(RootDestination.FamilySummary.route, inclusive = false) },
+                onTabSelected = { tab -> navController.openCaregiverTab(tab) },
             )
         }
 
@@ -909,7 +936,7 @@ fun TataNavHost(
             AdherenceRecommendationsRoute(
                 factory = app.container.adherenceRecommendationsViewModelFactory(olderAdultId),
                 onBackToHistory = { navController.popBackStack() },
-                onTabSelected = { navController.popBackStack(RootDestination.FamilySummary.route, inclusive = false) },
+                onTabSelected = { tab -> navController.openCaregiverTab(tab) },
             )
         }
 

@@ -4,9 +4,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.asAndroidBitmap
-import androidx.compose.ui.test.captureToImage
-import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -42,6 +41,48 @@ import org.junit.runner.RunWith
 class ExistingScreensVisualAuditTest {
     @get:Rule val compose = createComposeRule()
 
+    @Test fun defaultResourcesUseSpanishAndEnglishIsExplicit() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        fun localized(tag: String): android.content.Context {
+            val config = android.content.res.Configuration(context.resources.configuration)
+            config.setLocales(android.os.LocaleList.forLanguageTags(tag))
+            return context.createConfigurationContext(config)
+        }
+        val spanish = localized("fr-FR") // An unsupported device language must use the Spanish fallback.
+        check(spanish.getString(com.vitahealth.tata.R.string.onboarding_start) == "Comenzar")
+        check(spanish.getString(com.vitahealth.tata.R.string.alerts_title) == "Alertas")
+        check(spanish.getString(com.vitahealth.tata.R.string.inventory_title) == "Inventario")
+        check(spanish.getString(com.vitahealth.tata.R.string.accessibility_title) == "Accesibilidad")
+        val english = localized("en-US")
+        check(english.getString(com.vitahealth.tata.R.string.onboarding_start) == "Get started")
+        check(english.getString(com.vitahealth.tata.R.string.alerts_title) == "Alerts")
+    }
+
+    @Test fun captureOnboardingAndPlanVariants() {
+        val essential = com.vitahealth.tata.identity.domain.model.Plan("ESSENTIAL", "Esencial",
+            java.math.BigDecimal("9.90"), "PEN", setOf(com.vitahealth.tata.identity.domain.model.PlanCapability.REMINDERS))
+        val family = essential.copy(code = "FAMILY", name = "Familiar", monthlyPrice = java.math.BigDecimal("19.90"),
+            capabilities = com.vitahealth.tata.identity.domain.model.PlanCapability.entries.toSet())
+        val state = com.vitahealth.tata.identity.presentation.subscription.PlanSubscriptionUiState(
+            isLoading = false, plans = listOf(essential, family), subscription =
+                com.vitahealth.tata.identity.domain.model.Subscription("account-test", family,
+                    com.vitahealth.tata.identity.domain.model.SubscriptionStatus.ACTIVE,
+                    java.time.Instant.parse("2026-10-28T00:00:00Z")))
+        var variant by mutableStateOf(0)
+        compose.setContent { AuditTheme { Box(Modifier.safeDrawingPadding()) {
+            if (variant == 0) com.vitahealth.tata.identity.presentation.onboarding.OnboardingScreen({}, {})
+            else com.vitahealth.tata.identity.presentation.subscription.PlanSubscriptionScreen(
+                state.copy(changeMessage = if (variant == 2)
+                    com.vitahealth.tata.identity.presentation.subscription.PlanChangeMessage.Updated else null),
+                {}, {}, {}, {}, {}, {})
+        } } }
+        capture("onboarding")
+        compose.runOnIdle { variant = 1 }
+        capture("plan-subscription")
+        compose.runOnIdle { variant = 2 }
+        capture("plan-updated")
+    }
+
     @Test fun captureHistoryVariants() {
         val summary = AdherenceSummaryUi("Últimos 30 días", 92, "+4%", 87, "+3%", 2, 1,
             "2 tardías · 1 omitida", listOf(AdherenceTrendPoint("S1", 80), AdherenceTrendPoint("S2", 87),
@@ -50,8 +91,13 @@ class ExistingScreensVisualAuditTest {
             pattern = PatternUi("Excelente progreso", "Los retrasos se concentran por la tarde."))
         var state by mutableStateOf<AdherenceHistoryUiState>(AdherenceHistoryUiState.Content(summary))
         var period by mutableStateOf(com.vitahealth.tata.analytics.domain.model.AdherencePeriod.LastMonth)
-        compose.setContent { AuditTheme { AdherenceHistoryScreen(state, Modifier.safeDrawingPadding(), selectedPeriod = period) } }
+        compose.setContent { AuditTheme { AdherenceHistoryScreen(state, Modifier.safeDrawingPadding(), selectedPeriod = period,
+            onPeriodSelected = { period = it }) } }
         capture("history-content")
+        compose.onNodeWithText("Últimos 30 días ⌄").performClick()
+        compose.onNodeWithText("Últimos 7 días").performClick()
+        compose.runOnIdle { check(period == com.vitahealth.tata.analytics.domain.model.AdherencePeriod.LastWeek)
+            period = com.vitahealth.tata.analytics.domain.model.AdherencePeriod.LastMonth }
         compose.runOnIdle { state = AdherenceHistoryUiState.InsufficientData("Últimos 30 días") }
         capture("history-insufficient")
         compose.runOnIdle { state = AdherenceHistoryUiState.NoResults("Últimos 30 días") }
@@ -75,10 +121,22 @@ class ExistingScreensVisualAuditTest {
         var state by mutableStateOf(CareLinkUiState("caregiver-test", code = "TATA-4821",
             olderAdult = com.vitahealth.tata.carelink.domain.model.OlderAdultProfile("adult-test", "Rosa Vargas",
                 java.time.LocalDate.of(1958, 5, 12), null, null, null)))
-        compose.setContent { AuditTheme { CareLinkScreen(state, {}, {}, {}, {}, Modifier.safeDrawingPadding()) } }
+        compose.setContent { AuditTheme { CareLinkScreen(state, {}, {}, {}, {}, Modifier.safeDrawingPadding(),
+            avatarResource = com.vitahealth.tata.R.drawable.figma_link_avatar) } }
         capture("link-code")
-        compose.runOnIdle { state = state.copy(errorMessage = "El código no es válido o expiró.") }
+        compose.runOnIdle { state = state.copy(code = "INVALIDO", errorMessage = "El código ya venció o fue utilizado.") }
         capture("link-invalid")
+    }
+
+    @Test fun captureLogin() {
+        var requested = false
+        compose.setContent { AuditTheme { Box(Modifier.safeDrawingPadding()) {
+            SessionAccessScreen(SessionAccessUiState(email = "diego@example.test", password = "fixture-only"),
+                {}, {}, { requested = true }, {}, {}, showPin = false)
+        } } }
+        compose.onNodeWithText("Iniciar sesión").performClick()
+        compose.runOnIdle { check(requested) }
+        capture("login")
     }
 
     @Test fun captureNotificationVariants() {
@@ -94,9 +152,12 @@ class ExistingScreensVisualAuditTest {
     @Test fun captureMedicationRegistrationVariants() {
         var state by mutableStateOf(MedicationRegistrationUiState("caregiver-test", "adult-test", "Rosa Vargas",
             name = "Losartán 50 mg", presentation = "Comprimido", frequency = "Una vez al día", timing = "Con el desayuno"))
-        compose.setContent { AuditTheme { MedicationRegistrationScreen(state, {}, {}, {}, {}, {}, {}, Modifier.safeDrawingPadding()) } }
+        compose.setContent { AuditTheme { MedicationRegistrationScreen(state, {}, {}, { state = state.copy(frequency = it) }, {}, {}, {}, Modifier.safeDrawingPadding()) } }
+        compose.onNodeWithText("Una vez al día").performClick()
+        compose.onNodeWithText("Cada 12 horas").performClick()
+        compose.runOnIdle { check(state.frequency == "Cada 12 horas") }
         capture("medication-registration")
-        compose.runOnIdle { state = state.copy(name = "", presentation = "", errorMessage = "Completa los campos requeridos.") }
+        compose.runOnIdle { state = state.copy(name = "", presentation = "", frequency = "", timing = "", errorMessage = "Completa medicamento, dosis y frecuencia antes de continuar.") }
         capture("medication-registration-error")
     }
 
@@ -143,7 +204,7 @@ class ExistingScreensVisualAuditTest {
     }
 
     @Test fun capturePinVariants() {
-        var state by mutableStateOf(SessionAccessUiState())
+        var state by mutableStateOf(SessionAccessUiState(pin = "4821"))
         var setup by mutableStateOf(false)
         compose.setContent { AuditTheme { Box(Modifier.safeDrawingPadding()) {
             PinAccessScreen(state, "Rosa Vargas", setup, {}, {}, {})
@@ -158,13 +219,18 @@ class ExistingScreensVisualAuditTest {
     }
 
     @Test fun captureRegistrationVariants() {
-        var state by mutableStateOf(CaregiverRegistrationUiState(name = "Diego Vargas", email = "diego@example.test"))
+        var state by mutableStateOf(CaregiverRegistrationUiState(name = "Diego Vargas", email = "diego@example.test",
+            password = "Fixture4821"))
         compose.setContent { AuditTheme { CaregiverRegistrationScreen(state, {}, {}, {}, {}, {}, {}, {}, Modifier.safeDrawingPadding()) } }
         capture("registration-content")
-        compose.runOnIdle { state = state.copy(errorCode = "DUPLICATE_EMAIL", errorMessage = "Este correo ya está registrado.") }
+        compose.runOnIdle { state = state.copy(accountId = "account-test", step = RegistrationStep.Verification,
+            verificationCode = "482196") }
+        capture("registration-verification")
+        compose.runOnIdle { state = state.copy(accountId = null, step = RegistrationStep.Account,
+            verificationCode = "", errorCode = "DUPLICATE_EMAIL", errorMessage = "Este correo ya está registrado.") }
         capture("registration-duplicate")
         compose.runOnIdle { state = state.copy(accountId = "account-test", step = RegistrationStep.VerificationExpired,
-            errorCode = null, errorMessage = null) }
+            verificationCode = "482196", errorCode = null, errorMessage = null) }
         capture("registration-expired")
     }
 
@@ -191,13 +257,24 @@ class ExistingScreensVisualAuditTest {
         capture("linked-person")
     }
 
+    @Test fun captureConsentRequired() {
+        compose.setContent { AuditTheme { Box(Modifier.safeDrawingPadding()) {
+            FamilySummaryScreen(FamilySummaryUiState(loading = false,
+                error = "El vínculo de cuidado ya no está activo.", errorCode = "CARE_RELATIONSHIP_REQUIRED"),
+                "Rosa Vargas", {}, {}, {}, {}, {}, {}, {}, {})
+        } } }
+        compose.onNodeWithText("Seguimiento restringido").assertExists()
+        compose.onNodeWithText("Adherencia esta semana").assertDoesNotExist()
+        capture("consent-required")
+    }
+
     @Test fun captureInventoryVariants() {
         val now = java.time.Instant.now()
         val stock = InventoryStockReadModel("med-test", 5, 7, StockStatus.LOW,
             listOf(InventoryBatch("batch-test", 30, now, "Lote 2026-09")), now, now, 5)
         var state by mutableStateOf(InventoryUiState.Ready(stock, "Losartán 50 mg", "comprimidos",
             replenishmentInput = "30", lotInput = "Lote 2026-09"))
-        compose.setContent { AuditTheme { InventoryScreen(state, {}, {}, {}, {}, {}, {}, Modifier.safeDrawingPadding()) } }
+        compose.setContent { AuditTheme { InventoryScreen(state, {}, {}, {}, {}, {}, {}, Modifier.safeDrawingPadding(), olderAdultName = "Rosa Vargas") } }
         capture("inventory-content")
         compose.runOnIdle { state = state.copy(replenishmentInput = "0", replenishmentErrorCode = "INVALID_QUANTITY") }
         capture("inventory-invalid")
@@ -264,6 +341,17 @@ class ExistingScreensVisualAuditTest {
 
     @Composable private fun AuditTheme(preferences: AccessibilityPreferences = AccessibilityPreferences.Defaults, content: @Composable () -> Unit) {
         val context = androidx.compose.ui.platform.LocalContext.current
+        DisposableEffect(context) {
+            var owner: android.content.Context = context
+            while (owner is android.content.ContextWrapper && owner !is android.app.Activity) owner = owner.baseContext
+            (owner as? android.app.Activity)?.let { activity ->
+                androidx.core.view.WindowCompat.getInsetsController(activity.window, activity.window.decorView).apply {
+                    isAppearanceLightStatusBars = true
+                    isAppearanceLightNavigationBars = true
+                }
+            }
+            onDispose {}
+        }
         val configuration = android.content.res.Configuration(androidx.compose.ui.platform.LocalConfiguration.current).apply {
             setLocales(android.os.LocaleList.forLanguageTags("es-419"))
         }
@@ -279,7 +367,12 @@ class ExistingScreensVisualAuditTest {
     private fun capture(name: String) {
         compose.waitForIdle()
         InstrumentationRegistry.getInstrumentation().waitForIdleSync()
-        val bitmap = compose.onRoot().captureToImage().asAndroidBitmap()
+        // Capture the rendered window, including system insets and shared navigation.
+        compose.mainClock.advanceTimeBy(500)
+        compose.waitForIdle()
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+        Thread.sleep(400) // Give the emulator render thread time to present the settled Compose frame.
+        val bitmap = requireNotNull(InstrumentationRegistry.getInstrumentation().uiAutomation.takeScreenshot())
         val resolver = InstrumentationRegistry.getInstrumentation().targetContext.contentResolver
         val values = android.content.ContentValues().apply {
             put(android.provider.MediaStore.Images.Media.DISPLAY_NAME, "audit-$name.png")
