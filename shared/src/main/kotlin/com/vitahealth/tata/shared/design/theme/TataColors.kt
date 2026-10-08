@@ -2,10 +2,24 @@ package com.vitahealth.tata.shared.design.theme
 
 import androidx.compose.ui.graphics.Color
 
-val TataNavy = Color(0xFF203A73)
+val TataNavy = Color(0xFF173B70)
+val TataDeepNavy = Color(0xFF0E2952)
 val TataPurple = Color(0xFF6254E8)
-val TataLavender = Color(0xFFF1EEFF)
-val TataMint = Color(0xFFEAF7EE)
-val TataCream = Color(0xFFFFF5E4)
-val TataSurface = Color(0xFFF9F8FD)
-val TataText = Color(0xFF172038)
+val TataLavender = Color(0xFFF1ECFF)
+val TataMint = Color(0xFFE8F5EB)
+val TataCream = Color(0xFFFFF4E2)
+val TataSuccess = Color(0xFF296345)
+val TataBlueSurface = Color(0xFFE6EEFB)
+val TataSurface = Color(0xFFF8F8FE)
+val TataText = Color(0xFF0E1729)
+val TataMuted = Color(0xFF7B879B)
+val TataBorder = Color(0xFFE8EAF1)
+val TataError = Color(0xFFAD2E3D)
+val TataErrorSurface = Color(0xFFFCE8EB)
+val TataWarning = Color(0xFF855E1F)
+val TataWarningSurface = Color(0xFFFFF5E0)
+
+// High contrast variants: every pair below reaches at least 7:1 on white and on TataSurface.
+val TataHighContrastText = Color(0xFF000000)
+val TataHighContrastMuted = Color(0xFF38425A)
+val TataHighContrastBorder = Color(0xFF0E2952)
