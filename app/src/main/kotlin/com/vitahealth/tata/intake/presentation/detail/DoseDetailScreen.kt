@@ -43,6 +43,7 @@ fun DoseDetailRoute(
     factory: DoseDetailViewModel.Factory,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
+    onHome: () -> Unit = onBack,
 ) {
     val viewModel: DoseDetailViewModel = viewModel(factory = factory)
     val state by viewModel.state.collectAsState()
@@ -52,6 +53,7 @@ fun DoseDetailRoute(
         onRetry = viewModel::retry,
         onConfirm = viewModel::confirm,
         modifier = modifier,
+        onHome = onHome,
     )
 }
 
@@ -62,7 +64,12 @@ fun DoseDetailScreen(
     onRetry: () -> Unit,
     onConfirm: () -> Unit,
     modifier: Modifier = Modifier,
+    onHome: () -> Unit = onBack,
 ) {
+    if (state is DoseDetailUiState.Content && state.confirmationSucceeded && state.outcome != ConfirmationOutcome.LATE) {
+        DoseConfirmedScreen(state, onHome, modifier)
+        return
+    }
     Column(modifier.fillMaxSize().background(Brush.horizontalGradient(listOf(Color.White, TataSurface, Color(0xFFFCFBFF))))) {
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = 22.dp)) {
             Spacer(Modifier.height(28.dp))
