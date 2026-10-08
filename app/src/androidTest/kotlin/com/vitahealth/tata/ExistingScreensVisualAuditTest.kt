@@ -4,9 +4,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.asAndroidBitmap
-import androidx.compose.ui.test.captureToImage
-import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -94,8 +91,13 @@ class ExistingScreensVisualAuditTest {
             pattern = PatternUi("Excelente progreso", "Los retrasos se concentran por la tarde."))
         var state by mutableStateOf<AdherenceHistoryUiState>(AdherenceHistoryUiState.Content(summary))
         var period by mutableStateOf(com.vitahealth.tata.analytics.domain.model.AdherencePeriod.LastMonth)
-        compose.setContent { AuditTheme { AdherenceHistoryScreen(state, Modifier.safeDrawingPadding(), selectedPeriod = period) } }
+        compose.setContent { AuditTheme { AdherenceHistoryScreen(state, Modifier.safeDrawingPadding(), selectedPeriod = period,
+            onPeriodSelected = { period = it }) } }
         capture("history-content")
+        compose.onNodeWithText("Últimos 30 días ⌄").performClick()
+        compose.onNodeWithText("Últimos 7 días").performClick()
+        compose.runOnIdle { check(period == com.vitahealth.tata.analytics.domain.model.AdherencePeriod.LastWeek)
+            period = com.vitahealth.tata.analytics.domain.model.AdherencePeriod.LastMonth }
         compose.runOnIdle { state = AdherenceHistoryUiState.InsufficientData("Últimos 30 días") }
         capture("history-insufficient")
         compose.runOnIdle { state = AdherenceHistoryUiState.NoResults("Últimos 30 días") }
@@ -316,6 +318,17 @@ class ExistingScreensVisualAuditTest {
 
     @Composable private fun AuditTheme(preferences: AccessibilityPreferences = AccessibilityPreferences.Defaults, content: @Composable () -> Unit) {
         val context = androidx.compose.ui.platform.LocalContext.current
+        DisposableEffect(context) {
+            var owner: android.content.Context = context
+            while (owner is android.content.ContextWrapper && owner !is android.app.Activity) owner = owner.baseContext
+            (owner as? android.app.Activity)?.let { activity ->
+                androidx.core.view.WindowCompat.getInsetsController(activity.window, activity.window.decorView).apply {
+                    isAppearanceLightStatusBars = true
+                    isAppearanceLightNavigationBars = true
+                }
+            }
+            onDispose {}
+        }
         val configuration = android.content.res.Configuration(androidx.compose.ui.platform.LocalConfiguration.current).apply {
             setLocales(android.os.LocaleList.forLanguageTags("es-419"))
         }
@@ -331,7 +344,12 @@ class ExistingScreensVisualAuditTest {
     private fun capture(name: String) {
         compose.waitForIdle()
         InstrumentationRegistry.getInstrumentation().waitForIdleSync()
-        val bitmap = compose.onRoot().captureToImage().asAndroidBitmap()
+        // Capture the rendered window, including system insets and shared navigation.
+        compose.mainClock.advanceTimeBy(500)
+        compose.waitForIdle()
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync()
+        Thread.sleep(400) // Give the emulator render thread time to present the settled Compose frame.
+        val bitmap = requireNotNull(InstrumentationRegistry.getInstrumentation().uiAutomation.takeScreenshot())
         val resolver = InstrumentationRegistry.getInstrumentation().targetContext.contentResolver
         val values = android.content.ContentValues().apply {
             put(android.provider.MediaStore.Images.Media.DISPLAY_NAME, "audit-$name.png")

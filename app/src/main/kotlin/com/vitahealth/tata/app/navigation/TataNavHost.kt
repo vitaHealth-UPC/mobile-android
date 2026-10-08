@@ -913,7 +913,7 @@ fun TataNavHost(
                 onOpenRecommendations = {
                     navController.navigate(RootDestination.AdherenceRecommendations.createRoute(olderAdultId))
                 },
-                onTabSelected = { navController.popBackStack(RootDestination.FamilySummary.route, inclusive = false) },
+                onTabSelected = { tab -> navController.openCaregiverTab(tab) },
             )
         }
 
@@ -933,7 +933,7 @@ fun TataNavHost(
             AdherenceRecommendationsRoute(
                 factory = app.container.adherenceRecommendationsViewModelFactory(olderAdultId),
                 onBackToHistory = { navController.popBackStack() },
-                onTabSelected = { navController.popBackStack(RootDestination.FamilySummary.route, inclusive = false) },
+                onTabSelected = { tab -> navController.openCaregiverTab(tab) },
             )
         }
 
