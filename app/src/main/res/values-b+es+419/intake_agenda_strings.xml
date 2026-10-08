@@ -1,0 +1,4 @@
+<resources>
+    <string name="agenda_tip_title">Consejo del día</string>
+    <string name="agenda_tip_body">Tomar a la misma hora facilita la rutina.</string>
+</resources>
