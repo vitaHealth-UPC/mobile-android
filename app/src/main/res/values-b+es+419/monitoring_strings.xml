@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Alertas del cuidador (US-27) -->
+    <string name="alerts_title">Alertas</string>
+    <string name="alerts_subtitle">Tomas no confirmadas que necesitan tu seguimiento.</string>
+    <string name="alerts_filter_all">Todas</string>
+    <string name="alerts_filter_pending">Pendientes</string>
+    <string name="alerts_filter_attended">Atendidas</string>
+    <plurals name="alerts_pending_summary">
+        <item quantity="one">%1$d alerta pendiente</item>
+        <item quantity="many">%1$d alertas pendientes</item>
+        <item quantity="other">%1$d alertas pendientes</item>
+    </plurals>
+    <string name="alerts_empty_title">Sin alertas</string>
+    <string name="alerts_empty_message">Todo bajo control. Te avisaremos si una toma no se confirma.</string>
+    <string name="alerts_filter_empty">No hay alertas en este filtro.</string>
+    <string name="alerts_card_scheduled">Programada: %1$s</string>
+    <string name="alerts_open_detail">Abrir detalle de la alerta</string>
+    <string name="alerts_loading">Consultando alertas…</string>
+    <string name="alerts_retry">Reintentar</string>
+    <string name="alerts_back">Volver</string>
+
+    <!-- Estado de la alerta, como lo nombra el backend -->
+    <string name="alert_status_open">Pendiente</string>
+    <string name="alert_status_attended">Atendida</string>
+    <string name="alert_status_closed">Cerrada</string>
+    <string name="alert_title_open">Alerta pendiente</string>
+    <string name="alert_title_attended">Alerta atendida</string>
+    <string name="alert_title_closed">Alerta cerrada</string>
+
+    <!-- Detalle de la alerta -->
+    <string name="alert_detail_title">Detalle de la alerta</string>
+    <string name="alert_detail_section">Información de la alerta</string>
+    <string name="alert_detail_scheduled">Toma programada</string>
+    <string name="alert_detail_reason">Motivo</string>
+    <string name="alert_detail_reason_missing">No informado</string>
+    <string name="alert_detail_status">Estado</string>
+    <string name="alert_detail_opened">Abierta</string>
+    <string name="alert_detail_closed">Cerrada</string>
+    <string name="alert_detail_loading">Consultando la alerta…</string>
+
+    <!-- Seguimiento de la alerta (US-31) -->
+    <string name="alert_actions_title">Acciones de seguimiento</string>
+    <string name="alert_actions_subtitle">Actualiza la alerta según el resultado del seguimiento.</string>
+    <string name="alert_action_attend">Marcar como atendida</string>
+    <string name="alert_action_attended">Atendida</string>
+    <string name="alert_action_close">Cerrar alerta</string>
+    <string name="alert_action_saving">Guardando…</string>
+    <string name="alert_closed_note">Esta alerta está cerrada y se conserva en el historial.</string>
+    <string name="alert_close_confirm_title">¿Cerrar esta alerta?</string>
+    <string name="alert_close_confirm_message">Saldrá de la lista de pendientes y quedará en el historial. No se puede reabrir.</string>
+    <string name="alert_close_cancel">Cancelar</string>
+    <string name="alert_feedback_attended">Alerta marcada como atendida.</string>
+    <string name="alert_feedback_closed">Alerta cerrada.</string>
+    <string name="alert_feedback_conflict">La alerta ya había cambiado. Este es su estado actual.</string>
+    <string name="alert_feedback_failed">No pudimos actualizar la alerta. Inténtalo nuevamente.</string>
+
+    <!-- Errores de lectura -->
+    <string name="alerts_error_network">No hay conexión. Revisa tu internet e inténtalo nuevamente.</string>
+    <string name="alerts_error_access">El vínculo de cuidado no está activo o falta el consentimiento, por eso no podemos mostrar las alertas.</string>
+    <string name="alerts_error_list_not_found">Esta persona no tiene un seguimiento activo.</string>
+    <string name="alerts_error_detail_not_found">Esta alerta no existe o ya no está disponible.</string>
+    <string name="alerts_error_unknown">No pudimos consultar las alertas. Inténtalo nuevamente.</string>
+
+    <!-- Notas de seguimiento (US-30) -->
+    <string name="notes_title">Notas</string>
+    <string name="notes_subtitle">Seguimiento y observaciones sobre la persona que cuidas.</string>
+    <string name="notes_section">Notas del cuidador</string>
+    <string name="notes_add">Agregar nota</string>
+    <string name="notes_empty_title">Aún no hay notas</string>
+    <string name="notes_empty_message">Registra lo que hiciste u observaste para que el seguimiento tenga historial.</string>
+    <string name="notes_loading">Consultando notas…</string>
+    <string name="notes_author_you">Tú</string>
+    <string name="notes_author_other">Otro cuidador</string>
+    <string name="notes_meta">%1$s · %2$s</string>
+    <string name="notes_error_unknown">No pudimos consultar las notas. Inténtalo nuevamente.</string>
+    <string name="note_saved">Nota guardada</string>
+    <string name="note_add_followup">Agregar nota de seguimiento</string>
+    <string name="note_dialog_title">Nueva nota de seguimiento</string>
+    <string name="note_dialog_label">¿Qué hiciste u observaste?</string>
+    <string name="note_dialog_counter">%1$d/%2$d caracteres</string>
+    <string name="note_dialog_save">Guardar nota</string>
+    <string name="note_dialog_cancel">Cancelar</string>
+    <string name="note_error_blank">Escribe la nota antes de guardarla.</string>
+    <string name="note_error_too_long">La nota puede tener hasta %1$d caracteres.</string>
+    <string name="note_error_rejected">El servidor no aceptó la nota. Revísala e inténtalo nuevamente.</string>
+    <string name="note_error_save">No pudimos guardar la nota. Inténtalo nuevamente.</string>
+
+    <!-- Contacto desde una alerta (US-29) -->
+    <string name="alert_actions_subtitle_named">Contacta a %1$s y actualiza la alerta según el resultado.</string>
+    <string name="contact_action_named">Contactar a %1$s</string>
+    <string name="contact_action">Contactar</string>
+    <string name="contact_unavailable">Contacto no disponible</string>
+    <string name="contact_loading">Consultando contacto…</string>
+    <string name="contact_channel_phone">Teléfono: %1$s</string>
+    <string name="contact_channel_whatsapp">WhatsApp: %1$s</string>
+    <string name="contact_retry">Volver a consultar el contacto</string>
+    <string name="contact_no_app">Ninguna app de este dispositivo puede abrir este contacto.</string>
+</resources>
