@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="adult_tab_home">Inicio</string>
+    <string name="adult_tab_medications">Medicamentos</string>
+    <string name="adult_tab_agenda">Agenda</string>
+    <string name="adult_tab_notes">Notas</string>
+    <string name="adult_tab_more">Más</string>
+</resources>
