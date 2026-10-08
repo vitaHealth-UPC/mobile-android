@@ -112,3 +112,8 @@ Entry point: the "More" menu of the family summary offers "Plan y suscripción".
 Frames `563:1701` (Plan & Subscription) and `563:5354` (Subscription Updated), same `PlanSubscriptionScreen`. Tapping a plan other than the current one selects it (radio behaviour, a border marks the choice); "Cambiar plan" opens a confirmation that lists what the account gains and loses (computed from the capabilities, not written text) and the monthly price. The "Subscription updated" banner is the `PlanChangeMessage.Updated` UI state; the failures (plan no longer available, account, session, offline) are the other values of the same enum and leave the current plan untouched.
 
 The plan changes only after the backend answers, so the screen never shows a plan the account does not have.
+## Onboarding (identity)
+
+Frame `563:5` (Onboarding): `OnboardingScreen`, the first screen of a fresh install. "Comenzar" opens the caregiver registration and "Iniciar sesión" opens the sign-in; both remember on the device that the welcome was seen, so the next launches open on the sign-in. The sunlight, heart and leaf decorations and the butterfly are the Figma assets; the "Tata" wordmark is drawn with the system cursive font (Dancing Script on Android), because the wordmark layer cannot be exported on its own.
+
+The three reminder cards are decoration with sample medications and are hidden from TalkBack. Their position follows the 393 dp prototype frame, scaled to the real width. The glow washes are approximated with gradients instead of the blurred ellipses.

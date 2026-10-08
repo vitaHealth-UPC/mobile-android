@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted.
+Superseded by [ADR-002](ADR-002-single-app-course-structure.md).
 
 ## Decision
 
