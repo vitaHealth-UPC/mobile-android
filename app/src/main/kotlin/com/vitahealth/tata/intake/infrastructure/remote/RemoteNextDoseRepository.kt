@@ -5,6 +5,7 @@ import com.vitahealth.tata.intake.application.readmodels.NextDoseReadModel
 import com.vitahealth.tata.intake.domain.model.DoseStatus
 import com.vitahealth.tata.shared.common.result.AppResult
 import java.time.Instant
+import kotlinx.coroutines.CancellationException
 
 class RemoteNextDoseRepository(
     private val api: IntakeApiService,
@@ -28,6 +29,8 @@ class RemoteNextDoseRepository(
                     )
                 }
             }
+        } catch (exception: CancellationException) {
+            throw exception
         } catch (exception: Exception) {
             AppResult.Failure(
                 message = "No hay conexión. Inténtalo nuevamente.",
