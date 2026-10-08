@@ -42,6 +42,23 @@ import org.junit.runner.RunWith
 class ExistingScreensVisualAuditTest {
     @get:Rule val compose = createComposeRule()
 
+    @Test fun defaultResourcesUseSpanishAndEnglishIsExplicit() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        fun localized(tag: String): android.content.Context {
+            val config = android.content.res.Configuration(context.resources.configuration)
+            config.setLocales(android.os.LocaleList.forLanguageTags(tag))
+            return context.createConfigurationContext(config)
+        }
+        val spanish = localized("fr-FR") // An unsupported device language must use the Spanish fallback.
+        check(spanish.getString(com.vitahealth.tata.identity.R.string.onboarding_start) == "Comenzar")
+        check(spanish.getString(com.vitahealth.tata.monitoring.R.string.alerts_title) == "Alertas")
+        check(spanish.getString(com.vitahealth.tata.inventory.R.string.inventory_title) == "Inventario")
+        check(spanish.getString(com.vitahealth.tata.preferences.R.string.accessibility_title) == "Accesibilidad")
+        val english = localized("en-US")
+        check(english.getString(com.vitahealth.tata.identity.R.string.onboarding_start) == "Get started")
+        check(english.getString(com.vitahealth.tata.monitoring.R.string.alerts_title) == "Alerts")
+    }
+
     @Test fun captureOnboardingAndPlanVariants() {
         val essential = com.vitahealth.tata.identity.domain.model.Plan("ESSENTIAL", "Esencial",
             java.math.BigDecimal("9.90"), "PEN", setOf(com.vitahealth.tata.identity.domain.model.PlanCapability.REMINDERS))
