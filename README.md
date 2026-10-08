@@ -10,33 +10,33 @@ This repository contains the Android-native product only. The public landing scr
 
 The scaffold follows the architecture used in the course materials:
 
-- Bounded Context per Gradle module.
+- One Gradle module (`:app`), with a package per Bounded Context under `app/src/main/kotlin/com/vitahealth/tata`.
 - DDD layers inside every Bounded Context: `domain`, `application`, `infrastructure`, `presentation`.
 - CQRS in the application layer using Commands/CommandHandlers and Queries/QueryHandlers.
 - Jetpack Compose + StateFlow in presentation.
 - Room/SQLite, Retrofit, Coil, WorkManager and Android device APIs in infrastructure as features are implemented.
-- No direct dependency from one Bounded Context to another.
-- `:app` is the composition root and may depend on every context.
-- `:shared` contains only genuinely shared technical/design primitives and never shared business models.
+- Cross-context work is composed in `app`; feature packages use explicit contracts.
+- The `app` package owns navigation, dependency composition and event routing.
+- The `shared` package contains only genuinely shared technical/design primitives and never shared business models.
 
-## Modules
+## Context packages
 
-| Module | Canonical Bounded Context |
+| Package | Canonical Bounded Context |
 | --- | --- |
-| `:identity` | Identity & Subscription |
-| `:carelink` | Care Link |
-| `:treatment` | Treatment Management |
-| `:intake` | Intake Execution |
-| `:omission` | Omission & Escalation |
-| `:monitoring` | Family Monitoring |
-| `:analytics` | Adherence Analytics |
-| `:inventory` | Inventory & Replenishment |
-| `:preferences` | Accessibility & Preferences |
+| `identity` | Identity & Subscription |
+| `carelink` | Care Link |
+| `treatment` | Treatment Management |
+| `intake` | Intake Execution |
+| `omission` | Omission & Escalation |
+| `monitoring` | Family Monitoring |
+| `analytics` | Adherence Analytics |
+| `inventory` | Inventory & Replenishment |
+| `preferences` | Accessibility & Preferences |
 
-Support modules:
+Supporting packages:
 
-- `:app`: navigation, composition and cross-context event routing.
-- `:shared`: design system, common result types, technical event contracts and synchronization abstractions.
+- `app`: navigation, composition and cross-context event routing.
+- `shared`: design system, common result types, technical event contracts and synchronization abstractions.
 
 ## Baseline
 
@@ -44,7 +44,7 @@ Support modules:
 - Gradle 9.6.0
 - Kotlin 2.2.10
 - Compose BOM 2026.02.01
-- compileSdk / targetSdk 37
+- compileSdk / targetSdk 36
 - minSdk 29
 - JDK 17
 

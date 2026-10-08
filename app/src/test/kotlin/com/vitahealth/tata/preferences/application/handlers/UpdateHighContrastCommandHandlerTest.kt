@@ -1,0 +1,34 @@
+package com.vitahealth.tata.preferences.application.handlers
+
+import com.vitahealth.tata.preferences.FakeAccessibilityLocalStore
+import com.vitahealth.tata.preferences.FakeUserPreferencesRemote
+import com.vitahealth.tata.preferences.application.commands.UpdateHighContrastCommand
+import com.vitahealth.tata.preferences.infrastructure.OfflineFirstUserPreferencesRepository
+import com.vitahealth.tata.shared.common.result.AppResult
+import kotlinx.coroutines.runBlocking
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
+import org.junit.Test
+
+class UpdateHighContrastCommandHandlerTest {
+    private val remote = FakeUserPreferencesRemote()
+    private val handler = UpdateHighContrastCommandHandler(
+        OfflineFirstUserPreferencesRepository(remote, FakeAccessibilityLocalStore()),
+    )
+
+    @Test
+    fun aBlankUserIsRejectedBeforeCallingTheBackend() = runBlocking {
+        val result = handler(UpdateHighContrastCommand(userId = "", enabled = true))
+
+        assertEquals("INVALID_USER_REFERENCE", (result as AppResult.Failure).code)
+        assertTrue(remote.contrastCalls.isEmpty())
+    }
+
+    @Test
+    fun theChosenValueIsSent() = runBlocking {
+        val result = handler(UpdateHighContrastCommand(userId = " user-1 ", enabled = true))
+
+        assertTrue(result is AppResult.Success)
+        assertEquals(listOf(true), remote.contrastCalls)
+    }
+}
