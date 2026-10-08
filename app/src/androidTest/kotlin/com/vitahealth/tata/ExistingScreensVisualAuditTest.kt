@@ -128,6 +128,17 @@ class ExistingScreensVisualAuditTest {
         capture("link-invalid")
     }
 
+    @Test fun captureLogin() {
+        var requested = false
+        compose.setContent { AuditTheme { Box(Modifier.safeDrawingPadding()) {
+            SessionAccessScreen(SessionAccessUiState(email = "diego@example.test", password = "fixture-only"),
+                {}, {}, { requested = true }, {}, {}, showPin = false)
+        } } }
+        compose.onNodeWithText("Iniciar sesión").performClick()
+        compose.runOnIdle { check(requested) }
+        capture("login")
+    }
+
     @Test fun captureNotificationVariants() {
         var state by mutableStateOf(NotificationPreferencesUiState(isLoading = false, preferences = NotificationPreferences(
             quietHours = com.vitahealth.tata.preferences.domain.model.QuietHours.Default)))
