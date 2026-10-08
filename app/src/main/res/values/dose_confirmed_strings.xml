@@ -1,0 +1,8 @@
+<resources>
+    <string name="confirmed_well_done">¡Bien hecho!</string>
+    <string name="confirmed_title">Toma confirmada ♡</string>
+    <string name="confirmed_recorded">Toma registrada</string>
+    <string name="confirmed_next">Próxima toma</string>
+    <string name="confirmed_progress">Tu progreso se ha actualizado</string>
+    <string name="confirmed_history">La toma queda registrada en tu historial.</string>
+</resources>
