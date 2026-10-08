@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="personal_notes_title">Notes</string>
+    <string name="personal_notes_subtitle">Notes to support your routine.</string>
+    <string name="personal_notes_today">Today</string>
+    <string name="personal_notes_yesterday">Yesterday</string>
+    <string name="personal_notes_all">All</string>
+    <string name="personal_notes_routine">Routine</string>
+    <string name="personal_notes_recent">Recent notes</string>
+    <string name="personal_notes_tip">Tip</string>
+    <string name="personal_notes_tip_text">Notes can help you remember instructions beyond your dose.</string>
+    <string name="personal_notes_add">Add note</string>
+    <string name="personal_notes_empty">No notes in this category.</string>
+    <string name="personal_notes_load_error">Could not load your notes.</string>
+    <string name="personal_notes_retry">Retry</string>
+    <string name="personal_notes_sign_in">Sign in with PIN</string>
+    <string name="personal_notes_save_error">Your note was not saved. Retry without losing your text.</string>
+    <string name="personal_notes_subject">Title</string>
+    <string name="personal_notes_body">Note</string>
+    <string name="personal_notes_save">Save</string>
+    <string name="personal_notes_cancel">Cancel</string>
+</resources>

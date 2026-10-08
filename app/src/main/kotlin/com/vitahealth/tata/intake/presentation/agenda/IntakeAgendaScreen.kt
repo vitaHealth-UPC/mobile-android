@@ -49,7 +49,8 @@ import java.util.Locale
 private val agendaLocale = Locale("es", "PE")
 
 @Composable
-fun IntakeAgendaRoute(factory: IntakeAgendaViewModel.Factory, onOpenDose: (String) -> Unit, onHome: () -> Unit) {
+fun IntakeAgendaRoute(factory: IntakeAgendaViewModel.Factory, onOpenDose: (String) -> Unit, onHome: () -> Unit,
+    onMedications: (() -> Unit)? = null, onNotes: (() -> Unit)? = null) {
     val model: IntakeAgendaViewModel = viewModel(factory = factory)
     val state by model.state.collectAsState()
     val owner = LocalLifecycleOwner.current
@@ -58,7 +59,7 @@ fun IntakeAgendaRoute(factory: IntakeAgendaViewModel.Factory, onOpenDose: (Strin
         owner.lifecycle.addObserver(observer)
         onDispose { owner.lifecycle.removeObserver(observer) }
     }
-    IntakeAgendaScreen(state, model::selectDay, model::moveWeek, model::refresh, onOpenDose, onHome)
+    IntakeAgendaScreen(state, model::selectDay, model::moveWeek, model::refresh, onOpenDose, onHome, onMedications, onNotes)
 }
 
 @Composable
@@ -69,6 +70,8 @@ fun IntakeAgendaScreen(
     onRetry: () -> Unit,
     onOpenDose: (String) -> Unit,
     onHome: () -> Unit,
+    onMedications: (() -> Unit)? = null,
+    onNotes: (() -> Unit)? = null,
 ) {
     ProvideTextStyle(MaterialTheme.typography.bodyMedium.copy(fontFamily = FontFamily(Font(com.vitahealth.tata.R.font.tata_inter)), fontSize = 11.sp, lineHeight = 14.sp)) {
     Column(Modifier.fillMaxSize().background(Brush.horizontalGradient(listOf(Color.White, TataSurface, Color(0xFFFCFBFF))))) {
@@ -132,7 +135,12 @@ fun IntakeAgendaScreen(
             }
             Spacer(Modifier.height(20.dp))
         }
-        AdultTabBar(AdultTab.Agenda, { if (it == AdultTab.Home) onHome() }, setOf(AdultTab.Home, AdultTab.Agenda))
+        AdultTabBar(AdultTab.Agenda, { when(it) {
+            AdultTab.Home -> onHome()
+            AdultTab.Medications -> onMedications?.invoke()
+            AdultTab.Notes -> onNotes?.invoke()
+            else -> Unit
+        } }, setOfNotNull(AdultTab.Home, AdultTab.Agenda, AdultTab.Medications.takeIf { onMedications != null }, AdultTab.Notes.takeIf { onNotes != null }))
     }
     }
 }
