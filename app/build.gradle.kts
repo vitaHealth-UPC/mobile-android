@@ -3,6 +3,11 @@ plugins {
     alias(libs.plugins.kotlin.compose)
 }
 
+// Firebase reads app/google-services.json, which is not versioned. Without it the app builds and push stays off.
+if (file("google-services.json").exists()) {
+    apply(plugin = "com.google.gms.google-services")
+}
+
 android {
     namespace = "com.vitahealth.tata"
     compileSdk = 36
@@ -32,16 +37,6 @@ android {
 }
 
 dependencies {
-    implementation(project(":shared"))
-    implementation(project(":identity"))
-    implementation(project(":carelink"))
-    implementation(project(":treatment"))
-    implementation(project(":intake"))
-    implementation(project(":omission"))
-    implementation(project(":monitoring"))
-    implementation(project(":analytics"))
-    implementation(project(":inventory"))
-    implementation(project(":preferences"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
@@ -62,4 +57,17 @@ dependencies {
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
+
+    implementation(libs.androidx.datastore.preferences)
+    implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.coil.compose)
+    implementation(libs.coil.svg)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    testImplementation(libs.kotlinx.coroutines.test)
+    implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
+    implementation("com.google.firebase:firebase-messaging")
+    testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
 }
