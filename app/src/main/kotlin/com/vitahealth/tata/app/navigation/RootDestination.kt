@@ -60,6 +60,11 @@ sealed interface RootDestination {
         fun createRoute(userId: String) = "notification-preferences/" + Uri.encode(userId)
     }
 
+    data object MyMedications : RootDestination {
+        override val route = "my-medications/{olderAdultId}"
+        fun createRoute(olderAdultId: String) = "my-medications/" + Uri.encode(olderAdultId)
+    }
+
     data object IntakeAgenda : RootDestination {
         const val olderAdultIdArgument = "olderAdultId"
         override val route = "intake-agenda/{$olderAdultIdArgument}"
@@ -382,6 +387,11 @@ sealed interface RootDestination {
 
         fun createRoute(olderAdultId: String): String =
             "adherence-recommendations/" + Uri.encode(olderAdultId)
+    }
+
+    data object PersonalNotes : RootDestination {
+        override val route = "personal-notes/{olderAdultId}"
+        fun createRoute(olderAdultId: String) = "personal-notes/" + Uri.encode(olderAdultId)
     }
 
 }
