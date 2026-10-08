@@ -126,7 +126,7 @@ The app harness renders production composables with isolated test fixtures, Span
 | 25, 66, 67 | Native stock ring, numeric input, lot, last batch and error/success feedback render. Caregiver tabs are absent; error location and success composition differ. Last-batch date still follows device-default formatting under a Spanish UI context. Initial-stock action is correctly restricted to uninitialized inventory. |
 | 26, 65 | Quiet hours and push/SMS/email render in Spanish. Medication cadence, caregiver thresholds/summary, emergency contacts/escalation, call channel and caregiver tabs are missing. |
 
-Reproduce with `gradlew.bat :app:connectedDebugAndroidTest :intake:connectedDebugAndroidTest` on an available emulator. App captures are exported by the test to device `Pictures/TataAudit`; intake captures use device `/data/local/tmp`. Figma screenshots are comparison references, never app assets. The full app suite passed 16 instrumentation cases; intake passed 3 interaction/render cases. Monitoring and app unit tests passed while integrating US-27 with current develop. Focused fixture reruns cover period, link-profile and quiet-hours comparison settings.
+Reproduce with `gradlew.bat :app:connectedDebugAndroidTest` on an available emulator. App captures are exported by the test to device `Pictures/TataAudit`; intake captures use device `/data/local/tmp`. Figma screenshots are comparison references, never app assets. The full app suite passed 16 instrumentation cases; intake passed 3 interaction/render cases. Monitoring and app unit tests passed while integrating US-27 with current develop. Focused fixture reruns cover period, link-profile and quiet-hours comparison settings.
 
 ## Implementation consistency
 
