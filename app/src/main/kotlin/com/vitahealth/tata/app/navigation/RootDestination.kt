@@ -30,10 +30,22 @@ sealed interface RootDestination {
             "alerts/" + Uri.encode(caregiverId) + "/" + Uri.encode(olderAdultId)
     }
 
+    data object Notes : RootDestination {
+        override val route = "notes/{caregiverId}/{olderAdultId}"
+        fun createRoute(caregiverId: String, olderAdultId: String) =
+            "notes/" + Uri.encode(caregiverId) + "/" + Uri.encode(olderAdultId)
+    }
+
     data object AlertDetail : RootDestination {
         override val route = "alert-detail/{caregiverId}/{olderAdultId}/{alertId}"
         fun createRoute(caregiverId: String, olderAdultId: String, alertId: Long) =
             "alert-detail/" + Uri.encode(caregiverId) + "/" + Uri.encode(olderAdultId) + "/" + alertId
+    }
+
+    data object PlanSubscription : RootDestination {
+        const val accountIdArgument = "accountId"
+        override val route = "plan-subscription/{$accountIdArgument}"
+        fun createRoute(accountId: String) = "plan-subscription/" + Uri.encode(accountId)
     }
 
     data object Accessibility : RootDestination {
@@ -64,9 +76,9 @@ sealed interface RootDestination {
 
     data object CareLink : RootDestination {
         const val caregiverIdArgument = "caregiverId"
-        override val route: String = "care-link/{$caregiverIdArgument}?code={code}"
+        override val route: String = "care-link/{$caregiverIdArgument}?code={code}&previewAdult={previewAdult}"
 
-        fun createRoute(caregiverId: String, code: String = ""): String = "care-link/" + Uri.encode(caregiverId) + "?code=" + Uri.encode(code)
+        fun createRoute(caregiverId: String, code: String = "", previewAdult: String = ""): String = "care-link/" + Uri.encode(caregiverId) + "?code=" + Uri.encode(code) + "&previewAdult=" + Uri.encode(previewAdult)
     }
 
     data object MedicationRegistration : RootDestination {
