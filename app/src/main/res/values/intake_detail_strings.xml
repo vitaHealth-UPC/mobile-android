@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="detail_back">Regresar</string>
+    <string name="detail_title">Detalle del medicamento</string>
+    <string name="detail_loading">Cargando detalle de la toma…</string>
+    <string name="detail_error_title">No pudimos cargar esta toma</string>
+    <string name="detail_success_title">✓ ¡Bien hecho!</string>
+    <string name="detail_success_description">Toma confirmada ♡</string>
+    <string name="detail_confirm">Confirmar toma</string>
+    <string name="detail_confirming">Confirmando...</string>
+    <string name="detail_next_confirmation">Próxima confirmación</string>
+    <string name="detail_information">Información</string>
+    <string name="detail_dose">Dosis</string>
+    <string name="detail_when">Cuándo</string>
+    <string name="detail_purpose">Para qué</string>
+    <string name="detail_unspecified">No especificado</string>
+    <string name="detail_instructions">Indicaciones</string>
+    <string name="detail_no_instructions">Sin indicaciones adicionales</string>
+    <string name="detail_before_dose">Antes de tu toma</string>
+    <string name="detail_prepare_medication">Ten tu medicamento a la mano</string>
+    <string name="detail_prepare_water">Un vaso de agua</string>
+    <string name="detail_prepare_seat">Siéntate cómodamente</string>
+    <string name="detail_back_home">Volver al inicio</string>
+</resources>
