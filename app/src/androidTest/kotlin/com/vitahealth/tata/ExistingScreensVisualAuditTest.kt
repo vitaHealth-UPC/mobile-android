@@ -168,7 +168,7 @@ class ExistingScreensVisualAuditTest {
     }
 
     @Test fun capturePinVariants() {
-        var state by mutableStateOf(SessionAccessUiState())
+        var state by mutableStateOf(SessionAccessUiState(pin = "4821"))
         var setup by mutableStateOf(false)
         compose.setContent { AuditTheme { Box(Modifier.safeDrawingPadding()) {
             PinAccessScreen(state, "Rosa Vargas", setup, {}, {}, {})
@@ -183,13 +183,18 @@ class ExistingScreensVisualAuditTest {
     }
 
     @Test fun captureRegistrationVariants() {
-        var state by mutableStateOf(CaregiverRegistrationUiState(name = "Diego Vargas", email = "diego@example.test"))
+        var state by mutableStateOf(CaregiverRegistrationUiState(name = "Diego Vargas", email = "diego@example.test",
+            password = "Fixture4821"))
         compose.setContent { AuditTheme { CaregiverRegistrationScreen(state, {}, {}, {}, {}, {}, {}, {}, Modifier.safeDrawingPadding()) } }
         capture("registration-content")
-        compose.runOnIdle { state = state.copy(errorCode = "DUPLICATE_EMAIL", errorMessage = "Este correo ya está registrado.") }
+        compose.runOnIdle { state = state.copy(accountId = "account-test", step = RegistrationStep.Verification,
+            verificationCode = "482196") }
+        capture("registration-verification")
+        compose.runOnIdle { state = state.copy(accountId = null, step = RegistrationStep.Account,
+            verificationCode = "", errorCode = "DUPLICATE_EMAIL", errorMessage = "Este correo ya está registrado.") }
         capture("registration-duplicate")
         compose.runOnIdle { state = state.copy(accountId = "account-test", step = RegistrationStep.VerificationExpired,
-            errorCode = null, errorMessage = null) }
+            verificationCode = "482196", errorCode = null, errorMessage = null) }
         capture("registration-expired")
     }
 

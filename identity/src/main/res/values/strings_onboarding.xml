@@ -16,4 +16,5 @@
     <string name="onboarding_card_c_time">10:00 p.m.</string>
     <string name="onboarding_card_c_name">Vitamin D3</string>
     <string name="onboarding_card_c_dose">1 capsule</string>
+    <string name="onboarding_today">Today</string>
 </resources>

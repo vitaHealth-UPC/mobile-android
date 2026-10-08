@@ -1,6 +1,5 @@
 package com.vitahealth.tata.identity.presentation.onboarding
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -32,7 +31,6 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.heading
@@ -52,6 +50,7 @@ import coil3.compose.AsyncImage
 import coil3.svg.SvgDecoder
 import com.vitahealth.tata.identity.R
 import com.vitahealth.tata.shared.design.components.TataButton
+import com.vitahealth.tata.shared.design.components.TataSvgIcon
 import com.vitahealth.tata.shared.design.theme.TataCream
 import com.vitahealth.tata.shared.design.theme.TataLavender
 import com.vitahealth.tata.shared.design.theme.TataNavy
@@ -83,13 +82,14 @@ fun OnboardingScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
                 .padding(horizontal = 24.dp, vertical = 28.dp),
         ) {
+            Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) {
             Hero()
             Spacer(Modifier.height(20.dp))
             Headline()
-            Spacer(Modifier.height(32.dp))
+            Spacer(Modifier.height(24.dp))
+            }
             TataButton(text = stringResource(R.string.onboarding_start), onClick = onStart)
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -110,6 +110,7 @@ fun OnboardingScreen(
                     )
                 }
             }
+            Spacer(Modifier.height(48.dp))
         }
     }
 }
@@ -145,12 +146,12 @@ private fun Glows() {
 private fun Hero() {
     val context = LocalContext.current
     val imageLoader = remember(context) {
-        ImageLoader.Builder(context).components { add(SvgDecoder.Factory()) }.build()
+        ImageLoader.Builder(context).components { add(SvgDecoder.Factory(scaleToDensity = true)) }.build()
     }
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxWidth()
-            .height(340.dp)
+            .height(290.dp)
             // Only the title is announced; the sample cards are decoration.
             .clearAndSetSemantics { },
     ) {
@@ -171,7 +172,7 @@ private fun Hero() {
                 imageLoader = imageLoader,
                 modifier = Modifier
                     .padding(start = 4.dp, top = 8.dp)
-                    .size(28.dp),
+                    .size(22.dp).rotate(20f),
             )
         }
 
@@ -180,12 +181,12 @@ private fun Hero() {
             medication = stringResource(R.string.onboarding_card_a_name),
             dose = stringResource(R.string.onboarding_card_a_dose),
             container = TataCream,
-            rotation = -6f,
-            modifier = Modifier.offset(x = 1.dp.s(), y = 89.dp.s()).width(160.dp.s()),
+            rotation = 8f,
+            showToday = true,
+            modifier = Modifier.offset(x = 14.dp.s(), y = 89.dp.s()).width(146.dp.s()),
         ) {
-            Image(
-                painter = painterResource(R.drawable.onboarding_sun),
-                contentDescription = null,
+            TataSvgIcon(
+                resource = R.raw.onboarding_sun,
                 modifier = Modifier.size(34.dp).align(Alignment.End),
             )
         }
@@ -194,8 +195,9 @@ private fun Hero() {
             medication = stringResource(R.string.onboarding_card_b_name),
             dose = stringResource(R.string.onboarding_card_b_dose),
             container = TataLavender,
-            rotation = 5f,
-            modifier = Modifier.offset(x = 154.dp.s(), y = 111.dp.s()).width(157.dp.s()),
+            rotation = -7f,
+            titleSize = 12,
+            modifier = Modifier.offset(x = 178.dp.s(), y = 93.dp.s()).width(145.dp.s()),
         ) {
             Text(text = "✓", color = Color(0xFF3F7F5E), fontSize = 18.sp, modifier = Modifier.align(Alignment.End))
         }
@@ -205,17 +207,15 @@ private fun Hero() {
             dose = stringResource(R.string.onboarding_card_c_dose),
             container = Color.White,
             rotation = -3f,
-            modifier = Modifier.offset(x = 69.dp.s(), y = 208.dp.s()).width(155.dp.s()),
+            modifier = Modifier.offset(x = 93.dp.s(), y = 197.dp.s()).width(148.dp.s()),
         ) {}
-        Image(
-            painter = painterResource(R.drawable.onboarding_heart),
-            contentDescription = null,
-            modifier = Modifier.offset(x = 260.dp.s(), y = 94.dp.s()).size(30.dp),
+        TataSvgIcon(
+            resource = R.raw.onboarding_heart,
+            modifier = Modifier.offset(x = 284.dp.s(), y = 93.dp.s()).size(30.dp),
         )
-        Image(
-            painter = painterResource(R.drawable.onboarding_leaf),
-            contentDescription = null,
-            modifier = Modifier.offset(x = 222.dp.s(), y = 248.dp.s()).size(width = 66.dp, height = 78.dp).alpha(0.95f),
+        TataSvgIcon(
+            resource = R.raw.onboarding_leaf,
+            modifier = Modifier.offset(x = 246.dp.s(), y = 248.dp.s()).size(width = 66.dp, height = 78.dp).alpha(0.95f),
         )
     }
 }
@@ -228,27 +228,43 @@ private fun ReminderCard(
     container: Color,
     rotation: Float,
     modifier: Modifier = Modifier,
+    titleSize: Int = 15,
+    showToday: Boolean = false,
     decor: @Composable androidx.compose.foundation.layout.ColumnScope.() -> Unit,
 ) {
     val shape = RoundedCornerShape(20.dp)
-    Column(
+    Box(
         modifier = modifier
             .rotate(rotation)
             .shadow(8.dp, shape, ambientColor = Color(0x1A173B70), spotColor = Color(0x1A173B70))
-            .background(container, shape)
+            .background(Brush.horizontalGradient(listOf(container, when (container) {
+                TataCream -> Color(0xFFFFEACF)
+                TataLavender -> Color(0xFFE7DDFE)
+                else -> Color(0xFFF6F6FC)
+            })), shape)
+            .height(108.dp)
             .padding(14.dp),
     ) {
-        Text(text = time, fontFamily = InterFont, fontSize = 11.sp, color = tataMutedColor())
+        Column {
+        Text(text = time, fontFamily = InterFont, fontSize = 11.sp, lineHeight = 14.sp, color = tataMutedColor())
         Text(
             text = medication,
             fontFamily = InterFont,
             fontWeight = FontWeight.Bold,
-            fontSize = 15.sp,
+            fontSize = titleSize.sp,
+            lineHeight = 18.sp,
             color = tataTextColor(),
-            modifier = Modifier.padding(top = 4.dp),
+            modifier = Modifier.padding(top = 8.dp),
         )
-        Text(text = dose, fontFamily = InterFont, fontSize = 11.sp, color = tataMutedColor(), modifier = Modifier.padding(top = 2.dp))
-        decor()
+        Text(text = dose, fontFamily = InterFont, fontSize = 12.sp, lineHeight = 15.sp, color = tataMutedColor(), modifier = Modifier.padding(top = 7.dp))
+        }
+        if (showToday) Row(Modifier.align(Alignment.BottomStart), verticalAlignment = Alignment.CenterVertically) {
+            Box(Modifier.size(10.dp).background(Color.White, RoundedCornerShape(50)))
+            Spacer(Modifier.width(6.dp))
+            Text(stringResource(R.string.onboarding_today), fontFamily = InterFont, fontSize = 10.sp,
+                lineHeight = 12.sp, color = tataMutedColor())
+        }
+        Column(Modifier.align(Alignment.BottomEnd)) { decor() }
     }
 }
 
