@@ -4,8 +4,8 @@ Checkpoint: 2026-10-07. Registro independiente del conteo de implementaciones.
 
 - 60 variantes tienen implementación, incluyendo composiciones parciales.
 - 10 carecen de implementación específica.
-- 13 aceptadas visualmente con el criterio proporcional acordado.
-- 47 implementadas requieren validación o correcciones.
+- 15 aceptadas visualmente con el criterio proporcional acordado.
+- 45 implementadas requieren validación o correcciones.
 - 58 tienen comparación visual; comparación no equivale a aceptación.
 
 Aceptación: composición, tipografía, proporciones, iconos, contraste y estado representado coherentes con Figma. Se permiten adaptaciones nativas, desplazamiento por contenido real y datos dinámicos; no se exige copiar nombres, fechas ni títulos a posiciones absolutas. La aceptación visual no certifica integraciones ni navegación completa. Cada variante requiere su propio resultado; reutilizar un composable no aprueba automáticamente todas sus variantes.
@@ -35,7 +35,7 @@ Evidencias PNG en el equipo de trabajo: C:/Users/david/Downloads/. Las capturas 
 | 19 | History & Insights | 563:1017 | Requiere validar/corregir | — |
 | 20 | Adherence Recommendations | 563:1767 | Requiere validar/corregir | — |
 | 21 | Notes - Adult | 576:2785 | Sin implementación específica | — |
-| 22 | Add Medication - Caregiver | 563:453 | Comparada; título, campos e ilustración corregidos; selector de frecuencia por completar | medication-registration-proportional.png |
+| 22 | Add Medication - Caregiver | 563:453 | Aceptada visualmente; selector nativo y volver conectados | medication-registration-final.png |
 | 23 | Create Treatment | 563:1490 | Requiere validar/corregir | — |
 | 24 | Treatment Management | 563:1554 | Requiere validar/corregir | — |
 | 25 | Inventory & Restock | 563:1632 | Requiere validar/corregir | — |
@@ -49,7 +49,7 @@ Evidencias PNG en el equipo de trabajo: C:/Users/david/Downloads/. Las capturas 
 | 33 | Verification Expired | 563:2208 | Aceptada visualmente | registration-expired-final.png |
 | 34 | Invalid Link Code | 563:2254 | Requiere validar/corregir | — |
 | 35 | Consent Required | 563:2308 | Requiere validar/corregir | — |
-| 36 | Medication Required Fields Error | 563:2404 | Comparada; campos corregidos; falta composición del mensaje y selector de frecuencia | medication-registration-error-proportional.png |
+| 36 | Medication Required Fields Error | 563:2404 | Aceptada visualmente; aviso y campos vacíos, contenido desplazable | medication-error-final.png |
 | 37 | Medication Updated | 563:2455 | Requiere validar/corregir | — |
 | 38 | Medication Deactivated | 563:2537 | Requiere validar/corregir | — |
 | 39 | Medication Reminder Due | 563:2619 | Sin implementación específica | — |

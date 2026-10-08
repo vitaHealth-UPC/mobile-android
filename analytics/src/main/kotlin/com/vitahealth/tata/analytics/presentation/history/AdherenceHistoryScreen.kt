@@ -8,8 +8,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -397,7 +399,7 @@ private fun CalendarIcon(modifier: Modifier = Modifier) {
 @Composable
 private fun MetricsRow(summary: AdherenceSummaryUi) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
         horizontalArrangement = Arrangement.spacedBy(9.dp),
     ) {
         MetricCard(
@@ -439,7 +441,8 @@ private fun MetricCard(
     val shape = RoundedCornerShape(16.dp)
     Column(
         modifier = modifier
-            .height(92.dp)
+            .fillMaxHeight()
+            .heightIn(min = 92.dp)
             .shadow(elevation = 3.dp, shape = shape)
             .background(Brush.horizontalGradient(listOf(startColor, endColor)), shape)
             .padding(12.dp),
