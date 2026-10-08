@@ -41,7 +41,7 @@ Evidencias PNG en el equipo de trabajo: C:/Users/david/Downloads/. Las capturas 
 | 25 | Inventory & Restock | 563:1632 | Requiere validar/corregir | — |
 | 26 | Notification Preferences | 563:1219 | Requiere validar/corregir | — |
 | 27 | Notes - Caregiver | 576:2859 | Requiere corregir: perfil y títulos no representados | audit-caregiver-notes.png |
-| 28 | Plan & Subscription | 563:1701 | Comparada; fechas y proporciones corregidas, falta barra y composición final | — |
+| 28 | Plan & Subscription | 563:1701 | Comparada; barra, fechas y composición corregidas; indicador de ciclo sin dato contractual | plan-navigation-final.png |
 | 29 | PIN Setup | 563:1970 | Aceptada visualmente | pin-setup-final.png |
 | 30 | PIN Incorrect | 563:2034 | Aceptada visualmente | pin-incorrect-final.png |
 | 31 | PIN Temporarily Blocked | 563:2098 | Aceptada visualmente | pin-blocked-final.png |
@@ -81,6 +81,6 @@ Evidencias PNG en el equipo de trabajo: C:/Users/david/Downloads/. Las capturas 
 | 65 | Notification Preferences Saved | 563:5090 | Requiere validar/corregir | — |
 | 66 | Invalid Inventory Quantity | 563:5213 | Requiere validar/corregir | — |
 | 67 | Stock Replenished | 563:5284 | Requiere validar/corregir | — |
-| 68 | Subscription Updated | 563:5354 | Comparada; falta barra y composición final | — |
+| 68 | Subscription Updated | 563:5354 | Comparada; barra y confirmación corregidas; indicador de ciclo sin dato contractual | plan-updated-final.png |
 | 69 | External Destination Unavailable | 563:5425 | Sin implementación específica | — |
 | 70 | Internationalization | 665:183 | Sin implementación específica | — |

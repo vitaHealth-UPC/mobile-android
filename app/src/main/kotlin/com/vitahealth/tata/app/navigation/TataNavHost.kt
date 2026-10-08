@@ -223,6 +223,17 @@ fun TataNavHost(
             PlanSubscriptionRoute(
                 factory = app.container.planSubscriptionViewModelFactory(accountId),
                 onBack = { navController.popBackStack() },
+                onTabSelected = { tab ->
+                    if (tab != CaregiverTab.More) {
+                        val family = runCatching { navController.getBackStackEntry(RootDestination.FamilySummary.route) }.getOrNull()
+                        val caregiver = family?.arguments?.getString("caregiverId")
+                        val adult = family?.arguments?.getString("olderAdultId")
+                        if (caregiver != null && adult != null) {
+                            if (tab == CaregiverTab.Person) navController.navigate(RootDestination.CaregiverProfiles.createRoute(caregiver))
+                            else navController.openCaregiverTab(tab, caregiver, adult)
+                        } else navController.popBackStack()
+                    }
+                },
             )
         }
 
