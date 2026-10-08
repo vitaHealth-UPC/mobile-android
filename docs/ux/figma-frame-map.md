@@ -90,3 +90,30 @@ Frames `563:1554` (Treatment Management), `563:2455` (Medication Updated), `563:
 Not implemented on purpose: "Pause" is the treatment lifecycle of US-18 (`TreatmentLifecycleScreen`), "Reactivate" has no backend endpoint, and the 92% adherence chart belongs to `:analytics`.
 
 Entry point: the "More" menu of the family summary offers "Medicamentos". This screen uses the colour constants that exist in `develop`; once the accessibility branches are merged it can switch to `tataTextColor()` / `tataMutedColor()` so it follows high contrast.
+
+## US-01 session entry and PIN
+
+Prototype `641:18` supplies the password entry form; `563:1340` supplies the PIN keypad. Setup, incorrect and blocked PINs are states of `PinAccessScreen`. The screens use the existing Compose form, button, serif and accessibility tokens and call the live session API.
+
+## US-12 profile entry and care-link handoff
+
+`CaregiverProfilesScreen` presents real confirmed links, an empty state, profile registration and the temporary code. It follows the person identity hierarchy and shared card/form tokens consulted in prototype `563:1123`, using actual names and avoiding the prototype's sample adherence figures. Date selection uses the accessible Android date picker. Existing link/consent states receive the generated code; the adult reviews and grants consent explicitly.
+
+## US-44 current plan
+
+Frame `563:1701` (Plan & Subscription): `PlanSubscriptionScreen` (route `plan-subscription/{accountId}`) in `:identity`. It shows the current plan with its price and renewal date, the available plans with the capabilities each one enables (a capability the app does not know is skipped) and the next renewal card. Loading and error states (offline, account, session) are `PlanSubscriptionUiState`.
+
+Not implemented on purpose: the plan descriptions ("Alertas, seguimiento, insights y múltiples canales") because the backend sends no description, and the progress bar of the period because it sends no start date. The "Change plan" button arrives with US-45.
+
+Entry point: the "More" menu of the family summary offers "Plan y suscripción".
+
+## US-45 change subscription
+
+Frames `563:1701` (Plan & Subscription) and `563:5354` (Subscription Updated), same `PlanSubscriptionScreen`. Tapping a plan other than the current one selects it (radio behaviour, a border marks the choice); "Cambiar plan" opens a confirmation that lists what the account gains and loses (computed from the capabilities, not written text) and the monthly price. The "Subscription updated" banner is the `PlanChangeMessage.Updated` UI state; the failures (plan no longer available, account, session, offline) are the other values of the same enum and leave the current plan untouched.
+
+The plan changes only after the backend answers, so the screen never shows a plan the account does not have.
+## Onboarding (identity)
+
+Frame `563:5` (Onboarding): `OnboardingScreen`, the first screen of a fresh install. "Comenzar" opens the caregiver registration and "Iniciar sesión" opens the sign-in; both remember on the device that the welcome was seen, so the next launches open on the sign-in. The sunlight, heart and leaf decorations and the butterfly are the Figma assets; the "Tata" wordmark is drawn with the system cursive font (Dancing Script on Android), because the wordmark layer cannot be exported on its own.
+
+The three reminder cards are decoration with sample medications and are hidden from TalkBack. Their position follows the 393 dp prototype frame, scaled to the real width. The glow washes are approximated with gradients instead of the blurred ellipses.

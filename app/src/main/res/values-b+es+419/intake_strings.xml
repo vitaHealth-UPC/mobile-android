@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Recordatorio reforzado en el inicio del adulto mayor (US-22) -->
+    <string name="intake_reinforced_reminder_title">Segundo recordatorio</string>
+    <string name="intake_reinforced_reminder_text">La toma sigue pendiente. Confírmala cuando la realices.</string>
+</resources>
