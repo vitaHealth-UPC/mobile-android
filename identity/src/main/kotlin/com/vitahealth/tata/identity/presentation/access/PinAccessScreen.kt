@@ -9,6 +9,9 @@ import androidx.compose.ui.*
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.*
 import androidx.compose.ui.unit.*
 import com.vitahealth.tata.identity.R
@@ -75,7 +78,8 @@ fun PinAccessScreen(state: SessionAccessUiState, olderAdultName: String, setup: 
                                 if (digit.isNotEmpty()) {
                                     Box(Modifier.fillMaxSize().tataPrototypeShadow(8.dp, CircleShape)
                                         .background(Color.White, CircleShape).clip(CircleShape)
-                                        .clickable(enabled = !state.busy && !locked, onClick = { onDigit(digit) }),
+                                        .semantics { if (digit == "\u232b") contentDescription = "Borrar último dígito" }
+                                        .clickable(enabled = !state.busy && !locked, role = Role.Button, onClick = { onDigit(digit) }),
                                         contentAlignment = Alignment.Center) {
                                         PinText(digit, if (digit == "\u232b") 18 else 19, TataDeepNavy, FontWeight.SemiBold)
                                     }

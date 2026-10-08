@@ -20,6 +20,10 @@ import com.vitahealth.tata.shared.design.accessibility.TataAccessibility
 import com.vitahealth.tata.shared.design.theme.TataTheme
 
 class MainActivity : ComponentActivity() {
+    override fun attachBaseContext(newBase: android.content.Context) {
+        super.attachBaseContext(newBase.withSpanishAppLocale())
+    }
+
     /** Screen requested by a tapped omission notification, consumed once it is open. */
     private var pushDestination by mutableStateOf<PushDestination?>(null)
 

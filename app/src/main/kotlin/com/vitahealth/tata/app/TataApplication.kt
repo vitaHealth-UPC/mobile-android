@@ -4,6 +4,10 @@ import android.app.Application
 import com.vitahealth.tata.app.di.AppContainer
 
 class TataApplication : Application() {
+    override fun attachBaseContext(base: android.content.Context) {
+        super.attachBaseContext(base.withSpanishAppLocale())
+    }
+
     lateinit var container: AppContainer
         private set
 

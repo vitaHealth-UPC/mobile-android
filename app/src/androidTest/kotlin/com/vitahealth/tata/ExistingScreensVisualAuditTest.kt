@@ -42,6 +42,23 @@ import org.junit.runner.RunWith
 class ExistingScreensVisualAuditTest {
     @get:Rule val compose = createComposeRule()
 
+    @Test fun defaultResourcesUseSpanishAndEnglishIsExplicit() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        fun localized(tag: String): android.content.Context {
+            val config = android.content.res.Configuration(context.resources.configuration)
+            config.setLocales(android.os.LocaleList.forLanguageTags(tag))
+            return context.createConfigurationContext(config)
+        }
+        val spanish = localized("fr-FR") // An unsupported device language must use the Spanish fallback.
+        check(spanish.getString(com.vitahealth.tata.identity.R.string.onboarding_start) == "Comenzar")
+        check(spanish.getString(com.vitahealth.tata.monitoring.R.string.alerts_title) == "Alertas")
+        check(spanish.getString(com.vitahealth.tata.inventory.R.string.inventory_title) == "Inventario")
+        check(spanish.getString(com.vitahealth.tata.preferences.R.string.accessibility_title) == "Accesibilidad")
+        val english = localized("en-US")
+        check(english.getString(com.vitahealth.tata.identity.R.string.onboarding_start) == "Get started")
+        check(english.getString(com.vitahealth.tata.monitoring.R.string.alerts_title) == "Alerts")
+    }
+
     @Test fun captureOnboardingAndPlanVariants() {
         val essential = com.vitahealth.tata.identity.domain.model.Plan("ESSENTIAL", "Esencial",
             java.math.BigDecimal("9.90"), "PEN", setOf(com.vitahealth.tata.identity.domain.model.PlanCapability.REMINDERS))
@@ -168,7 +185,7 @@ class ExistingScreensVisualAuditTest {
     }
 
     @Test fun capturePinVariants() {
-        var state by mutableStateOf(SessionAccessUiState())
+        var state by mutableStateOf(SessionAccessUiState(pin = "4821"))
         var setup by mutableStateOf(false)
         compose.setContent { AuditTheme { Box(Modifier.safeDrawingPadding()) {
             PinAccessScreen(state, "Rosa Vargas", setup, {}, {}, {})
@@ -183,13 +200,18 @@ class ExistingScreensVisualAuditTest {
     }
 
     @Test fun captureRegistrationVariants() {
-        var state by mutableStateOf(CaregiverRegistrationUiState(name = "Diego Vargas", email = "diego@example.test"))
+        var state by mutableStateOf(CaregiverRegistrationUiState(name = "Diego Vargas", email = "diego@example.test",
+            password = "Fixture4821"))
         compose.setContent { AuditTheme { CaregiverRegistrationScreen(state, {}, {}, {}, {}, {}, {}, {}, Modifier.safeDrawingPadding()) } }
         capture("registration-content")
-        compose.runOnIdle { state = state.copy(errorCode = "DUPLICATE_EMAIL", errorMessage = "Este correo ya está registrado.") }
+        compose.runOnIdle { state = state.copy(accountId = "account-test", step = RegistrationStep.Verification,
+            verificationCode = "482196") }
+        capture("registration-verification")
+        compose.runOnIdle { state = state.copy(accountId = null, step = RegistrationStep.Account,
+            verificationCode = "", errorCode = "DUPLICATE_EMAIL", errorMessage = "Este correo ya está registrado.") }
         capture("registration-duplicate")
         compose.runOnIdle { state = state.copy(accountId = "account-test", step = RegistrationStep.VerificationExpired,
-            errorCode = null, errorMessage = null) }
+            verificationCode = "482196", errorCode = null, errorMessage = null) }
         capture("registration-expired")
     }
 

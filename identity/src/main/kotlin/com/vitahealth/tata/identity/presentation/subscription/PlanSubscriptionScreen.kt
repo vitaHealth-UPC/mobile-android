@@ -49,6 +49,9 @@ import com.vitahealth.tata.identity.domain.model.SubscriptionStatus
 import com.vitahealth.tata.shared.design.components.TataButton
 import com.vitahealth.tata.shared.design.components.TataButtonStyle
 import com.vitahealth.tata.shared.design.components.TataCard
+import com.vitahealth.tata.shared.design.components.CaregiverTab
+import com.vitahealth.tata.shared.design.components.CaregiverTabBar
+import com.vitahealth.tata.shared.design.theme.tataPrototypeShadow
 import com.vitahealth.tata.shared.design.theme.TataBlueSurface
 import com.vitahealth.tata.shared.design.theme.TataError
 import com.vitahealth.tata.shared.design.theme.TataErrorSurface
@@ -74,6 +77,7 @@ fun PlanSubscriptionRoute(
     factory: PlanSubscriptionViewModel.Factory,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
+    onTabSelected: (CaregiverTab) -> Unit = { onBack() },
 ) {
     val viewModel: PlanSubscriptionViewModel = viewModel(factory = factory)
     val state by viewModel.state.collectAsState()
@@ -87,6 +91,7 @@ fun PlanSubscriptionRoute(
         onChangeCancel = viewModel::onChangeCancel,
         onChangeConfirm = viewModel::onChangeConfirm,
         modifier = modifier,
+        onTabSelected = onTabSelected,
     )
 }
 
@@ -100,15 +105,17 @@ fun PlanSubscriptionScreen(
     onChangeCancel: () -> Unit,
     onChangeConfirm: () -> Unit,
     modifier: Modifier = Modifier,
+    onTabSelected: (CaregiverTab) -> Unit = { onBack() },
 ) {
+    Column(modifier.fillMaxSize().background(TataSurface)) {
     Column(
-        modifier = modifier
-            .fillMaxSize()
-            .background(TataSurface)
+        modifier = Modifier
+            .weight(1f)
+            .fillMaxWidth()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 22.dp, vertical = 28.dp),
     ) {
-        Header(onBack = onBack)
+        Header()
         Spacer(Modifier.height(16.dp))
 
         val subscription = state.subscription
@@ -160,6 +167,8 @@ fun PlanSubscriptionScreen(
                 }
             }
         }
+    }
+    CaregiverTabBar(CaregiverTab.More, onTabSelected)
     }
 }
 
@@ -230,37 +239,23 @@ private fun ChangeBanner(message: PlanChangeMessage, isError: Boolean) {
 }
 
 @Composable
-private fun Header(onBack: () -> Unit) {
+private fun Header() {
     Row(verticalAlignment = Alignment.CenterVertically) {
-        val backLabel = stringResource(R.string.plan_back)
-        Box(
-            modifier = Modifier
-                .size(48.dp)
-                .clickable(role = Role.Button, onClick = onBack)
-                .semantics { contentDescription = backLabel },
-            contentAlignment = Alignment.Center,
-        ) {
-            Text(text = "‹", fontSize = 28.sp, color = TataNavy)
-        }
-        Column {
-            Text(
-                text = stringResource(R.string.plan_title),
+        
+        Column(Modifier.weight(1f)) {
+            Text(stringResource(R.string.plan_title),
                 fontFamily = FontFamily(Font(com.vitahealth.tata.shared.R.font.tata_serif)),
-                fontSize = 26.sp,
-                color = TataText,
-            )
-            Text(
-                text = stringResource(R.string.plan_subtitle),
+                fontSize = 29.sp, color = TataText)
+            Text(stringResource(R.string.plan_subtitle),
                 style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp, lineHeight = 15.sp, fontFamily = PlanFont),
-                color = TataMuted,
-            )
+                color = TataMuted)
         }
     }
 }
 
 @Composable
 private fun CurrentPlanCard(subscription: Subscription) {
-    TataCard(Modifier.fillMaxWidth(), TataMint) {
+    TataCard(Modifier.fillMaxWidth().tataPrototypeShadow(8.dp, RoundedCornerShape(18.dp)), TataMint) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -325,6 +320,7 @@ private fun PlanCard(
     TataCard(
         modifier = Modifier
             .fillMaxWidth()
+            .tataPrototypeShadow(8.dp, RoundedCornerShape(18.dp))
             .then(if (isSelected) Modifier.border(BorderStroke(2.dp, TataNavy), RoundedCornerShape(18.dp)) else Modifier)
             // The current plan cannot be chosen again; the others behave as one choice of a group.
             .selectable(
@@ -377,7 +373,7 @@ private fun PlanCard(
 @Composable
 private fun RenewalCard(subscription: Subscription) {
     val locale = LocalConfiguration.current.locales[0]
-    TataCard(Modifier.fillMaxWidth(), TataBlueSurface) {
+    TataCard(Modifier.fillMaxWidth().tataPrototypeShadow(8.dp, RoundedCornerShape(18.dp)), TataBlueSurface) {
         Text(
             text = stringResource(R.string.plan_renewal_title),
             style = MaterialTheme.typography.bodyMedium.copy(fontSize = 11.sp, lineHeight = 15.sp, fontFamily = PlanFont),
