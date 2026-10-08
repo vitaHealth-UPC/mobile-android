@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="personal_notes_title">Notas</string>
+    <string name="personal_notes_subtitle">Apuntes para acompañar tu rutina.</string>
+    <string name="personal_notes_today">Hoy</string>
+    <string name="personal_notes_yesterday">Ayer</string>
+    <string name="personal_notes_all">Todas</string>
+    <string name="personal_notes_routine">Rutina</string>
+    <string name="personal_notes_recent">Notas recientes</string>
+    <string name="personal_notes_tip">Consejo</string>
+    <string name="personal_notes_tip_text">Las notas pueden ayudarte a recordar indicaciones que no forman parte de la dosis.</string>
+    <string name="personal_notes_add">Agregar nota</string>
+    <string name="personal_notes_empty">No hay notas en esta categoría.</string>
+    <string name="personal_notes_load_error">No pudimos cargar tus notas.</string>
+    <string name="personal_notes_retry">Reintentar</string>
+    <string name="personal_notes_sign_in">Ingresar con PIN</string>
+    <string name="personal_notes_save_error">No se guardó la nota. Reintenta conservando tu texto.</string>
+    <string name="personal_notes_subject">Título</string>
+    <string name="personal_notes_body">Nota</string>
+    <string name="personal_notes_save">Guardar</string>
+    <string name="personal_notes_cancel">Cancelar</string>
+</resources>
