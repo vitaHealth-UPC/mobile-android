@@ -1,12 +1,12 @@
 # Conteo de fidelidad visual — 70 variantes
 
-Checkpoint: 2026-10-07. Registro independiente del conteo de implementaciones.
+Checkpoint: 2026-10-08. Registro independiente del conteo de implementaciones.
 
-- 60 variantes tienen implementación, incluyendo composiciones parciales.
-- 10 carecen de implementación específica.
-- 26 aceptadas visualmente con el criterio proporcional acordado.
+- 62 variantes tienen implementación, incluyendo composiciones parciales.
+- 8 carecen de implementación específica.
+- 28 aceptadas visualmente con el criterio proporcional acordado.
 - 34 implementadas requieren validación o correcciones.
-- 58 tienen comparación visual; comparación no equivale a aceptación.
+- 60 tienen comparación visual; comparación no equivale a aceptación.
 
 Aceptación: composición, tipografía, proporciones, iconos, contraste y estado representado coherentes con Figma. Se permiten adaptaciones nativas, desplazamiento por contenido real y datos dinámicos; no se exige copiar nombres, fechas ni títulos a posiciones absolutas. La aceptación visual no certifica integraciones ni navegación completa. Cada variante requiere su propio resultado; reutilizar un composable no aprueba automáticamente todas sus variantes.
 
@@ -22,7 +22,7 @@ Evidencias PNG en el equipo de trabajo: C:/Users/david/Downloads/. Las capturas 
 | 6 | PIN Access | 563:1338 | Aceptada visualmente | pin-access-final.png |
 | 7 | Login | 641:16 | Aceptada visualmente; correo y contraseña nativos, proveedores sociales solo informativos | login-final.png |
 | 8 | Home | 563:58 | Aceptada visualmente | home-vector-icons.png |
-| 9 | My Medications | 563:361 | Sin implementación específica | — |
+| 9 | My Medications | 563:361 | Aceptada visualmente; catálogo de sesión PIN, conteo real y toma destacada sin duplicar | my-medications-verified.png |
 | 10 | Medication Detail | 563:142 | Aceptada visualmente | dose-detail-polished.png |
 | 11 | Weekly Schedule | 563:500 | Aceptada visualmente | agenda-final.png |
 | 12 | Voice Confirmation | 563:242 | Sin implementación específica | — |
@@ -34,7 +34,7 @@ Evidencias PNG en el equipo de trabajo: C:/Users/david/Downloads/. Las capturas 
 | 18 | Alert Detail | 563:918 | Requiere corregir: perfil y eventos reales de recordatorios | alert-detail-proportional.png |
 | 19 | History & Insights | 563:1017 | Aceptada visualmente; datos y gráfica dinámicos | history-content-final.png |
 | 20 | Adherence Recommendations | 563:1767 | Requiere validar/corregir | — |
-| 21 | Notes - Adult | 576:2785 | Sin implementación específica | — |
+| 21 | Notes - Adult | 576:2785 | Aceptada visualmente; notas personales por sesión PIN, filtros y formulario nativo | personal-notes-verified.png |
 | 22 | Add Medication - Caregiver | 563:453 | Aceptada visualmente; selector nativo y volver conectados | medication-registration-final.png |
 | 23 | Create Treatment | 563:1490 | Requiere validar/corregir | — |
 | 24 | Treatment Management | 563:1554 | Requiere validar/corregir | — |
@@ -84,3 +84,13 @@ Evidencias PNG en el equipo de trabajo: C:/Users/david/Downloads/. Las capturas 
 | 68 | Subscription Updated | 563:5354 | Comparada; barra y confirmación corregidas; indicador de ciclo sin dato contractual | plan-updated-final.png |
 | 69 | External Destination Unavailable | 563:5425 | Sin implementación específica | — |
 | 70 | Internationalization | 665:183 | Sin implementación específica | — |
+
+## My Medications: integración y aceptación
+
+El catálogo usa `GET /api/v1/me/medications`, con la identidad derivada de la sesión PIN. La próxima dosis procede del contrato de Intake y abre su detalle real. El historial agrupa medicamentos sin tratamiento activo; los estados de carga, error y catálogo vacío son nativos.
+
+La composición usa tarjetas, botones, texto y distribución Compose. La ilustración y los iconos de mañana/noche proceden de Figma. La barra adulta compartida abre Inicio, Medicamentos y Agenda. Agregar informa que el cuidador administra los tratamientos.
+
+La captura se compara con `563:361`: encabezado, destacado, próxima dosis, filtros, cuadrícula y barra inferior. El contador usa los datos recibidos: el mockup muestra cinco medicamentos distintos y un contador de cuatro. La validación visual usa fixtures aislados; la comprobación de Render responde con 502 o timeout y no confirma integración contra el despliegue público.
+
+Notas del adulto: GET/POST `/api/v1/me/notes`, categorías `MEDICATION` y `ROUTINE`, propietario derivado de sesión PIN. Se verifican aislamiento entre propietarios, orden persistido y rechazo de sesiones de cuidador/configuración. Navegación Inicio, Medicamentos, Agenda y Notas disponible sin acumular destinos repetidos. La comprobación visual usa datos aislados; Render conserva la limitación de verificación pública registrada.
