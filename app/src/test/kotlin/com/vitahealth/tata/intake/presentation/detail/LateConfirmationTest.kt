@@ -108,4 +108,20 @@ class LateConfirmationTest {
         assertEquals("No hay conexión.", content(model).confirmationMessage)
         assertEquals(DoseStatus.PENDING, content(model).dose.status)
     }
+    @Test fun nextDoseReadFailureDoesNotUndoSuccessfulConfirmation() {
+        details.answers = mutableListOf(AppResult.Success(pending))
+        confirmations.answer = AppResult.Success(pending.copy(status = DoseStatus.CONFIRMED, confirmedAt = Instant.now()))
+        val next = object : com.vitahealth.tata.intake.application.NextDoseRepository {
+            override suspend fun getNextDose(olderAdultId: String): AppResult<com.vitahealth.tata.intake.application.readmodels.NextDoseReadModel?> {
+                assertEquals("adult-1", olderAdultId)
+                return AppResult.Failure("", code = "NETWORK_UNAVAILABLE")
+            }
+        }
+        val model = DoseDetailViewModel("101", GetDoseDetailQueryHandler(details), ConfirmDoseCommandHandler(confirmations),
+            Dispatchers.Unconfined, com.vitahealth.tata.intake.application.handlers.GetNextDoseQueryHandler(next))
+        model.confirm()
+        assertTrue(content(model).confirmationSucceeded)
+        assertNull(content(model).nextDose)
+    }
+
 }
