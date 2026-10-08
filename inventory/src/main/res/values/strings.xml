@@ -1,51 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Inventory screen (US-40 to US-43) -->
-    <string name="inventory_title">Inventory</string>
-    <string name="inventory_subtitle">Initial stock, availability and restocks.</string>
+    <!-- Pantalla de Inventario (US-40 a US-43) -->
+    <string name="inventory_title">Inventario</string>
+    <string name="inventory_subtitle">Stock inicial, disponibilidad y reposiciones.</string>
 
-    <!-- Stock status -->
-    <string name="inventory_status_low">Low stock</string>
-    <string name="inventory_status_available">Stock available</string>
-    <string name="inventory_units_remaining">%1$d %2$s remaining</string>
-    <string name="inventory_units_remaining_no_unit">%1$d remaining</string>
-    <string name="inventory_days_estimate">≈ %1$d days of treatment</string>
-    <string name="inventory_days_no_estimate">No estimate</string>
+    <!-- Estado del stock -->
+    <string name="inventory_status_low">Stock bajo</string>
+    <string name="inventory_status_available">Stock disponible</string>
+    <string name="inventory_units_remaining">%1$d %2$s restantes</string>
+    <string name="inventory_units_remaining_no_unit">%1$d restantes</string>
+    <string name="inventory_days_estimate">≈ %1$d días de tratamiento</string>
+    <string name="inventory_days_no_estimate">Sin estimación</string>
 
-    <!-- Initial inventory (US-40) -->
-    <string name="inventory_not_initialized">You haven\'t defined the initial stock yet.</string>
-    <string name="inventory_initial_quantity_label">Initial quantity</string>
-    <string name="inventory_threshold_label">Replenishment threshold</string>
-    <string name="inventory_define_initial">Define initial stock</string>
+    <!-- Inventario inicial (US-40) -->
+    <string name="inventory_not_initialized">Aún no has definido el stock inicial.</string>
+    <string name="inventory_initial_quantity_label">Cantidad inicial</string>
+    <string name="inventory_threshold_label">Umbral de reposición</string>
+    <string name="inventory_define_initial">Definir stock inicial</string>
 
-    <!-- Replenishment (US-43) -->
-    <string name="inventory_replenishment_section">Register replenishment</string>
-    <string name="inventory_quantity_received_label">Quantity received</string>
-    <string name="inventory_invalid_quantity_label">Invalid quantity</string>
-    <string name="inventory_invalid_threshold_label">Invalid threshold</string>
-    <string name="inventory_save_replenishment">Save replenishment</string>
-    <string name="inventory_replenishment_saved">Replenishment registered.</string>
-    <string name="inventory_last_replenishment">Last replenishment</string>
-    <string name="inventory_registered_badge">Registered</string>
+    <!-- Reposición (US-43) -->
+    <string name="inventory_replenishment_section">Registrar reposición</string>
+    <string name="inventory_quantity_received_label">Cantidad recibida</string>
+    <string name="inventory_invalid_quantity_label">Cantidad inválida</string>
+    <string name="inventory_invalid_threshold_label">Umbral inválido</string>
+    <string name="inventory_save_replenishment">Guardar reposición</string>
+    <string name="inventory_replenishment_saved">Reposición registrada.</string>
+    <string name="inventory_last_replenishment">Última reposición</string>
+    <string name="inventory_registered_badge">Registrado</string>
     <string name="inventory_batch_summary">%1$d %2$s</string>
     <string name="inventory_batch_summary_no_unit">%1$d</string>
 
-    <!-- Common actions -->
-    <string name="inventory_retry">Retry</string>
-    <string name="inventory_saving">Saving…</string>
+    <!-- Acciones comunes -->
+    <string name="inventory_retry">Reintentar</string>
+    <string name="inventory_saving">Guardando…</string>
 
-    <!-- Error messages, selected by stable backend/app error code -->
-    <string name="inventory_error_invalid_quantity">Enter a quantity greater than zero before saving.</string>
-    <string name="inventory_error_invalid_threshold">The replenishment threshold cannot be negative.</string>
-    <string name="inventory_error_invalid_medication_reference">We couldn\'t identify the medication.</string>
-    <string name="inventory_error_inventory_not_found">This medication has no inventory registered yet.</string>
-    <string name="inventory_error_inventory_already_exists">This medication already has an inventory.</string>
-    <string name="inventory_error_concurrent_update">The inventory changed while you were saving. Try again.</string>
-    <string name="inventory_error_request_failed">We couldn\'t complete the request.</string>
-    <string name="inventory_error_network_unavailable">No connection available. Try again.</string>
-    <string name="inventory_error_invalid_response">The service returned unexpected data.</string>
-    <string name="inventory_error_unknown">Something went wrong.</string>
-    <string name="inventory_error_medication_not_found">This medication no longer exists. Refresh the medication list.</string>
-    <string name="inventory_error_medication_inactive">This medication is inactive. Select an active medication.</string>
-    <string name="inventory_lot_label">Lot / note</string>
+    <!-- Mensajes de error, elegidos por el código estable del backend/app -->
+    <string name="inventory_error_invalid_quantity">Ingresa una cantidad mayor que cero antes de guardar.</string>
+    <string name="inventory_error_invalid_threshold">El umbral de reposición no puede ser negativo.</string>
+    <string name="inventory_error_invalid_medication_reference">No pudimos identificar el medicamento.</string>
+    <string name="inventory_error_inventory_not_found">Este medicamento aún no tiene inventario registrado.</string>
+    <string name="inventory_error_inventory_already_exists">Este medicamento ya tiene un inventario.</string>
+    <string name="inventory_error_concurrent_update">El inventario cambió mientras guardabas. Inténtalo de nuevo.</string>
+    <string name="inventory_error_request_failed">No pudimos completar la solicitud.</string>
+    <string name="inventory_error_network_unavailable">No hay conexión disponible. Inténtalo de nuevo.</string>
+    <string name="inventory_error_invalid_response">El servicio devolvió datos inesperados.</string>
+    <string name="inventory_error_unknown">Ocurrió un problema.</string>
+    <string name="inventory_error_medication_not_found">Este medicamento ya no existe. Actualiza la lista de medicamentos.</string>
+    <string name="inventory_error_medication_inactive">Este medicamento está inactivo. Selecciona un medicamento activo.</string>
+    <string name="inventory_lot_label">Lote / nota</string>
+    <string name="inventory_days_short">días</string>
 </resources>

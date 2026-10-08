@@ -52,7 +52,7 @@ fun CareLinkRoute(factory: CareLinkViewModel.Factory, modifier: Modifier = Modif
 @Composable
 fun CareLinkScreen(state: CareLinkUiState, onCodeChange: (String) -> Unit,
     onSendRequest: () -> Unit, onAcceptConsent: () -> Unit, onRejectConsent: () -> Unit,
-    modifier: Modifier = Modifier) {
+    modifier: Modifier = Modifier, avatarResource: Int? = null) {
     Column(modifier.fillMaxSize().background(TataSurface).verticalScroll(rememberScrollState())
         .padding(horizontal = 22.dp).padding(top = 28.dp, bottom = 32.dp)) {
         Text("Vincula a tu familiar", fontFamily = LinkSerif, fontSize = 29.sp,
@@ -64,7 +64,7 @@ fun CareLinkScreen(state: CareLinkUiState, onCodeChange: (String) -> Unit,
         Spacer(Modifier.height(4.dp))
         LinkText("Código temporal", 11, tataMutedColor(), FontWeight.Medium)
         Spacer(Modifier.height(8.dp))
-        Box(Modifier.fillMaxWidth().height(58.dp).shadow(8.dp, RoundedCornerShape(15.dp))
+        Box(Modifier.fillMaxWidth().height(58.dp).tataPrototypeShadow(8.dp, RoundedCornerShape(15.dp))
             .background(Color.White, RoundedCornerShape(15.dp)).padding(horizontal = 14.dp),
             contentAlignment = Alignment.CenterStart) {
             BasicTextField(value = state.code, onValueChange = onCodeChange,
@@ -77,7 +77,7 @@ fun CareLinkScreen(state: CareLinkUiState, onCodeChange: (String) -> Unit,
                 })
         }
         Spacer(Modifier.height(10.dp))
-        OlderAdultCard(state.olderAdult, state.step)
+        OlderAdultCard(state.olderAdult, state.step, avatarResource)
         Spacer(Modifier.height(22.dp))
         LinkButton(if (state.isLoading && state.step == CareLinkStep.Code) "Enviando…" else "Enviar solicitud",
             onSendRequest, state.step == CareLinkStep.Code && !state.isLoading,
@@ -91,8 +91,12 @@ fun CareLinkScreen(state: CareLinkUiState, onCodeChange: (String) -> Unit,
             LinkText("El adulto puede retirar su consentimiento en cualquier momento.", 11, tataMutedColor())
         }
         state.errorMessage?.let {
-            Spacer(Modifier.height(14.dp))
-            LinkText(it, 12, TataError, modifier = Modifier.fillMaxWidth())
+            Spacer(Modifier.height(10.dp))
+            GradientCard(listOf(TataErrorSurface, TataErrorSurface)) {
+                LinkText("No se pudo vincular", 11, TataError, FontWeight.SemiBold)
+                Spacer(Modifier.height(5.dp))
+                LinkText(it, 10, tataMutedColor())
+            }
         }
     }
 }
@@ -110,7 +114,7 @@ private fun LinkProgress(step: CareLinkStep) {
     val context = LocalContext.current
     val imageLoader = remember(context) { ImageLoader.Builder(context).components { add(SvgDecoder.Factory()) }.build() }
     val activeIndex = when (step) { CareLinkStep.Code -> 0; CareLinkStep.AwaitingConsent -> 1; else -> 2 }
-    Box(Modifier.fillMaxWidth().height(58.dp).shadow(8.dp, LinkShape).background(Color.White, LinkShape)) {
+    Box(Modifier.fillMaxWidth().height(58.dp).tataPrototypeShadow(8.dp, LinkShape).background(Color.White, LinkShape)) {
         Box(Modifier.fillMaxWidth().padding(horizontal = 49.dp).padding(top = 18.dp)
             .height(2.dp).background(Color(0xFFDBE0ED)))
         Row(Modifier.fillMaxWidth().padding(horizontal = 6.dp, vertical = 10.dp)) {
@@ -133,12 +137,17 @@ private fun LinkProgress(step: CareLinkStep) {
 }
 
 @Composable
-private fun OlderAdultCard(profile: OlderAdultProfile?, step: CareLinkStep) {
-    Row(Modifier.fillMaxWidth().heightIn(min = 94.dp).shadow(8.dp, LinkShape)
+private fun OlderAdultCard(profile: OlderAdultProfile?, step: CareLinkStep, avatarResource: Int?) {
+    Row(Modifier.fillMaxWidth().heightIn(min = 94.dp).tataPrototypeShadow(8.dp, LinkShape)
         .background(Color.White, LinkShape).border(1.dp, Color(0xFFE8EAF1), LinkShape)
         .padding(horizontal = 13.dp, vertical = 15.dp), verticalAlignment = Alignment.CenterVertically) {
-        Image(painterResource(R.drawable.figma_link_avatar), contentDescription = null,
+        if (avatarResource != null) Image(painterResource(avatarResource), contentDescription = null,
             contentScale = ContentScale.Crop, modifier = Modifier.size(58.dp).clip(CircleShape).border(2.dp, Color.White, CircleShape))
+        else Box(Modifier.size(58.dp).background(TataLavender, CircleShape), contentAlignment = Alignment.Center) {
+            val initials = profile?.fullName?.split(' ')?.filter { it.isNotBlank() }?.take(2)
+                ?.joinToString("") { it.take(1).uppercase(java.util.Locale.forLanguageTag("es-419")) } ?: "?"
+            LinkText(initials, 20, TataDeepNavy, FontWeight.SemiBold)
+        }
         Spacer(Modifier.width(18.dp))
         Column(Modifier.weight(1f)) {
             val age = profile?.let { Period.between(it.birthDate, LocalDate.now()).years.coerceAtLeast(0) }
@@ -148,7 +157,7 @@ private fun OlderAdultCard(profile: OlderAdultProfile?, step: CareLinkStep) {
                 LinkText(when(step) { CareLinkStep.Code -> "Solicitud lista para enviar"; CareLinkStep.AwaitingConsent -> "Solicitud enviada";
                     CareLinkStep.Confirmed -> "Vínculo activo"; CareLinkStep.Rejected -> "Solicitud rechazada" }, 12, tataMutedColor(), modifier = Modifier.weight(1f))
                 Box(Modifier.background(Color(0xFFFFF3E2), CircleShape).padding(horizontal = 14.dp, vertical = 5.dp)) {
-                    LinkText(if (step == CareLinkStep.Confirmed) "Activo" else "Pendiente", 10, Color(0xFFAB731F), FontWeight.Medium)
+                    LinkText(when (step) { CareLinkStep.Confirmed -> "Activo"; CareLinkStep.Rejected -> "Rechazada"; else -> "Pendiente" }, 10, Color(0xFFAB731F), FontWeight.Medium)
                 }
             }
         }
@@ -157,7 +166,7 @@ private fun OlderAdultCard(profile: OlderAdultProfile?, step: CareLinkStep) {
 
 @Composable
 private fun GradientCard(colors: List<Color>, content: @Composable ColumnScope.() -> Unit) {
-    Column(Modifier.fillMaxWidth().shadow(8.dp, LinkShape).background(Brush.horizontalGradient(colors), LinkShape)
+    Column(Modifier.fillMaxWidth().tataPrototypeShadow(8.dp, LinkShape).background(Brush.horizontalGradient(colors), LinkShape)
         .padding(horizontal = 16.dp, vertical = 14.dp), content = content)
 }
 
@@ -185,8 +194,8 @@ private fun ConsentCard(profile: OlderAdultProfile?, step: CareLinkStep, loading
 
 @Composable
 private fun LinkButton(text: String, onClick: () -> Unit, enabled: Boolean, modifier: Modifier, secondary: Boolean = false) {
-    Surface(onClick = onClick, enabled = enabled, modifier = modifier,
-        shape = CircleShape, shadowElevation = 6.dp,
+    Surface(onClick = onClick, enabled = enabled, modifier = modifier.tataPrototypeShadow(6.dp, CircleShape),
+        shape = CircleShape, shadowElevation = 0.dp,
         color = if (secondary) Color(0xFFF1ECFF) else TataNavy,
         contentColor = if (secondary) TataNavy else Color.White,
         border = if (secondary) BorderStroke(1.dp, Color(0xFFC2B5E5)) else null) {

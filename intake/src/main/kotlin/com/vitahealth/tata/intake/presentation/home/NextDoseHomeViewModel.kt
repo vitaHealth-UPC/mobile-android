@@ -10,14 +10,22 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.Job
+import com.vitahealth.tata.intake.application.handlers.GetDailyDoseProgressQueryHandler
+import com.vitahealth.tata.intake.application.queries.GetDailyDoseProgressQuery
+import java.time.LocalDate
+import java.time.ZoneId
 
 class NextDoseHomeViewModel(
     private val olderAdultId: String,
     private val olderAdultName: String,
     private val handler: GetNextDoseQueryHandler,
+    private val progressHandler: GetDailyDoseProgressQueryHandler? = null,
 ) : ViewModel() {
     private val _state = MutableStateFlow<NextDoseHomeUiState>(NextDoseHomeUiState.Loading)
     val state: StateFlow<NextDoseHomeUiState> = _state.asStateFlow()
+
+    private var request: Job? = null
 
     init {
         load()
@@ -26,16 +34,21 @@ class NextDoseHomeViewModel(
     fun retry() = load()
 
     private fun load() {
+        request?.cancel()
         _state.value = NextDoseHomeUiState.Loading
-        viewModelScope.launch {
+        request = viewModelScope.launch {
+            val zone = ZoneId.systemDefault()
+            val day = LocalDate.now(zone)
+            val progress = (progressHandler?.invoke(GetDailyDoseProgressQuery(olderAdultId, day, zone)) as? AppResult.Success)?.value
             when (val result = handler(GetNextDoseQuery(olderAdultId))) {
                 is AppResult.Success -> {
                     _state.value = result.value?.let {
                         NextDoseHomeUiState.NextDoseAvailable(
                             dose = it,
                             olderAdultName = olderAdultName,
+                            progress = progress,
                         )
-                    } ?: NextDoseHomeUiState.NoNextDose(olderAdultName)
+                    } ?: NextDoseHomeUiState.NoNextDose(olderAdultName, progress)
                 }
                 is AppResult.Failure -> {
                     _state.value = NextDoseHomeUiState.Error(
@@ -51,6 +64,7 @@ class NextDoseHomeViewModel(
         private val olderAdultId: String,
         private val olderAdultName: String,
         private val handler: GetNextDoseQueryHandler,
+        private val progressHandler: GetDailyDoseProgressQueryHandler? = null,
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T =
@@ -58,6 +72,7 @@ class NextDoseHomeViewModel(
                 olderAdultId = olderAdultId,
                 olderAdultName = olderAdultName,
                 handler = handler,
+                progressHandler = progressHandler,
             ) as T
     }
 }
