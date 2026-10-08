@@ -48,4 +48,5 @@
     <string name="inventory_error_medication_not_found">Este medicamento ya no existe. Actualiza la lista de medicamentos.</string>
     <string name="inventory_error_medication_inactive">Este medicamento está inactivo. Selecciona un medicamento activo.</string>
     <string name="inventory_lot_label">Lote / nota</string>
+    <string name="inventory_days_short">días</string>
 </resources>
