@@ -35,11 +35,11 @@ Evidencias PNG en el equipo de trabajo: C:/Users/david/Downloads/. Las capturas 
 | 19 | History & Insights | 563:1017 | Requiere validar/corregir | — |
 | 20 | Adherence Recommendations | 563:1767 | Requiere validar/corregir | — |
 | 21 | Notes - Adult | 576:2785 | Sin implementación específica | — |
-| 22 | Add Medication - Caregiver | 563:453 | Requiere validar/corregir | — |
+| 22 | Add Medication - Caregiver | 563:453 | Comparada; título, campos e ilustración corregidos; selector de frecuencia por completar | medication-registration-proportional.png |
 | 23 | Create Treatment | 563:1490 | Requiere validar/corregir | — |
 | 24 | Treatment Management | 563:1554 | Requiere validar/corregir | — |
 | 25 | Inventory & Restock | 563:1632 | Requiere validar/corregir | — |
-| 26 | Notification Preferences | 563:1219 | Requiere validar/corregir | — |
+| 26 | Notification Preferences | 563:1219 | Requiere corregir: faltan secciones de cadencia, alertas y escalamiento del mockup | — |
 | 27 | Notes - Caregiver | 576:2859 | Requiere corregir: perfil y títulos no representados | audit-caregiver-notes.png |
 | 28 | Plan & Subscription | 563:1701 | Comparada; barra, fechas y composición corregidas; indicador de ciclo sin dato contractual | plan-navigation-final.png |
 | 29 | PIN Setup | 563:1970 | Aceptada visualmente | pin-setup-final.png |
@@ -49,7 +49,7 @@ Evidencias PNG en el equipo de trabajo: C:/Users/david/Downloads/. Las capturas 
 | 33 | Verification Expired | 563:2208 | Aceptada visualmente | registration-expired-final.png |
 | 34 | Invalid Link Code | 563:2254 | Requiere validar/corregir | — |
 | 35 | Consent Required | 563:2308 | Requiere validar/corregir | — |
-| 36 | Medication Required Fields Error | 563:2404 | Requiere validar/corregir | — |
+| 36 | Medication Required Fields Error | 563:2404 | Comparada; campos corregidos; falta composición del mensaje y selector de frecuencia | medication-registration-error-proportional.png |
 | 37 | Medication Updated | 563:2455 | Requiere validar/corregir | — |
 | 38 | Medication Deactivated | 563:2537 | Requiere validar/corregir | — |
 | 39 | Medication Reminder Due | 563:2619 | Sin implementación específica | — |

@@ -1,6 +1,12 @@
 package com.vitahealth.tata.treatment.presentation.medication
 
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
+import com.vitahealth.tata.shared.design.components.TataSvgIcon
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -27,7 +33,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -90,22 +95,24 @@ fun MedicationRegistrationScreen(
 
         Text(
             text = "Agregar medicamento: " + displayName(state.olderAdultName),
-            style = MaterialTheme.typography.headlineSmall,
+            fontFamily = FontFamily(Font(com.vitahealth.tata.shared.R.font.tata_serif)),
+            fontSize = 22.sp,
+            lineHeight = 29.sp,
             color = TataText,
-            fontWeight = FontWeight.SemiBold,
+            fontWeight = FontWeight.Normal,
+            modifier = Modifier.align(Alignment.CenterHorizontally),
         )
         Text(
             text = "Cuidador · Paso 1 de 4",
-            style = MaterialTheme.typography.bodySmall,
+            style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily(Font(com.vitahealth.tata.shared.R.font.tata_inter)), fontSize = 11.sp, lineHeight = 14.sp),
             color = TataMuted,
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
                 .padding(top = 6.dp),
         )
 
-        Image(
-            painter = painterResource(R.drawable.medication_bottle),
-            contentDescription = null,
+        TataSvgIcon(
+            resource = R.raw.medication_bottle,
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
                 .padding(top = 10.dp)
@@ -166,7 +173,7 @@ fun MedicationRegistrationScreen(
                 Text(
                     text = message,
                     color = TataError,
-                    style = MaterialTheme.typography.bodySmall,
+                    style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily(Font(com.vitahealth.tata.shared.R.font.tata_inter)), fontSize = 11.sp, lineHeight = 14.sp),
                     fontWeight = FontWeight.SemiBold,
                 )
             }
@@ -187,7 +194,7 @@ fun MedicationRegistrationScreen(
                 Text(
                     text = medication.name + " · " + medication.presentation,
                     color = TataMuted,
-                    style = MaterialTheme.typography.bodySmall,
+                    style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily(Font(com.vitahealth.tata.shared.R.font.tata_inter)), fontSize = 11.sp, lineHeight = 14.sp),
                     modifier = Modifier.padding(top = 4.dp),
                 )
             }
@@ -222,37 +229,24 @@ private fun MedicationField(
     placeholder: String,
     enabled: Boolean,
 ) {
-    OutlinedTextField(
-        value = value,
-        onValueChange = onValueChange,
-        enabled = enabled,
-        label = { Text(label, style = MaterialTheme.typography.labelSmall) },
-        placeholder = { Text(placeholder, style = MaterialTheme.typography.bodySmall) },
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(bottom = 12.dp)
-            .shadow(
-                elevation = 6.dp,
-                shape = RoundedCornerShape(15.dp),
-                ambientColor = Color(0x141A2138),
-                spotColor = Color(0x141A2138),
-            ),
-        singleLine = true,
-        shape = RoundedCornerShape(15.dp),
-        colors = OutlinedTextFieldDefaults.colors(
-            focusedContainerColor = Color.White,
-            unfocusedContainerColor = Color.White,
-            disabledContainerColor = Color.White,
-            focusedBorderColor = Color.Transparent,
-            unfocusedBorderColor = Color.Transparent,
-            disabledBorderColor = Color.Transparent,
-            focusedTextColor = TataText,
-            unfocusedTextColor = TataText,
-            disabledTextColor = TataMuted,
-            focusedLabelColor = TataText,
-            unfocusedLabelColor = TataText,
-        ),
-    )
+    Column(Modifier.fillMaxWidth().padding(bottom = 12.dp)
+        .shadow(6.dp, RoundedCornerShape(15.dp), ambientColor = Color(0x141A2138), spotColor = Color(0x141A2138))
+        .background(Color.White, RoundedCornerShape(15.dp)).padding(horizontal = 14.dp, vertical = 10.dp)) {
+        Text(label, color = TataText, fontFamily = FontFamily(Font(com.vitahealth.tata.shared.R.font.tata_inter)),
+            fontSize = 10.sp, lineHeight = 13.sp)
+        Spacer(Modifier.height(5.dp))
+        BasicTextField(value = value, onValueChange = onValueChange, enabled = enabled, singleLine = true,
+            textStyle = MaterialTheme.typography.bodySmall.copy(
+                fontFamily = FontFamily(Font(com.vitahealth.tata.shared.R.font.tata_inter)),
+                fontSize = 12.sp, lineHeight = 16.sp, color = TataText),
+            modifier = Modifier.fillMaxWidth().semantics { contentDescription = label },
+            decorationBox = { input -> Box {
+                if (value.isEmpty()) Text(placeholder, color = TataMuted,
+                    fontFamily = FontFamily(Font(com.vitahealth.tata.shared.R.font.tata_inter)),
+                    fontSize = 12.sp, lineHeight = 16.sp)
+                input()
+            } })
+    }
 }
 
 @Composable
