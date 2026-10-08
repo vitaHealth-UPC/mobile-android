@@ -4,8 +4,8 @@ Checkpoint: 2026-10-07. Registro independiente del conteo de implementaciones.
 
 - 60 variantes tienen implementación, incluyendo composiciones parciales.
 - 10 carecen de implementación específica.
-- 21 aceptadas visualmente con el criterio proporcional acordado.
-- 39 implementadas requieren validación o correcciones.
+- 22 aceptadas visualmente con el criterio proporcional acordado.
+- 38 implementadas requieren validación o correcciones.
 - 58 tienen comparación visual; comparación no equivale a aceptación.
 
 Aceptación: composición, tipografía, proporciones, iconos, contraste y estado representado coherentes con Figma. Se permiten adaptaciones nativas, desplazamiento por contenido real y datos dinámicos; no se exige copiar nombres, fechas ni títulos a posiciones absolutas. La aceptación visual no certifica integraciones ni navegación completa. Cada variante requiere su propio resultado; reutilizar un composable no aprueba automáticamente todas sus variantes.
@@ -48,7 +48,7 @@ Evidencias PNG en el equipo de trabajo: C:/Users/david/Downloads/. Las capturas 
 | 32 | Duplicate Email | 563:2162 | Aceptada visualmente; código todavía no enviado | registration-duplicate-final.png |
 | 33 | Verification Expired | 563:2208 | Aceptada visualmente | registration-expired-final.png |
 | 34 | Invalid Link Code | 563:2254 | Aceptada visualmente; aviso de error separado del estado del vínculo | link-invalid-final.png |
-| 35 | Consent Required | 563:2308 | Requiere validar/corregir | — |
+| 35 | Consent Required | 563:2308 | Aceptada visualmente; acceso restringido sin exponer seguimiento ni inferir la causa del vínculo inactivo | consent-required-final.png |
 | 36 | Medication Required Fields Error | 563:2404 | Aceptada visualmente; aviso y campos vacíos, contenido desplazable | medication-error-final.png |
 | 37 | Medication Updated | 563:2455 | Requiere validar/corregir | — |
 | 38 | Medication Deactivated | 563:2537 | Requiere validar/corregir | — |

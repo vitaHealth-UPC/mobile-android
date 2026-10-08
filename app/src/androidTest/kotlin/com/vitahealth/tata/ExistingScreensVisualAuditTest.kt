@@ -246,6 +246,17 @@ class ExistingScreensVisualAuditTest {
         capture("linked-person")
     }
 
+    @Test fun captureConsentRequired() {
+        compose.setContent { AuditTheme { Box(Modifier.safeDrawingPadding()) {
+            FamilySummaryScreen(FamilySummaryUiState(loading = false,
+                error = "El vínculo de cuidado ya no está activo.", errorCode = "CARE_RELATIONSHIP_REQUIRED"),
+                "Rosa Vargas", {}, {}, {}, {}, {}, {}, {}, {})
+        } } }
+        compose.onNodeWithText("Seguimiento restringido").assertExists()
+        compose.onNodeWithText("Adherencia esta semana").assertDoesNotExist()
+        capture("consent-required")
+    }
+
     @Test fun captureInventoryVariants() {
         val now = java.time.Instant.now()
         val stock = InventoryStockReadModel("med-test", 5, 7, StockStatus.LOW,
