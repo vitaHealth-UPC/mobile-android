@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Caregiver alerts (US-27) -->
+    <string name="alerts_title">Alerts</string>
+    <string name="alerts_subtitle">Missed doses that need your follow-up.</string>
+    <string name="alerts_filter_all">All</string>
+    <string name="alerts_filter_pending">Pending</string>
+    <string name="alerts_filter_attended">Attended</string>
+    <plurals name="alerts_pending_summary">
+        <item quantity="one">%1$d pending alert</item>
+        <item quantity="other">%1$d pending alerts</item>
+    </plurals>
+    <string name="alerts_empty_title">No alerts</string>
+    <string name="alerts_empty_message">Everything is under control. We will let you know if a dose is missed.</string>
+    <string name="alerts_filter_empty">There are no alerts in this filter.</string>
+    <string name="alerts_card_scheduled">Scheduled for %1$s</string>
+    <string name="alerts_open_detail">Open alert detail</string>
+    <string name="alerts_loading">Loading alerts…</string>
+    <string name="alerts_retry">Try again</string>
+    <string name="alerts_back">Back</string>
+
+    <!-- Alert status, as the backend names it -->
+    <string name="alert_status_open">Pending</string>
+    <string name="alert_status_attended">Attended</string>
+    <string name="alert_status_closed">Closed</string>
+    <string name="alert_title_open">Pending alert</string>
+    <string name="alert_title_attended">Attended alert</string>
+    <string name="alert_title_closed">Closed alert</string>
+
+    <!-- Alert detail -->
+    <string name="alert_detail_title">Alert detail</string>
+    <string name="alert_detail_section">Alert information</string>
+    <string name="alert_detail_scheduled">Scheduled dose</string>
+    <string name="alert_detail_reason">Reason</string>
+    <string name="alert_detail_reason_missing">Not reported</string>
+    <string name="alert_detail_status">Status</string>
+    <string name="alert_detail_opened">Opened</string>
+    <string name="alert_detail_closed">Closed</string>
+    <string name="alert_detail_loading">Loading the alert…</string>
+
+    <!-- Alert follow-up (US-31) -->
+    <string name="alert_actions_title">Follow-up actions</string>
+    <string name="alert_actions_subtitle">Update the alert according to the follow-up result.</string>
+    <string name="alert_action_attend">Mark as attended</string>
+    <string name="alert_action_attended">Attended</string>
+    <string name="alert_action_close">Close alert</string>
+    <string name="alert_action_saving">Saving…</string>
+    <string name="alert_closed_note">This alert is closed and stays in the history.</string>
+    <string name="alert_close_confirm_title">Close this alert?</string>
+    <string name="alert_close_confirm_message">It will leave the pending list and stay in the history. It cannot be reopened.</string>
+    <string name="alert_close_cancel">Cancel</string>
+    <string name="alert_feedback_attended">Alert marked as attended.</string>
+    <string name="alert_feedback_closed">Alert closed.</string>
+    <string name="alert_feedback_conflict">The alert had already changed. This is its current status.</string>
+    <string name="alert_feedback_failed">We could not update the alert. Try again.</string>
+
+    <!-- Read failures -->
+    <string name="alerts_error_network">No connection. Check your internet and try again.</string>
+    <string name="alerts_error_access">The care link is not active or consent is missing, so the alerts cannot be shown.</string>
+    <string name="alerts_error_list_not_found">This person has no active follow-up.</string>
+    <string name="alerts_error_detail_not_found">This alert does not exist or is no longer available.</string>
+    <string name="alerts_error_unknown">We could not load the alerts. Try again.</string>
+
+    <!-- Follow-up notes (US-30) -->
+    <string name="notes_title">Notes</string>
+    <string name="notes_subtitle">Follow-up and observations about the person you care for.</string>
+    <string name="notes_section">Caregiver notes</string>
+    <string name="notes_add">Add note</string>
+    <string name="notes_empty_title">No notes yet</string>
+    <string name="notes_empty_message">Write what you did or noticed so the follow-up has a history.</string>
+    <string name="notes_loading">Loading notes…</string>
+    <string name="notes_author_you">You</string>
+    <string name="notes_author_other">Another caregiver</string>
+    <string name="notes_meta">%1$s · %2$s</string>
+    <string name="notes_error_unknown">We could not load the notes. Try again.</string>
+    <string name="note_saved">Note saved</string>
+    <string name="note_add_followup">Add follow-up note</string>
+    <string name="note_dialog_title">New follow-up note</string>
+    <string name="note_dialog_label">What did you do or notice?</string>
+    <string name="note_dialog_counter">%1$d/%2$d characters</string>
+    <string name="note_dialog_save">Save note</string>
+    <string name="note_dialog_cancel">Cancel</string>
+    <string name="note_error_blank">Write the note before saving it.</string>
+    <string name="note_error_too_long">The note can have up to %1$d characters.</string>
+    <string name="note_error_rejected">The server did not accept the note. Review it and try again.</string>
+    <string name="note_error_save">We could not save the note. Try again.</string>
+
+    <!-- Contact from an alert (US-29) -->
+    <string name="alert_actions_subtitle_named">Contact %1$s and update the alert according to the result.</string>
+    <string name="contact_action_named">Contact %1$s</string>
+    <string name="contact_action">Contact</string>
+    <string name="contact_unavailable">Contact unavailable</string>
+    <string name="contact_loading">Checking contact…</string>
+    <string name="contact_channel_phone">Phone: %1$s</string>
+    <string name="contact_channel_whatsapp">WhatsApp: %1$s</string>
+    <string name="contact_retry">Check contact again</string>
+    <string name="contact_no_app">No app on this device can open this contact.</string>
+</resources>
