@@ -889,6 +889,9 @@ fun TataNavHost(
             ).trim()
 
             InventoryRoute(
+                olderAdultName = runCatching { navController.getBackStackEntry(RootDestination.FamilySummary.route) }
+                    .getOrNull()?.arguments?.getString("olderAdultName") ?: "",
+                onTabSelected = { tab -> navController.openCaregiverTab(tab) },
                 factory = app.container.inventoryViewModelFactory(
                     medicationId = medicationId,
                     medicationName = medicationName,
