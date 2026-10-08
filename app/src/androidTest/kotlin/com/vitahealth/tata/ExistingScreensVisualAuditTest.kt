@@ -49,13 +49,13 @@ class ExistingScreensVisualAuditTest {
             return context.createConfigurationContext(config)
         }
         val spanish = localized("fr-FR") // An unsupported device language must use the Spanish fallback.
-        check(spanish.getString(com.vitahealth.tata.identity.R.string.onboarding_start) == "Comenzar")
-        check(spanish.getString(com.vitahealth.tata.monitoring.R.string.alerts_title) == "Alertas")
-        check(spanish.getString(com.vitahealth.tata.inventory.R.string.inventory_title) == "Inventario")
-        check(spanish.getString(com.vitahealth.tata.preferences.R.string.accessibility_title) == "Accesibilidad")
+        check(spanish.getString(com.vitahealth.tata.R.string.onboarding_start) == "Comenzar")
+        check(spanish.getString(com.vitahealth.tata.R.string.alerts_title) == "Alertas")
+        check(spanish.getString(com.vitahealth.tata.R.string.inventory_title) == "Inventario")
+        check(spanish.getString(com.vitahealth.tata.R.string.accessibility_title) == "Accesibilidad")
         val english = localized("en-US")
-        check(english.getString(com.vitahealth.tata.identity.R.string.onboarding_start) == "Get started")
-        check(english.getString(com.vitahealth.tata.monitoring.R.string.alerts_title) == "Alerts")
+        check(english.getString(com.vitahealth.tata.R.string.onboarding_start) == "Get started")
+        check(english.getString(com.vitahealth.tata.R.string.alerts_title) == "Alerts")
     }
 
     @Test fun captureOnboardingAndPlanVariants() {
@@ -122,10 +122,21 @@ class ExistingScreensVisualAuditTest {
             olderAdult = com.vitahealth.tata.carelink.domain.model.OlderAdultProfile("adult-test", "Rosa Vargas",
                 java.time.LocalDate.of(1958, 5, 12), null, null, null)))
         compose.setContent { AuditTheme { CareLinkScreen(state, {}, {}, {}, {}, Modifier.safeDrawingPadding(),
-            avatarResource = com.vitahealth.tata.carelink.R.drawable.figma_link_avatar) } }
+            avatarResource = com.vitahealth.tata.R.drawable.figma_link_avatar) } }
         capture("link-code")
         compose.runOnIdle { state = state.copy(code = "INVALIDO", errorMessage = "El código ya venció o fue utilizado.") }
         capture("link-invalid")
+    }
+
+    @Test fun captureLogin() {
+        var requested = false
+        compose.setContent { AuditTheme { Box(Modifier.safeDrawingPadding()) {
+            SessionAccessScreen(SessionAccessUiState(email = "diego@example.test", password = "fixture-only"),
+                {}, {}, { requested = true }, {}, {}, showPin = false)
+        } } }
+        compose.onNodeWithText("Iniciar sesión").performClick()
+        compose.runOnIdle { check(requested) }
+        capture("login")
     }
 
     @Test fun captureNotificationVariants() {
@@ -246,13 +257,24 @@ class ExistingScreensVisualAuditTest {
         capture("linked-person")
     }
 
+    @Test fun captureConsentRequired() {
+        compose.setContent { AuditTheme { Box(Modifier.safeDrawingPadding()) {
+            FamilySummaryScreen(FamilySummaryUiState(loading = false,
+                error = "El vínculo de cuidado ya no está activo.", errorCode = "CARE_RELATIONSHIP_REQUIRED"),
+                "Rosa Vargas", {}, {}, {}, {}, {}, {}, {}, {})
+        } } }
+        compose.onNodeWithText("Seguimiento restringido").assertExists()
+        compose.onNodeWithText("Adherencia esta semana").assertDoesNotExist()
+        capture("consent-required")
+    }
+
     @Test fun captureInventoryVariants() {
         val now = java.time.Instant.now()
         val stock = InventoryStockReadModel("med-test", 5, 7, StockStatus.LOW,
             listOf(InventoryBatch("batch-test", 30, now, "Lote 2026-09")), now, now, 5)
         var state by mutableStateOf(InventoryUiState.Ready(stock, "Losartán 50 mg", "comprimidos",
             replenishmentInput = "30", lotInput = "Lote 2026-09"))
-        compose.setContent { AuditTheme { InventoryScreen(state, {}, {}, {}, {}, {}, {}, Modifier.safeDrawingPadding()) } }
+        compose.setContent { AuditTheme { InventoryScreen(state, {}, {}, {}, {}, {}, {}, Modifier.safeDrawingPadding(), olderAdultName = "Rosa Vargas") } }
         capture("inventory-content")
         compose.runOnIdle { state = state.copy(replenishmentInput = "0", replenishmentErrorCode = "INVALID_QUANTITY") }
         capture("inventory-invalid")
