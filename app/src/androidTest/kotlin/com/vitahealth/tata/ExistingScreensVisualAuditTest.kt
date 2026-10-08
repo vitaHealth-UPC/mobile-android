@@ -7,6 +7,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -136,9 +138,12 @@ class ExistingScreensVisualAuditTest {
     @Test fun captureMedicationRegistrationVariants() {
         var state by mutableStateOf(MedicationRegistrationUiState("caregiver-test", "adult-test", "Rosa Vargas",
             name = "Losartán 50 mg", presentation = "Comprimido", frequency = "Una vez al día", timing = "Con el desayuno"))
-        compose.setContent { AuditTheme { MedicationRegistrationScreen(state, {}, {}, {}, {}, {}, {}, Modifier.safeDrawingPadding()) } }
+        compose.setContent { AuditTheme { MedicationRegistrationScreen(state, {}, {}, { state = state.copy(frequency = it) }, {}, {}, {}, Modifier.safeDrawingPadding()) } }
+        compose.onNodeWithText("Una vez al día").performClick()
+        compose.onNodeWithText("Cada 12 horas").performClick()
+        compose.runOnIdle { check(state.frequency == "Cada 12 horas") }
         capture("medication-registration")
-        compose.runOnIdle { state = state.copy(name = "", presentation = "", errorMessage = "Completa los campos requeridos.") }
+        compose.runOnIdle { state = state.copy(name = "", presentation = "", frequency = "", timing = "", errorMessage = "Completa medicamento, dosis y frecuencia antes de continuar.") }
         capture("medication-registration-error")
     }
 
