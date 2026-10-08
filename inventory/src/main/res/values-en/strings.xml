@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="inventory_subtitle_for_person">Initial stock, availability and restocking for %1$s.</string>
+    <string name="inventory_initialized_info">Initial stock is already registered. Add a restock to increase the quantity.</string>
+    <string name="inventory_close">Got it</string>
     <!-- Inventory screen (US-40 to US-43) -->
     <string name="inventory_title">Inventory</string>
     <string name="inventory_subtitle">Initial stock, availability and restocks.</string>

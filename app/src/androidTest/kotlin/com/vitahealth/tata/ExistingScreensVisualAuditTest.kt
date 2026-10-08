@@ -263,7 +263,7 @@ class ExistingScreensVisualAuditTest {
             listOf(InventoryBatch("batch-test", 30, now, "Lote 2026-09")), now, now, 5)
         var state by mutableStateOf(InventoryUiState.Ready(stock, "Losartán 50 mg", "comprimidos",
             replenishmentInput = "30", lotInput = "Lote 2026-09"))
-        compose.setContent { AuditTheme { InventoryScreen(state, {}, {}, {}, {}, {}, {}, Modifier.safeDrawingPadding()) } }
+        compose.setContent { AuditTheme { InventoryScreen(state, {}, {}, {}, {}, {}, {}, Modifier.safeDrawingPadding(), olderAdultName = "Rosa Vargas") } }
         capture("inventory-content")
         compose.runOnIdle { state = state.copy(replenishmentInput = "0", replenishmentErrorCode = "INVALID_QUANTITY") }
         capture("inventory-invalid")
