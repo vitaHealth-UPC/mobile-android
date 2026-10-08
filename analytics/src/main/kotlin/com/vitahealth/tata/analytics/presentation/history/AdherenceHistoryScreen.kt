@@ -1,19 +1,24 @@
 package com.vitahealth.tata.analytics.presentation.history
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -22,6 +27,10 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -49,9 +58,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.vitahealth.tata.analytics.domain.model.AdherencePeriod
+import com.vitahealth.tata.analytics.domain.model.IntakeOutcomeStatus
+import com.vitahealth.tata.analytics.presentation.components.AnalyticsEmptyStateCard
+import com.vitahealth.tata.shared.design.components.CaregiverTab
+import com.vitahealth.tata.shared.design.components.CaregiverTabBar
 import com.vitahealth.tata.shared.design.components.TataButton
 import com.vitahealth.tata.shared.design.components.TataButtonStyle
 import com.vitahealth.tata.shared.design.components.TataCard
+import com.vitahealth.tata.shared.design.theme.TataBorder
 import com.vitahealth.tata.shared.design.theme.TataDeepNavy
 import com.vitahealth.tata.shared.design.theme.TataLavender
 import com.vitahealth.tata.shared.design.theme.TataMuted
@@ -67,9 +81,11 @@ private val OnTimeCardStart = Color(0xFFECF5FB)
 private val OnTimeCardEnd = Color(0xFFDFECF6)
 private val LateOmittedCardStart = Color(0xFFECF7EF)
 private val LateOmittedCardEnd = Color(0xFFDFF0E4)
-private val EmptyStateSurface = Color(0xFFEBF5FC)
-private val EmptyStateTitle = Color(0xFF121A2E)
-private val EmptyStateBody = Color(0xFF78859E)
+private val PatternCardStart = Color(0xFFFFF3E2)
+private val PatternCardEnd = Color(0xFFFBE8C9)
+private val PatternIcon = Color(0xFFC78E2A)
+private val PatternLink = Color(0xFF5261B8)
+private val OmittedText = Color(0xFFB83D47)
 private val ChartLabel = Color(0xFF637087)
 private val ChartGrid = Color(0xCCE8E8EF)
 private val ChartLine = Color(0x618B83E8)
@@ -80,6 +96,8 @@ private val ChartAreaBottom = Color(0x006576E6)
 @Composable
 fun AdherenceHistoryRoute(
     factory: AdherenceHistoryViewModel.Factory,
+    onOpenRecommendations: () -> Unit = {},
+    onTabSelected: (CaregiverTab) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val viewModel: AdherenceHistoryViewModel = viewModel(factory = factory)
@@ -89,7 +107,9 @@ fun AdherenceHistoryRoute(
         state = state,
         selectedPeriod = selectedPeriod,
         onPeriodSelected = viewModel::selectPeriod,
+        onOpenRecommendations = onOpenRecommendations,
         onRetry = viewModel::retry,
+        onTabSelected = onTabSelected,
         modifier = modifier,
     )
 }
@@ -100,12 +120,40 @@ fun AdherenceHistoryScreen(
     modifier: Modifier = Modifier,
     selectedPeriod: AdherencePeriod = AdherencePeriod.LastMonth,
     onPeriodSelected: (AdherencePeriod) -> Unit = {},
+    onOpenRecommendations: () -> Unit = {},
     onRetry: () -> Unit = {},
+    onTabSelected: (CaregiverTab) -> Unit = {},
+) {
+    CompositionLocalProvider(LocalTextStyle provides TextStyle(
+        fontFamily = FontFamily(Font(com.vitahealth.tata.shared.R.font.tata_inter)),
+        letterSpacing = 0.sp,
+    )) {
+    Column(modifier = modifier.fillMaxSize().background(TataSurface)) {
+        AdherenceHistoryBody(
+            state = state,
+            selectedPeriod = selectedPeriod,
+            onPeriodSelected = onPeriodSelected,
+            onOpenRecommendations = onOpenRecommendations,
+            onRetry = onRetry,
+            modifier = Modifier.weight(1f),
+        )
+        CaregiverTabBar(selected = CaregiverTab.Home, onSelect = onTabSelected)
+    }
+    }
+}
+
+@Composable
+private fun AdherenceHistoryBody(
+    state: AdherenceHistoryUiState,
+    selectedPeriod: AdherencePeriod,
+    onPeriodSelected: (AdherencePeriod) -> Unit,
+    onOpenRecommendations: () -> Unit,
+    onRetry: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(TataSurface)
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 22.dp, vertical = 28.dp),
     ) {
@@ -119,19 +167,33 @@ fun AdherenceHistoryScreen(
                 MetricsRow(summary = state.summary)
                 Spacer(Modifier.height(12.dp))
                 TrendCard(points = state.summary.trend)
+                state.summary.pattern?.let { pattern ->
+                    Spacer(Modifier.height(12.dp))
+                    PatternCard(pattern = pattern, onOpenRecommendations = onOpenRecommendations)
+                }
+                if (state.summary.recentIntakes.isNotEmpty()) {
+                    Spacer(Modifier.height(12.dp))
+                    RecentIntakesCard(intakes = state.summary.recentIntakes)
+                }
                 if (state.periodUpdated) {
                     Spacer(Modifier.height(12.dp))
                     PeriodUpdatedNotice()
                 }
             }
-            is AdherenceHistoryUiState.InsufficientData -> EmptyStateCard(
+            is AdherenceHistoryUiState.InsufficientData -> {
+                Spacer(Modifier.height(112.dp))
+                AnalyticsEmptyStateCard(
                 title = "Sin datos suficientes",
                 message = "No existen tomas en este periodo para calcular adherencia.",
             )
-            is AdherenceHistoryUiState.NoResults -> EmptyStateCard(
+            }
+            is AdherenceHistoryUiState.NoResults -> {
+                Spacer(Modifier.height(112.dp))
+                AnalyticsEmptyStateCard(
                 title = "Sin resultados",
                 message = "No existen tomas registradas dentro del periodo seleccionado.",
             )
+            }
             is AdherenceHistoryUiState.Error -> ErrorCard(message = state.message, onRetry = onRetry)
         }
         Spacer(Modifier.height(28.dp))
@@ -151,8 +213,10 @@ private fun HistoryHeader(
         Column {
             Text(
                 text = "Historial e insights",
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
+                fontFamily = FontFamily(Font(com.vitahealth.tata.shared.R.font.tata_serif)),
+                fontSize = 28.sp,
+                lineHeight = 36.sp,
+                fontWeight = FontWeight.Normal,
                 color = TataText,
             )
             PeriodSelector(selected = selectedPeriod, onSelected = onPeriodSelected)
@@ -187,6 +251,117 @@ private fun PeriodSelector(
                         expanded = false
                         onSelected(period)
                     },
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun PatternCard(
+    pattern: PatternUi,
+    onOpenRecommendations: () -> Unit,
+) {
+    val shape = RoundedCornerShape(18.dp)
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .shadow(elevation = 3.dp, shape = shape)
+            .background(Brush.horizontalGradient(listOf(PatternCardStart, PatternCardEnd)), shape)
+            .padding(horizontal = 15.dp, vertical = 14.dp),
+    ) {
+        SunIcon(modifier = Modifier.padding(top = 4.dp))
+        Column(modifier = Modifier.padding(start = 12.dp)) {
+            Text(
+                text = "Patrón detectado",
+                fontSize = 12.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = TataText,
+            )
+            Text(
+                text = pattern.headline,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = TataText,
+                modifier = Modifier.padding(top = 6.dp),
+            )
+            Text(
+                text = pattern.summary,
+                fontSize = 11.sp,
+                color = TataText.copy(alpha = 0.7f),
+                modifier = Modifier.padding(top = 6.dp),
+            )
+            Text(
+                text = "Ver recomendaciones  ›",
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Medium,
+                color = PatternLink,
+                modifier = Modifier
+                    .heightIn(min = 44.dp)
+                    .clickable(onClick = onOpenRecommendations)
+                    .padding(top = 14.dp),
+            )
+        }
+    }
+}
+
+@Composable
+private fun SunIcon(modifier: Modifier = Modifier) {
+    Canvas(modifier = modifier.size(22.dp)) {
+        val unit = size.width / 22f
+        val strokeWidth = 1.7f * unit
+        val center = Offset(11f * unit, 11f * unit)
+        drawCircle(
+            color = PatternIcon,
+            radius = 3.2f * unit,
+            center = center,
+            style = Stroke(width = strokeWidth, cap = StrokeCap.Round),
+        )
+        listOf(
+            0f to -9.2f, 0f to 9.2f, -9.2f to 0f, 9.2f to 0f,
+            -6.5f to -6.5f, 6.5f to -6.5f, -6.5f to 6.5f, 6.5f to 6.5f,
+        ).forEach { (dx, dy) ->
+            val inner = Offset(center.x + dx * 0.55f * unit, center.y + dy * 0.55f * unit)
+            val outer = Offset(center.x + dx * unit, center.y + dy * unit)
+            drawLine(PatternIcon, inner, outer, strokeWidth, StrokeCap.Round)
+        }
+    }
+}
+
+@Composable
+private fun RecentIntakesCard(intakes: List<RecentIntakeUi>) {
+    val shape = RoundedCornerShape(16.dp)
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color.White, shape)
+            .border(BorderStroke(1.dp, TataBorder), shape)
+            .padding(14.dp),
+    ) {
+        Text(
+            text = "Tomas recientes",
+            fontSize = 13.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = TataText,
+        )
+        intakes.forEach { intake ->
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 14.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = intake.whenLabel,
+                    fontSize = 11.sp,
+                    color = TataMuted,
+                    modifier = Modifier.width(104.dp),
+                )
+                Text(
+                    text = "${intake.medicationName}, ${intake.outcomeText}",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = if (intake.status == IntakeOutcomeStatus.Omitted) OmittedText else TataText,
                 )
             }
         }
@@ -241,7 +416,7 @@ private fun CalendarIcon(modifier: Modifier = Modifier) {
 @Composable
 private fun MetricsRow(summary: AdherenceSummaryUi) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
         horizontalArrangement = Arrangement.spacedBy(9.dp),
     ) {
         MetricCard(
@@ -283,15 +458,17 @@ private fun MetricCard(
     val shape = RoundedCornerShape(16.dp)
     Column(
         modifier = modifier
-            .height(92.dp)
+            .fillMaxHeight()
+            .heightIn(min = 92.dp)
             .shadow(elevation = 3.dp, shape = shape)
             .background(Brush.horizontalGradient(listOf(startColor, endColor)), shape)
             .padding(12.dp),
     ) {
-        Text(text = label, fontSize = 11.sp, fontWeight = FontWeight.Medium, color = TataText)
+        Text(text = label, fontSize = 11.sp, lineHeight = 14.sp, fontWeight = FontWeight.Medium, color = TataText)
         Text(
             text = value,
             fontSize = 25.sp,
+            lineHeight = 30.sp,
             fontWeight = FontWeight.Bold,
             color = TataText,
             modifier = Modifier.padding(top = 6.dp),
@@ -300,6 +477,7 @@ private fun MetricCard(
             Text(
                 text = caption,
                 fontSize = 9.sp,
+                lineHeight = 11.sp,
                 color = TataDeepNavy,
                 modifier = Modifier.padding(top = 4.dp),
             )
@@ -423,38 +601,6 @@ private fun AdherenceTrendChart(points: List<AdherenceTrendPoint>) {
 }
 
 @Composable
-private fun EmptyStateCard(
-    title: String,
-    message: String,
-) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(226.dp)
-            .background(EmptyStateSurface, RoundedCornerShape(20.dp))
-            .padding(horizontal = 24.dp),
-        contentAlignment = Alignment.Center,
-    ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(
-                text = title,
-                fontSize = 21.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = EmptyStateTitle,
-                textAlign = TextAlign.Center,
-            )
-            Text(
-                text = message,
-                fontSize = 11.sp,
-                color = EmptyStateBody,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(top = 12.dp),
-            )
-        }
-    }
-}
-
-@Composable
 private fun LoadingCard() {
     TataCard(
         containerColor = TataLavender,
@@ -492,6 +638,17 @@ private fun ErrorCard(
     }
 }
 
+private val previewPattern = PatternUi(
+    headline = "Excelente progreso",
+    summary = "4 omisiones y 6 tomas tardías se concentran en la tarde.",
+)
+
+private val previewRecentIntakes = listOf(
+    RecentIntakeUi("Hoy, 8:00 a. m.", "Losartán", "a tiempo", IntakeOutcomeStatus.OnTime),
+    RecentIntakeUi("Ayer, 8:00 p. m.", "Amlodipino", "24 min tarde", IntakeOutcomeStatus.Late),
+    RecentIntakeUi("Sáb, 1:00 p. m.", "Vitamina D3", "omitida", IntakeOutcomeStatus.Omitted),
+)
+
 private val previewSummary = AdherenceSummaryUi(
     periodLabel = "Últimos 30 días",
     adherencePercent = 92,
@@ -501,6 +658,7 @@ private val previewSummary = AdherenceSummaryUi(
     lateCount = 6,
     omittedCount = 4,
     lateOmittedCaption = "últ. 30 días",
+    pattern = previewPattern,
     trend = listOf(
         AdherenceTrendPoint("20 jun", 57),
         AdherenceTrendPoint("24 jun", 74),
@@ -510,6 +668,7 @@ private val previewSummary = AdherenceSummaryUi(
         AdherenceTrendPoint("18 jul", 73),
         AdherenceTrendPoint("20 jul", 92),
     ),
+    recentIntakes = previewRecentIntakes,
 )
 
 @Preview(name = "Con datos", showBackground = true, widthDp = 393, heightDp = 852)
@@ -529,6 +688,7 @@ private val previewWeekSummary = AdherenceSummaryUi(
     lateCount = 3,
     omittedCount = 1,
     lateOmittedCaption = "últ. 7 días",
+    pattern = previewPattern,
     trend = listOf(
         AdherenceTrendPoint("30 sep", 88),
         AdherenceTrendPoint("1 oct", 90),
@@ -538,6 +698,7 @@ private val previewWeekSummary = AdherenceSummaryUi(
         AdherenceTrendPoint("5 oct", 94),
         AdherenceTrendPoint("6 oct", 92),
     ),
+    recentIntakes = previewRecentIntakes,
 )
 
 @Preview(name = "Periodo actualizado (7 días)", showBackground = true, widthDp = 393, heightDp = 852)

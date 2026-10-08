@@ -40,5 +40,9 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.coil.compose)
 
+    // FCM reception for reminders and caregiver alerts (TS-06). Kept out of the version catalog on purpose.
+    implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
+    implementation("com.google.firebase:firebase-messaging")
+
     testImplementation(libs.junit)
 }

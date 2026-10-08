@@ -1,6 +1,7 @@
 package com.vitahealth.tata.treatment.infrastructure.remote
 
 import com.vitahealth.tata.shared.common.result.AppResult
+import com.vitahealth.tata.treatment.application.MedicationManagementRepository
 import com.vitahealth.tata.treatment.application.TreatmentRepository
 import com.vitahealth.tata.treatment.application.TreatmentLifecycleRepository
 import com.vitahealth.tata.treatment.application.TreatmentDetailRepository
@@ -11,7 +12,7 @@ import com.vitahealth.tata.treatment.domain.model.TreatmentStatus
 
 class RemoteTreatmentRepository(
     private val api: TreatmentApiService,
-) : TreatmentRepository, TreatmentLifecycleRepository, TreatmentDetailRepository {
+) : TreatmentRepository, TreatmentLifecycleRepository, TreatmentDetailRepository, MedicationManagementRepository {
     override suspend fun registerMedication(
         caregiverId: String,
         olderAdultId: String,
@@ -48,6 +49,74 @@ class RemoteTreatmentRepository(
             networkFailure(exception)
         }
     }
+
+    override suspend fun listMedications(
+        caregiverId: String,
+        olderAdultId: String,
+    ): AppResult<List<Medication>> =
+        try {
+            val response = api.listMedications(olderAdultId = olderAdultId, caregiverId = caregiverId)
+            val body = response.body()
+            if (response.isSuccessful && body != null) {
+                AppResult.Success(body.map { it.toDomain() })
+            } else {
+                AppResult.Failure(
+                    message = treatmentMessage(response.code()),
+                    code = treatmentCode(response.code()),
+                )
+            }
+        } catch (exception: Exception) {
+            networkFailure(exception)
+        }
+
+    override suspend fun updateMedication(
+        caregiverId: String,
+        medicationId: String,
+        name: String,
+        presentation: String,
+    ): AppResult<Medication> =
+        medicationRequest {
+            api.updateMedication(
+                medicationId = medicationId,
+                request = UpdateMedicationRequest(
+                    caregiverId = caregiverId,
+                    name = name,
+                    presentation = presentation,
+                ),
+            )
+        }
+
+    override suspend fun deactivateMedication(
+        caregiverId: String,
+        medicationId: String,
+    ): AppResult<Medication> =
+        medicationRequest { api.deactivateMedication(medicationId, caregiverId) }
+
+    private suspend fun medicationRequest(
+        request: suspend () -> retrofit2.Response<MedicationResponse>,
+    ): AppResult<Medication> =
+        try {
+            val response = request()
+            val body = response.body()
+            if (response.isSuccessful && body != null) {
+                AppResult.Success(body.toDomain())
+            } else {
+                AppResult.Failure(
+                    message = treatmentMessage(response.code()),
+                    code = treatmentCode(response.code()),
+                )
+            }
+        } catch (exception: Exception) {
+            networkFailure(exception)
+        }
+
+    private fun MedicationResponse.toDomain() = Medication(
+        id = id,
+        olderAdultId = olderAdultId,
+        name = name,
+        presentation = presentation,
+        active = active,
+    )
 
     override suspend fun createTreatment(
         caregiverId: String,
@@ -226,10 +295,12 @@ class RemoteTreatmentRepository(
             else -> "REQUEST_FAILED"
         }
 
-    private fun networkFailure(exception: Exception): AppResult.Failure =
-        AppResult.Failure(
+    private fun networkFailure(exception: Exception): AppResult.Failure {
+        if(exception is kotlinx.coroutines.CancellationException) throw exception
+        return AppResult.Failure(
             message = "No hay conexión disponible.",
             cause = exception,
             code = "NETWORK_UNAVAILABLE",
         )
+    }
 }

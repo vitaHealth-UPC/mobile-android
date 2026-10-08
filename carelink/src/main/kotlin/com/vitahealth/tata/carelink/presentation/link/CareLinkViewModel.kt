@@ -34,6 +34,10 @@ class CareLinkViewModel(
         _state.update { it.copy(code = normalized, errorMessage = null) }
     }
 
+    fun previewOlderAdult(olderAdultId: String) {
+        if (_state.value.step == CareLinkStep.Code) viewModelScope.launch { loadOlderAdult(olderAdultId) }
+    }
+
     fun sendLinkRequest() {
         val current = _state.value
         if (current.isLoading || current.step != CareLinkStep.Code) return

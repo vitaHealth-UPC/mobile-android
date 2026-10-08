@@ -13,4 +13,5 @@ data class DoseDetailReadModel(
     val instructions: String,
     val scheduledAt: Instant,
     val status: DoseStatus,
+    val confirmedAt: Instant? = null,
 )
