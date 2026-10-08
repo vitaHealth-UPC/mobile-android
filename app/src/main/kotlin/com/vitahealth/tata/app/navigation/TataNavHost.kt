@@ -834,9 +834,51 @@ fun TataNavHost(
                     navController.navigate(RootDestination.DoseDetail.createRoute(intakeId))
                 },
                 onSignOut = {scope.launch{app.container.signOut();navController.navigate(RootDestination.SessionAccess.route){popUpTo(navController.graph.id){inclusive=true}}}},
-                onOpenAgenda = { navController.navigate(RootDestination.IntakeAgenda.createRoute(olderAdultId)) },
+                onOpenMedications = { navController.openAdultDestination(RootDestination.MyMedications.createRoute(olderAdultId)) },
+                onOpenNotes = { navController.openAdultDestination(RootDestination.PersonalNotes.createRoute(olderAdultId)) },
+                onOpenAgenda = { navController.openAdultDestination(RootDestination.IntakeAgenda.createRoute(olderAdultId)) },
             )
             FollowOmissionPush(olderAdultId) { app.container.followDoseReminders(olderAdultId, olderAdultName) }
+        }
+
+        composable(RootDestination.PersonalNotes.route,
+            arguments = listOf(navArgument("olderAdultId") { type = NavType.StringType })) { entry ->
+            val app = androidx.compose.ui.platform.LocalContext.current.applicationContext as TataApplication
+            val adult = requireNotNull(entry.arguments?.getString("olderAdultId"))
+            val scope = androidx.compose.runtime.rememberCoroutineScope()
+            com.vitahealth.tata.monitoring.presentation.personalnotes.PersonalNotesRoute(
+                factory = app.container.personalNotesViewModelFactory(),
+                onSignIn = { scope.launch {
+                    app.container.signOut()
+                    navController.navigate(RootDestination.SessionAccess.route) { popUpTo(navController.graph.id) { inclusive = true } }
+                } },
+                onTab = { tab -> when (tab) {
+                    com.vitahealth.tata.shared.design.components.AdultTab.Home -> navController.popBackStack(RootDestination.NextDoseHome.route, false)
+                    com.vitahealth.tata.shared.design.components.AdultTab.Medications -> navController.openAdultDestination(RootDestination.MyMedications.createRoute(adult))
+                    com.vitahealth.tata.shared.design.components.AdultTab.Agenda -> navController.openAdultDestination(RootDestination.IntakeAgenda.createRoute(adult))
+                    else -> Unit
+                } },
+            )
+        }
+
+        composable(
+            route = RootDestination.MyMedications.route,
+            arguments = listOf(navArgument("olderAdultId") { type = NavType.StringType }),
+        ) { entry ->
+            val app = androidx.compose.ui.platform.LocalContext.current.applicationContext as TataApplication
+            val olderAdultId = requireNotNull(entry.arguments?.getString("olderAdultId"))
+            val scope = androidx.compose.runtime.rememberCoroutineScope()
+            com.vitahealth.tata.treatment.presentation.medication.MyMedicationsRoute(
+                factory = app.container.myMedicationsViewModelFactory(olderAdultId),
+                onSignIn = { scope.launch {
+                    app.container.signOut()
+                    navController.navigate(RootDestination.SessionAccess.route) { popUpTo(navController.graph.id) { inclusive = true } }
+                } },
+                onHome = { navController.popBackStack(RootDestination.NextDoseHome.route, false) },
+                onAgenda = { navController.openAdultDestination(RootDestination.IntakeAgenda.createRoute(olderAdultId)) },
+                onNotes = { navController.openAdultDestination(RootDestination.PersonalNotes.createRoute(olderAdultId)) },
+                onOpenDose = { navController.navigate(RootDestination.DoseDetail.createRoute(it)) },
+            )
         }
 
         composable(
@@ -848,7 +890,9 @@ fun TataNavHost(
             com.vitahealth.tata.intake.presentation.agenda.IntakeAgendaRoute(
                 factory = app.container.intakeAgendaViewModelFactory(olderAdultId),
                 onOpenDose = { navController.navigate(RootDestination.DoseDetail.createRoute(it)) },
-                onHome = { navController.popBackStack() },
+                onMedications = { navController.openAdultDestination(RootDestination.MyMedications.createRoute(olderAdultId)) },
+                onNotes = { navController.openAdultDestination(RootDestination.PersonalNotes.createRoute(olderAdultId)) },
+                onHome = { navController.popBackStack(RootDestination.NextDoseHome.route, false) },
             )
         }
 
@@ -940,5 +984,14 @@ fun TataNavHost(
             )
         }
 
+    }
+}
+
+/** Adult bottom tabs preserve their state without growing a stack for every tab switch. */
+private fun androidx.navigation.NavHostController.openAdultDestination(route: String) {
+    navigate(route) {
+        popUpTo(RootDestination.NextDoseHome.route) { saveState = true }
+        launchSingleTop = true
+        restoreState = true
     }
 }
