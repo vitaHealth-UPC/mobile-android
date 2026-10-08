@@ -1,0 +1,21 @@
+<resources>
+    <string name="my_medications_title">Mis medicamentos</string>
+    <string name="my_medications_subtitle">Tus tratamientos activos</string>
+    <string name="my_medications_featured">Destacado</string>
+    <string name="my_medications_next_dose">Próxima dosis</string>
+    <string name="my_medications_active">Activos %1$d</string>
+    <string name="my_medications_history">Historial</string>
+    <string name="my_medications_empty">No tienes tratamientos activos.</string>
+    <string name="my_medications_history_empty">No hay medicamentos en el historial.</string>
+    <string name="my_medications_error">No pudimos cargar tus medicamentos. Inténtalo nuevamente.</string>
+    <string name="my_medications_offline">No hay conexión. Inténtalo nuevamente.</string>
+    <string name="my_medications_session">Vuelve a ingresar con tu PIN para consultar tus medicamentos.</string>
+    <string name="my_medications_retry">Reintentar</string>
+    <string name="my_medications_add">Agregar medicamento</string>
+    <string name="my_medications_add_help">Tu cuidador puede agregar medicamentos y configurar tus tratamientos.</string>
+    <string name="my_medications_ok">Entendido</string>
+    <string name="my_medications_details">Detalle del medicamento</string>
+    <string name="my_medications_unconfigured">Sin pauta configurada</string>
+    <string name="my_medications_schedule">Horarios: %1$s</string>
+<string name="my_medications_sign_in">Ingresar con PIN</string>
+</resources>
