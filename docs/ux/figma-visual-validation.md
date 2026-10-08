@@ -4,8 +4,8 @@ Checkpoint: 2026-10-07. Registro independiente del conteo de implementaciones.
 
 - 60 variantes tienen implementación, incluyendo composiciones parciales.
 - 10 carecen de implementación específica.
-- 6 aceptadas visualmente con el criterio proporcional acordado.
-- 54 implementadas requieren validación o correcciones.
+- 10 aceptadas visualmente con el criterio proporcional acordado.
+- 50 implementadas requieren validación o correcciones.
 - 58 tienen comparación visual; comparación no equivale a aceptación.
 
 Aceptación: composición, tipografía, proporciones, iconos, contraste y estado representado coherentes con Figma. Se permiten adaptaciones nativas, desplazamiento por contenido real y datos dinámicos; no se exige copiar nombres, fechas ni títulos a posiciones absolutas. La aceptación visual no certifica integraciones ni navegación completa. Cada variante requiere su propio resultado; reutilizar un composable no aprueba automáticamente todas sus variantes.
@@ -19,7 +19,7 @@ Evidencias PNG en el equipo de trabajo: C:/Users/david/Downloads/. Las capturas 
 | 3 | Onboarding | 563:5 | Aceptada visualmente | onboarding-final.png |
 | 4 | Caregiver Registration | 563:1398 | Requiere validar/corregir | — |
 | 5 | Link & Consent | 563:1440 | Requiere validar/corregir | — |
-| 6 | PIN Access | 563:1338 | Requiere validar/corregir | — |
+| 6 | PIN Access | 563:1338 | Aceptada visualmente | pin-access-final.png |
 | 7 | Login | 641:16 | Requiere validar/corregir | — |
 | 8 | Home | 563:58 | Aceptada visualmente | home-vector-icons.png |
 | 9 | My Medications | 563:361 | Sin implementación específica | — |
@@ -42,9 +42,9 @@ Evidencias PNG en el equipo de trabajo: C:/Users/david/Downloads/. Las capturas 
 | 26 | Notification Preferences | 563:1219 | Requiere validar/corregir | — |
 | 27 | Notes - Caregiver | 576:2859 | Requiere corregir: perfil y títulos no representados | audit-caregiver-notes.png |
 | 28 | Plan & Subscription | 563:1701 | Comparada; fechas y proporciones corregidas, falta barra y composición final | — |
-| 29 | PIN Setup | 563:1970 | Requiere validar/corregir | — |
-| 30 | PIN Incorrect | 563:2034 | Requiere validar/corregir | — |
-| 31 | PIN Temporarily Blocked | 563:2098 | Requiere validar/corregir | — |
+| 29 | PIN Setup | 563:1970 | Aceptada visualmente | pin-setup-final.png |
+| 30 | PIN Incorrect | 563:2034 | Aceptada visualmente | pin-incorrect-final.png |
+| 31 | PIN Temporarily Blocked | 563:2098 | Aceptada visualmente | pin-blocked-final.png |
 | 32 | Duplicate Email | 563:2162 | Requiere validar/corregir | — |
 | 33 | Verification Expired | 563:2208 | Requiere validar/corregir | — |
 | 34 | Invalid Link Code | 563:2254 | Requiere validar/corregir | — |

@@ -168,7 +168,7 @@ class ExistingScreensVisualAuditTest {
     }
 
     @Test fun capturePinVariants() {
-        var state by mutableStateOf(SessionAccessUiState())
+        var state by mutableStateOf(SessionAccessUiState(pin = "4821"))
         var setup by mutableStateOf(false)
         compose.setContent { AuditTheme { Box(Modifier.safeDrawingPadding()) {
             PinAccessScreen(state, "Rosa Vargas", setup, {}, {}, {})
