@@ -25,6 +25,7 @@ class DoseDetailViewModel(
     private val handler: GetDoseDetailQueryHandler,
     private val confirmHandler: ConfirmDoseCommandHandler,
     private val context: CoroutineContext = EmptyCoroutineContext,
+    private val nextDoseHandler: com.vitahealth.tata.intake.application.handlers.GetNextDoseQueryHandler? = null,
 ) : ViewModel() {
     private val _state = MutableStateFlow<DoseDetailUiState>(DoseDetailUiState.Loading)
     val state: StateFlow<DoseDetailUiState> = _state.asStateFlow()
@@ -47,6 +48,11 @@ class DoseDetailViewModel(
                     outcome = if (result.value.status == DoseStatus.LATE) ConfirmationOutcome.LATE else ConfirmationOutcome.CONFIRMED,
                 )
                 is AppResult.Failure -> if (result.code == NOT_CONFIRMABLE) refreshRejectedConfirmation(content) else content.copy(confirmationMessage = result.message)
+            }
+            val saved = _state.value as? DoseDetailUiState.Content
+            if (saved?.confirmationSucceeded == true && nextDoseHandler != null) {
+                val next = nextDoseHandler(com.vitahealth.tata.intake.application.queries.GetNextDoseQuery(saved.dose.olderAdultId))
+                if (next is AppResult.Success) _state.value = saved.copy(nextDose = next.value?.takeIf { it.id != intakeId })
             }
         }
     }
@@ -83,6 +89,7 @@ class DoseDetailViewModel(
         private val intakeId: String,
         private val handler: GetDoseDetailQueryHandler,
         private val confirmHandler: ConfirmDoseCommandHandler,
+        private val nextDoseHandler: com.vitahealth.tata.intake.application.handlers.GetNextDoseQueryHandler? = null,
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T =
@@ -90,6 +97,7 @@ class DoseDetailViewModel(
                 intakeId = intakeId,
                 handler = handler,
                 confirmHandler = confirmHandler,
+                nextDoseHandler = nextDoseHandler,
             ) as T
     }
 }
