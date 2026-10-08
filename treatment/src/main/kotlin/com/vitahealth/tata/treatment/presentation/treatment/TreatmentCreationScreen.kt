@@ -1,6 +1,6 @@
 package com.vitahealth.tata.treatment.presentation.treatment
 
-import androidx.compose.foundation.Image
+import com.vitahealth.tata.shared.design.components.TataSvgIcon
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -25,7 +25,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -128,10 +129,10 @@ fun TreatmentCreationScreen(
                         .background(TataLavender, CircleShape),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Image(
-                        painter = painterResource(R.drawable.treatment_medication_icon),
-                        contentDescription = null,
-                        modifier = Modifier.size(24.dp),
+                    TataSvgIcon(
+                        resource = com.vitahealth.tata.shared.R.raw.adult_tab_medications,
+                        colorFilter = ColorFilter.tint(com.vitahealth.tata.shared.design.theme.TataNavy),
+                        modifier = Modifier.size(24.dp).rotate(-42f),
                     )
                 }
                 Column {

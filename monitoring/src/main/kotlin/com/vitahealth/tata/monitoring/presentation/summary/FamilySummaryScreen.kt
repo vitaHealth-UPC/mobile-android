@@ -100,6 +100,21 @@ fun FamilySummaryScreen(state: FamilySummaryUiState, olderAdultName: String, onR
                 }
                 when {
                     state.loading -> TataCard(Modifier.fillMaxWidth(), TataMint) { Text("Consultando el resumen…", color = TataText) }
+                    state.errorCode == "CARE_RELATIONSHIP_REQUIRED" -> {
+                        Spacer(Modifier.height(124.dp))
+                        Box(Modifier.fillMaxWidth().heightIn(min = 226.dp)
+                            .background(TataCream, RoundedCornerShape(20.dp)).padding(24.dp),
+                            contentAlignment = Alignment.Center) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text("Seguimiento restringido", fontSize = 21.sp, lineHeight = 27.sp,
+                                    fontWeight = FontWeight.SemiBold, color = TataText)
+                                Spacer(Modifier.height(24.dp))
+                                Text("Se requiere un vínculo activo y el consentimiento de ${olderAdultName.substringBefore(' ')} para compartir su información.",
+                                    color = TataMuted, fontSize = 11.sp, lineHeight = 14.sp,
+                                    textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                            }
+                        }
+                    }
                     state.error != null -> TataCard(Modifier.fillMaxWidth()) {
                         Text(state.error, color = TataText)
                         TataButton("Reintentar", onRetry, Modifier.padding(top = 12.dp))

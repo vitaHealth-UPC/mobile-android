@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="inventory_subtitle_for_person">Stock inicial, disponibilidad y reposiciones de %1$s.</string>
+    <string name="inventory_initialized_info">El stock inicial ya está registrado. Usa una reposición para añadir unidades.</string>
+    <string name="inventory_close">Entendido</string>
     <!-- Pantalla de Inventario (US-40 a US-43) -->
     <string name="inventory_title">Inventario</string>
     <string name="inventory_subtitle">Stock inicial, disponibilidad y reposiciones.</string>

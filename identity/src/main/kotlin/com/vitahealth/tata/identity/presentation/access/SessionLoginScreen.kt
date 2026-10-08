@@ -29,7 +29,7 @@ fun SessionAccessScreen(state: SessionAccessUiState, onEmail: (String) -> Unit,
     val context = LocalContext.current
     val imageLoader = remember(context) { ImageLoader.Builder(context).components { add(SvgDecoder.Factory()) }.build() }
     Column(Modifier.fillMaxSize().background(TataSurface).verticalScroll(rememberScrollState())
-        .imePadding().padding(horizontal = 22.dp).padding(top = tataPrototypeTopPadding(), bottom = 32.dp)) {
+        .imePadding().padding(horizontal = 22.dp).padding(top = 28.dp, bottom = 32.dp)) {
         Text("Inicia sesión", fontFamily = FontFamily(Font(com.vitahealth.tata.shared.R.font.tata_serif)),
             fontSize = 29.sp, lineHeight = 38.sp, color = tataTextColor(), modifier = Modifier.padding(start = 2.dp))
         LoginText("Accede a tu cuenta para continuar.", 12, tataMutedColor(), modifier = Modifier.padding(top = 2.dp, start = 2.dp))
