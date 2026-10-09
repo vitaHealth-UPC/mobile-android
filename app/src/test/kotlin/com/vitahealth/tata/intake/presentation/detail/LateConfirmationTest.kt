@@ -8,42 +8,67 @@ import com.vitahealth.tata.intake.application.handlers.GetDoseDetailQueryHandler
 import com.vitahealth.tata.intake.application.readmodels.DoseDetailReadModel
 import com.vitahealth.tata.intake.domain.model.DoseStatus
 import com.vitahealth.tata.shared.common.result.AppResult
+import java.time.Instant
 import kotlinx.coroutines.Dispatchers
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import java.time.Instant
 
 /** US-23: the dose detail shows the outcome the backend decided for a confirmation. */
 class LateConfirmationTest {
-    private val pending = DoseDetailReadModel(
-        id = "101", treatmentId = "t", medicationId = "m", olderAdultId = "adult-1",
-        medicationName = "Losartan 50 mg", dose = "1 tablet", instructions = "",
-        scheduledAt = Instant.parse("2026-10-05T13:00:00Z"), status = DoseStatus.PENDING,
-    )
+    private val pending =
+        DoseDetailReadModel(
+            id = "101",
+            treatmentId = "t",
+            medicationId = "m",
+            olderAdultId = "adult-1",
+            medicationName = "Losartan 50 mg",
+            dose = "1 tablet",
+            instructions = "",
+            scheduledAt = Instant.parse("2026-10-05T13:00:00Z"),
+            status = DoseStatus.PENDING,
+        )
 
-    private val details = object : DoseDetailRepository {
-        var answers = mutableListOf<AppResult<DoseDetailReadModel>>()
-        override suspend fun getDoseDetail(intakeId: String): AppResult<DoseDetailReadModel> =
-            if (answers.size > 1) answers.removeAt(0) else answers.first()
-    }
+    private val details =
+        object : DoseDetailRepository {
+            var answers = mutableListOf<AppResult<DoseDetailReadModel>>()
 
-    private val confirmations = object : DoseConfirmationRepository {
-        var answer: AppResult<DoseDetailReadModel> = AppResult.Success(pending)
-        override suspend fun confirm(command: ConfirmDoseCommand): AppResult<DoseDetailReadModel> = answer
-    }
+            override suspend fun getDoseDetail(intakeId: String): AppResult<DoseDetailReadModel> =
+                if (answers.size > 1) answers.removeAt(0) else answers.first()
+        }
+
+    private val confirmations =
+        object : DoseConfirmationRepository {
+            var answer: AppResult<DoseDetailReadModel> = AppResult.Success(pending)
+
+            override suspend fun confirm(
+                command: ConfirmDoseCommand
+            ): AppResult<DoseDetailReadModel> = answer
+        }
 
     private fun model(): DoseDetailViewModel {
         details.answers = mutableListOf(AppResult.Success(pending))
-        return DoseDetailViewModel("101", GetDoseDetailQueryHandler(details), ConfirmDoseCommandHandler(confirmations), Dispatchers.Unconfined)
+        return DoseDetailViewModel(
+            "101",
+            GetDoseDetailQueryHandler(details),
+            ConfirmDoseCommandHandler(confirmations),
+            Dispatchers.Unconfined,
+        )
     }
 
     private fun content(model: DoseDetailViewModel) = model.state.value as DoseDetailUiState.Content
 
-    @Test fun onTimeConfirmationKeepsTheUsualSuccess() {
+    @Test
+    fun onTimeConfirmationKeepsTheUsualSuccess() {
         val model = model()
-        confirmations.answer = AppResult.Success(pending.copy(status = DoseStatus.CONFIRMED, confirmedAt = Instant.parse("2026-10-05T12:58:00Z")))
+        confirmations.answer =
+            AppResult.Success(
+                pending.copy(
+                    status = DoseStatus.CONFIRMED,
+                    confirmedAt = Instant.parse("2026-10-05T12:58:00Z"),
+                )
+            )
 
         model.confirm()
 
@@ -51,9 +76,16 @@ class LateConfirmationTest {
         assertTrue(content(model).confirmationSucceeded)
     }
 
-    @Test fun confirmationWithinToleranceIsShownAsLate() {
+    @Test
+    fun confirmationWithinToleranceIsShownAsLate() {
         val model = model()
-        confirmations.answer = AppResult.Success(pending.copy(status = DoseStatus.LATE, confirmedAt = Instant.parse("2026-10-05T13:02:00Z")))
+        confirmations.answer =
+            AppResult.Success(
+                pending.copy(
+                    status = DoseStatus.LATE,
+                    confirmedAt = Instant.parse("2026-10-05T13:02:00Z"),
+                )
+            )
 
         model.confirm()
 
@@ -61,10 +93,13 @@ class LateConfirmationTest {
         assertEquals(Instant.parse("2026-10-05T13:02:00Z"), content(model).dose.confirmedAt)
     }
 
-    @Test fun aDefinitiveOmissionIsPreservedAndReadAgain() {
+    @Test
+    fun aDefinitiveOmissionIsPreservedAndReadAgain() {
         val model = model()
-        confirmations.answer = AppResult.Failure("Esta toma ya no puede confirmarse.", code = "INTAKE_NOT_CONFIRMABLE")
-        details.answers = mutableListOf(AppResult.Success(pending.copy(status = DoseStatus.OMITTED)))
+        confirmations.answer =
+            AppResult.Failure("Esta toma ya no puede confirmarse.", code = "INTAKE_NOT_CONFIRMABLE")
+        details.answers =
+            mutableListOf(AppResult.Success(pending.copy(status = DoseStatus.OMITTED)))
 
         model.confirm()
 
@@ -73,10 +108,13 @@ class LateConfirmationTest {
         assertNull(content(model).confirmationMessage)
     }
 
-    @Test fun aFailedReadDoesNotInventAnOmissionOrAllowAnotherConfirmation() {
+    @Test
+    fun aFailedReadDoesNotInventAnOmissionOrAllowAnotherConfirmation() {
         val model = model()
-        confirmations.answer = AppResult.Failure("Esta toma ya no puede confirmarse.", code = "INTAKE_NOT_CONFIRMABLE")
-        details.answers = mutableListOf(AppResult.Failure("No hay conexión.", code = "NETWORK_UNAVAILABLE"))
+        confirmations.answer =
+            AppResult.Failure("Esta toma ya no puede confirmarse.", code = "INTAKE_NOT_CONFIRMABLE")
+        details.answers =
+            mutableListOf(AppResult.Failure("No hay conexión.", code = "NETWORK_UNAVAILABLE"))
 
         model.confirm()
 
@@ -89,17 +127,21 @@ class LateConfirmationTest {
         assertEquals(DoseStatus.PENDING, content(model).dose.status)
     }
 
-    @Test fun aDoseConfirmedElsewhereIsNotPresentedAsOmitted() {
+    @Test
+    fun aDoseConfirmedElsewhereIsNotPresentedAsOmitted() {
         val model = model()
-        confirmations.answer = AppResult.Failure("Already confirmed", code = "INTAKE_NOT_CONFIRMABLE")
-        details.answers = mutableListOf(AppResult.Success(pending.copy(status = DoseStatus.CONFIRMED)))
+        confirmations.answer =
+            AppResult.Failure("Already confirmed", code = "INTAKE_NOT_CONFIRMABLE")
+        details.answers =
+            mutableListOf(AppResult.Success(pending.copy(status = DoseStatus.CONFIRMED)))
         model.confirm()
         assertEquals(DoseStatus.CONFIRMED, content(model).dose.status)
         assertEquals(ConfirmationOutcome.ALREADY_CONFIRMED, content(model).outcome)
         assertTrue(content(model).confirmationSucceeded)
     }
 
-    @Test fun otherFailuresKeepTheDoseWithTheirMessage() {
+    @Test
+    fun otherFailuresKeepTheDoseWithTheirMessage() {
         val model = model()
         confirmations.answer = AppResult.Failure("No hay conexión.", code = "NETWORK_UNAVAILABLE")
 
@@ -109,44 +151,78 @@ class LateConfirmationTest {
         assertEquals("No hay conexión.", content(model).confirmationMessage)
         assertEquals(DoseStatus.PENDING, content(model).dose.status)
     }
-    @Test fun nextDoseReadFailureDoesNotUndoSuccessfulConfirmation() {
+
+    @Test
+    fun nextDoseReadFailureDoesNotUndoSuccessfulConfirmation() {
         details.answers = mutableListOf(AppResult.Success(pending))
-        confirmations.answer = AppResult.Success(pending.copy(status = DoseStatus.CONFIRMED, confirmedAt = Instant.now()))
-        val next = object : com.vitahealth.tata.intake.application.NextDoseRepository {
-            override suspend fun getNextDose(olderAdultId: String): AppResult<com.vitahealth.tata.intake.application.readmodels.NextDoseReadModel?> {
-                assertEquals("adult-1", olderAdultId)
-                return AppResult.Failure("", code = "NETWORK_UNAVAILABLE")
+        confirmations.answer =
+            AppResult.Success(
+                pending.copy(status = DoseStatus.CONFIRMED, confirmedAt = Instant.now())
+            )
+        val next =
+            object : com.vitahealth.tata.intake.application.NextDoseRepository {
+                override suspend fun getNextDose(
+                    olderAdultId: String
+                ): AppResult<com.vitahealth.tata.intake.application.readmodels.NextDoseReadModel?> {
+                    assertEquals("adult-1", olderAdultId)
+                    return AppResult.Failure("", code = "NETWORK_UNAVAILABLE")
+                }
             }
-        }
-        val model = DoseDetailViewModel("101", GetDoseDetailQueryHandler(details), ConfirmDoseCommandHandler(confirmations),
-            Dispatchers.Unconfined, com.vitahealth.tata.intake.application.handlers.GetNextDoseQueryHandler(next))
+        val model =
+            DoseDetailViewModel(
+                "101",
+                GetDoseDetailQueryHandler(details),
+                ConfirmDoseCommandHandler(confirmations),
+                Dispatchers.Unconfined,
+                com.vitahealth.tata.intake.application.handlers.GetNextDoseQueryHandler(next),
+            )
         model.confirm()
         assertTrue(content(model).confirmationSucceeded)
         assertNull(content(model).nextDose)
     }
 
-    @Test fun serverMarksAnIdempotentReplayWithoutChangingItsRecordedTime() {
+    @Test
+    fun serverMarksAnIdempotentReplayWithoutChangingItsRecordedTime() {
         val model = model()
         val recorded = Instant.parse("2026-10-05T12:58:00Z")
-        confirmations.answer = AppResult.Success(pending.copy(status = DoseStatus.CONFIRMED, confirmedAt = recorded, alreadyConfirmed = true))
+        confirmations.answer =
+            AppResult.Success(
+                pending.copy(
+                    status = DoseStatus.CONFIRMED,
+                    confirmedAt = recorded,
+                    alreadyConfirmed = true,
+                )
+            )
         model.confirm()
         assertEquals(ConfirmationOutcome.ALREADY_CONFIRMED, content(model).outcome)
         assertEquals(recorded, content(model).dose.confirmedAt)
     }
 
-    @Test fun omissionQueriesNextDoseWithoutUndoingTheRecordedOmission() {
+    @Test
+    fun omissionQueriesNextDoseWithoutUndoingTheRecordedOmission() {
         details.answers = mutableListOf(AppResult.Success(pending))
-        confirmations.answer = AppResult.Failure("No longer confirmable", code = "INTAKE_NOT_CONFIRMABLE")
+        confirmations.answer =
+            AppResult.Failure("No longer confirmable", code = "INTAKE_NOT_CONFIRMABLE")
         var requestedOwner: String? = null
-        val next = object : com.vitahealth.tata.intake.application.NextDoseRepository {
-            override suspend fun getNextDose(olderAdultId: String): AppResult<com.vitahealth.tata.intake.application.readmodels.NextDoseReadModel?> {
-                requestedOwner = olderAdultId
-                return AppResult.Failure("", code = "NETWORK_UNAVAILABLE")
+        val next =
+            object : com.vitahealth.tata.intake.application.NextDoseRepository {
+                override suspend fun getNextDose(
+                    olderAdultId: String
+                ): AppResult<com.vitahealth.tata.intake.application.readmodels.NextDoseReadModel?> {
+                    requestedOwner = olderAdultId
+                    return AppResult.Failure("", code = "NETWORK_UNAVAILABLE")
+                }
             }
-        }
-        val model = DoseDetailViewModel("101", GetDoseDetailQueryHandler(details), ConfirmDoseCommandHandler(confirmations),
-            Dispatchers.Unconfined, com.vitahealth.tata.intake.application.handlers.GetNextDoseQueryHandler(next))
-        details.answers = mutableListOf(AppResult.Success(pending.copy(status = DoseStatus.OMITTED)))
+        val model =
+            DoseDetailViewModel(
+                "101",
+                GetDoseDetailQueryHandler(details),
+                ConfirmDoseCommandHandler(confirmations),
+                Dispatchers.Unconfined,
+                com.vitahealth.tata.intake.application.handlers.GetNextDoseQueryHandler(next),
+            )
+        details.answers =
+            mutableListOf(AppResult.Success(pending.copy(status = DoseStatus.OMITTED)))
         model.confirm()
         assertEquals("adult-1", requestedOwner)
         assertEquals(ConfirmationOutcome.OMISSION_PRESERVED, content(model).outcome)
@@ -155,4 +231,41 @@ class LateConfirmationTest {
         assertNull(content(model).nextDose)
     }
 
+    @Test
+    fun loadingRecordedDoseQueriesItsOwnerAndExcludesTheCurrentIntake() {
+        details.answers = mutableListOf(AppResult.Success(pending.copy(status = DoseStatus.LATE)))
+        var requestedOwner: String? = null
+        val next =
+            object : com.vitahealth.tata.intake.application.NextDoseRepository {
+                override suspend fun getNextDose(
+                    olderAdultId: String
+                ): AppResult<com.vitahealth.tata.intake.application.readmodels.NextDoseReadModel?> {
+                    requestedOwner = olderAdultId
+                    return AppResult.Success(
+                        com.vitahealth.tata.intake.application.readmodels.NextDoseReadModel(
+                            pending.id,
+                            pending.treatmentId,
+                            pending.medicationId,
+                            pending.olderAdultId,
+                            pending.medicationName,
+                            pending.dose,
+                            pending.instructions,
+                            pending.scheduledAt,
+                            DoseStatus.PENDING,
+                        )
+                    )
+                }
+            }
+        val model =
+            DoseDetailViewModel(
+                "101",
+                GetDoseDetailQueryHandler(details),
+                ConfirmDoseCommandHandler(confirmations),
+                Dispatchers.Unconfined,
+                com.vitahealth.tata.intake.application.handlers.GetNextDoseQueryHandler(next),
+            )
+        assertEquals("adult-1", requestedOwner)
+        assertNull(content(model).nextDose)
+        assertEquals(DoseStatus.LATE, content(model).dose.status)
+    }
 }

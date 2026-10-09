@@ -59,6 +59,22 @@ class ExistingScreensVisualAuditTest {
         capture("voice-not-recognized",composeOnly=true)
     }
 
+    @Test fun captureRecordedDoseDetails() {
+        val now=java.time.Instant.now()
+        val next=com.vitahealth.tata.intake.application.readmodels.NextDoseReadModel("next","t","med","adult","Losartán 50 mg","1 comprimido","",now.plusSeconds(86400),com.vitahealth.tata.intake.domain.model.DoseStatus.PENDING)
+        var status by mutableStateOf(com.vitahealth.tata.intake.domain.model.DoseStatus.LATE)
+        compose.setContent { AuditTheme { Box(Modifier.safeDrawingPadding()) {
+            val dose=com.vitahealth.tata.intake.application.readmodels.DoseDetailReadModel("detail","t","med","adult","Losartán 50 mg","1 comprimido","Con o sin alimentos",now,status)
+            com.vitahealth.tata.intake.presentation.detail.DoseDetailScreen(
+                com.vitahealth.tata.intake.presentation.detail.DoseDetailUiState.Content(dose,nextDose=next),{},{},{})
+        } } }
+        compose.onNodeWithText("Estado: Tardía").assertExists()
+        capture("dose-detail-late",composeOnly=true)
+        compose.runOnIdle { status=com.vitahealth.tata.intake.domain.model.DoseStatus.OMITTED }
+        compose.onNodeWithText("Estado: Omitida").assertExists()
+        capture("dose-detail-omitted",composeOnly=true)
+    }
+
     @Test fun captureOmissionPreserved() {
         val now=java.time.Instant.now()
         val dose=com.vitahealth.tata.intake.application.readmodels.DoseDetailReadModel("omitted","t","med","adult","Losartán 50 mg","1 comprimido","",now.minusSeconds(3600),com.vitahealth.tata.intake.domain.model.DoseStatus.OMITTED)
@@ -168,11 +184,14 @@ class ExistingScreensVisualAuditTest {
         val spanish = localized("fr-FR") // An unsupported device language must use the Spanish fallback.
         check(spanish.getString(com.vitahealth.tata.R.string.onboarding_start) == "Comenzar")
         check(spanish.getString(com.vitahealth.tata.R.string.alerts_title) == "Alertas")
+        check(spanish.getString(com.vitahealth.tata.R.string.detail_status_late) == "Tardía")
         check(spanish.getString(com.vitahealth.tata.R.string.inventory_title) == "Inventario")
         check(spanish.getString(com.vitahealth.tata.R.string.accessibility_title) == "Accesibilidad")
         val english = localized("en-US")
         check(english.getString(com.vitahealth.tata.R.string.onboarding_start) == "Get started")
         check(english.getString(com.vitahealth.tata.R.string.alerts_title) == "Alerts")
+        check(english.getString(com.vitahealth.tata.R.string.detail_status_late) == "Late")
+        check(english.getString(com.vitahealth.tata.R.string.detail_title) == "Medication detail")
     }
 
     @Test fun captureOnboardingAndPlanVariants() {

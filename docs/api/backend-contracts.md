@@ -164,3 +164,7 @@ PHONE opens the dialer with the number typed (`ACTION_DIAL`, no `CALL_PHONE` per
 ### Omission preserved outcome
 
 After `INTAKE_NOT_CONFIRMABLE`, the detail is read again. An `OMITTED` response preserves the programmed timestamp and renders a disabled confirmation control. The next dose is queried for the same older adult; failure of that query does not replace the omission or invent a next dose. Home navigation remains available through the adult tab bar.
+
+### Recorded dose detail
+
+A recorded dose loads the next intake for its older adult and excludes its own ID. When no next intake is available, the schedule card is labeled as the current dose schedule. Clinical indication and recurrence remain unspecified unless supplied by the contract. ES is the resource fallback; the EN prototype uses localized detail resources.
