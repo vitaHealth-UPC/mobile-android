@@ -8,4 +8,6 @@
     <string name="confirmed_already_title">Dose already confirmed</string>
     <string name="confirmed_no_duplicates">No duplicates</string>
     <string name="confirmed_no_duplicates_detail">The dose was already confirmed and no additional record was created.</string>
+    <string name="omitted_history_title">Your history preserves the omission</string>
+    <string name="omitted_history_description">The omitted intake remains recorded in your history.</string>
 </resources>
