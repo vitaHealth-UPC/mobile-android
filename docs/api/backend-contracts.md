@@ -10,11 +10,13 @@ Rules:
 
 ## Intake confirmation (TS-04 / US-06 touch)
 
-`POST /api/v1/intakes/{intakeId}/confirmation`, body `{ "channel": "TOUCH" }` (`VOICE` shares the same invariant). Returns the same intake representation as detail. `404` means missing intake; `409` means definitive omission cannot be overwritten. Retries use the original intake ID and do not create duplicate confirmations. Backend decides `CONFIRMED / LATE / OMITTED`.
+`POST /api/v1/intakes/{intakeId}/confirmation`, body `{ "channel": "TOUCH" }` (`VOICE` shares the same invariant). Returns the same intake representation as detail. `404` means missing intake; `409` means definitive omission cannot be overwritten. Retries use the original intake ID and do not create duplicate confirmations. Backend decides `CONFIRMED / LATE / OMITTED`. The response includes `alreadyConfirmed`: `false` for the request that records the intake and `true` for an idempotent replay. This request metadata is not a new intake status. Replays preserve the original confirmation channel and timestamp; Android displays the "Toma ya confirmada" result with "Sin duplicados".
 
 Account, OlderAdult, CareLink, Medication, Treatment and Intake IDs and references are UUID `String` values. Numeric internal IDs from other contexts do not change that contract.
 
-Touch confirmation is implemented. Device voice recognition and its permission/error states remain pending; accepting VOICE in REST does not implement speech recognition.
+Touch and voice use separate endpoints. `POST /api/v1/intakes/{intakeId}/voice-confirmation` sends multipart part `audio` (`audio/mp4`) and query `language` (`es-419`, or `en-US` for EN). Android requests microphone permission and records eight seconds in private cache, then uploads and deletes the temporary recording. Departure or cancellation releases the microphone. The UI shows listening only after capture starts and processing while the server validates the recording.
+
+Voice results are `CONFIRMED`, `ALREADY_CONFIRMED`, `NOT_RECOGNIZED`, `NOT_VALIDATED` or `PROVIDER_UNAVAILABLE`. Success requires the expected intake, a persisted confirmation timestamp and `CONFIRMED`/`LATE` state. Recognition failure leaves the intake unchanged; the screen offers retry and return to touch confirmation. HTTP `409` distinguishes `VOICE_CONFIRMATION_DISABLED` from `INTAKE_NOT_CONFIRMABLE` through the Problem Detail title. Voice recognition requires the configured backend speech provider; the app displays unavailable when that provider is unavailable.
 
 US-23 uses the same endpoint: a `200` whose intake comes back `LATE` shows "Dose confirmed late" (confirmed within the tolerance period); a `409` shows "Missed dose": the app reads the intake again and keeps the omission, because a later confirmation does not replace it.
 

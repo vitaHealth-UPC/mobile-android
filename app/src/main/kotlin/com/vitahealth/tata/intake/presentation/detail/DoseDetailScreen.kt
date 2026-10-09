@@ -44,6 +44,7 @@ fun DoseDetailRoute(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
     onHome: () -> Unit = onBack,
+    onAdultTab: ((AdultTab, String) -> Unit)? = null,
 ) {
     val viewModel: DoseDetailViewModel = viewModel(factory = factory)
     val state by viewModel.state.collectAsState()
@@ -54,6 +55,7 @@ fun DoseDetailRoute(
         onConfirm = viewModel::confirm,
         modifier = modifier,
         onHome = onHome,
+        onAdultTab = onAdultTab,
     )
 }
 
@@ -65,9 +67,10 @@ fun DoseDetailScreen(
     onConfirm: () -> Unit,
     modifier: Modifier = Modifier,
     onHome: () -> Unit = onBack,
+    onAdultTab: ((AdultTab, String) -> Unit)? = null,
 ) {
     if (state is DoseDetailUiState.Content && state.confirmationSucceeded && state.outcome != ConfirmationOutcome.LATE) {
-        DoseConfirmedScreen(state, onHome, modifier)
+        DoseConfirmedScreen(state, onHome, modifier, onTab = onAdultTab?.let { callback -> { tab -> callback(tab, state.dose.olderAdultId) } })
         return
     }
     Column(modifier.fillMaxSize().background(Brush.horizontalGradient(listOf(Color.White, TataSurface, Color(0xFFFCFBFF))))) {
@@ -115,7 +118,10 @@ fun DoseDetailScreen(
             }
             Spacer(Modifier.height(24.dp))
         }
-        AdultTabBar(selected = AdultTab.Medications, availableTabs = emptySet(), onSelect = {})
+        val owner = (state as? DoseDetailUiState.Content)?.dose?.olderAdultId
+        AdultTabBar(selected = AdultTab.Medications,
+            availableTabs = if (owner != null && onAdultTab != null) setOf(AdultTab.Home, AdultTab.Medications, AdultTab.Agenda, AdultTab.Notes) else emptySet(),
+            onSelect = { tab -> if (owner != null) onAdultTab?.invoke(tab, owner) })
     }
 }
 
