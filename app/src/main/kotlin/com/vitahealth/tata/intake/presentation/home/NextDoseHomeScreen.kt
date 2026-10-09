@@ -57,6 +57,7 @@ fun NextDoseHomeRoute(
     onSignOut: (() -> Unit)? = null,
     onOpenMedications: (() -> Unit)? = null,
     onOpenNotes: (() -> Unit)? = null,
+    onOpenVoice: ((String) -> Unit)? = null,
 ) {
     val viewModel: NextDoseHomeViewModel = viewModel(factory = factory)
     val state by viewModel.state.collectAsState()
@@ -75,6 +76,7 @@ fun NextDoseHomeRoute(
         onSignOut = onSignOut,
         onOpenMedications = onOpenMedications,
         onOpenNotes = onOpenNotes,
+        onOpenVoice = onOpenVoice,
     )
 }
 
@@ -88,6 +90,7 @@ fun NextDoseHomeScreen(
     onSignOut: (() -> Unit)? = null,
     onOpenMedications: (() -> Unit)? = null,
     onOpenNotes: (() -> Unit)? = null,
+    onOpenVoice: ((String) -> Unit)? = null,
 ) {
     val locale = Locale.forLanguageTag("es-PE")
     val name = when (state) {
@@ -133,8 +136,8 @@ fun NextDoseHomeScreen(
             ProgressCard(progress, onOpenAgenda)
             Spacer(Modifier.height(22.dp))
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(11.dp)) {
-                // Voice recognition has no route yet; do not pretend that a tap confirms an intake.
-                HomeShortcut(stringResource(R.string.home_voice_title), stringResource(R.string.home_voice_subtitle), TataMint, com.vitahealth.tata.R.raw.home_mic, Modifier.weight(1f), null)
+                val voiceDose = (state as? NextDoseHomeUiState.NextDoseAvailable)?.dose?.id
+                HomeShortcut(stringResource(R.string.home_voice_title), stringResource(R.string.home_voice_subtitle), TataMint, com.vitahealth.tata.R.raw.home_mic, Modifier.weight(1f), if (voiceDose != null && onOpenVoice != null) ({ onOpenVoice(voiceDose) }) else null)
                 HomeShortcut(stringResource(R.string.home_agenda_title), stringResource(R.string.home_agenda_subtitle), Color(0xFFE1EFF8), com.vitahealth.tata.R.raw.home_list, Modifier.weight(1f), onOpenAgenda)
             }
             if (showTip) {
@@ -149,12 +152,11 @@ fun NextDoseHomeScreen(
                     IconButton(onClick = { showTip = false }, modifier = Modifier.size(24.dp).semantics { contentDescription = dismissTip }) { Text("×", color = TataMuted) }
                 }
             }
-            if (state is NextDoseHomeUiState.NextDoseAvailable && isReinforcedReminderDue(state.dose, java.time.Instant.now())) {
-                Spacer(Modifier.height(21.dp))
-                ReinforcedReminderCard()
-            }
             onSignOut?.let { action -> TextButton(onClick = action) { Text(stringResource(R.string.home_switch_account), color = TataNavy) } }
             Spacer(Modifier.height(24.dp))
+        }
+        if (state is NextDoseHomeUiState.NextDoseAvailable && isReinforcedReminderDue(state.dose, java.time.Instant.now())) {
+            ReinforcedReminderCard(Modifier.padding(start = 24.dp, end = 24.dp, top = 8.dp, bottom = 16.dp))
         }
         AdultTabBar(
             selected = AdultTab.Home,

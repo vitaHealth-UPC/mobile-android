@@ -1,0 +1,20 @@
+<resources>
+    <string name="voice_title">Confirmar con voz </string>
+    <string name="voice_subtitle">Di la frase en voz alta </string>
+    <string name="voice_listening">Escuchando... </string>
+    <string name="voice_ready">Listo para escuchar </string>
+    <string name="voice_processing">Validando... </string>
+    <string name="voice_not_recognized">No reconocida </string>
+    <string name="voice_unavailable">No disponible </string>
+    <string name="voice_permission">Micrófono desactivado </string>
+    <string name="voice_suggested">Frase sugerida </string>
+    <string name="voice_phrase">“Confirmo que tomé %1$s.” </string>
+    <string name="voice_not_saved">Confirmación no registrada </string>
+    <string name="voice_retry_hint">Reintenta o confirma por toque desde Inicio. </string>
+    <string name="voice_permission_hint">Permite el micrófono para confirmar por voz o vuelve para confirmar por toque. </string>
+    <string name="voice_retry">Reintentar </string>
+    <string name="voice_start">Comenzar </string>
+    <string name="voice_cancel">Cancelar </string>
+    <string name="voice_back">Volver </string>
+    <string name="voice_read_phrase">Escuchar la frase </string>
+</resources>
