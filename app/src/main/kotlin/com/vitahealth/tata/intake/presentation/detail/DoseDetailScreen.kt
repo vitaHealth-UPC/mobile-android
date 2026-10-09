@@ -332,32 +332,39 @@ private fun DoseContent(
             Modifier.align(Alignment.BottomEnd).padding(end = 9.dp).size(106.dp, 102.dp),
         )
     }
-    if (dose.status != DoseStatus.PENDING) {
-        Column(
-            Modifier.fillMaxWidth()
-                .padding(top = 12.dp)
-                .background(
-                    if (dose.status == DoseStatus.OMITTED) Color(0xFFFFF5E0) else TataLavender,
-                    RoundedCornerShape(16.dp),
-                )
-                .padding(horizontal = 14.dp, vertical = 10.dp)
-        ) {
-            Text(
-                stringResource(R.string.detail_state, statusTitle(dose.status)),
-                color = if (dose.status == DoseStatus.OMITTED) Color(0xFF855E1F) else TataNavy,
-                fontFamily = detailInter,
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 11.sp,
+    Column(
+        Modifier.fillMaxWidth()
+            .padding(top = 12.dp)
+            .background(
+                when (dose.status) {
+                    DoseStatus.OMITTED -> Color(0xFFFFF5E0)
+                    DoseStatus.CONFIRMED -> Color(0xFFE8F5EB)
+                    else -> TataLavender
+                },
+                RoundedCornerShape(16.dp),
             )
-            Spacer(Modifier.height(8.dp))
-            Text(
-                statusMessage(dose.status),
-                color = TataMuted,
-                fontFamily = detailInter,
-                fontSize = 9.sp,
-                lineHeight = 12.sp,
-            )
-        }
+            .padding(horizontal = 14.dp, vertical = 10.dp)
+    ) {
+        Text(
+            stringResource(R.string.detail_state, statusTitle(dose.status)),
+            color =
+                when (dose.status) {
+                    DoseStatus.OMITTED -> Color(0xFF855E1F)
+                    DoseStatus.CONFIRMED -> Color(0xFF2E6E45)
+                    else -> TataNavy
+                },
+            fontFamily = detailInter,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 11.sp,
+        )
+        Spacer(Modifier.height(8.dp))
+        Text(
+            statusMessage(dose.status),
+            color = TataMuted,
+            fontFamily = detailInter,
+            fontSize = 9.sp,
+            lineHeight = 12.sp,
+        )
     }
     Spacer(Modifier.height(if (dose.status == DoseStatus.PENDING) 20.dp else 4.dp))
 }

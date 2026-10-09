@@ -6,6 +6,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.graphics.asAndroidBitmap
@@ -73,6 +74,27 @@ class ExistingScreensVisualAuditTest {
         compose.onNodeWithText("Confirmar\ncon voz").performClick()
         compose.runOnIdle { check(voiceIntake=="reminder"); state=com.vitahealth.tata.intake.presentation.home.NextDoseHomeUiState.NoNextDose("Rosa Vargas") }
         compose.onNodeWithText("Segundo recordatorio").assertDoesNotExist()
+    }
+
+    @Test fun capturePendingAndConfirmedDoseDetails() {
+        val now=java.time.Instant.now()
+        var status by mutableStateOf(com.vitahealth.tata.intake.domain.model.DoseStatus.PENDING)
+        val next=com.vitahealth.tata.intake.application.readmodels.NextDoseReadModel("next","t","med","adult","Losartán 50 mg","1 comprimido","",now.plusSeconds(86400),com.vitahealth.tata.intake.domain.model.DoseStatus.PENDING)
+        var confirmations=0
+        compose.setContent { AuditTheme { Box(Modifier.safeDrawingPadding()) {
+            val dose=com.vitahealth.tata.intake.application.readmodels.DoseDetailReadModel("detail","t","med","adult","Losartán 50 mg","1 comprimido","Con o sin alimentos",now,status)
+            key(status) {
+                com.vitahealth.tata.intake.presentation.detail.DoseDetailScreen(
+                    com.vitahealth.tata.intake.presentation.detail.DoseDetailUiState.Content(dose,nextDose=next.takeIf { status!=com.vitahealth.tata.intake.domain.model.DoseStatus.PENDING }),{},{},{confirmations++})
+            }
+        } } }
+        compose.onNodeWithText("Estado: Pendiente").assertExists()
+        capture("dose-detail-pending",composeOnly=true)
+        compose.onNodeWithText("Confirmar toma").performScrollTo().performClick()
+        compose.runOnIdle { check(confirmations==1); status=com.vitahealth.tata.intake.domain.model.DoseStatus.CONFIRMED }
+        compose.onNodeWithText("Estado: Confirmada").assertExists()
+        compose.onNodeWithText("Confirmar toma").assertDoesNotExist()
+        capture("dose-detail-confirmed",composeOnly=true)
     }
 
     @Test fun captureRecordedDoseDetails() {
