@@ -160,3 +160,7 @@ PHONE opens the dialer with the number typed (`ACTION_DIAL`, no `CALL_PHONE` per
 - El propietario proviene de la sesión PIN. No se acepta selector de propietario. Las sesiones de cuidador y configuración reciben 403.
 - Las notas de intervención del cuidador conservan `/api/v1/older-adults/{olderAdultId}/notes`; las notas personales no se incorporan a ese historial.
 - Un error de guardado conserva el formulario y sus datos. La lista agrega la respuesta real del servidor y bloquea el doble envío.
+
+### Omission preserved outcome
+
+After `INTAKE_NOT_CONFIRMABLE`, the detail is read again. An `OMITTED` response preserves the programmed timestamp and renders a disabled confirmation control. The next dose is queried for the same older adult; failure of that query does not replace the omission or invent a next dose. Home navigation remains available through the adult tab bar.

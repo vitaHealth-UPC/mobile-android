@@ -54,7 +54,7 @@ class DoseDetailViewModel(
                 is AppResult.Failure -> if (result.code == NOT_CONFIRMABLE) refreshRejectedConfirmation(content) else content.copy(confirmationMessage = result.message)
             }
             val saved = _state.value as? DoseDetailUiState.Content
-            if (saved?.confirmationSucceeded == true && nextDoseHandler != null) {
+            if (saved != null && (saved.confirmationSucceeded || saved.outcome == ConfirmationOutcome.OMISSION_PRESERVED) && nextDoseHandler != null) {
                 val next = nextDoseHandler(com.vitahealth.tata.intake.application.queries.GetNextDoseQuery(saved.dose.olderAdultId))
                 if (next is AppResult.Success) _state.value = saved.copy(nextDose = next.value?.takeIf { it.id != intakeId })
             }

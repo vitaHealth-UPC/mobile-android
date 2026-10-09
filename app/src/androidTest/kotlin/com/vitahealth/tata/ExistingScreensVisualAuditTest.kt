@@ -59,6 +59,20 @@ class ExistingScreensVisualAuditTest {
         capture("voice-not-recognized",composeOnly=true)
     }
 
+    @Test fun captureOmissionPreserved() {
+        val now=java.time.Instant.now()
+        val dose=com.vitahealth.tata.intake.application.readmodels.DoseDetailReadModel("omitted","t","med","adult","Losartán 50 mg","1 comprimido","",now.minusSeconds(3600),com.vitahealth.tata.intake.domain.model.DoseStatus.OMITTED)
+        val next=com.vitahealth.tata.intake.application.readmodels.NextDoseReadModel("next","t2","med2","adult","Metformina 850 mg","1 comprimido","",now.plusSeconds(3600),com.vitahealth.tata.intake.domain.model.DoseStatus.PENDING)
+        compose.setContent { AuditTheme { Box(Modifier.safeDrawingPadding()) {
+            com.vitahealth.tata.intake.presentation.detail.DoseDetailScreen(
+                com.vitahealth.tata.intake.presentation.detail.DoseDetailUiState.Content(dose,nextDose=next,outcome=com.vitahealth.tata.intake.presentation.detail.ConfirmationOutcome.OMISSION_PRESERVED),{},{},{})
+        } } }
+        compose.onNodeWithText("Toma omitida").assertExists()
+        compose.onNodeWithText("Confirmación no disponible").assertExists()
+        compose.onNodeWithText("Periodo finalizado").assertExists()
+        capture("omission-preserved",composeOnly=true)
+    }
+
     @Test fun captureLateDoseConfirmed() {
         val now=java.time.Instant.now()
         val dose=com.vitahealth.tata.intake.application.readmodels.DoseDetailReadModel("late","t","med","adult","Losartán 50 mg","1 comprimido","",now.minusSeconds(300),
@@ -81,7 +95,7 @@ class ExistingScreensVisualAuditTest {
             com.vitahealth.tata.intake.domain.model.DoseStatus.CONFIRMED,now,alreadyConfirmed=true)
         val next=com.vitahealth.tata.intake.application.readmodels.NextDoseReadModel("next","t2","med2","adult","Metformina 850 mg","1 comprimido","",now.plusSeconds(3600),com.vitahealth.tata.intake.domain.model.DoseStatus.PENDING)
         compose.setContent { AuditTheme { Box(Modifier.safeDrawingPadding()) {
-            com.vitahealth.tata.intake.presentation.detail.DoseConfirmedScreen(
+            com.vitahealth.tata.intake.presentation.detail.DoseOutcomeScreen(
                 com.vitahealth.tata.intake.presentation.detail.DoseDetailUiState.Content(dose,nextDose=next,confirmationSucceeded=true,
                     outcome=com.vitahealth.tata.intake.presentation.detail.ConfirmationOutcome.ALREADY_CONFIRMED),{})
         } } }
@@ -96,7 +110,7 @@ class ExistingScreensVisualAuditTest {
             com.vitahealth.tata.intake.domain.model.DoseStatus.CONFIRMED,now)
         val next=com.vitahealth.tata.intake.application.readmodels.NextDoseReadModel("next","t2","med2","adult","Metformina 850 mg","1 comprimido","",now.plusSeconds(3600),com.vitahealth.tata.intake.domain.model.DoseStatus.PENDING)
         compose.setContent { AuditTheme { Box(Modifier.safeDrawingPadding()) {
-            com.vitahealth.tata.intake.presentation.detail.DoseConfirmedScreen(
+            com.vitahealth.tata.intake.presentation.detail.DoseOutcomeScreen(
                 com.vitahealth.tata.intake.presentation.detail.DoseDetailUiState.Content(dose,nextDose=next,confirmationSucceeded=true),{})
         } } }
         compose.onNodeWithText("¡Bien hecho!").assertExists()

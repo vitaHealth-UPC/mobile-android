@@ -69,8 +69,8 @@ fun DoseDetailScreen(
     onHome: () -> Unit = onBack,
     onAdultTab: ((AdultTab, String) -> Unit)? = null,
 ) {
-    if (state is DoseDetailUiState.Content && state.confirmationSucceeded) {
-        DoseConfirmedScreen(state, onHome, modifier, onTab = onAdultTab?.let { callback -> { tab -> callback(tab, state.dose.olderAdultId) } })
+    if (state is DoseDetailUiState.Content && (state.confirmationSucceeded || state.outcome == ConfirmationOutcome.OMISSION_PRESERVED)) {
+        DoseOutcomeScreen(state, onHome, modifier, onTab = onAdultTab?.let { callback -> { tab -> callback(tab, state.dose.olderAdultId) } })
         return
     }
     Column(modifier.fillMaxSize().background(Brush.horizontalGradient(listOf(Color.White, TataSurface, Color(0xFFFCFBFF))))) {
@@ -92,20 +92,6 @@ fun DoseDetailScreen(
                     TataButton(stringResource(R.string.home_retry), onRetry, Modifier.padding(top = 16.dp))
                 }
                 is DoseDetailUiState.Content -> {
-                    val outcome = state.outcome
-                    if (outcome == ConfirmationOutcome.LATE || outcome == ConfirmationOutcome.OMISSION_PRESERVED) {
-                        ConfirmationResult(outcome, state.dose, onBack)
-                    } else if (state.confirmationSucceeded) {
-                        TataCard(containerColor = TataMint, modifier = Modifier.fillMaxWidth()) {
-                            Text(stringResource(R.string.detail_success_title), fontFamily = detailSerif, fontSize = 28.sp, color = TataNavy)
-                            Text(stringResource(R.string.detail_success_description), color = TataNavy, modifier = Modifier.padding(top = 8.dp))
-                            Text(state.dose.medicationName, color = TataText, modifier = Modifier.padding(top = 12.dp))
-                            state.dose.confirmedAt?.let { at ->
-                                Text(at.atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("d MMM, h:mm a", Locale.forLanguageTag("es-PE"))), color = TataMuted, modifier = Modifier.padding(top = 8.dp))
-                            }
-                        }
-                        TataButton(stringResource(R.string.detail_back_home), onBack, Modifier.padding(top = 20.dp))
-                    } else {
                         DoseContent(state.dose)
                         state.confirmationMessage?.let { Text(it, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(bottom = 12.dp)) }
                         if (state.confirmationUnavailable) {
@@ -113,7 +99,6 @@ fun DoseDetailScreen(
                         } else if (state.dose.status == DoseStatus.PENDING) {
                             TataButton(stringResource(if (state.confirming) R.string.detail_confirming else R.string.detail_confirm), onConfirm, enabled = !state.confirming)
                         }
-                    }
                 }
             }
             Spacer(Modifier.height(24.dp))

@@ -11,6 +11,8 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.res.*
+import androidx.compose.ui.semantics.disabled
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.*
 import androidx.compose.ui.unit.*
 import com.vitahealth.tata.R
@@ -22,7 +24,7 @@ import java.time.format.DateTimeFormatter
 private val confirmedInter = FontFamily(Font(R.font.tata_inter))
 
 @Composable
-fun DoseConfirmedScreen(
+fun DoseOutcomeScreen(
     state: DoseDetailUiState.Content,
     onHome: () -> Unit,
     modifier: Modifier = Modifier,
@@ -30,9 +32,10 @@ fun DoseConfirmedScreen(
 ) {
     val alreadyConfirmed = state.outcome == ConfirmationOutcome.ALREADY_CONFIRMED
     val late = state.outcome == ConfirmationOutcome.LATE
-    val hasNotice = alreadyConfirmed || late
+    val omitted = state.outcome == ConfirmationOutcome.OMISSION_PRESERVED
+    val hasNotice = alreadyConfirmed || late || omitted
     val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0]
-    val at = state.dose.confirmedAt?.atZone(ZoneId.systemDefault())
+    val at = (if (omitted) state.dose.scheduledAt else state.dose.confirmedAt)?.atZone(ZoneId.systemDefault())
     Column(
         modifier
             .fillMaxSize()
@@ -56,28 +59,29 @@ fun DoseConfirmedScreen(
                             spotColor = Color(0x1A1A2138),
                         )
                         .background(
-                            Brush.horizontalGradient(listOf(Color(0xFFCEEBD6), Color(0xFF8AC7A3))),
+                            Brush.horizontalGradient(if (omitted) listOf(Color(0xFFFDE19F), Color(0xFFFDE19F)) else listOf(Color(0xFFCEEBD6), Color(0xFF8AC7A3))),
                             CircleShape,
                         ),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Canvas(Modifier.size(48.dp)) {
+                    if (omitted) Text("!", fontFamily = confirmedInter, fontSize = 48.sp, fontWeight = FontWeight.Bold, color = Color(0xFF8C611A))
+                    else Canvas(Modifier.size(48.dp)) {
                         drawLine(Color.White, Offset(size.width * .18f, size.height * .52f), Offset(size.width * .42f, size.height * .75f), strokeWidth = 8.dp.toPx())
                         drawLine(Color.White, Offset(size.width * .42f, size.height * .75f), Offset(size.width * .86f, size.height * .25f), strokeWidth = 8.dp.toPx())
                     }
                 }
-                ConfirmationConfetti(Modifier.align(Alignment.TopCenter))
+                if (!omitted) ConfirmationConfetti(Modifier.align(Alignment.TopCenter))
             }
             Spacer(Modifier.height(8.dp))
             Text(
-                stringResource(R.string.confirmed_well_done),
+                stringResource(if (omitted) R.string.intake_result_omitted_title else R.string.confirmed_well_done),
                 fontFamily = FontFamily(Font(R.font.tata_serif)),
                 fontSize = 30.sp,
                 lineHeight = 36.sp,
                 color = TataText,
             )
             Text(
-                stringResource(if (alreadyConfirmed) R.string.confirmed_already_title else if (late) R.string.intake_result_late_subtitle else R.string.confirmed_title),
+                stringResource(if (omitted) R.string.intake_result_omitted_subtitle else if (alreadyConfirmed) R.string.confirmed_already_title else if (late) R.string.intake_result_late_subtitle else R.string.confirmed_title),
                 fontFamily = confirmedInter,
                 fontSize = 15.sp,
                 lineHeight = 18.sp,
@@ -152,7 +156,7 @@ fun DoseConfirmedScreen(
                     Spacer(Modifier.width(16.dp))
                     Column(Modifier.weight(1f)) {
                         Text(
-                            stringResource(R.string.confirmed_progress),
+                            stringResource(if (omitted) R.string.omitted_history_title else R.string.confirmed_progress),
                             fontFamily = confirmedInter,
                             fontWeight = FontWeight.SemiBold,
                             fontSize = 14.sp,
@@ -160,7 +164,7 @@ fun DoseConfirmedScreen(
                         )
                         Spacer(Modifier.height(7.dp))
                         Text(
-                            stringResource(R.string.confirmed_history),
+                            stringResource(if (omitted) R.string.omitted_history_description else R.string.confirmed_history),
                             fontFamily = confirmedInter,
                             fontSize = 13.sp,
                             color = TataMuted,
@@ -169,13 +173,17 @@ fun DoseConfirmedScreen(
                 }
             }
             Spacer(Modifier.height(28.dp))
-            TataButton(stringResource(R.string.detail_back_home), onHome)
+            if (omitted) {
+                Box(Modifier.fillMaxWidth().height(56.dp).background(Color(0xFFEBEDF2), RoundedCornerShape(28.dp)).border(1.dp, Color(0xFFC7CCD6), RoundedCornerShape(28.dp)).semantics { disabled() }, contentAlignment = Alignment.Center) {
+                    Text(stringResource(R.string.intake_result_confirmation_unavailable), fontFamily = confirmedInter, fontSize = 17.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF575E6E))
+                }
+            } else TataButton(stringResource(R.string.detail_back_home), onHome)
             if (hasNotice) {
                 Spacer(Modifier.height(18.dp))
-                Column(Modifier.fillMaxWidth().background(if (late) Color(0xFFFFF5E0) else TataLavender, RoundedCornerShape(16.dp)).padding(horizontal = 14.dp, vertical = 10.dp)) {
-                    Text(stringResource(if (late) R.string.intake_result_late_note_title else R.string.confirmed_no_duplicates), fontFamily = confirmedInter, fontWeight = FontWeight.SemiBold, fontSize = 11.sp, lineHeight = 14.sp, color = if (late) Color(0xFF855E1F) else TataNavy)
+                Column(Modifier.fillMaxWidth().background(if (late || omitted) Color(0xFFFFF5E0) else TataLavender, RoundedCornerShape(16.dp)).padding(horizontal = 14.dp, vertical = 10.dp)) {
+                    Text(stringResource(if (omitted) R.string.intake_result_omitted_note_title else if (late) R.string.intake_result_late_note_title else R.string.confirmed_no_duplicates), fontFamily = confirmedInter, fontWeight = FontWeight.SemiBold, fontSize = 11.sp, lineHeight = 14.sp, color = if (late || omitted) Color(0xFF855E1F) else TataNavy)
                     Spacer(Modifier.height(7.dp))
-                    Text(stringResource(if (late) R.string.intake_result_late_note else R.string.confirmed_no_duplicates_detail), fontFamily = confirmedInter, fontSize = 8.5.sp, lineHeight = 12.sp, color = TataMuted)
+                    Text(stringResource(if (omitted) R.string.intake_result_omitted_note else if (late) R.string.intake_result_late_note else R.string.confirmed_no_duplicates_detail), fontFamily = confirmedInter, fontSize = 8.5.sp, lineHeight = 12.sp, color = TataMuted)
                 }
             }
             Spacer(Modifier.height(24.dp))

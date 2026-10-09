@@ -134,4 +134,25 @@ class LateConfirmationTest {
         assertEquals(recorded, content(model).dose.confirmedAt)
     }
 
+    @Test fun omissionQueriesNextDoseWithoutUndoingTheRecordedOmission() {
+        details.answers = mutableListOf(AppResult.Success(pending))
+        confirmations.answer = AppResult.Failure("No longer confirmable", code = "INTAKE_NOT_CONFIRMABLE")
+        var requestedOwner: String? = null
+        val next = object : com.vitahealth.tata.intake.application.NextDoseRepository {
+            override suspend fun getNextDose(olderAdultId: String): AppResult<com.vitahealth.tata.intake.application.readmodels.NextDoseReadModel?> {
+                requestedOwner = olderAdultId
+                return AppResult.Failure("", code = "NETWORK_UNAVAILABLE")
+            }
+        }
+        val model = DoseDetailViewModel("101", GetDoseDetailQueryHandler(details), ConfirmDoseCommandHandler(confirmations),
+            Dispatchers.Unconfined, com.vitahealth.tata.intake.application.handlers.GetNextDoseQueryHandler(next))
+        details.answers = mutableListOf(AppResult.Success(pending.copy(status = DoseStatus.OMITTED)))
+        model.confirm()
+        assertEquals("adult-1", requestedOwner)
+        assertEquals(ConfirmationOutcome.OMISSION_PRESERVED, content(model).outcome)
+        assertEquals(DoseStatus.OMITTED, content(model).dose.status)
+        assertNull(content(model).dose.confirmedAt)
+        assertNull(content(model).nextDose)
+    }
+
 }
