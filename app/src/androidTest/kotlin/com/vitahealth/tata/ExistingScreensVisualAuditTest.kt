@@ -59,6 +59,22 @@ class ExistingScreensVisualAuditTest {
         capture("voice-not-recognized",composeOnly=true)
     }
 
+    @Test fun captureReinforcedReminderAndItsRemoval() {
+        val now=java.time.Instant.now()
+        val dose=com.vitahealth.tata.intake.application.readmodels.NextDoseReadModel("reminder","t","med","adult","Losartán 50 mg","1 tableta","",now.minusSeconds(60),com.vitahealth.tata.intake.domain.model.DoseStatus.PENDING)
+        var state by mutableStateOf<com.vitahealth.tata.intake.presentation.home.NextDoseHomeUiState>(
+            com.vitahealth.tata.intake.presentation.home.NextDoseHomeUiState.NextDoseAvailable(dose,"Rosa Vargas",com.vitahealth.tata.intake.application.readmodels.DailyDoseProgress(2,3)))
+        var voiceIntake: String? = null
+        compose.setContent { AuditTheme { Box(Modifier.safeDrawingPadding()) {
+            com.vitahealth.tata.intake.presentation.home.NextDoseHomeScreen(state,{},{},{},onOpenVoice={voiceIntake=it})
+        } } }
+        compose.onNodeWithText("Segundo recordatorio").assertExists()
+        capture("reinforced-reminder",composeOnly=true)
+        compose.onNodeWithText("Confirmar\ncon voz").performClick()
+        compose.runOnIdle { check(voiceIntake=="reminder"); state=com.vitahealth.tata.intake.presentation.home.NextDoseHomeUiState.NoNextDose("Rosa Vargas") }
+        compose.onNodeWithText("Segundo recordatorio").assertDoesNotExist()
+    }
+
     @Test fun captureRecordedDoseDetails() {
         val now=java.time.Instant.now()
         val next=com.vitahealth.tata.intake.application.readmodels.NextDoseReadModel("next","t","med","adult","Losartán 50 mg","1 comprimido","",now.plusSeconds(86400),com.vitahealth.tata.intake.domain.model.DoseStatus.PENDING)

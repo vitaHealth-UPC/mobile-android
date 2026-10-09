@@ -152,12 +152,11 @@ fun NextDoseHomeScreen(
                     IconButton(onClick = { showTip = false }, modifier = Modifier.size(24.dp).semantics { contentDescription = dismissTip }) { Text("×", color = TataMuted) }
                 }
             }
-            if (state is NextDoseHomeUiState.NextDoseAvailable && isReinforcedReminderDue(state.dose, java.time.Instant.now())) {
-                Spacer(Modifier.height(21.dp))
-                ReinforcedReminderCard()
-            }
             onSignOut?.let { action -> TextButton(onClick = action) { Text(stringResource(R.string.home_switch_account), color = TataNavy) } }
             Spacer(Modifier.height(24.dp))
+        }
+        if (state is NextDoseHomeUiState.NextDoseAvailable && isReinforcedReminderDue(state.dose, java.time.Instant.now())) {
+            ReinforcedReminderCard(Modifier.padding(start = 24.dp, end = 24.dp, top = 8.dp, bottom = 16.dp))
         }
         AdultTabBar(
             selected = AdultTab.Home,

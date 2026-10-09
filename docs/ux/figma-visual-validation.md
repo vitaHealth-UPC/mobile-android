@@ -1,16 +1,16 @@
 # Conteo de fidelidad visual — 70 variantes
 
-Checkpoint: 2026-10-08. Registro independiente del conteo de implementaciones.
+Checkpoint: 2026-10-09. Registro independiente del conteo de implementaciones.
 
 - 65 variantes tienen implementación, incluyendo composiciones parciales.
 - 5 carecen de implementación específica.
-- 36 aceptadas visualmente con el criterio proporcional acordado.
-- 29 implementadas requieren validación o correcciones.
+- 37 aceptadas visualmente con el criterio proporcional acordado.
+- 28 implementadas requieren validación o correcciones.
 - 64 tienen comparación visual; comparación no equivale a aceptación.
 
 Aceptación: composición, tipografía, proporciones, iconos, contraste y estado representado coherentes con Figma. Se permiten adaptaciones nativas, desplazamiento por contenido real y datos dinámicos; no se exige copiar nombres, fechas ni títulos a posiciones absolutas. La aceptación visual no certifica integraciones ni navegación completa. Cada variante requiere su propio resultado; reutilizar un composable no aprueba automáticamente todas sus variantes.
 
-Evidencias PNG en el equipo de trabajo: C:/Users/david/Downloads/. Las capturas de pruebas contienen datos aislados. Los casos de detalle confirmado/tardío/omitido y consentimiento denegado siguen abiertos aunque compartan componentes corregidos.
+Evidencias PNG en el equipo de trabajo: C:/Users/david/Downloads/. Las capturas de pruebas contienen datos aislados. El detalle confirmado y el consentimiento denegado conservan su propia validación pendiente.
 
 | # | Variante | Nodo Figma | Resultado | Captura aceptada |
 | --- | --- | --- | --- | --- |
@@ -64,7 +64,7 @@ Evidencias PNG en el equipo de trabajo: C:/Users/david/Downloads/. Las capturas 
 | 48 | Dose Detail - Confirmed | 563:3370 | Requiere validar/corregir | — |
 | 49 | Dose Detail - Late | 563:3474 | Aceptada visualmente; siguiente toma real y estado tardío localizado | dose-detail-late-final.png |
 | 50 | Dose Detail - Omitted | 563:3578 | Aceptada visualmente; aviso de omisión y barra nativa | dose-detail-omitted-final.png |
-| 51 | Reinforced Reminder | 563:3682 | Requiere validar/corregir | — |
+| 51 | Reinforced Reminder | 563:3682 | Aceptada visualmente; aviso sobre la barra, voz funcional y retirada cuando deja de estar pendiente | reinforced-reminder-review.png |
 | 52 | Late Dose Confirmed | 563:3770 | Aceptada visualmente; fecha original, próxima toma real y aviso de clasificación tardía | late-dose-confirmed-verified.png |
 | 53 | Omission Preserved | 563:3844 | Aceptada visualmente; horario programado, próxima toma real y confirmación deshabilitada | omission-preserved-verified.png |
 | 54 | Agenda With Statuses | 563:3918 | Aceptada visualmente | agenda-final.png |
