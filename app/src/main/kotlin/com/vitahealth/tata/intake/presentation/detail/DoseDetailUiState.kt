@@ -7,6 +7,9 @@ enum class ConfirmationOutcome {
     /** Confirmed on time. */
     CONFIRMED,
 
+    /** A confirmation attempt returned the existing record without another transition. */
+    ALREADY_CONFIRMED,
+
     /** Confirmed within the tolerance period (US-23). */
     LATE,
 
