@@ -1,0 +1,20 @@
+<resources>
+    <string name="voice_title">Confirm by voice </string>
+    <string name="voice_subtitle">Say the phrase aloud </string>
+    <string name="voice_listening">Listening... </string>
+    <string name="voice_ready">Ready to listen </string>
+    <string name="voice_processing">Validating... </string>
+    <string name="voice_not_recognized">Not recognized </string>
+    <string name="voice_unavailable">Unavailable </string>
+    <string name="voice_permission">Microphone disabled </string>
+    <string name="voice_suggested">Suggested phrase </string>
+    <string name="voice_phrase">“I confirm that I took %1$s.” </string>
+    <string name="voice_not_saved">Confirmation not recorded </string>
+    <string name="voice_retry_hint">Retry or return Home to confirm by touch. </string>
+    <string name="voice_permission_hint">Allow microphone access to confirm by voice, or go back to confirm by touch. </string>
+    <string name="voice_retry">Retry </string>
+    <string name="voice_start">Start </string>
+    <string name="voice_cancel">Cancel </string>
+    <string name="voice_back">Back </string>
+    <string name="voice_read_phrase">Read the phrase </string>
+</resources>

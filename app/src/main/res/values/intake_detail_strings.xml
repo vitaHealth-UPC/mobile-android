@@ -21,4 +21,14 @@
     <string name="detail_prepare_water">Un vaso de agua</string>
     <string name="detail_prepare_seat">Siéntate cómodamente</string>
     <string name="detail_back_home">Volver al inicio</string>
+    <string name="detail_state">Estado: %1$s</string>
+    <string name="detail_status_pending">Pendiente</string>
+    <string name="detail_status_confirmed">Confirmada</string>
+    <string name="detail_status_late">Tardía</string>
+    <string name="detail_status_omitted">Omitida</string>
+    <string name="detail_message_pending">Aún puedes confirmar esta toma.</string>
+    <string name="detail_message_confirmed">La toma fue registrada correctamente.</string>
+    <string name="detail_message_late">La toma quedó registrada después de la hora programada.</string>
+    <string name="detail_message_omitted">El periodo permitido terminó sin confirmación.</string>
+    <string name="detail_recorded_schedule">Horario de esta toma</string>
 </resources>

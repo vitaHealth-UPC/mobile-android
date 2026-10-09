@@ -19,6 +19,7 @@ data class IntakeResponse(
     val status: String,
     val confirmedAt: String? = null,
     val confirmationChannel: String? = null,
+    val alreadyConfirmed: Boolean = false,
 )
 
 data class ConfirmIntakeRequest(val channel: String)
