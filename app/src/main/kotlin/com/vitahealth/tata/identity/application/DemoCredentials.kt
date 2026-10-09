@@ -6,6 +6,6 @@ package com.vitahealth.tata.identity.application
  * magic strings inside Compose screens.
  */
 object DemoCredentials {
-    const val EMAIL = "demo@tata.app"
+    const val EMAIL = "demo.caregiver@tata.app"
     const val PASSWORD = "Tata-Demo-2026"
 }
