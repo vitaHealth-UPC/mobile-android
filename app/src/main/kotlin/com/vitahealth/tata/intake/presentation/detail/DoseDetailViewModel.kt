@@ -45,7 +45,11 @@ class DoseDetailViewModel(
                 is AppResult.Success -> DoseDetailUiState.Content(
                     result.value,
                     confirmationSucceeded = true,
-                    outcome = if (result.value.status == DoseStatus.LATE) ConfirmationOutcome.LATE else ConfirmationOutcome.CONFIRMED,
+                    outcome = when {
+                        result.value.alreadyConfirmed -> ConfirmationOutcome.ALREADY_CONFIRMED
+                        result.value.status == DoseStatus.LATE -> ConfirmationOutcome.LATE
+                        else -> ConfirmationOutcome.CONFIRMED
+                    },
                 )
                 is AppResult.Failure -> if (result.code == NOT_CONFIRMABLE) refreshRejectedConfirmation(content) else content.copy(confirmationMessage = result.message)
             }
@@ -65,7 +69,12 @@ class DoseDetailViewModel(
         when (val result = handler(GetDoseDetailQuery(intakeId))) {
             is AppResult.Success -> DoseDetailUiState.Content(
                 dose = result.value,
-                outcome = if (result.value.status == DoseStatus.OMITTED) ConfirmationOutcome.OMISSION_PRESERVED else null,
+                confirmationSucceeded = result.value.status == DoseStatus.CONFIRMED || result.value.status == DoseStatus.LATE,
+                outcome = when (result.value.status) {
+                    DoseStatus.CONFIRMED, DoseStatus.LATE -> ConfirmationOutcome.ALREADY_CONFIRMED
+                    DoseStatus.OMITTED -> ConfirmationOutcome.OMISSION_PRESERVED
+                    else -> null
+                },
                 confirmationUnavailable = result.value.status == DoseStatus.PENDING,
             )
             is AppResult.Failure -> content.copy(

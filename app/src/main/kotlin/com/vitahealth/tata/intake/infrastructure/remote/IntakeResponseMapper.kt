@@ -11,12 +11,15 @@ internal fun mapIntakeDetail(body: IntakeResponse): AppResult<DoseDetailReadMode
             message = "La programación de la toma no es válida.",
             code = "INVALID_SCHEDULE",
         )
-    val status = runCatching { DoseStatus.valueOf(body.status.uppercase()) }.getOrNull()
+    val status = runCatching { DoseStatus.valueOf(body.status.uppercase(java.util.Locale.ROOT)) }.getOrNull()
         ?: return AppResult.Failure(
             message = "El estado de la toma no es válido.",
             code = "INVALID_DOSE_STATUS",
         )
 
+    if (body.alreadyConfirmed && status != DoseStatus.CONFIRMED && status != DoseStatus.LATE) {
+        return AppResult.Failure("El resultado de la confirmación no es válido.", code = "INVALID_DOSE_STATUS")
+    }
     return AppResult.Success(
         DoseDetailReadModel(
             id = body.id,
@@ -29,6 +32,7 @@ internal fun mapIntakeDetail(body: IntakeResponse): AppResult<DoseDetailReadMode
             scheduledAt = scheduledAt,
             status = status,
             confirmedAt = body.confirmedAt?.let { runCatching { Instant.parse(it) }.getOrNull() },
+            alreadyConfirmed = body.alreadyConfirmed,
         ),
     )
 }
