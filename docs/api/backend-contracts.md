@@ -18,7 +18,7 @@ Touch and voice use separate endpoints. `POST /api/v1/intakes/{intakeId}/voice-c
 
 Voice results are `CONFIRMED`, `ALREADY_CONFIRMED`, `NOT_RECOGNIZED`, `NOT_VALIDATED` or `PROVIDER_UNAVAILABLE`. Success requires the expected intake, a persisted confirmation timestamp and `CONFIRMED`/`LATE` state. Recognition failure leaves the intake unchanged; the screen offers retry and return to touch confirmation. HTTP `409` distinguishes `VOICE_CONFIRMATION_DISABLED` from `INTAKE_NOT_CONFIRMABLE` through the Problem Detail title. Voice recognition requires the configured backend speech provider; the app displays unavailable when that provider is unavailable.
 
-US-23 uses the same endpoint: a `200` whose intake comes back `LATE` shows "Dose confirmed late" (confirmed within the tolerance period); a `409` shows "Missed dose": the app reads the intake again and keeps the omission, because a later confirmation does not replace it.
+US-23 displays the Figma confirmation composition with the persisted timestamp, actual next intake, adult navigation and late classification notice. A delayed omission event cannot replace an already confirmed intake, including a late one. US-23 uses the same endpoint: a `200` whose intake comes back `LATE` shows "Dose confirmed late" (confirmed within the tolerance period); a `409` shows "Missed dose": the app reads the intake again and keeps the omission, because a later confirmation does not replace it.
 
 ## Daily/weekly agenda (TS-08 / US-24)
 
@@ -160,3 +160,11 @@ PHONE opens the dialer with the number typed (`ACTION_DIAL`, no `CALL_PHONE` per
 - El propietario proviene de la sesión PIN. No se acepta selector de propietario. Las sesiones de cuidador y configuración reciben 403.
 - Las notas de intervención del cuidador conservan `/api/v1/older-adults/{olderAdultId}/notes`; las notas personales no se incorporan a ese historial.
 - Un error de guardado conserva el formulario y sus datos. La lista agrega la respuesta real del servidor y bloquea el doble envío.
+
+### Omission preserved outcome
+
+After `INTAKE_NOT_CONFIRMABLE`, the detail is read again. An `OMITTED` response preserves the programmed timestamp and renders a disabled confirmation control. The next dose is queried for the same older adult; failure of that query does not replace the omission or invent a next dose. Home navigation remains available through the adult tab bar.
+
+### Recorded dose detail
+
+A recorded dose loads the next intake for its older adult and excludes its own ID. When no next intake is available, the schedule card is labeled as the current dose schedule. Clinical indication and recurrence remain unspecified unless supplied by the contract. ES is the resource fallback; the EN prototype uses localized detail resources.
