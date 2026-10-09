@@ -2,26 +2,26 @@ package com.vitahealth.tata.shared.design.components
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.heightIn
-import com.vitahealth.tata.shared.design.theme.tataPrototypeShadow
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.material3.MaterialTheme
 import com.vitahealth.tata.shared.design.theme.TataBorder
 import com.vitahealth.tata.shared.design.theme.TataMuted
 import com.vitahealth.tata.shared.design.theme.TataText
+import com.vitahealth.tata.shared.design.theme.tataPrototypeShadow
 
 @Composable
 fun TataFormField(
@@ -35,6 +35,7 @@ fun TataFormField(
     singleLine: Boolean = true,
     enabled: Boolean = true,
     softSurface: Boolean = false,
+    trailingIcon: (@Composable () -> Unit)? = null,
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
         Text(
@@ -58,6 +59,7 @@ fun TataFormField(
             keyboardOptions = keyboardOptions,
             visualTransformation = visualTransformation,
             singleLine = singleLine,
+            trailingIcon = trailingIcon,
             shape = RoundedCornerShape(15.dp),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedContainerColor = Color.White,
