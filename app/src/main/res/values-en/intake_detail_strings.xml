@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="detail_back">Back</string>
+    <string name="detail_title">Medication detail</string>
+    <string name="detail_loading">Loading dose details...</string>
+    <string name="detail_error_title">We could not load this dose</string>
+    <string name="detail_success_title">Well done!</string>
+    <string name="detail_success_description">Dose confirmed</string>
+    <string name="detail_confirm">Confirm dose</string>
+    <string name="detail_confirming">Confirming...</string>
+    <string name="detail_next_confirmation">Next confirmation</string>
+    <string name="detail_information">Information</string>
+    <string name="detail_dose">Dose</string>
+    <string name="detail_when">When</string>
+    <string name="detail_purpose">Purpose</string>
+    <string name="detail_unspecified">Not specified</string>
+    <string name="detail_instructions">Instructions</string>
+    <string name="detail_no_instructions">No additional instructions</string>
+    <string name="detail_before_dose">Before your dose</string>
+    <string name="detail_prepare_medication">Have your medication ready</string>
+    <string name="detail_prepare_water">A glass of water</string>
+    <string name="detail_prepare_seat">Sit comfortably</string>
+    <string name="detail_back_home">Back to home</string>
+    <string name="detail_state">Status: %1$s</string>
+    <string name="detail_status_pending">Pending</string>
+    <string name="detail_status_confirmed">Confirmed</string>
+    <string name="detail_status_late">Late</string>
+    <string name="detail_status_omitted">Omitted</string>
+    <string name="detail_message_pending">You can still confirm this dose.</string>
+    <string name="detail_message_confirmed">The dose was recorded successfully.</string>
+    <string name="detail_message_late">The dose was recorded after its scheduled time.</string>
+    <string name="detail_message_omitted">The confirmation period ended without confirmation.</string>
+    <string name="detail_recorded_schedule">This dose schedule</string>
+</resources>

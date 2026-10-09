@@ -4,10 +4,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.liveRegion
@@ -20,9 +24,6 @@ import com.vitahealth.tata.R
 import com.vitahealth.tata.intake.application.readmodels.NextDoseReadModel
 import com.vitahealth.tata.intake.domain.model.DoseStatus
 import com.vitahealth.tata.shared.design.theme.TataTheme
-import com.vitahealth.tata.shared.design.theme.TataWarning
-import com.vitahealth.tata.shared.design.theme.TataWarningSurface
-import com.vitahealth.tata.shared.design.theme.tataTextColor
 import java.time.Instant
 
 /**
@@ -33,27 +34,31 @@ import java.time.Instant
 internal fun isReinforcedReminderDue(dose: NextDoseReadModel, now: Instant): Boolean =
     dose.status == DoseStatus.PENDING && !now.isBefore(dose.scheduledAt)
 
-/** "Segundo recordatorio" card of Figma 563:3682; warning text on its surface keeps 5.4:1 contrast. */
+/** Native reminder notice of Figma 563:3682. Its state comes from the pending scheduled dose. */
 @Composable
 internal fun ReinforcedReminderCard(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .background(TataWarningSurface, RoundedCornerShape(18.dp))
-            .padding(16.dp)
+            .heightIn(min = 58.dp)
+            .background(Color(0xFFFFF5E0), RoundedCornerShape(16.dp))
+            .padding(horizontal = 14.dp, vertical = 10.dp)
             .semantics { liveRegion = LiveRegionMode.Polite },
     ) {
         Text(
             text = stringResource(R.string.intake_reinforced_reminder_title),
-            color = TataWarning,
-            fontSize = 15.sp,
+            color = Color(0xFF855E1F),
+            fontFamily = FontFamily(Font(R.font.tata_inter)),
+            fontSize = 11.sp,
+            lineHeight = 14.sp,
             fontWeight = FontWeight.SemiBold,
         )
         Text(
             text = stringResource(R.string.intake_reinforced_reminder_text),
-            color = tataTextColor(),
-            fontSize = 14.sp,
-            lineHeight = 19.sp,
+            color = Color(0xFF78859E),
+            fontFamily = FontFamily(Font(R.font.tata_inter)),
+            fontSize = 9.sp,
+            lineHeight = 12.sp,
             modifier = Modifier.padding(top = 6.dp),
         )
     }
