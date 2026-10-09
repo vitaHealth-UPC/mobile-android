@@ -10,7 +10,7 @@ Rules:
 
 ## Intake confirmation (TS-04 / US-06 touch)
 
-`POST /api/v1/intakes/{intakeId}/confirmation`, body `{ "channel": "TOUCH" }` (`VOICE` shares the same invariant). Returns the same intake representation as detail. `404` means missing intake; `409` means definitive omission cannot be overwritten. Retries use the original intake ID and do not create duplicate confirmations. Backend decides `CONFIRMED / LATE / OMITTED`.
+`POST /api/v1/intakes/{intakeId}/confirmation`, body `{ "channel": "TOUCH" }` (`VOICE` shares the same invariant). Returns the same intake representation as detail. `404` means missing intake; `409` means definitive omission cannot be overwritten. Retries use the original intake ID and do not create duplicate confirmations. Backend decides `CONFIRMED / LATE / OMITTED`. The response includes `alreadyConfirmed`: `false` for the request that records the intake and `true` for an idempotent replay. This request metadata is not a new intake status. Replays preserve the original confirmation channel and timestamp; Android displays the "Toma ya confirmada" result with "Sin duplicados".
 
 Account, OlderAdult, CareLink, Medication, Treatment and Intake IDs and references are UUID `String` values. Numeric internal IDs from other contexts do not change that contract.
 

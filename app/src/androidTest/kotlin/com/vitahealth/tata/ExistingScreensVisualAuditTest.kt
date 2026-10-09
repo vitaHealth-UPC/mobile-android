@@ -44,6 +44,21 @@ import org.junit.runner.RunWith
 class ExistingScreensVisualAuditTest {
     @get:Rule val compose = createComposeRule()
 
+    @Test fun captureDoseAlreadyConfirmed() {
+        val now=java.time.Instant.now()
+        val dose=com.vitahealth.tata.intake.application.readmodels.DoseDetailReadModel("done","t","med","adult","Losartán 50 mg","1 comprimido","",now,
+            com.vitahealth.tata.intake.domain.model.DoseStatus.CONFIRMED,now,alreadyConfirmed=true)
+        val next=com.vitahealth.tata.intake.application.readmodels.NextDoseReadModel("next","t2","med2","adult","Metformina 850 mg","1 comprimido","",now.plusSeconds(3600),com.vitahealth.tata.intake.domain.model.DoseStatus.PENDING)
+        compose.setContent { AuditTheme { Box(Modifier.safeDrawingPadding()) {
+            com.vitahealth.tata.intake.presentation.detail.DoseConfirmedScreen(
+                com.vitahealth.tata.intake.presentation.detail.DoseDetailUiState.Content(dose,nextDose=next,confirmationSucceeded=true,
+                    outcome=com.vitahealth.tata.intake.presentation.detail.ConfirmationOutcome.ALREADY_CONFIRMED),{})
+        } } }
+        compose.onNodeWithText("Toma ya confirmada").assertExists()
+        compose.onNodeWithText("Sin duplicados").assertExists()
+        capture("dose-already-confirmed",composeOnly=true)
+    }
+
     @Test fun captureDoseConfirmed() {
         val now=java.time.Instant.now()
         val dose=com.vitahealth.tata.intake.application.readmodels.DoseDetailReadModel("done","t","med","adult","Losartán 50 mg","1 comprimido","",now,

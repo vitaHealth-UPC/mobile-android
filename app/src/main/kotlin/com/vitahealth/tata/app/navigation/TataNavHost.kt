@@ -909,6 +909,13 @@ fun TataNavHost(
 
             DoseDetailRoute(
                 factory = app.container.doseDetailViewModelFactory(intakeId),
+                onAdultTab = { tab, adult -> when (tab) {
+                    com.vitahealth.tata.shared.design.components.AdultTab.Home -> navController.popBackStack(RootDestination.NextDoseHome.route, false)
+                    com.vitahealth.tata.shared.design.components.AdultTab.Medications -> navController.openAdultDestination(RootDestination.MyMedications.createRoute(adult))
+                    com.vitahealth.tata.shared.design.components.AdultTab.Agenda -> navController.openAdultDestination(RootDestination.IntakeAgenda.createRoute(adult))
+                    com.vitahealth.tata.shared.design.components.AdultTab.Notes -> navController.openAdultDestination(RootDestination.PersonalNotes.createRoute(adult))
+                    else -> Unit
+                } },
                 onBack = { navController.popBackStack() },
                 onHome = { if (!navController.popBackStack(RootDestination.NextDoseHome.route, false)) navController.popBackStack() },
             )

@@ -46,6 +46,20 @@ class RemoteDoseConfirmationRepositoryTest {
         } catch (_: CancellationException) { }
     }
 
+    @Test fun idempotentMetadataAndOriginalDateReachTheReadModel() = runBlocking {
+        val result = RemoteDoseConfirmationRepository(FakeApi(Response.success(confirmed.copy(alreadyConfirmed = true))))
+            .confirm(ConfirmDoseCommand("intake-1", ConfirmationChannel.TOUCH))
+        val dose = (result as AppResult.Success).value
+        assertTrue(dose.alreadyConfirmed)
+        assertEquals(Instant.parse("2026-10-06T13:02:00Z"), dose.confirmedAt)
+    }
+
+    @Test fun incompatibleIdempotentMetadataDoesNotFabricateConfirmation() = runBlocking {
+        val result = RemoteDoseConfirmationRepository(FakeApi(Response.success(confirmed.copy(status = "PENDING", alreadyConfirmed = true))))
+            .confirm(ConfirmDoseCommand("intake-1", ConfirmationChannel.TOUCH))
+        assertEquals("INVALID_DOSE_STATUS", (result as AppResult.Failure).code)
+    }
+
     private class FakeApi(val response: Response<IntakeResponse>, val failure: Exception? = null) : IntakeApiService {
         override suspend fun getAgenda(olderAdultId: String, from: String, to: String): Response<List<IntakeResponse>> = error("Unused")
         var request: ConfirmIntakeRequest? = null

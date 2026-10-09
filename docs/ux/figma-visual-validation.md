@@ -2,11 +2,11 @@
 
 Checkpoint: 2026-10-08. Registro independiente del conteo de implementaciones.
 
-- 62 variantes tienen implementación, incluyendo composiciones parciales.
-- 8 carecen de implementación específica.
-- 29 aceptadas visualmente con el criterio proporcional acordado.
+- 63 variantes tienen implementación, incluyendo composiciones parciales.
+- 7 carecen de implementación específica.
+- 30 aceptadas visualmente con el criterio proporcional acordado.
 - 33 implementadas requieren validación o correcciones.
-- 61 tienen comparación visual; comparación no equivale a aceptación.
+- 62 tienen comparación visual; comparación no equivale a aceptación.
 
 Aceptación: composición, tipografía, proporciones, iconos, contraste y estado representado coherentes con Figma. Se permiten adaptaciones nativas, desplazamiento por contenido real y datos dinámicos; no se exige copiar nombres, fechas ni títulos a posiciones absolutas. La aceptación visual no certifica integraciones ni navegación completa. Cada variante requiere su propio resultado; reutilizar un composable no aprueba automáticamente todas sus variantes.
 
@@ -54,7 +54,7 @@ Evidencias PNG en el equipo de trabajo: C:/Users/david/Downloads/. Las capturas 
 | 38 | Medication Deactivated | 563:2537 | Requiere validar/corregir | — |
 | 39 | Medication Reminder Due | 563:2619 | Sin implementación específica | — |
 | 40 | Voice Not Recognized | 563:2707 | Sin implementación específica | — |
-| 41 | Dose Already Confirmed | 563:2760 | Sin implementación específica | — |
+| 41 | Dose Already Confirmed | 563:2760 | Aceptada visualmente; reintento idempotente, fecha original y aviso completo sin duplicados | dose-already-confirmed-verified.png |
 | 42 | No Adherence Data | 563:2834 | Aceptada visualmente | history-insufficient-final.png |
 | 43 | Treatment Incomplete | 563:2942 | Requiere validar/corregir | — |
 | 44 | Treatment Paused | 563:3010 | Requiere validar/corregir | — |
