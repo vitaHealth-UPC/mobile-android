@@ -306,7 +306,7 @@ class ExistingScreensVisualAuditTest {
         var requested = false
         compose.setContent { AuditTheme { Box(Modifier.safeDrawingPadding()) {
             SessionAccessScreen(SessionAccessUiState(email = "diego@example.test", password = "fixture-only"),
-                {}, {}, { requested = true }, {}, {}, showPin = false)
+                {}, {}, { requested = true }, {}, {}, {}, showPin = false)
         } } }
         compose.onNodeWithText("Iniciar sesión").performClick()
         compose.runOnIdle { check(requested) }
