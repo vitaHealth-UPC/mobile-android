@@ -44,6 +44,21 @@ import org.junit.runner.RunWith
 class ExistingScreensVisualAuditTest {
     @get:Rule val compose = createComposeRule()
 
+    @Test fun captureVoiceStates() {
+        val now=java.time.Instant.now()
+        val dose=com.vitahealth.tata.intake.application.readmodels.DoseDetailReadModel("voice","t","med","adult","Losartán cincuenta miligramos","1 comprimido","",now,com.vitahealth.tata.intake.domain.model.DoseStatus.PENDING)
+        var phase by mutableStateOf(com.vitahealth.tata.intake.presentation.voice.VoicePhase.RECORDING)
+        compose.setContent { AuditTheme { Box(Modifier.safeDrawingPadding()) {
+            com.vitahealth.tata.intake.presentation.voice.VoiceConfirmationScreen(com.vitahealth.tata.intake.presentation.voice.VoiceConfirmationUiState(phase,dose),{},{},{})
+        } } }
+        compose.onNodeWithText("Escuchando...").assertExists()
+        capture("voice-listening",composeOnly=true)
+        compose.runOnIdle { phase=com.vitahealth.tata.intake.presentation.voice.VoicePhase.NOT_RECOGNIZED }
+        compose.onNodeWithText("No reconocida").assertExists()
+        compose.onNodeWithText("Confirmación no registrada").assertExists()
+        capture("voice-not-recognized",composeOnly=true)
+    }
+
     @Test fun captureDoseAlreadyConfirmed() {
         val now=java.time.Instant.now()
         val dose=com.vitahealth.tata.intake.application.readmodels.DoseDetailReadModel("done","t","med","adult","Losartán 50 mg","1 comprimido","",now,

@@ -830,6 +830,7 @@ fun TataNavHost(
                     olderAdultId = olderAdultId,
                     olderAdultName = olderAdultName,
                 ),
+                onOpenVoice = { navController.navigate(RootDestination.VoiceConfirmation.createRoute(it)) },
                 onOpenDoseDetail = { intakeId ->
                     navController.navigate(RootDestination.DoseDetail.createRoute(intakeId))
                 },
@@ -893,6 +894,24 @@ fun TataNavHost(
                 onMedications = { navController.openAdultDestination(RootDestination.MyMedications.createRoute(olderAdultId)) },
                 onNotes = { navController.openAdultDestination(RootDestination.PersonalNotes.createRoute(olderAdultId)) },
                 onHome = { navController.popBackStack(RootDestination.NextDoseHome.route, false) },
+            )
+        }
+
+        composable(RootDestination.VoiceConfirmation.route,
+            arguments = listOf(navArgument("intakeId") { type = NavType.StringType })) { entry ->
+            val app = androidx.compose.ui.platform.LocalContext.current.applicationContext as TataApplication
+            val id = requireNotNull(entry.arguments?.getString("intakeId"))
+            com.vitahealth.tata.intake.presentation.voice.VoiceConfirmationRoute(
+                factory = app.container.voiceConfirmationViewModelFactory(id),
+                onBack = { navController.popBackStack() },
+                onHome = { if (!navController.popBackStack(RootDestination.NextDoseHome.route, false)) navController.popBackStack() },
+                onAdultTab = { tab, adult -> when (tab) {
+                    com.vitahealth.tata.shared.design.components.AdultTab.Home -> navController.popBackStack(RootDestination.NextDoseHome.route, false)
+                    com.vitahealth.tata.shared.design.components.AdultTab.Medications -> navController.openAdultDestination(RootDestination.MyMedications.createRoute(adult))
+                    com.vitahealth.tata.shared.design.components.AdultTab.Agenda -> navController.openAdultDestination(RootDestination.IntakeAgenda.createRoute(adult))
+                    com.vitahealth.tata.shared.design.components.AdultTab.Notes -> navController.openAdultDestination(RootDestination.PersonalNotes.createRoute(adult))
+                    else -> Unit
+                } },
             )
         }
 
