@@ -18,7 +18,7 @@ Touch and voice use separate endpoints. `POST /api/v1/intakes/{intakeId}/voice-c
 
 Voice results are `CONFIRMED`, `ALREADY_CONFIRMED`, `NOT_RECOGNIZED`, `NOT_VALIDATED` or `PROVIDER_UNAVAILABLE`. Success requires the expected intake, a persisted confirmation timestamp and `CONFIRMED`/`LATE` state. Recognition failure leaves the intake unchanged; the screen offers retry and return to touch confirmation. HTTP `409` distinguishes `VOICE_CONFIRMATION_DISABLED` from `INTAKE_NOT_CONFIRMABLE` through the Problem Detail title. Voice recognition requires the configured backend speech provider; the app displays unavailable when that provider is unavailable.
 
-US-23 uses the same endpoint: a `200` whose intake comes back `LATE` shows "Dose confirmed late" (confirmed within the tolerance period); a `409` shows "Missed dose": the app reads the intake again and keeps the omission, because a later confirmation does not replace it.
+US-23 displays the Figma confirmation composition with the persisted timestamp, actual next intake, adult navigation and late classification notice. A delayed omission event cannot replace an already confirmed intake, including a late one. US-23 uses the same endpoint: a `200` whose intake comes back `LATE` shows "Dose confirmed late" (confirmed within the tolerance period); a `409` shows "Missed dose": the app reads the intake again and keeps the omission, because a later confirmation does not replace it.
 
 ## Daily/weekly agenda (TS-08 / US-24)
 

@@ -47,11 +47,7 @@ import java.time.format.FormatStyle
 
 private val resultSerif = FontFamily(Font(com.vitahealth.tata.R.font.tata_serif))
 
-/**
- * US-23 result screens: "Late Dose Confirmed" (Figma 563:3770) and "Omission Preserved" (563:3844).
- * The prototype cards "Tu familia ha sido notificada" and "Próxima toma" are left out: no API tells the app
- * that the family was notified, and the next dose is already on the home this screen returns to.
- */
+/** Displays a preserved omission. Confirmed intakes use DoseConfirmedScreen with actual next-dose data. */
 @Composable
 internal fun ConfirmationResult(
     outcome: ConfirmationOutcome,

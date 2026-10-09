@@ -59,6 +59,22 @@ class ExistingScreensVisualAuditTest {
         capture("voice-not-recognized",composeOnly=true)
     }
 
+    @Test fun captureLateDoseConfirmed() {
+        val now=java.time.Instant.now()
+        val dose=com.vitahealth.tata.intake.application.readmodels.DoseDetailReadModel("late","t","med","adult","Losartán 50 mg","1 comprimido","",now.minusSeconds(300),
+            com.vitahealth.tata.intake.domain.model.DoseStatus.LATE,now)
+        val next=com.vitahealth.tata.intake.application.readmodels.NextDoseReadModel("next","t2","med2","adult","Metformina 850 mg","1 comprimido","",now.plusSeconds(3600),com.vitahealth.tata.intake.domain.model.DoseStatus.PENDING)
+        compose.setContent { AuditTheme { Box(Modifier.safeDrawingPadding()) {
+            com.vitahealth.tata.intake.presentation.detail.DoseDetailScreen(
+                com.vitahealth.tata.intake.presentation.detail.DoseDetailUiState.Content(dose,nextDose=next,confirmationSucceeded=true,
+                    outcome=com.vitahealth.tata.intake.presentation.detail.ConfirmationOutcome.LATE),{},{},{})
+        } } }
+        compose.onNodeWithText("Toma confirmada con retraso").assertExists()
+        compose.onNodeWithText("Clasificada como tardía").assertExists()
+        compose.onNodeWithText("Metformina 850 mg").assertExists()
+        capture("late-dose-confirmed",composeOnly=true)
+    }
+
     @Test fun captureDoseAlreadyConfirmed() {
         val now=java.time.Instant.now()
         val dose=com.vitahealth.tata.intake.application.readmodels.DoseDetailReadModel("done","t","med","adult","Losartán 50 mg","1 comprimido","",now,

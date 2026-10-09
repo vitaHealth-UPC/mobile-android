@@ -4,8 +4,8 @@ Checkpoint: 2026-10-08. Registro independiente del conteo de implementaciones.
 
 - 65 variantes tienen implementación, incluyendo composiciones parciales.
 - 5 carecen de implementación específica.
-- 32 aceptadas visualmente con el criterio proporcional acordado.
-- 33 implementadas requieren validación o correcciones.
+- 33 aceptadas visualmente con el criterio proporcional acordado.
+- 32 implementadas requieren validación o correcciones.
 - 64 tienen comparación visual; comparación no equivale a aceptación.
 
 Aceptación: composición, tipografía, proporciones, iconos, contraste y estado representado coherentes con Figma. Se permiten adaptaciones nativas, desplazamiento por contenido real y datos dinámicos; no se exige copiar nombres, fechas ni títulos a posiciones absolutas. La aceptación visual no certifica integraciones ni navegación completa. Cada variante requiere su propio resultado; reutilizar un composable no aprueba automáticamente todas sus variantes.
@@ -65,7 +65,7 @@ Evidencias PNG en el equipo de trabajo: C:/Users/david/Downloads/. Las capturas 
 | 49 | Dose Detail - Late | 563:3474 | Requiere validar/corregir | — |
 | 50 | Dose Detail - Omitted | 563:3578 | Requiere validar/corregir | — |
 | 51 | Reinforced Reminder | 563:3682 | Requiere validar/corregir | — |
-| 52 | Late Dose Confirmed | 563:3770 | Requiere validar/corregir | — |
+| 52 | Late Dose Confirmed | 563:3770 | Aceptada visualmente; fecha original, próxima toma real y aviso de clasificación tardía | late-dose-confirmed-verified.png |
 | 53 | Omission Preserved | 563:3844 | Requiere validar/corregir | — |
 | 54 | Agenda With Statuses | 563:3918 | Aceptada visualmente | agenda-final.png |
 | 55 | Empty Intake History | 563:4037 | Aceptada visualmente | history-empty-final.png |

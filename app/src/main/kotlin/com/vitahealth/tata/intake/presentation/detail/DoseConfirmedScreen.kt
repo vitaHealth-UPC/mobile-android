@@ -29,6 +29,8 @@ fun DoseConfirmedScreen(
     onTab: ((AdultTab) -> Unit)? = null,
 ) {
     val alreadyConfirmed = state.outcome == ConfirmationOutcome.ALREADY_CONFIRMED
+    val late = state.outcome == ConfirmationOutcome.LATE
+    val hasNotice = alreadyConfirmed || late
     val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0]
     val at = state.dose.confirmedAt?.atZone(ZoneId.systemDefault())
     Column(
@@ -42,8 +44,8 @@ fun DoseConfirmedScreen(
             Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = 22.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Spacer(Modifier.height(if (alreadyConfirmed) 12.dp else 24.dp))
-            Box(Modifier.fillMaxWidth().height(if (alreadyConfirmed) 132.dp else 148.dp)) {
+            Spacer(Modifier.height(if (hasNotice) 12.dp else 24.dp))
+            Box(Modifier.fillMaxWidth().height(if (hasNotice) 132.dp else 148.dp)) {
                 Box(
                     Modifier.align(Alignment.Center)
                         .size(96.dp)
@@ -75,14 +77,14 @@ fun DoseConfirmedScreen(
                 color = TataText,
             )
             Text(
-                stringResource(if (state.outcome == ConfirmationOutcome.ALREADY_CONFIRMED) R.string.confirmed_already_title else R.string.confirmed_title),
+                stringResource(if (alreadyConfirmed) R.string.confirmed_already_title else if (late) R.string.intake_result_late_subtitle else R.string.confirmed_title),
                 fontFamily = confirmedInter,
                 fontSize = 15.sp,
                 lineHeight = 18.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = TataNavy,
             )
-            Spacer(Modifier.height(if (alreadyConfirmed) 24.dp else 38.dp))
+            Spacer(Modifier.height(if (hasNotice) 24.dp else 38.dp))
             ConfirmedCard(Color.White) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     TataSvgIcon(R.raw.dose_confirmed_calendar, Modifier.size(22.dp))
@@ -168,12 +170,12 @@ fun DoseConfirmedScreen(
             }
             Spacer(Modifier.height(28.dp))
             TataButton(stringResource(R.string.detail_back_home), onHome)
-            if (state.outcome == ConfirmationOutcome.ALREADY_CONFIRMED) {
+            if (hasNotice) {
                 Spacer(Modifier.height(18.dp))
-                Column(Modifier.fillMaxWidth().background(TataLavender, RoundedCornerShape(16.dp)).padding(horizontal = 14.dp, vertical = 10.dp)) {
-                    Text(stringResource(R.string.confirmed_no_duplicates), fontFamily = confirmedInter, fontWeight = FontWeight.SemiBold, fontSize = 11.sp, lineHeight = 14.sp, color = TataNavy)
+                Column(Modifier.fillMaxWidth().background(if (late) Color(0xFFFFF5E0) else TataLavender, RoundedCornerShape(16.dp)).padding(horizontal = 14.dp, vertical = 10.dp)) {
+                    Text(stringResource(if (late) R.string.intake_result_late_note_title else R.string.confirmed_no_duplicates), fontFamily = confirmedInter, fontWeight = FontWeight.SemiBold, fontSize = 11.sp, lineHeight = 14.sp, color = if (late) Color(0xFF855E1F) else TataNavy)
                     Spacer(Modifier.height(7.dp))
-                    Text(stringResource(R.string.confirmed_no_duplicates_detail), fontFamily = confirmedInter, fontSize = 8.5.sp, lineHeight = 12.sp, color = TataMuted)
+                    Text(stringResource(if (late) R.string.intake_result_late_note else R.string.confirmed_no_duplicates_detail), fontFamily = confirmedInter, fontSize = 8.5.sp, lineHeight = 12.sp, color = TataMuted)
                 }
             }
             Spacer(Modifier.height(24.dp))

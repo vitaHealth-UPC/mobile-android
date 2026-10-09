@@ -69,7 +69,7 @@ fun DoseDetailScreen(
     onHome: () -> Unit = onBack,
     onAdultTab: ((AdultTab, String) -> Unit)? = null,
 ) {
-    if (state is DoseDetailUiState.Content && state.confirmationSucceeded && state.outcome != ConfirmationOutcome.LATE) {
+    if (state is DoseDetailUiState.Content && state.confirmationSucceeded) {
         DoseConfirmedScreen(state, onHome, modifier, onTab = onAdultTab?.let { callback -> { tab -> callback(tab, state.dose.olderAdultId) } })
         return
     }
