@@ -121,6 +121,7 @@ class AppContainer(
     context: Context,
     baseUrl: String = com.vitahealth.tata.BuildConfig.API_BASE_URL,
 ) {
+    private val applicationContext = context.applicationContext
     private val sessions = com.vitahealth.tata.shared.infrastructure.security.EncryptedSessionStore(context)
     private val httpClient = okhttp3.OkHttpClient.Builder()
         .connectTimeout(20, java.util.concurrent.TimeUnit.SECONDS)
@@ -493,6 +494,15 @@ class AppContainer(
         olderAdultName = olderAdultName,
         handler = GetNextDoseQueryHandler(nextDoseRepository),
         progressHandler = com.vitahealth.tata.intake.application.handlers.GetDailyDoseProgressQueryHandler(intakeAgendaRepository),
+    )
+
+    fun voiceConfirmationViewModelFactory(intakeId: String) = com.vitahealth.tata.intake.presentation.voice.VoiceConfirmationViewModel.Factory(
+        intakeId,
+        GetDoseDetailQueryHandler(doseDetailRepository),
+        com.vitahealth.tata.intake.application.handlers.ConfirmDoseByVoiceCommandHandler(
+            com.vitahealth.tata.intake.infrastructure.remote.RemoteVoiceConfirmationRepository(retrofit.create(com.vitahealth.tata.intake.infrastructure.remote.VoiceConfirmationApiService::class.java))),
+        com.vitahealth.tata.intake.infrastructure.audio.AndroidVoiceAudioRecorder(applicationContext),
+        GetNextDoseQueryHandler(nextDoseRepository),
     )
 
     fun doseDetailViewModelFactory(

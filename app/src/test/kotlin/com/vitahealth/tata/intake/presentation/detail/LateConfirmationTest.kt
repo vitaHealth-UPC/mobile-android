@@ -95,7 +95,8 @@ class LateConfirmationTest {
         details.answers = mutableListOf(AppResult.Success(pending.copy(status = DoseStatus.CONFIRMED)))
         model.confirm()
         assertEquals(DoseStatus.CONFIRMED, content(model).dose.status)
-        assertNull(content(model).outcome)
+        assertEquals(ConfirmationOutcome.ALREADY_CONFIRMED, content(model).outcome)
+        assertTrue(content(model).confirmationSucceeded)
     }
 
     @Test fun otherFailuresKeepTheDoseWithTheirMessage() {
@@ -122,6 +123,15 @@ class LateConfirmationTest {
         model.confirm()
         assertTrue(content(model).confirmationSucceeded)
         assertNull(content(model).nextDose)
+    }
+
+    @Test fun serverMarksAnIdempotentReplayWithoutChangingItsRecordedTime() {
+        val model = model()
+        val recorded = Instant.parse("2026-10-05T12:58:00Z")
+        confirmations.answer = AppResult.Success(pending.copy(status = DoseStatus.CONFIRMED, confirmedAt = recorded, alreadyConfirmed = true))
+        model.confirm()
+        assertEquals(ConfirmationOutcome.ALREADY_CONFIRMED, content(model).outcome)
+        assertEquals(recorded, content(model).dose.confirmedAt)
     }
 
 }

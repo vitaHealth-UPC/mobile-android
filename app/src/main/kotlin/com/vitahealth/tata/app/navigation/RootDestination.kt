@@ -5,6 +5,11 @@ import android.net.Uri
 sealed interface RootDestination {
     val route: String
 
+    data object VoiceConfirmation : RootDestination {
+        override val route = "voice-confirmation/{intakeId}"
+        fun createRoute(intakeId: String) = "voice-confirmation/" + Uri.encode(intakeId)
+    }
+
     data object TreatmentList : RootDestination {
         override val route = "treatment-list/{caregiverId}/{olderAdultId}/{olderAdultName}"
         fun createRoute(caregiver: String,adult: String,name: String) = "treatment-list/${Uri.encode(caregiver)}/${Uri.encode(adult)}/${Uri.encode(name)}"
