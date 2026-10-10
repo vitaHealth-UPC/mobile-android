@@ -306,7 +306,7 @@ class ExistingScreensVisualAuditTest {
         var requested = false
         compose.setContent { AuditTheme { Box(Modifier.safeDrawingPadding()) {
             SessionAccessScreen(SessionAccessUiState(email = "diego@example.test", password = "fixture-only"),
-                {}, {}, { requested = true }, {}, {}, showPin = false)
+                {}, {}, { requested = true }, {}, {}, {}, showPin = false)
         } } }
         compose.onNodeWithText("Iniciar sesión").performClick()
         compose.runOnIdle { check(requested) }
@@ -318,9 +318,10 @@ class ExistingScreensVisualAuditTest {
             quietHours = com.vitahealth.tata.preferences.domain.model.QuietHours.Default)))
         compose.setContent { AuditTheme { NotificationPreferencesScreen(state, {}, {}, {}, { _, _ -> }, { _, _ -> },
             { _, _ -> }, Modifier.safeDrawingPadding()) } }
-        capture("notifications-content")
+        compose.onNodeWithText("Horario de silencio").assertExists()
+        capture("notifications-content", composeOnly = true)
         compose.runOnIdle { state = state.copy(message = NotificationMessage.Saved) }
-        capture("notifications-saved")
+        capture("notifications-saved", composeOnly = true)
     }
 
     @Test fun captureMedicationRegistrationVariants() {

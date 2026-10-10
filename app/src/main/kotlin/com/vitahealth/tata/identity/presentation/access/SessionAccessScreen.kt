@@ -22,7 +22,7 @@ fun SessionAccessRoute(factory: SessionAccessViewModel.Factory, onAuthenticated:
     val state by vm.state.collectAsState()
     LaunchedEffect(Unit) { vm.restore() }
     LaunchedEffect(state.subject) { state.subject?.let(onAuthenticated) }
-    SessionAccessScreen(state,vm::email,vm::password,vm::signIn,onRegister,onPin,showPin)
+    SessionAccessScreen(state,vm::email,vm::password,vm::signIn,vm::useDemoAccount,onRegister,onPin,showPin)
 }
 
 @Composable
@@ -35,13 +35,5 @@ fun PinAccessRoute(factory: SessionAccessViewModel.Factory, olderAdultId: String
 
 @Composable
 internal fun AccessError(code: String) {
-    val message=when(code) {
-        "PIN_LOCKED","PIN_TEMPORARILY_BLOCKED" -> "Tu PIN está bloqueado temporalmente. Intenta nuevamente en 15 minutos."
-        "INVALID_PIN","INVALID_CREDENTIALS","PIN_INCORRECT" -> "Los datos de acceso no son correctos. Inténtalo otra vez."
-        "ACCOUNT_NOT_ACTIVE","CONSENT_REQUIRED" -> "Verifica tu cuenta y completa la vinculación para continuar."
-        "NETWORK_UNAVAILABLE" -> "No hay conexión. Revisa tu red e inténtalo otra vez."
-        "REQUIRED_FIELDS" -> "Completa tu correo y contraseña."
-        else -> "No pudimos completar el acceso. Inténtalo nuevamente."
-    }
-    Text(message,color=TataError,modifier=Modifier.fillMaxWidth().padding(vertical=8.dp))
+    Text(sessionAccessMessage(code), color = TataError, modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp))
 }
