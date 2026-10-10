@@ -2,6 +2,7 @@ package com.vitahealth.tata.preferences.presentation.notifications
 
 import android.app.TimePickerDialog
 import android.text.format.DateFormat
+import androidx.annotation.RawRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -46,6 +47,7 @@ import com.vitahealth.tata.preferences.domain.model.QuietHours
 import com.vitahealth.tata.shared.design.components.TataButton
 import com.vitahealth.tata.shared.design.components.TataButtonStyle
 import com.vitahealth.tata.shared.design.components.TataCard
+import com.vitahealth.tata.shared.design.components.TataSvgIcon
 import com.vitahealth.tata.shared.design.components.TataToggleRow
 import com.vitahealth.tata.shared.design.theme.TataBlueSurface
 import com.vitahealth.tata.shared.design.theme.TataBorder
@@ -54,7 +56,6 @@ import com.vitahealth.tata.shared.design.theme.TataErrorSurface
 import com.vitahealth.tata.shared.design.theme.TataLavender
 import com.vitahealth.tata.shared.design.theme.TataMint
 import com.vitahealth.tata.shared.design.theme.TataNavy
-import com.vitahealth.tata.shared.design.theme.TataPurple
 import com.vitahealth.tata.shared.design.theme.TataSuccess
 import com.vitahealth.tata.shared.design.theme.TataSurface
 import com.vitahealth.tata.shared.design.theme.TataTheme
@@ -97,19 +98,20 @@ fun NotificationPreferencesScreen(
     modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = modifier
-            .fillMaxSize()
-            .background(TataSurface)
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 22.dp, vertical = 28.dp),
+        modifier =
+            modifier
+                .fillMaxSize()
+                .background(TataSurface)
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 22.dp, vertical = 28.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             val backLabel = stringResource(R.string.accessibility_back)
             Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clickable(role = Role.Button, onClick = onBack)
-                    .semantics { contentDescription = backLabel },
+                modifier =
+                    Modifier.size(48.dp).clickable(role = Role.Button, onClick = onBack).semantics {
+                        contentDescription = backLabel
+                    },
                 contentAlignment = Alignment.Center,
             ) {
                 Text(text = "‹", fontSize = 28.sp, color = TataNavy)
@@ -117,7 +119,8 @@ fun NotificationPreferencesScreen(
             Text(
                 text = stringResource(R.string.notifications_title),
                 fontFamily = FontFamily(Font(com.vitahealth.tata.R.font.tata_serif)),
-                fontSize = 26.sp,
+                fontSize = 21.sp,
+                lineHeight = 26.sp,
                 color = tataTextColor(),
             )
         }
@@ -125,9 +128,10 @@ fun NotificationPreferencesScreen(
 
         val preferences = state.preferences
         when {
-            state.isLoading -> TataCard(Modifier.fillMaxWidth(), TataMint) {
-                Text(stringResource(R.string.notifications_loading), color = tataTextColor())
-            }
+            state.isLoading ->
+                TataCard(Modifier.fillMaxWidth(), TataMint) {
+                    Text(stringResource(R.string.notifications_loading), color = tataTextColor())
+                }
 
             preferences == null -> {
                 state.message?.let { MessageBanner(it, state.messageIsError) }
@@ -170,26 +174,41 @@ private fun QuietHoursCard(
     TataCard(modifier = Modifier.fillMaxWidth()) {
         TataToggleRow(
             title = stringResource(R.string.notifications_quiet_title),
-            subtitle = hours?.let {
-                stringResource(R.string.notifications_quiet_range, formatTime(it.startHour, it.startMinute), formatTime(it.endHour, it.endMinute))
-            } ?: stringResource(R.string.notifications_quiet_off),
+            subtitle =
+                hours?.let {
+                    stringResource(
+                        R.string.notifications_quiet_range,
+                        formatTime(it.startHour, it.startMinute),
+                        formatTime(it.endHour, it.endMinute),
+                    )
+                } ?: stringResource(R.string.notifications_quiet_off),
             checked = hours != null,
             onCheckedChange = onEnabledChange,
             enabled = enabled,
-            leading = { IconBadge(glyph = "☾", background = TataLavender, tint = TataPurple) },
+            leading = {
+                TataSvgIcon(R.raw.notifications_quiet, Modifier.size(22.dp))
+            },
         )
         if (hours != null) {
             val context = LocalContext.current
             Spacer(Modifier.height(8.dp))
             TataButton(
-                text = stringResource(R.string.notifications_quiet_from, formatTime(hours.startHour, hours.startMinute)),
+                text =
+                    stringResource(
+                        R.string.notifications_quiet_from,
+                        formatTime(hours.startHour, hours.startMinute),
+                    ),
                 onClick = { pickTime(context, hours.startHour, hours.startMinute, onStartChange) },
                 enabled = enabled,
                 style = TataButtonStyle.Secondary,
             )
             Spacer(Modifier.height(8.dp))
             TataButton(
-                text = stringResource(R.string.notifications_quiet_to, formatTime(hours.endHour, hours.endMinute)),
+                text =
+                    stringResource(
+                        R.string.notifications_quiet_to,
+                        formatTime(hours.endHour, hours.endMinute),
+                    ),
                 onClick = { pickTime(context, hours.endHour, hours.endMinute, onEndChange) },
                 enabled = enabled,
                 style = TataButtonStyle.Secondary,
@@ -220,14 +239,24 @@ private fun ChannelsCard(
     TataCard(modifier = Modifier.fillMaxWidth()) {
         val channels = ChannelType.entries
         channels.forEachIndexed { index, type ->
-            val (title, subtitle, glyph) = channelTexts(type)
+            val (title, subtitle, icon) = channelTexts(type)
             TataToggleRow(
                 title = stringResource(title),
                 subtitle = stringResource(subtitle),
                 checked = preferences.channels.firstOrNull { it.type == type }?.enabled ?: false,
                 onCheckedChange = { onChannelChange(type, it) },
                 enabled = enabled,
-                leading = { IconBadge(glyph = glyph, background = TataBlueSurface, tint = TataNavy) },
+                leading = {
+                    IconBadge(
+                        icon = icon,
+                        background =
+                            when (type) {
+                                ChannelType.PUSH -> TataBlueSurface
+                                ChannelType.SMS -> TataMint
+                                ChannelType.EMAIL -> TataLavender
+                            },
+                    )
+                },
             )
             if (index != channels.lastIndex) {
                 HorizontalDivider(color = TataBorder, modifier = Modifier.padding(start = 58.dp))
@@ -236,42 +265,57 @@ private fun ChannelsCard(
     }
 }
 
-private data class ChannelTexts(val title: Int, val subtitle: Int, val glyph: String)
+private data class ChannelTexts(val title: Int, val subtitle: Int, @RawRes val icon: Int)
 
 private fun channelTexts(type: ChannelType): ChannelTexts =
     when (type) {
-        ChannelType.PUSH -> ChannelTexts(R.string.notifications_channel_push, R.string.notifications_channel_push_hint, "🔔")
-        ChannelType.SMS -> ChannelTexts(R.string.notifications_channel_sms, R.string.notifications_channel_sms_hint, "✉")
-        ChannelType.EMAIL -> ChannelTexts(R.string.notifications_channel_email, R.string.notifications_channel_email_hint, "@")
+        ChannelType.PUSH ->
+            ChannelTexts(
+                R.string.notifications_channel_push,
+                R.string.notifications_channel_push_hint,
+                R.raw.notifications_push,
+            )
+        ChannelType.SMS ->
+            ChannelTexts(
+                R.string.notifications_channel_sms,
+                R.string.notifications_channel_sms_hint,
+                R.raw.notifications_sms,
+            )
+        ChannelType.EMAIL ->
+            ChannelTexts(
+                R.string.notifications_channel_email,
+                R.string.notifications_channel_email_hint,
+                R.raw.notifications_email,
+            )
     }
 
 @Composable
-private fun IconBadge(glyph: String, background: Color, tint: Color) {
+private fun IconBadge(@RawRes icon: Int, background: Color) {
     Box(
-        modifier = Modifier
-            .size(40.dp)
-            .background(background, CircleShape),
+        modifier = Modifier.size(36.dp).background(background, CircleShape),
         contentAlignment = Alignment.Center,
     ) {
-        Text(text = glyph, color = tint, fontSize = 18.sp, fontWeight = FontWeight.Medium)
+        TataSvgIcon(icon, Modifier.size(24.dp))
     }
 }
 
 @Composable
 private fun MessageBanner(message: NotificationMessage, isError: Boolean) {
-    val title = stringResource(
-        if (isError) R.string.accessibility_error_title else R.string.accessibility_saved_title,
-    )
-    val body = stringResource(
-        when (message) {
-            NotificationMessage.Saved -> R.string.notifications_saved
-            NotificationMessage.ErrorInvalidHours -> R.string.notifications_error_hours
-            NotificationMessage.ErrorRejected -> R.string.accessibility_error_rejected
-            NotificationMessage.ErrorOffline -> R.string.notifications_error_offline
-            NotificationMessage.ErrorUser -> R.string.accessibility_error_user
-            NotificationMessage.ErrorGeneric -> R.string.accessibility_error_generic
-        },
-    )
+    val title =
+        stringResource(
+            if (isError) R.string.accessibility_error_title else R.string.accessibility_saved_title
+        )
+    val body =
+        stringResource(
+            when (message) {
+                NotificationMessage.Saved -> R.string.notifications_saved
+                NotificationMessage.ErrorInvalidHours -> R.string.notifications_error_hours
+                NotificationMessage.ErrorRejected -> R.string.accessibility_error_rejected
+                NotificationMessage.ErrorOffline -> R.string.notifications_error_offline
+                NotificationMessage.ErrorUser -> R.string.accessibility_error_user
+                NotificationMessage.ErrorGeneric -> R.string.accessibility_error_generic
+            }
+        )
     TataCard(
         modifier = Modifier.fillMaxWidth(),
         containerColor = if (isError) TataErrorSurface else TataMint,
@@ -296,14 +340,20 @@ private fun MessageBanner(message: NotificationMessage, isError: Boolean) {
 private fun formatTime(hour: Int, minute: Int): String =
     LocalTime.of(hour, minute).format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT))
 
-private fun pickTime(context: android.content.Context, hour: Int, minute: Int, onPicked: (Int, Int) -> Unit) {
+private fun pickTime(
+    context: android.content.Context,
+    hour: Int,
+    minute: Int,
+    onPicked: (Int, Int) -> Unit,
+) {
     TimePickerDialog(
-        context,
-        { _, pickedHour, pickedMinute -> onPicked(pickedHour, pickedMinute) },
-        hour,
-        minute,
-        DateFormat.is24HourFormat(context),
-    ).show()
+            context,
+            { _, pickedHour, pickedMinute -> onPicked(pickedHour, pickedMinute) },
+            hour,
+            minute,
+            DateFormat.is24HourFormat(context),
+        )
+        .show()
 }
 
 @Preview(showBackground = true)
@@ -311,18 +361,21 @@ private fun pickTime(context: android.content.Context, hour: Int, minute: Int, o
 private fun NotificationPreferencesScreenPreview() {
     TataTheme {
         NotificationPreferencesScreen(
-            state = NotificationPreferencesUiState(
-                isLoading = false,
-                preferences = NotificationPreferences(
-                    quietHours = QuietHours.Default,
-                    channels = listOf(
-                        NotificationChannel(ChannelType.PUSH, true),
-                        NotificationChannel(ChannelType.SMS, false),
-                        NotificationChannel(ChannelType.EMAIL, false),
-                    ),
+            state =
+                NotificationPreferencesUiState(
+                    isLoading = false,
+                    preferences =
+                        NotificationPreferences(
+                            quietHours = QuietHours.Default,
+                            channels =
+                                listOf(
+                                    NotificationChannel(ChannelType.PUSH, true),
+                                    NotificationChannel(ChannelType.SMS, false),
+                                    NotificationChannel(ChannelType.EMAIL, false),
+                                ),
+                        ),
+                    message = NotificationMessage.Saved,
                 ),
-                message = NotificationMessage.Saved,
-            ),
             onBack = {},
             onRetry = {},
             onQuietHoursEnabledChange = {},

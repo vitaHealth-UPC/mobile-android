@@ -1,6 +1,6 @@
 # Conteo de fidelidad visual — 70 variantes
 
-Checkpoint: 2026-10-09. Registro independiente del conteo de implementaciones.
+Checkpoint: 2026-10-10. Registro independiente del conteo de implementaciones.
 
 - 65 variantes tienen implementación, incluyendo composiciones parciales.
 - 5 carecen de implementación específica.
@@ -11,6 +11,8 @@ Checkpoint: 2026-10-09. Registro independiente del conteo de implementaciones.
 Aceptación: composición, tipografía, proporciones, iconos, contraste y estado representado coherentes con Figma. Se permiten adaptaciones nativas, desplazamiento por contenido real y datos dinámicos; no se exige copiar nombres, fechas ni títulos a posiciones absolutas. La aceptación visual no certifica integraciones ni navegación completa. Cada variante requiere su propio resultado; reutilizar un composable no aprueba automáticamente todas sus variantes.
 
 Evidencias PNG en el equipo de trabajo: C:/Users/david/Downloads/. Las capturas de pruebas contienen datos aislados. El consentimiento denegado conserva su propia validación pendiente.
+
+Preferencias de notificación: se comparan los estados normal y guardado con capturas directas de Compose (`notifications-icons-verified.png` y `notifications-icons-saved-verified.png`). Los iconos de push, SMS y correo usan los SVG de Figma en sus posiciones de 24 dp; la luna ocupa 22 dp sin fondo adicional. El título usa 21 sp y se conserva en una línea con el tamaño normal de texto. La prueba enfocada pasa. Las variantes 26 y 65 conservan su validación pendiente por las secciones de cadencia, alertas y escalamiento, el canal de llamadas y la composición completa.
 
 | # | Variante | Nodo Figma | Resultado | Captura aceptada |
 | --- | --- | --- | --- | --- |
