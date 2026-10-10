@@ -16,15 +16,23 @@ import coil3.ImageLoader
 import coil3.compose.AsyncImage
 import coil3.svg.SvgDecoder
 import com.vitahealth.tata.R
+import com.vitahealth.tata.identity.application.DemoCredentials
 import com.vitahealth.tata.shared.design.components.*
 import com.vitahealth.tata.shared.design.theme.*
 
 private val LoginInter = FontFamily(Font(com.vitahealth.tata.R.font.tata_inter))
 
 @Composable
-fun SessionAccessScreen(state: SessionAccessUiState, onEmail: (String) -> Unit,
-    onPassword: (String) -> Unit, onSignIn: () -> Unit, onRegister: () -> Unit,
-    onPin: () -> Unit, showPin: Boolean) {
+fun SessionAccessScreen(
+    state: SessionAccessUiState,
+    onEmail: (String) -> Unit,
+    onPassword: (String) -> Unit,
+    onSignIn: () -> Unit,
+    onUseDemoAccount: () -> Unit,
+    onRegister: () -> Unit,
+    onPin: () -> Unit,
+    showPin: Boolean,
+) {
     var information by remember { mutableStateOf<String?>(null) }
     val context = LocalContext.current
     val imageLoader = remember(context) { ImageLoader.Builder(context).components { add(SvgDecoder.Factory()) }.build() }
@@ -37,10 +45,16 @@ fun SessionAccessScreen(state: SessionAccessUiState, onEmail: (String) -> Unit,
         TataFormField("Correo electrónico", state.email, onEmail,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next),
             enabled = !state.busy, softSurface = true)
-        Spacer(Modifier.height(22.dp))
-        TataFormField("Contraseña", state.password, onPassword, visualTransformation = PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
-            enabled = !state.busy, softSurface = true)
+        DemoAccountHint(enabled = !state.busy, onUseDemoAccount = onUseDemoAccount)
+        Spacer(Modifier.height(18.dp))
+        TataPasswordField(
+            label = "Contraseña",
+            value = state.password,
+            onValueChange = onPassword,
+            enabled = !state.busy,
+            softSurface = true,
+            imeAction = ImeAction.Done,
+        )
         Box(Modifier.fillMaxWidth().height(48.dp), contentAlignment = Alignment.CenterEnd) {
             TextButton(onClick = { information = "Recuperar contraseña" }, enabled = !state.busy,
                 contentPadding = PaddingValues(0.dp)) {
@@ -92,6 +106,30 @@ fun SessionAccessScreen(state: SessionAccessUiState, onEmail: (String) -> Unit,
                 "Solicita ayuda al responsable de tu cuenta para recuperar el acceso."
                 else "El acceso con $selection aún no está habilitado. Puedes ingresar con tu correo y contraseña.") },
             confirmButton = { TextButton(onClick = { information = null }) { Text("Entendido") } })
+    }
+}
+
+@Composable
+private fun DemoAccountHint(enabled: Boolean, onUseDemoAccount: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 8.dp, start = 2.dp, end = 2.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        Column(Modifier.weight(1f)) {
+            LoginText("Usa esta cuenta demo", 11, tataMutedColor())
+            LoginText(DemoCredentials.EMAIL, 13, TataNavy, FontWeight.SemiBold,
+                modifier = Modifier.padding(top = 2.dp))
+        }
+        TextButton(
+            onClick = onUseDemoAccount,
+            enabled = enabled,
+            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
+        ) {
+            LoginText("Usar", 12, TataNavy, FontWeight.SemiBold)
+        }
     }
 }
 

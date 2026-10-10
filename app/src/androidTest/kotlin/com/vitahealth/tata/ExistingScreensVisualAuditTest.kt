@@ -6,6 +6,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.graphics.asAndroidBitmap
@@ -44,13 +45,126 @@ import org.junit.runner.RunWith
 class ExistingScreensVisualAuditTest {
     @get:Rule val compose = createComposeRule()
 
+    @Test fun captureVoiceStates() {
+        val now=java.time.Instant.now()
+        val dose=com.vitahealth.tata.intake.application.readmodels.DoseDetailReadModel("voice","t","med","adult","Losartán cincuenta miligramos","1 comprimido","",now,com.vitahealth.tata.intake.domain.model.DoseStatus.PENDING)
+        var phase by mutableStateOf(com.vitahealth.tata.intake.presentation.voice.VoicePhase.RECORDING)
+        compose.setContent { AuditTheme { Box(Modifier.safeDrawingPadding()) {
+            com.vitahealth.tata.intake.presentation.voice.VoiceConfirmationScreen(com.vitahealth.tata.intake.presentation.voice.VoiceConfirmationUiState(phase,dose),{},{},{})
+        } } }
+        compose.onNodeWithText("Escuchando...").assertExists()
+        capture("voice-listening",composeOnly=true)
+        compose.runOnIdle { phase=com.vitahealth.tata.intake.presentation.voice.VoicePhase.NOT_RECOGNIZED }
+        compose.onNodeWithText("No reconocida").assertExists()
+        compose.onNodeWithText("Confirmación no registrada").assertExists()
+        capture("voice-not-recognized",composeOnly=true)
+    }
+
+    @Test fun captureReinforcedReminderAndItsRemoval() {
+        val now=java.time.Instant.now()
+        val dose=com.vitahealth.tata.intake.application.readmodels.NextDoseReadModel("reminder","t","med","adult","Losartán 50 mg","1 tableta","",now.minusSeconds(60),com.vitahealth.tata.intake.domain.model.DoseStatus.PENDING)
+        var state by mutableStateOf<com.vitahealth.tata.intake.presentation.home.NextDoseHomeUiState>(
+            com.vitahealth.tata.intake.presentation.home.NextDoseHomeUiState.NextDoseAvailable(dose,"Rosa Vargas",com.vitahealth.tata.intake.application.readmodels.DailyDoseProgress(2,3)))
+        var voiceIntake: String? = null
+        compose.setContent { AuditTheme { Box(Modifier.safeDrawingPadding()) {
+            com.vitahealth.tata.intake.presentation.home.NextDoseHomeScreen(state,{},{},{},onOpenVoice={voiceIntake=it})
+        } } }
+        compose.onNodeWithText("Segundo recordatorio").assertExists()
+        capture("reinforced-reminder",composeOnly=true)
+        compose.onNodeWithText("Confirmar\ncon voz").performClick()
+        compose.runOnIdle { check(voiceIntake=="reminder"); state=com.vitahealth.tata.intake.presentation.home.NextDoseHomeUiState.NoNextDose("Rosa Vargas") }
+        compose.onNodeWithText("Segundo recordatorio").assertDoesNotExist()
+    }
+
+    @Test fun capturePendingAndConfirmedDoseDetails() {
+        val now=java.time.Instant.now()
+        var status by mutableStateOf(com.vitahealth.tata.intake.domain.model.DoseStatus.PENDING)
+        val next=com.vitahealth.tata.intake.application.readmodels.NextDoseReadModel("next","t","med","adult","Losartán 50 mg","1 comprimido","",now.plusSeconds(86400),com.vitahealth.tata.intake.domain.model.DoseStatus.PENDING)
+        var confirmations=0
+        compose.setContent { AuditTheme { Box(Modifier.safeDrawingPadding()) {
+            val dose=com.vitahealth.tata.intake.application.readmodels.DoseDetailReadModel("detail","t","med","adult","Losartán 50 mg","1 comprimido","Con o sin alimentos",now,status)
+            key(status) {
+                com.vitahealth.tata.intake.presentation.detail.DoseDetailScreen(
+                    com.vitahealth.tata.intake.presentation.detail.DoseDetailUiState.Content(dose,nextDose=next.takeIf { status!=com.vitahealth.tata.intake.domain.model.DoseStatus.PENDING }),{},{},{confirmations++})
+            }
+        } } }
+        compose.onNodeWithText("Estado: Pendiente").assertExists()
+        capture("dose-detail-pending",composeOnly=true)
+        compose.onNodeWithText("Confirmar toma").performScrollTo().performClick()
+        compose.runOnIdle { check(confirmations==1); status=com.vitahealth.tata.intake.domain.model.DoseStatus.CONFIRMED }
+        compose.onNodeWithText("Estado: Confirmada").assertExists()
+        compose.onNodeWithText("Confirmar toma").assertDoesNotExist()
+        capture("dose-detail-confirmed",composeOnly=true)
+    }
+
+    @Test fun captureRecordedDoseDetails() {
+        val now=java.time.Instant.now()
+        val next=com.vitahealth.tata.intake.application.readmodels.NextDoseReadModel("next","t","med","adult","Losartán 50 mg","1 comprimido","",now.plusSeconds(86400),com.vitahealth.tata.intake.domain.model.DoseStatus.PENDING)
+        var status by mutableStateOf(com.vitahealth.tata.intake.domain.model.DoseStatus.LATE)
+        compose.setContent { AuditTheme { Box(Modifier.safeDrawingPadding()) {
+            val dose=com.vitahealth.tata.intake.application.readmodels.DoseDetailReadModel("detail","t","med","adult","Losartán 50 mg","1 comprimido","Con o sin alimentos",now,status)
+            com.vitahealth.tata.intake.presentation.detail.DoseDetailScreen(
+                com.vitahealth.tata.intake.presentation.detail.DoseDetailUiState.Content(dose,nextDose=next),{},{},{})
+        } } }
+        compose.onNodeWithText("Estado: Tardía").assertExists()
+        capture("dose-detail-late",composeOnly=true)
+        compose.runOnIdle { status=com.vitahealth.tata.intake.domain.model.DoseStatus.OMITTED }
+        compose.onNodeWithText("Estado: Omitida").assertExists()
+        capture("dose-detail-omitted",composeOnly=true)
+    }
+
+    @Test fun captureOmissionPreserved() {
+        val now=java.time.Instant.now()
+        val dose=com.vitahealth.tata.intake.application.readmodels.DoseDetailReadModel("omitted","t","med","adult","Losartán 50 mg","1 comprimido","",now.minusSeconds(3600),com.vitahealth.tata.intake.domain.model.DoseStatus.OMITTED)
+        val next=com.vitahealth.tata.intake.application.readmodels.NextDoseReadModel("next","t2","med2","adult","Metformina 850 mg","1 comprimido","",now.plusSeconds(3600),com.vitahealth.tata.intake.domain.model.DoseStatus.PENDING)
+        compose.setContent { AuditTheme { Box(Modifier.safeDrawingPadding()) {
+            com.vitahealth.tata.intake.presentation.detail.DoseDetailScreen(
+                com.vitahealth.tata.intake.presentation.detail.DoseDetailUiState.Content(dose,nextDose=next,outcome=com.vitahealth.tata.intake.presentation.detail.ConfirmationOutcome.OMISSION_PRESERVED),{},{},{})
+        } } }
+        compose.onNodeWithText("Toma omitida").assertExists()
+        compose.onNodeWithText("Confirmación no disponible").assertExists()
+        compose.onNodeWithText("Periodo finalizado").assertExists()
+        capture("omission-preserved",composeOnly=true)
+    }
+
+    @Test fun captureLateDoseConfirmed() {
+        val now=java.time.Instant.now()
+        val dose=com.vitahealth.tata.intake.application.readmodels.DoseDetailReadModel("late","t","med","adult","Losartán 50 mg","1 comprimido","",now.minusSeconds(300),
+            com.vitahealth.tata.intake.domain.model.DoseStatus.LATE,now)
+        val next=com.vitahealth.tata.intake.application.readmodels.NextDoseReadModel("next","t2","med2","adult","Metformina 850 mg","1 comprimido","",now.plusSeconds(3600),com.vitahealth.tata.intake.domain.model.DoseStatus.PENDING)
+        compose.setContent { AuditTheme { Box(Modifier.safeDrawingPadding()) {
+            com.vitahealth.tata.intake.presentation.detail.DoseDetailScreen(
+                com.vitahealth.tata.intake.presentation.detail.DoseDetailUiState.Content(dose,nextDose=next,confirmationSucceeded=true,
+                    outcome=com.vitahealth.tata.intake.presentation.detail.ConfirmationOutcome.LATE),{},{},{})
+        } } }
+        compose.onNodeWithText("Toma confirmada con retraso").assertExists()
+        compose.onNodeWithText("Clasificada como tardía").assertExists()
+        compose.onNodeWithText("Metformina 850 mg").assertExists()
+        capture("late-dose-confirmed",composeOnly=true)
+    }
+
+    @Test fun captureDoseAlreadyConfirmed() {
+        val now=java.time.Instant.now()
+        val dose=com.vitahealth.tata.intake.application.readmodels.DoseDetailReadModel("done","t","med","adult","Losartán 50 mg","1 comprimido","",now,
+            com.vitahealth.tata.intake.domain.model.DoseStatus.CONFIRMED,now,alreadyConfirmed=true)
+        val next=com.vitahealth.tata.intake.application.readmodels.NextDoseReadModel("next","t2","med2","adult","Metformina 850 mg","1 comprimido","",now.plusSeconds(3600),com.vitahealth.tata.intake.domain.model.DoseStatus.PENDING)
+        compose.setContent { AuditTheme { Box(Modifier.safeDrawingPadding()) {
+            com.vitahealth.tata.intake.presentation.detail.DoseOutcomeScreen(
+                com.vitahealth.tata.intake.presentation.detail.DoseDetailUiState.Content(dose,nextDose=next,confirmationSucceeded=true,
+                    outcome=com.vitahealth.tata.intake.presentation.detail.ConfirmationOutcome.ALREADY_CONFIRMED),{})
+        } } }
+        compose.onNodeWithText("Toma ya confirmada").assertExists()
+        compose.onNodeWithText("Sin duplicados").assertExists()
+        capture("dose-already-confirmed",composeOnly=true)
+    }
+
     @Test fun captureDoseConfirmed() {
         val now=java.time.Instant.now()
         val dose=com.vitahealth.tata.intake.application.readmodels.DoseDetailReadModel("done","t","med","adult","Losartán 50 mg","1 comprimido","",now,
             com.vitahealth.tata.intake.domain.model.DoseStatus.CONFIRMED,now)
         val next=com.vitahealth.tata.intake.application.readmodels.NextDoseReadModel("next","t2","med2","adult","Metformina 850 mg","1 comprimido","",now.plusSeconds(3600),com.vitahealth.tata.intake.domain.model.DoseStatus.PENDING)
         compose.setContent { AuditTheme { Box(Modifier.safeDrawingPadding()) {
-            com.vitahealth.tata.intake.presentation.detail.DoseConfirmedScreen(
+            com.vitahealth.tata.intake.presentation.detail.DoseOutcomeScreen(
                 com.vitahealth.tata.intake.presentation.detail.DoseDetailUiState.Content(dose,nextDose=next,confirmationSucceeded=true),{})
         } } }
         compose.onNodeWithText("¡Bien hecho!").assertExists()
@@ -108,11 +222,14 @@ class ExistingScreensVisualAuditTest {
         val spanish = localized("fr-FR") // An unsupported device language must use the Spanish fallback.
         check(spanish.getString(com.vitahealth.tata.R.string.onboarding_start) == "Comenzar")
         check(spanish.getString(com.vitahealth.tata.R.string.alerts_title) == "Alertas")
+        check(spanish.getString(com.vitahealth.tata.R.string.detail_status_late) == "Tardía")
         check(spanish.getString(com.vitahealth.tata.R.string.inventory_title) == "Inventario")
         check(spanish.getString(com.vitahealth.tata.R.string.accessibility_title) == "Accesibilidad")
         val english = localized("en-US")
         check(english.getString(com.vitahealth.tata.R.string.onboarding_start) == "Get started")
         check(english.getString(com.vitahealth.tata.R.string.alerts_title) == "Alerts")
+        check(english.getString(com.vitahealth.tata.R.string.detail_status_late) == "Late")
+        check(english.getString(com.vitahealth.tata.R.string.detail_title) == "Medication detail")
     }
 
     @Test fun captureOnboardingAndPlanVariants() {
@@ -189,7 +306,7 @@ class ExistingScreensVisualAuditTest {
         var requested = false
         compose.setContent { AuditTheme { Box(Modifier.safeDrawingPadding()) {
             SessionAccessScreen(SessionAccessUiState(email = "diego@example.test", password = "fixture-only"),
-                {}, {}, { requested = true }, {}, {}, showPin = false)
+                {}, {}, { requested = true }, {}, {}, {}, showPin = false)
         } } }
         compose.onNodeWithText("Iniciar sesión").performClick()
         compose.runOnIdle { check(requested) }

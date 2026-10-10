@@ -1,16 +1,16 @@
 # Conteo de fidelidad visual — 70 variantes
 
-Checkpoint: 2026-10-08. Registro independiente del conteo de implementaciones.
+Checkpoint: 2026-10-09. Registro independiente del conteo de implementaciones.
 
-- 62 variantes tienen implementación, incluyendo composiciones parciales.
-- 8 carecen de implementación específica.
-- 29 aceptadas visualmente con el criterio proporcional acordado.
-- 33 implementadas requieren validación o correcciones.
-- 61 tienen comparación visual; comparación no equivale a aceptación.
+- 65 variantes tienen implementación, incluyendo composiciones parciales.
+- 5 carecen de implementación específica.
+- 39 aceptadas visualmente con el criterio proporcional acordado.
+- 26 implementadas requieren validación o correcciones.
+- 64 tienen comparación visual; comparación no equivale a aceptación.
 
 Aceptación: composición, tipografía, proporciones, iconos, contraste y estado representado coherentes con Figma. Se permiten adaptaciones nativas, desplazamiento por contenido real y datos dinámicos; no se exige copiar nombres, fechas ni títulos a posiciones absolutas. La aceptación visual no certifica integraciones ni navegación completa. Cada variante requiere su propio resultado; reutilizar un composable no aprueba automáticamente todas sus variantes.
 
-Evidencias PNG en el equipo de trabajo: C:/Users/david/Downloads/. Las capturas de pruebas contienen datos aislados. Los casos de detalle confirmado/tardío/omitido y consentimiento denegado siguen abiertos aunque compartan componentes corregidos.
+Evidencias PNG en el equipo de trabajo: C:/Users/david/Downloads/. Las capturas de pruebas contienen datos aislados. El consentimiento denegado conserva su propia validación pendiente.
 
 | # | Variante | Nodo Figma | Resultado | Captura aceptada |
 | --- | --- | --- | --- | --- |
@@ -25,7 +25,7 @@ Evidencias PNG en el equipo de trabajo: C:/Users/david/Downloads/. Las capturas 
 | 9 | My Medications | 563:361 | Aceptada visualmente; catálogo de sesión PIN, conteo real y toma destacada sin duplicar | my-medications-verified.png |
 | 10 | Medication Detail | 563:142 | Aceptada visualmente | dose-detail-polished.png |
 | 11 | Weekly Schedule | 563:500 | Aceptada visualmente | agenda-final.png |
-| 12 | Voice Confirmation | 563:242 | Sin implementación específica | — |
+| 12 | Voice Confirmation | 563:242 | Aceptada visualmente; permiso, grabación privada, frase dinámica y cancelación | voice-listening-verified.png |
 | 13 | Dose Confirmed | 563:291 | Aceptada visualmente; fecha persistida, próxima toma real y retorno al inicio | dose-confirmed-verified.png |
 | 14 | Accessibility | 563:618 | Requiere validar/corregir | — |
 | 15 | Family Summary | 563:727 | Aceptada visualmente | family-summary-final.png |
@@ -53,20 +53,20 @@ Evidencias PNG en el equipo de trabajo: C:/Users/david/Downloads/. Las capturas 
 | 37 | Medication Updated | 563:2455 | Requiere validar/corregir | — |
 | 38 | Medication Deactivated | 563:2537 | Requiere validar/corregir | — |
 | 39 | Medication Reminder Due | 563:2619 | Sin implementación específica | — |
-| 40 | Voice Not Recognized | 563:2707 | Sin implementación específica | — |
-| 41 | Dose Already Confirmed | 563:2760 | Sin implementación específica | — |
+| 40 | Voice Not Recognized | 563:2707 | Aceptada visualmente; confirmación no registrada, reintento y alternativa por toque | voice-not-recognized-verified.png |
+| 41 | Dose Already Confirmed | 563:2760 | Aceptada visualmente; reintento idempotente, fecha original y aviso completo sin duplicados | dose-already-confirmed-verified.png |
 | 42 | No Adherence Data | 563:2834 | Aceptada visualmente | history-insufficient-final.png |
 | 43 | Treatment Incomplete | 563:2942 | Requiere validar/corregir | — |
 | 44 | Treatment Paused | 563:3010 | Requiere validar/corregir | — |
 | 45 | Treatment Access Denied | 563:3092 | Requiere validar/corregir | — |
 | 46 | No Next Dose | 563:3178 | Requiere validar/corregir | — |
-| 47 | Dose Detail - Pending | 563:3266 | Requiere validar/corregir | — |
-| 48 | Dose Detail - Confirmed | 563:3370 | Requiere validar/corregir | — |
-| 49 | Dose Detail - Late | 563:3474 | Requiere validar/corregir | — |
-| 50 | Dose Detail - Omitted | 563:3578 | Requiere validar/corregir | — |
-| 51 | Reinforced Reminder | 563:3682 | Requiere validar/corregir | — |
-| 52 | Late Dose Confirmed | 563:3770 | Requiere validar/corregir | — |
-| 53 | Omission Preserved | 563:3844 | Requiere validar/corregir | — |
+| 47 | Dose Detail - Pending | 563:3266 | Aceptada visualmente; aviso pendiente y confirmación nativa accesible por desplazamiento | dose-detail-pending-final.png |
+| 48 | Dose Detail - Confirmed | 563:3370 | Aceptada visualmente; aviso verde y confirmación retirada | dose-detail-confirmed-final.png |
+| 49 | Dose Detail - Late | 563:3474 | Aceptada visualmente; siguiente toma real y estado tardío localizado | dose-detail-late-final.png |
+| 50 | Dose Detail - Omitted | 563:3578 | Aceptada visualmente; aviso de omisión y barra nativa | dose-detail-omitted-final.png |
+| 51 | Reinforced Reminder | 563:3682 | Aceptada visualmente; aviso sobre la barra, voz funcional y retirada cuando deja de estar pendiente | reinforced-reminder-review.png |
+| 52 | Late Dose Confirmed | 563:3770 | Aceptada visualmente; fecha original, próxima toma real y aviso de clasificación tardía | late-dose-confirmed-verified.png |
+| 53 | Omission Preserved | 563:3844 | Aceptada visualmente; horario programado, próxima toma real y confirmación deshabilitada | omission-preserved-verified.png |
 | 54 | Agenda With Statuses | 563:3918 | Aceptada visualmente | agenda-final.png |
 | 55 | Empty Intake History | 563:4037 | Aceptada visualmente | history-empty-final.png |
 | 56 | Contact Unavailable | 563:4145 | Requiere validar/corregir | — |
@@ -96,3 +96,5 @@ La captura se compara con `563:361`: encabezado, destacado, próxima dosis, filt
 Notas del adulto: GET/POST `/api/v1/me/notes`, categorías `MEDICATION` y `ROUTINE`, propietario derivado de sesión PIN. Se verifican aislamiento entre propietarios, orden persistido y rechazo de sesiones de cuidador/configuración. Navegación Inicio, Medicamentos, Agenda y Notas disponible sin acumular destinos repetidos. La comprobación visual usa datos aislados; Render conserva la limitación de verificación pública registrada.
 
 Toma confirmada: próxima toma consultada después del registro, sin duplicar la toma confirmada. Un fallo de esa consulta conserva la confirmación exitosa. La tarjeta comunica progreso registrado y no afirma entrega de notificaciones familiares. Confeti y marca de éxito nativos; iconos vectoriales y medicamento en su slot de diseño.
+
+La ilustración del vaso y la planta de los detalles 49 y 50 utiliza el original de Figma de 100×100 píxeles. Los iconos conservan SVG de 20/22 dp; no se amplía artificialmente el bitmap para atribuirle más detalle. Los datos de nombre, horario, dosis e indicaciones proceden del contrato.
