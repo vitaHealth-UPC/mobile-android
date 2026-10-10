@@ -41,10 +41,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.vitahealth.tata.shared.design.components.TataFormField
+import com.vitahealth.tata.shared.design.components.TataPasswordField
 import com.vitahealth.tata.shared.design.theme.TataCream
 import com.vitahealth.tata.shared.design.theme.TataDeepNavy
 import com.vitahealth.tata.shared.design.theme.TataError
@@ -110,9 +110,13 @@ fun CaregiverRegistrationScreen(
             placeholder = "diego@email.com", keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
             enabled = accountEditable, softSurface = true)
         Spacer(Modifier.height(2.dp))
-        TataFormField(label = "Contraseña", value = state.password, onValueChange = onPasswordChange,
-            visualTransformation = PasswordVisualTransformation(), keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            enabled = accountEditable, softSurface = true)
+        TataPasswordField(
+            label = "Contraseña",
+            value = state.password,
+            onValueChange = onPasswordChange,
+            enabled = accountEditable,
+            softSurface = true,
+        )
         Spacer(Modifier.height(10.dp))
         RegistrationButton(if (state.isLoading && state.step == RegistrationStep.Account) "Procesando…" else "Crear cuenta",
             onCreateAccount, accountEditable)

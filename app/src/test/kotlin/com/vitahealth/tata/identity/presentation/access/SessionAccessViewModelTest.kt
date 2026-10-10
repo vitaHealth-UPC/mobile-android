@@ -1,5 +1,6 @@
 package com.vitahealth.tata.identity.presentation.access
 
+import com.vitahealth.tata.identity.application.DemoCredentials
 import com.vitahealth.tata.identity.application.FakeSessionAccessRepository
 import com.vitahealth.tata.identity.application.SessionSubject
 import com.vitahealth.tata.identity.application.failure
@@ -83,6 +84,17 @@ class SessionAccessViewModelTest {
 
         model.email("a@b.co")
 
+        assertNull(model.state.value.error)
+    }
+
+    @Test
+    fun useDemoAccountPrefillsSeededCaregiverCredentials() {
+        val model = viewModel()
+
+        model.useDemoAccount()
+
+        assertEquals(DemoCredentials.EMAIL, model.state.value.email)
+        assertEquals(DemoCredentials.PASSWORD, model.state.value.password)
         assertNull(model.state.value.error)
     }
 

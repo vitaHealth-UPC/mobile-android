@@ -3,6 +3,7 @@ package com.vitahealth.tata.identity.presentation.access
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.vitahealth.tata.identity.application.DemoCredentials
 import com.vitahealth.tata.identity.application.SessionAccessRepository
 import com.vitahealth.tata.identity.application.SessionSubject
 import com.vitahealth.tata.shared.common.result.AppResult
@@ -15,6 +16,13 @@ class SessionAccessViewModel(private val repository: SessionAccessRepository) : 
     val state = mutable.asStateFlow()
     fun email(value: String) { mutable.update { it.copy(email=value,error=null) } }
     fun password(value: String) { mutable.update { it.copy(password=value,error=null) } }
+    /** Prefills the seeded demo caregiver so reviewers can sign in without typing. */
+    fun useDemoAccount() {
+        if (state.value.busy) return
+        mutable.update {
+            it.copy(email = DemoCredentials.EMAIL, password = DemoCredentials.PASSWORD, error = null)
+        }
+    }
     fun digit(value: String) { if (!state.value.busy) mutable.update { it.copy(pin=if(value=="⌫") it.pin.dropLast(1) else (it.pin+value).take(4),error=null) } }
     fun restore() = run { repository.current() }
     fun signIn() {
