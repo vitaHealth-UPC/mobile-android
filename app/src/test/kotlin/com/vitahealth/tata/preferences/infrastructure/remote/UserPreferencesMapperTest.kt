@@ -74,6 +74,15 @@ class UserPreferencesMapperTest {
     }
 
     @Test
+    fun callPreferenceFromTheBackendKeepsItsEnabledState() {
+        for (enabled in listOf(true, false)) {
+            val preferences = response(channels = listOf(ChannelDto("CALL", enabled))).toDomain("u")!!
+            assertEquals(ChannelType.CALL, preferences.notifications.channels.single().type)
+            assertEquals(enabled, preferences.notifications.channels.single().enabled)
+        }
+    }
+
+    @Test
     fun aBrokenQuietHoursValueIsRejected() {
         assertNull(response(quietHours = QuietHoursDto("late", "07:00")).toDomain("u"))
         assertNull(response(quietHours = QuietHoursDto("22:00", "22:00")).toDomain("u"))
