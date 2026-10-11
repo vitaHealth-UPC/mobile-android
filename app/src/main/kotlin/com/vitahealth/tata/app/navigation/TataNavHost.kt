@@ -296,6 +296,7 @@ fun TataNavHost(
             NotificationPreferencesRoute(
                 factory = app.container.notificationPreferencesViewModelFactory(userId),
                 onBack = { navController.popBackStack() },
+                onTabSelected = { tab -> if (tab != CaregiverTab.More) navController.openCaregiverTab(tab) },
             )
         }
 

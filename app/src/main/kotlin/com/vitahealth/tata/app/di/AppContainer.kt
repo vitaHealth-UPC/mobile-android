@@ -100,6 +100,7 @@ import com.vitahealth.tata.preferences.application.handlers.GetNotificationPrefe
 import com.vitahealth.tata.preferences.application.handlers.ObserveAccessibilityPreferencesQueryHandler
 import com.vitahealth.tata.preferences.application.handlers.SyncUserPreferencesCommandHandler
 import com.vitahealth.tata.preferences.application.handlers.UpdateHighContrastCommandHandler
+import com.vitahealth.tata.preferences.application.handlers.UpdateNotificationPolicyCommandHandler
 import com.vitahealth.tata.preferences.application.handlers.UpdateNotificationPreferencesCommandHandler
 import com.vitahealth.tata.preferences.application.handlers.UpdateReadingAssistanceCommandHandler
 import com.vitahealth.tata.preferences.application.handlers.UpdateReducedMotionCommandHandler
@@ -477,6 +478,7 @@ class AppContainer(
         userId = userId,
         getPreferences = GetNotificationPreferencesQueryHandler(notificationPreferencesRepository),
         updatePreferences = UpdateNotificationPreferencesCommandHandler(notificationPreferencesRepository),
+        updatePolicy = UpdateNotificationPolicyCommandHandler(notificationPreferencesRepository),
     )
 
     fun intakeAgendaViewModelFactory(

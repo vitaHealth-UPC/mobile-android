@@ -15,16 +15,17 @@ class UserPreferencesMapperTest {
         textSize: String? = "LARGE",
         quietHours: QuietHoursDto? = QuietHoursDto("22:00:00", "07:00"),
         channels: List<ChannelDto>? = listOf(ChannelDto("PUSH", true), ChannelDto("SMS", false)),
-    ) = UserPreferencesResponse(
-        userId = "user-1",
-        textSize = textSize,
-        highContrast = true,
-        reducedMotion = false,
-        readingAssistance = true,
-        voiceConfirmationEnabled = false,
-        quietHours = quietHours,
-        notificationChannels = channels,
-    )
+    ) =
+        UserPreferencesResponse(
+            userId = "user-1",
+            textSize = textSize,
+            highContrast = true,
+            reducedMotion = false,
+            readingAssistance = true,
+            voiceConfirmationEnabled = false,
+            quietHours = quietHours,
+            notificationChannels = channels,
+        )
 
     @Test
     fun aFullResponseIsMappedToTheDomain() {
@@ -63,6 +64,12 @@ class UserPreferencesMapperTest {
     }
 
     @Test
+    fun anExplicitEmptyChannelListKeepsAllChannelsDisabled() {
+        val preferences = response(quietHours = null, channels = emptyList()).toDomain("u")!!
+        assertTrue(preferences.notifications.channels.isEmpty())
+    }
+
+    @Test
     fun anUnknownTextSizeIsRejected() {
         assertNull(response(textSize = "HUGE").toDomain("u"))
         assertNull(response(textSize = null).toDomain("u"))
@@ -76,7 +83,8 @@ class UserPreferencesMapperTest {
     @Test
     fun callPreferenceFromTheBackendKeepsItsEnabledState() {
         for (enabled in listOf(true, false)) {
-            val preferences = response(channels = listOf(ChannelDto("CALL", enabled))).toDomain("u")!!
+            val preferences =
+                response(channels = listOf(ChannelDto("CALL", enabled))).toDomain("u")!!
             assertEquals(ChannelType.CALL, preferences.notifications.channels.single().type)
             assertEquals(enabled, preferences.notifications.channels.single().enabled)
         }
@@ -101,5 +109,42 @@ class UserPreferencesMapperTest {
     fun timesAreWrittenAsHoursAndMinutes() {
         assertEquals("07:05", formatTime(7, 5))
         assertEquals("22:00", formatTime(22, 0))
+    }
+
+    @Test
+    fun policyAndContactsComeFromTheResponseWithoutInventingRecipients() {
+        val value =
+            response()
+                .copy(
+                    notificationPolicy = NotificationPolicyDto(15, 25, 90, 150, "19:30:00"),
+                    emergencyContacts = listOf(EmergencyContactDto("Rosa", "+51999123456")),
+                )
+                .toDomain("u")!!
+        assertEquals(15, value.notifications.policy!!.reminderMinutes)
+        assertEquals(19, value.notifications.policy!!.dailySummaryHour)
+        assertEquals(30, value.notifications.policy!!.dailySummaryMinute)
+        assertEquals("Rosa", value.notifications.emergencyContacts.single().name)
+        assertNull(response().toDomain("u")!!.notifications.policy)
+        assertTrue(response().toDomain("u")!!.notifications.emergencyContacts.isEmpty())
+    }
+
+    @Test
+    fun invalidPolicyAndDuplicateContactsAreRejected() {
+        assertNull(
+            response()
+                .copy(notificationPolicy = NotificationPolicyDto(30, 20, 90, 150, null))
+                .toDomain("u")
+        )
+        assertNull(
+            response()
+                .copy(
+                    emergencyContacts =
+                        listOf(
+                            EmergencyContactDto("A", "+51999123456"),
+                            EmergencyContactDto("B", "51999123456"),
+                        )
+                )
+                .toDomain("u")
+        )
     }
 }

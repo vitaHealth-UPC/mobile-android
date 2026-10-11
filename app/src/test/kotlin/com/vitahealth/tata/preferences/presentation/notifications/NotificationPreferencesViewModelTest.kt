@@ -37,11 +37,15 @@ class NotificationPreferencesViewModelTest {
         Dispatchers.resetMain()
     }
 
-    private fun viewModel() = NotificationPreferencesViewModel(
-        userId = "user-1",
-        getPreferences = GetNotificationPreferencesQueryHandler(repository),
-        updatePreferences = UpdateNotificationPreferencesCommandHandler(repository),
-    )
+    private fun viewModel() =
+        NotificationPreferencesViewModel(
+            userId = "user-1",
+            getPreferences = GetNotificationPreferencesQueryHandler(repository),
+            updatePreferences = UpdateNotificationPreferencesCommandHandler(repository),
+            updatePolicy =
+                com.vitahealth.tata.preferences.application.handlers
+                    .UpdateNotificationPolicyCommandHandler(repository),
+        )
 
     @Test
     fun loadsThePreferencesWhenItOpens() {
@@ -51,6 +55,35 @@ class NotificationPreferencesViewModelTest {
 
         assertFalse(model.state.value.isLoading)
         assertEquals(QuietHours.Default, model.state.value.preferences?.quietHours)
+    }
+
+    @Test
+    fun policySavePreservesChannelsAndQuietHours() {
+        val policy =
+            com.vitahealth.tata.preferences.domain.model.NotificationPolicy(10, 20, 120, 180, 20, 0)
+        repository.stored =
+            NotificationPreferences(quietHours = QuietHours.Default, policy = policy)
+        val model = viewModel()
+        model.onPolicyChange(policy.copy(reminderMinutes = 15), emptyList())
+        assertEquals(15, model.state.value.preferences!!.policy!!.reminderMinutes)
+        assertEquals(QuietHours.Default, model.state.value.preferences!!.quietHours)
+        assertTrue(model.state.value.preferences!!.channels.first().enabled)
+        assertEquals(NotificationMessage.Saved, model.state.value.message)
+        model.onChannelChange(ChannelType.SMS, true)
+        assertEquals(15, model.state.value.preferences!!.policy!!.reminderMinutes)
+    }
+
+    @Test
+    fun rejectedPolicySaveKeepsTheServerValues() {
+        val policy =
+            com.vitahealth.tata.preferences.domain.model.NotificationPolicy(10, 20, 120, 180, 20, 0)
+        repository.stored = NotificationPreferences(policy = policy)
+        val model = viewModel()
+        repository.failWith = RejectedByServer
+        model.onPolicyChange(policy.copy(reminderMinutes = 15), emptyList())
+        assertEquals(policy, model.state.value.preferences!!.policy)
+        assertEquals(NotificationMessage.ErrorRejected, model.state.value.message)
+        assertFalse(model.state.value.isSaving)
     }
 
     @Test
@@ -143,7 +176,8 @@ class NotificationPreferencesViewModelTest {
 
     @Test
     fun aChannelMissingFromTheBackendIsAdded() {
-        repository.stored = NotificationPreferences(channels = listOf(NotificationChannel(ChannelType.PUSH, true)))
+        repository.stored =
+            NotificationPreferences(channels = listOf(NotificationChannel(ChannelType.PUSH, true)))
         val model = viewModel()
 
         model.onChannelChange(ChannelType.SMS, true)
@@ -167,7 +201,9 @@ class NotificationPreferencesViewModelTest {
 
         model.onChannelChange(ChannelType.SMS, true)
 
-        assertFalse(model.state.value.preferences!!.channels.first { it.type == ChannelType.SMS }.enabled)
+        assertFalse(
+            model.state.value.preferences!!.channels.first { it.type == ChannelType.SMS }.enabled
+        )
         assertEquals(NotificationMessage.ErrorRejected, model.state.value.message)
         assertTrue(model.state.value.messageIsError)
     }
