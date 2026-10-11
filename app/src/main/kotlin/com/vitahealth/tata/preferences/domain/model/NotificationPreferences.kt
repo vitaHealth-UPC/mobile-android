@@ -6,5 +6,6 @@ data class NotificationPreferences(
         NotificationChannel(ChannelType.PUSH, enabled = true),
         NotificationChannel(ChannelType.SMS, enabled = false),
         NotificationChannel(ChannelType.EMAIL, enabled = false),
+        NotificationChannel(ChannelType.CALL, enabled = false),
     ),
 )

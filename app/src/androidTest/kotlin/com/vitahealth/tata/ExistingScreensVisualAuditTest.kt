@@ -9,6 +9,11 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.captureToImage
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isToggleable
+import androidx.compose.ui.test.isDialog
+import androidx.compose.ui.test.performSemanticsAction
+import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -322,6 +327,25 @@ class ExistingScreensVisualAuditTest {
         capture("notifications-content", composeOnly = true)
         compose.runOnIdle { state = state.copy(message = NotificationMessage.Saved) }
         capture("notifications-saved", composeOnly = true)
+    }
+
+    @Test fun notificationChannelEditorPreservesTheSaveCallback() {
+        var requested: Pair<com.vitahealth.tata.preferences.domain.model.ChannelType, Boolean>? = null
+        val state = NotificationPreferencesUiState(isLoading = false,
+            preferences = NotificationPreferences(quietHours = com.vitahealth.tata.preferences.domain.model.QuietHours.Default))
+        compose.setContent { AuditTheme { NotificationPreferencesScreen(state, {}, {}, {}, { _, _ -> }, { _, _ -> },
+            { type, enabled -> requested = type to enabled }, Modifier.safeDrawingPadding()) } }
+        compose.onNodeWithText("Editar").performSemanticsAction(SemanticsActions.OnClick) { it() }
+        compose.onNode(hasText("Notificaciones push") and isToggleable()).performSemanticsAction(SemanticsActions.OnClick) { it() }
+        compose.runOnIdle { check(requested == (com.vitahealth.tata.preferences.domain.model.ChannelType.PUSH to false)) }
+        compose.onNode(isDialog()).assertExists()
+        compose.onNodeWithText("Entendido").performSemanticsAction(SemanticsActions.OnClick) { it() }
+        compose.onNodeWithText("Editar").assertExists()
+        compose.onNodeWithText("Horario de silencio").performSemanticsAction(SemanticsActions.OnClick) { it() }
+        compose.onNodeWithText("Desde", substring = true).assertExists()
+        compose.onNodeWithText("Hasta", substring = true).assertExists()
+        compose.onNode(isDialog()).assertExists()
+        compose.onNodeWithText("Entendido").performSemanticsAction(SemanticsActions.OnClick) { it() }
     }
 
     @Test fun captureMedicationRegistrationVariants() {
