@@ -60,4 +60,8 @@
     <string name="accessibility_help_subtitle">We guide you through configuring your app.</string>
     <string name="accessibility_help_body">Tap a setting to turn it on or off. Large text makes reading easier, enhanced contrast strengthens text and controls, and reduced motion removes screen transitions. Reading help increases text spacing. Changes are saved automatically.</string>
     <string name="accessibility_help_close">Understood</string>
+    <string name="notifications_edit">Edit</string>
+    <string name="notifications_sms_short">SMS</string>
+    <string name="notifications_channel_call">Calls</string>
+    <string name="notifications_channel_call_hint">To your phone number</string>
 </resources>
