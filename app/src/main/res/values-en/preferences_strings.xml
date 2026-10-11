@@ -53,7 +53,7 @@
     <string name="notifications_channel_sms_hint">To your mobile number</string>
     <string name="notifications_channel_email">Email</string>
     <string name="notifications_channel_email_hint">To your account email</string>
-    <string name="notifications_saved">Quiet hours and channels were updated.</string>
+    <string name="notifications_saved">Your notification preferences were saved.</string>
     <string name="notifications_error_hours">Quiet hours must start and end at different times.</string>
     <string name="notifications_error_offline">There is no connection. Try again when you are back online.</string>
     <string name="accessibility_help_title">Need help?</string>
@@ -64,4 +64,27 @@
     <string name="notifications_sms_short">SMS</string>
     <string name="notifications_channel_call">Calls</string>
     <string name="notifications_channel_call_hint">To your phone number</string>
+    <string name="notifications_policy_reminders">Medication reminders</string>
+    <string name="notifications_policy_cadence">Cadence</string>
+    <string name="notifications_policy_cadence_value">%1$d min after the scheduled time</string>
+    <string name="notifications_policy_caregiver">Caregiver alerts</string>
+    <string name="notifications_policy_pending">Pending doses</string>
+    <string name="notifications_policy_omitted">Missed doses</string>
+    <string name="notifications_policy_summary">Daily summary</string>
+    <string name="notifications_policy_summary_off">Disabled</string>
+    <string name="notifications_policy_emergency">Emergency escalation</string>
+    <string name="notifications_policy_contacts">Emergency contacts</string>
+    <string name="notifications_policy_contacts_count">%1$d configured</string>
+    <string name="notifications_policy_escalation">Escalate if no response</string>
+    <string name="notifications_policy_after_minutes">After %1$d min</string>
+    <string name="notifications_policy_after_hours">After %1$d h</string>
+    <string name="notifications_policy_contact_name">Contact name</string>
+    <string name="notifications_policy_contact_phone">Phone</string>
+    <string name="notifications_policy_remove_contact">Remove contact %1$d</string>
+    <string name="notifications_policy_add_contact">Add contact</string>
+    <string name="notifications_policy_invalid">Check the values. Delays must increase from reminder to escalation, up to 1440 minutes. Contacts need a name and distinct phones with 7 to 15 digits.</string>
+    <string name="notifications_policy_save">Save</string>
+    <string name="notifications_policy_cancel">Cancel</string>
+    <string name="notifications_policy_minutes">min</string>
+    <string name="notifications_saved_title">Notification preferences saved</string>
 </resources>

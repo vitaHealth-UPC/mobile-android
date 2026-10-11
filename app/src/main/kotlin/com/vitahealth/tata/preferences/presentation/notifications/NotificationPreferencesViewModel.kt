@@ -3,12 +3,16 @@ package com.vitahealth.tata.preferences.presentation.notifications
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.vitahealth.tata.preferences.application.commands.UpdateNotificationPolicyCommand
 import com.vitahealth.tata.preferences.application.commands.UpdateNotificationPreferencesCommand
 import com.vitahealth.tata.preferences.application.handlers.GetNotificationPreferencesQueryHandler
+import com.vitahealth.tata.preferences.application.handlers.UpdateNotificationPolicyCommandHandler
 import com.vitahealth.tata.preferences.application.handlers.UpdateNotificationPreferencesCommandHandler
 import com.vitahealth.tata.preferences.application.queries.GetNotificationPreferencesQuery
 import com.vitahealth.tata.preferences.domain.model.ChannelType
+import com.vitahealth.tata.preferences.domain.model.EmergencyContact
 import com.vitahealth.tata.preferences.domain.model.NotificationChannel
+import com.vitahealth.tata.preferences.domain.model.NotificationPolicy
 import com.vitahealth.tata.preferences.domain.model.NotificationPreferences
 import com.vitahealth.tata.preferences.domain.model.QuietHours
 import com.vitahealth.tata.shared.common.result.AppResult
@@ -22,6 +26,7 @@ class NotificationPreferencesViewModel(
     private val userId: String,
     private val getPreferences: GetNotificationPreferencesQueryHandler,
     private val updatePreferences: UpdateNotificationPreferencesCommandHandler,
+    private val updatePolicy: UpdateNotificationPolicyCommandHandler,
 ) : ViewModel() {
     private val _state = MutableStateFlow(NotificationPreferencesUiState())
     val state: StateFlow<NotificationPreferencesUiState> = _state.asStateFlow()
@@ -34,13 +39,11 @@ class NotificationPreferencesViewModel(
         _state.update { it.copy(isLoading = true, message = null) }
         viewModelScope.launch {
             when (val result = getPreferences(GetNotificationPreferencesQuery(userId))) {
-                is AppResult.Success -> _state.update {
-                    it.copy(isLoading = false, preferences = result.value)
-                }
+                is AppResult.Success ->
+                    _state.update { it.copy(isLoading = false, preferences = result.value) }
 
-                is AppResult.Failure -> _state.update {
-                    it.copy(isLoading = false, message = errorMessage(result))
-                }
+                is AppResult.Failure ->
+                    _state.update { it.copy(isLoading = false, message = errorMessage(result)) }
             }
         }
     }
@@ -66,12 +69,34 @@ class NotificationPreferencesViewModel(
     fun onChannelChange(type: ChannelType, enabled: Boolean) {
         val current = _state.value.preferences ?: return
         if (current.channels.firstOrNull { it.type == type }?.enabled == enabled) return
-        val channels = if (current.channels.any { it.type == type }) {
-            current.channels.map { if (it.type == type) it.copy(enabled = enabled) else it }
-        } else {
-            current.channels + NotificationChannel(type, enabled)
-        }
+        val channels =
+            if (current.channels.any { it.type == type }) {
+                current.channels.map { if (it.type == type) it.copy(enabled = enabled) else it }
+            } else {
+                current.channels + NotificationChannel(type, enabled)
+            }
         save(current.copy(channels = channels))
+    }
+
+    fun onPolicyChange(policy: NotificationPolicy, contacts: List<EmergencyContact>) {
+        if (_state.value.isSaving || _state.value.preferences?.policy == null) return
+        _state.update { it.copy(isSaving = true, message = null) }
+        viewModelScope.launch {
+            when (
+                val result = updatePolicy(UpdateNotificationPolicyCommand(userId, policy, contacts))
+            ) {
+                is AppResult.Success ->
+                    _state.update {
+                        it.copy(
+                            isSaving = false,
+                            preferences = result.value,
+                            message = NotificationMessage.Saved,
+                        )
+                    }
+                is AppResult.Failure ->
+                    _state.update { it.copy(isSaving = false, message = errorMessage(result)) }
+            }
+        }
     }
 
     private fun changeQuietHours(
@@ -81,12 +106,13 @@ class NotificationPreferencesViewModel(
         startHour: Int,
         startMinute: Int,
     ) {
-        val hours = try {
-            QuietHours(startHour, startMinute, endHour, endMinute)
-        } catch (exception: IllegalArgumentException) {
-            _state.update { it.copy(message = NotificationMessage.ErrorInvalidHours) }
-            return
-        }
+        val hours =
+            try {
+                QuietHours(startHour, startMinute, endHour, endMinute)
+            } catch (exception: IllegalArgumentException) {
+                _state.update { it.copy(message = NotificationMessage.ErrorInvalidHours) }
+                return
+            }
         save(current.copy(quietHours = hours))
     }
 
@@ -94,15 +120,20 @@ class NotificationPreferencesViewModel(
         if (_state.value.isSaving) return
         _state.update { it.copy(isSaving = true, message = null) }
         viewModelScope.launch {
-            val command = UpdateNotificationPreferencesCommand(userId, updated.quietHours, updated.channels)
+            val command =
+                UpdateNotificationPreferencesCommand(userId, updated.quietHours, updated.channels)
             when (val result = updatePreferences(command)) {
-                is AppResult.Success -> _state.update {
-                    it.copy(isSaving = false, preferences = result.value, message = NotificationMessage.Saved)
-                }
+                is AppResult.Success ->
+                    _state.update {
+                        it.copy(
+                            isSaving = false,
+                            preferences = result.value,
+                            message = NotificationMessage.Saved,
+                        )
+                    }
 
-                is AppResult.Failure -> _state.update {
-                    it.copy(isSaving = false, message = errorMessage(result))
-                }
+                is AppResult.Failure ->
+                    _state.update { it.copy(isSaving = false, message = errorMessage(result)) }
             }
         }
     }
@@ -110,7 +141,8 @@ class NotificationPreferencesViewModel(
     private fun errorMessage(failure: AppResult.Failure): NotificationMessage =
         when (failure.code) {
             "INVALID_USER_REFERENCE" -> NotificationMessage.ErrorUser
-            "REQUEST_VALIDATION_FAILED", "DUPLICATE_CHANNEL" -> NotificationMessage.ErrorRejected
+            "REQUEST_VALIDATION_FAILED",
+            "DUPLICATE_CHANNEL" -> NotificationMessage.ErrorRejected
             "NETWORK_UNAVAILABLE" -> NotificationMessage.ErrorOffline
             else -> NotificationMessage.ErrorGeneric
         }
@@ -119,9 +151,16 @@ class NotificationPreferencesViewModel(
         private val userId: String,
         private val getPreferences: GetNotificationPreferencesQueryHandler,
         private val updatePreferences: UpdateNotificationPreferencesCommandHandler,
+        private val updatePolicy: UpdateNotificationPolicyCommandHandler,
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T =
-            NotificationPreferencesViewModel(userId, getPreferences, updatePreferences) as T
+            NotificationPreferencesViewModel(
+                userId,
+                getPreferences,
+                updatePreferences,
+                updatePolicy,
+            )
+                as T
     }
 }
