@@ -4,15 +4,15 @@ Checkpoint: 2026-10-11. Registro independiente del conteo de implementaciones.
 
 - 65 variantes tienen implementación, incluyendo composiciones parciales.
 - 5 carecen de implementación específica.
-- 39 aceptadas visualmente con el criterio proporcional acordado.
-- 26 implementadas requieren validación o correcciones.
+- 41 aceptadas visualmente con el criterio proporcional acordado.
+- 24 implementadas requieren validación o correcciones.
 - 64 tienen comparación visual; comparación no equivale a aceptación.
 
 Aceptación: composición, tipografía, proporciones, iconos, contraste y estado representado coherentes con Figma. Se permiten adaptaciones nativas, desplazamiento por contenido real y datos dinámicos; no se exige copiar nombres, fechas ni títulos a posiciones absolutas. La aceptación visual no certifica integraciones ni navegación completa. Cada variante requiere su propio resultado; reutilizar un composable no aprueba automáticamente todas sus variantes.
 
 Evidencias PNG en el equipo de trabajo: C:/Users/david/Downloads/. Las capturas de pruebas contienen datos aislados. El consentimiento denegado conserva su propia validación pendiente.
 
-Preferencias de notificación: los estados normal y guardado se comparan mediante capturas directas de Compose. El horario ocupa una tarjeta compacta con switch nativo y editor de horas en diálogo. Los cuatro canales usan iconos SVG de Figma y controles nativos en el editor; CALL se conserva en el contrato de preferencias y queda deshabilitado cuando no llega del servidor. Los diálogos toman el idioma de la pantalla. Las variantes 26 y 65 siguen pendientes de aceptación por las secciones de cadencia, alertas, escalamiento y navegación inferior. La preferencia CALL no representa una integración de llamadas.
+Preferencias de notificación: los estados normal y guardado se comparan mediante capturas directas de Compose. Las tarjetas incluyen cadencia, alertas al cuidador, resumen diario, contactos y escalamiento cuando el servidor expone la política. Los editores usan formularios y selectores nativos. El horario ocupa una tarjeta compacta con switch y editor de horas en diálogo. Los cuatro canales usan iconos SVG de Figma y controles nativos; CALL queda deshabilitado cuando no llega del servidor. Los diálogos toman el idioma de la pantalla y la navegación usa la barra del cuidador. Las variantes 26 y 65 quedan aceptadas mediante capturas finales; tres pruebas de interacción comprueban el editor de cadencia, los canales y los estados de guardado. Guardar esta configuración no habilita por sí solo llamadas, resumen diario ni entrega a contactos de emergencia.
 
 | # | Variante | Nodo Figma | Resultado | Captura aceptada |
 | --- | --- | --- | --- | --- |
@@ -41,7 +41,7 @@ Preferencias de notificación: los estados normal y guardado se comparan mediant
 | 23 | Create Treatment | 563:1490 | Requiere validar/corregir | — |
 | 24 | Treatment Management | 563:1554 | Requiere validar/corregir | — |
 | 25 | Inventory & Restock | 563:1632 | Aceptada visualmente; cantidades y estimación proceden del contrato | inventory-content-final.png |
-| 26 | Notification Preferences | 563:1219 | Requiere corregir: faltan secciones de cadencia, alertas y escalamiento del mockup | — |
+| 26 | Notification Preferences | 563:1219 | Aceptada visualmente; cinco grupos, iconos y navegación nativa | notifications-full-policy-verified.png |
 | 27 | Notes - Caregiver | 576:2859 | Requiere corregir: perfil y títulos no representados | audit-caregiver-notes.png |
 | 28 | Plan & Subscription | 563:1701 | Comparada; barra, fechas y composición corregidas; indicador de ciclo sin dato contractual | plan-navigation-final.png |
 | 29 | PIN Setup | 563:1970 | Aceptada visualmente | pin-setup-final.png |
@@ -80,7 +80,7 @@ Preferencias de notificación: los estados normal y guardado se comparan mediant
 | 62 | High Contrast Enabled | 563:4751 | Requiere validar/corregir | — |
 | 63 | Reduced Motion Enabled | 563:4864 | Requiere validar/corregir | — |
 | 64 | Reading Assistance Enabled | 563:4977 | Requiere validar/corregir | — |
-| 65 | Notification Preferences Saved | 563:5090 | Requiere validar/corregir | — |
+| 65 | Notification Preferences Saved | 563:5090 | Aceptada visualmente; aviso de guardado visible con los cinco grupos | notifications-full-saved-verified.png |
 | 66 | Invalid Inventory Quantity | 563:5213 | Aceptada visualmente; conserva el valor inválido para corregirlo y muestra ayuda nativa | inventory-invalid-final.png |
 | 67 | Stock Replenished | 563:5284 | Aceptada visualmente; stock actualizado y fechas en español | inventory-replenished-final.png |
 | 68 | Subscription Updated | 563:5354 | Comparada; barra y confirmación corregidas; indicador de ciclo sin dato contractual | plan-updated-final.png |

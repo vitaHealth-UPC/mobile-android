@@ -13,6 +13,9 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.isDialog
 import androidx.compose.ui.test.performSemanticsAction
+import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.test.performTextReplacement
+import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -348,6 +351,30 @@ class ExistingScreensVisualAuditTest {
         compose.onNodeWithText("Entendido").performSemanticsAction(SemanticsActions.OnClick) { it() }
     }
 
+    @Test fun captureFullNotificationPolicyAndEditCadence() {
+        val policy = com.vitahealth.tata.preferences.domain.model.NotificationPolicy(10, 20, 120, 180, 20, 0)
+        val contacts = listOf(com.vitahealth.tata.preferences.domain.model.EmergencyContact("Rosa", "+51999123456"),
+            com.vitahealth.tata.preferences.domain.model.EmergencyContact("Diego", "+51988123456"))
+        var state by mutableStateOf(NotificationPreferencesUiState(isLoading = false,
+            preferences = NotificationPreferences(quietHours = com.vitahealth.tata.preferences.domain.model.QuietHours.Default,
+                policy = policy, emergencyContacts = contacts)))
+        var requested: com.vitahealth.tata.preferences.domain.model.NotificationPolicy? = null
+        compose.setContent { AuditTheme { NotificationPreferencesScreen(state, {}, {}, {}, { _, _ -> }, { _, _ -> },
+            { _, _ -> }, Modifier.safeDrawingPadding(), onPolicyChange = { updated, recipients ->
+                check(recipients == contacts)
+                requested = updated
+                state = state.copy(preferences = state.preferences!!.copy(policy = updated), message = NotificationMessage.Saved)
+            }, onTabSelected = {}) } }
+        compose.onNodeWithText("Contactos de emergencia", substring = true).assertExists()
+        capture("notifications-full-policy", composeOnly = true)
+        compose.onNode(hasText("Recordatorios de medicación") and hasClickAction()).performClick()
+        compose.onNode(hasText("Cadencia") and hasSetTextAction()).performTextReplacement("15")
+        capture("notifications-policy-editor", composeOnly = true, dialog = true)
+        compose.onNodeWithText("Guardar").performClick()
+        compose.runOnIdle { check(requested?.reminderMinutes == 15) }
+        capture("notifications-full-saved", composeOnly = true)
+    }
+
     @Test fun captureMedicationRegistrationVariants() {
         var state by mutableStateOf(MedicationRegistrationUiState("caregiver-test", "adult-test", "Rosa Vargas",
             name = "Losartán 50 mg", presentation = "Comprimido", frequency = "Una vez al día", timing = "Con el desayuno"))
@@ -563,7 +590,7 @@ class ExistingScreensVisualAuditTest {
         }
     }
 
-    private fun capture(name: String, composeOnly: Boolean = false) {
+    private fun capture(name: String, composeOnly: Boolean = false, dialog: Boolean = false) {
         compose.waitForIdle()
         InstrumentationRegistry.getInstrumentation().waitForIdleSync()
         // Capture the rendered window, including system insets and shared navigation.
@@ -571,7 +598,7 @@ class ExistingScreensVisualAuditTest {
         compose.waitForIdle()
         InstrumentationRegistry.getInstrumentation().waitForIdleSync()
         Thread.sleep(400) // Give the emulator render thread time to present the settled Compose frame.
-        val bitmap = if (composeOnly) compose.onRoot().captureToImage().asAndroidBitmap()
+        val bitmap = if (composeOnly) (if (dialog) compose.onNode(isDialog()) else compose.onRoot()).captureToImage().asAndroidBitmap()
             else requireNotNull(InstrumentationRegistry.getInstrumentation().uiAutomation.takeScreenshot())
         val resolver = InstrumentationRegistry.getInstrumentation().targetContext.contentResolver
         val values = android.content.ContentValues().apply {
