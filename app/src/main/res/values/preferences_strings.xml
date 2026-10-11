@@ -60,4 +60,8 @@
     <string name="accessibility_help_subtitle">Te guiamos para configurar tu app.</string>
     <string name="accessibility_help_body">Toca un ajuste para activarlo o desactivarlo. Texto grande facilita la lectura, el contraste refuerza textos y controles, y reducir movimiento elimina las transiciones. Ayuda al leer aumenta el espacio entre textos. Los cambios se guardan automáticamente.</string>
     <string name="accessibility_help_close">Entendido</string>
+    <string name="notifications_edit">Editar</string>
+    <string name="notifications_sms_short">SMS</string>
+    <string name="notifications_channel_call">Llamadas</string>
+    <string name="notifications_channel_call_hint">A tu número de celular</string>
 </resources>

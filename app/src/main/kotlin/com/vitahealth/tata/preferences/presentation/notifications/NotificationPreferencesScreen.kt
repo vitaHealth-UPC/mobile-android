@@ -15,15 +15,22 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -35,6 +42,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -50,7 +58,6 @@ import com.vitahealth.tata.shared.design.components.TataCard
 import com.vitahealth.tata.shared.design.components.TataSvgIcon
 import com.vitahealth.tata.shared.design.components.TataToggleRow
 import com.vitahealth.tata.shared.design.theme.TataBlueSurface
-import com.vitahealth.tata.shared.design.theme.TataBorder
 import com.vitahealth.tata.shared.design.theme.TataError
 import com.vitahealth.tata.shared.design.theme.TataErrorSurface
 import com.vitahealth.tata.shared.design.theme.TataLavender
@@ -171,55 +178,99 @@ private fun QuietHoursCard(
     onEndChange: (Int, Int) -> Unit,
 ) {
     val hours = preferences.quietHours
+    val context = LocalContext.current
+    var editing by rememberSaveable { mutableStateOf(false) }
     TataCard(modifier = Modifier.fillMaxWidth()) {
-        TataToggleRow(
-            title = stringResource(R.string.notifications_quiet_title),
-            subtitle =
-                hours?.let {
-                    stringResource(
-                        R.string.notifications_quiet_range,
-                        formatTime(it.startHour, it.startMinute),
-                        formatTime(it.endHour, it.endMinute),
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Column(
+                Modifier.weight(1f).clickable(
+                    enabled = enabled && hours != null,
+                    role = Role.Button,
+                ) {
+                    editing = true
+                }
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(7.dp),
+                ) {
+                    TataSvgIcon(R.raw.notifications_quiet, Modifier.size(22.dp))
+                    Text(
+                        context.getString(R.string.notifications_quiet_title),
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = tataTextColor(),
                     )
-                } ?: stringResource(R.string.notifications_quiet_off),
-            checked = hours != null,
-            onCheckedChange = onEnabledChange,
-            enabled = enabled,
-            leading = {
-                TataSvgIcon(R.raw.notifications_quiet, Modifier.size(22.dp))
-            },
-        )
-        if (hours != null) {
-            val context = LocalContext.current
-            Spacer(Modifier.height(8.dp))
-            TataButton(
-                text =
-                    stringResource(
-                        R.string.notifications_quiet_from,
-                        formatTime(hours.startHour, hours.startMinute),
-                    ),
-                onClick = { pickTime(context, hours.startHour, hours.startMinute, onStartChange) },
+                }
+                Text(
+                    hours?.let {
+                        context.getString(
+                            R.string.notifications_quiet_range,
+                            formatTime(it.startHour, it.startMinute),
+                            formatTime(it.endHour, it.endMinute),
+                        )
+                    } ?: context.getString(R.string.notifications_quiet_off),
+                    fontSize = 11.sp,
+                    color = tataMutedColor(),
+                    modifier = Modifier.padding(top = 4.dp),
+                )
+            }
+            Switch(
+                checked = hours != null,
+                onCheckedChange = onEnabledChange,
                 enabled = enabled,
-                style = TataButtonStyle.Secondary,
-            )
-            Spacer(Modifier.height(8.dp))
-            TataButton(
-                text =
-                    stringResource(
-                        R.string.notifications_quiet_to,
-                        formatTime(hours.endHour, hours.endMinute),
+                modifier =
+                    Modifier.size(48.dp, 28.dp).semantics {
+                        contentDescription = context.getString(R.string.notifications_quiet_title)
+                    },
+                colors =
+                    SwitchDefaults.colors(
+                        checkedTrackColor = TataSuccess,
+                        checkedThumbColor = Color.White,
                     ),
-                onClick = { pickTime(context, hours.endHour, hours.endMinute, onEndChange) },
-                enabled = enabled,
-                style = TataButtonStyle.Secondary,
-            )
-            Text(
-                text = stringResource(R.string.notifications_quiet_hint),
-                style = MaterialTheme.typography.bodySmall,
-                color = tataMutedColor(),
-                modifier = Modifier.padding(top = 8.dp),
             )
         }
+    }
+    if (editing && hours != null) {
+        AlertDialog(
+            onDismissRequest = { editing = false },
+            title = { Text(context.getString(R.string.notifications_quiet_title)) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    TataButton(
+                        context.getString(
+                            R.string.notifications_quiet_from,
+                            formatTime(hours.startHour, hours.startMinute),
+                        ),
+                        onClick = {
+                            pickTime(context, hours.startHour, hours.startMinute, onStartChange)
+                        },
+                        enabled = enabled,
+                        style = TataButtonStyle.Secondary,
+                    )
+                    TataButton(
+                        context.getString(
+                            R.string.notifications_quiet_to,
+                            formatTime(hours.endHour, hours.endMinute),
+                        ),
+                        onClick = {
+                            pickTime(context, hours.endHour, hours.endMinute, onEndChange)
+                        },
+                        enabled = enabled,
+                        style = TataButtonStyle.Secondary,
+                    )
+                    Text(
+                        context.getString(R.string.notifications_quiet_hint),
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { editing = false }) {
+                    Text(context.getString(R.string.accessibility_help_close))
+                }
+            },
+        )
     }
 }
 
@@ -229,39 +280,80 @@ private fun ChannelsCard(
     enabled: Boolean,
     onChannelChange: (ChannelType, Boolean) -> Unit,
 ) {
-    Text(
-        text = stringResource(R.string.notifications_channels_title),
-        style = MaterialTheme.typography.titleSmall,
-        fontWeight = FontWeight.SemiBold,
-        color = tataTextColor(),
-        modifier = Modifier.padding(start = 4.dp, bottom = 8.dp),
-    )
+    val context = LocalContext.current
+    var editing by rememberSaveable { mutableStateOf(false) }
     TataCard(modifier = Modifier.fillMaxWidth()) {
-        val channels = ChannelType.entries
-        channels.forEachIndexed { index, type ->
-            val (title, subtitle, icon) = channelTexts(type)
-            TataToggleRow(
-                title = stringResource(title),
-                subtitle = stringResource(subtitle),
-                checked = preferences.channels.firstOrNull { it.type == type }?.enabled ?: false,
-                onCheckedChange = { onChannelChange(type, it) },
-                enabled = enabled,
-                leading = {
-                    IconBadge(
-                        icon = icon,
-                        background =
-                            when (type) {
-                                ChannelType.PUSH -> TataBlueSurface
-                                ChannelType.SMS -> TataMint
-                                ChannelType.EMAIL -> TataLavender
-                            },
-                    )
-                },
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            TataSvgIcon(R.raw.notifications_channels, Modifier.size(22.dp))
+            Text(
+                context.getString(R.string.notifications_channels_title),
+                fontSize = 13.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = tataTextColor(),
+                modifier = Modifier.weight(1f).padding(start = 7.dp),
             )
-            if (index != channels.lastIndex) {
-                HorizontalDivider(color = TataBorder, modifier = Modifier.padding(start = 58.dp))
+            TextButton(onClick = { editing = true }, enabled = enabled) {
+                Text(context.getString(R.string.notifications_edit), fontSize = 11.sp)
             }
         }
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+            ChannelType.entries.forEach { type ->
+                val (title, _, icon) = channelTexts(type)
+                Column(
+                    Modifier.weight(1f)
+                        .clickable(enabled = enabled, role = Role.Button) { editing = true }
+                        .padding(vertical = 4.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    IconBadge(
+                        icon,
+                        when (type) {
+                            ChannelType.PUSH -> TataBlueSurface
+                            ChannelType.SMS -> TataMint
+                            ChannelType.EMAIL -> TataLavender
+                            ChannelType.CALL -> TataBlueSurface
+                        },
+                    )
+                    Text(
+                        context.getString(
+                            if (type == ChannelType.SMS) R.string.notifications_sms_short else title
+                        ),
+                        fontSize = 9.sp,
+                        lineHeight = 12.sp,
+                        textAlign = TextAlign.Center,
+                        color = tataTextColor(),
+                        modifier = Modifier.requiredWidth(87.dp).padding(top = 4.dp),
+                    )
+                }
+            }
+        }
+    }
+    if (editing) {
+        AlertDialog(
+            onDismissRequest = { editing = false },
+            title = { Text(context.getString(R.string.notifications_channels_title)) },
+            text = {
+                Column {
+                    ChannelType.entries.forEach { type ->
+                        val (title, subtitle, _) = channelTexts(type)
+                        TataToggleRow(
+                            context.getString(title),
+                            context.getString(subtitle),
+                            checked =
+                                preferences.channels.firstOrNull { it.type == type }?.enabled
+                                    ?: false,
+                            onCheckedChange = { onChannelChange(type, it) },
+                            enabled = enabled,
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { editing = false }) {
+                    Text(context.getString(R.string.accessibility_help_close))
+                }
+            },
+        )
     }
 }
 
@@ -280,6 +372,12 @@ private fun channelTexts(type: ChannelType): ChannelTexts =
                 R.string.notifications_channel_sms,
                 R.string.notifications_channel_sms_hint,
                 R.raw.notifications_sms,
+            )
+        ChannelType.CALL ->
+            ChannelTexts(
+                R.string.notifications_channel_call,
+                R.string.notifications_channel_call_hint,
+                R.raw.notifications_call,
             )
         ChannelType.EMAIL ->
             ChannelTexts(

@@ -4,4 +4,5 @@ enum class ChannelType {
     PUSH,
     SMS,
     EMAIL,
+    CALL,
 }
