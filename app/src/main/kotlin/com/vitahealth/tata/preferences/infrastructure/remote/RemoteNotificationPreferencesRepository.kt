@@ -5,9 +5,32 @@ import com.vitahealth.tata.preferences.domain.model.NotificationPreferences
 import com.vitahealth.tata.preferences.domain.model.QuietHours
 import com.vitahealth.tata.shared.common.result.AppResult
 
-class RemoteNotificationPreferencesRepository(
-    private val api: PreferencesApiService,
-) : NotificationPreferencesRepository {
+class RemoteNotificationPreferencesRepository(private val api: PreferencesApiService) :
+    NotificationPreferencesRepository {
+    override suspend fun updatePolicy(
+        userId: String,
+        policy: com.vitahealth.tata.preferences.domain.model.NotificationPolicy,
+        contacts: List<com.vitahealth.tata.preferences.domain.model.EmergencyContact>,
+    ): AppResult<NotificationPreferences> =
+        preferencesRequest(userId) {
+                api.updateNotificationPolicy(
+                    userId,
+                    UpdateNotificationPolicyRequest(
+                        NotificationPolicyDto(
+                            policy.reminderMinutes,
+                            policy.pendingAlertMinutes,
+                            policy.omittedAlertMinutes,
+                            policy.escalationMinutes,
+                            policy.dailySummaryHour?.let {
+                                formatTime(it, requireNotNull(policy.dailySummaryMinute))
+                            },
+                        ),
+                        contacts.map { EmergencyContactDto(it.name, it.phone) },
+                    ),
+                )
+            }
+            .notifications()
+
     override suspend fun get(userId: String): AppResult<NotificationPreferences> =
         preferencesRequest(userId) { api.getPreferences(userId) }.notifications()
 
@@ -16,26 +39,28 @@ class RemoteNotificationPreferencesRepository(
         preferences: NotificationPreferences,
     ): AppResult<NotificationPreferences> =
         preferencesRequest(userId) {
-            api.updateNotificationPreferences(
-                userId,
-                UpdateNotificationPreferencesRequest(
-                    quietHours = preferences.quietHours?.toDto(),
-                    channels = preferences.channels.map { ChannelDto(it.type.name, it.enabled) },
-                ),
-            )
-        }.notifications()
+                api.updateNotificationPreferences(
+                    userId,
+                    UpdateNotificationPreferencesRequest(
+                        quietHours = preferences.quietHours?.toDto(),
+                        channels = preferences.channels.map { ChannelDto(it.type.name, it.enabled) },
+                    ),
+                )
+            }
+            .notifications()
 
-    private fun AppResult<com.vitahealth.tata.preferences.domain.model.UserPreferences>.notifications():
-        AppResult<NotificationPreferences> =
+    private fun AppResult<com.vitahealth.tata.preferences.domain.model.UserPreferences>
+        .notifications(): AppResult<NotificationPreferences> =
         when (this) {
             is AppResult.Success -> AppResult.Success(value.notifications)
             is AppResult.Failure -> this
         }
 
-    private fun QuietHours.toDto() = QuietHoursDto(
-        start = formatTime(startHour, startMinute),
-        end = formatTime(endHour, endMinute),
-    )
+    private fun QuietHours.toDto() =
+        QuietHoursDto(
+            start = formatTime(startHour, startMinute),
+            end = formatTime(endHour, endMinute),
+        )
 }
 
 /** The backend reads a time of day as `HH:mm`. */

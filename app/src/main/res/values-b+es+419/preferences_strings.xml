@@ -53,7 +53,7 @@
     <string name="notifications_channel_sms_hint">A tu número de celular</string>
     <string name="notifications_channel_email">Correo electrónico</string>
     <string name="notifications_channel_email_hint">Al correo de tu cuenta</string>
-    <string name="notifications_saved">Se actualizaron el horario de silencio y los canales.</string>
+    <string name="notifications_saved">Se guardaron tus preferencias de notificación.</string>
     <string name="notifications_error_hours">El horario de silencio debe empezar y terminar a horas distintas.</string>
     <string name="notifications_error_offline">No hay conexión. Inténtalo cuando vuelvas a estar en línea.</string>
     <string name="accessibility_help_title">¿Necesitas ayuda?</string>
@@ -64,4 +64,27 @@
     <string name="notifications_sms_short">SMS</string>
     <string name="notifications_channel_call">Llamadas</string>
     <string name="notifications_channel_call_hint">A tu número de celular</string>
+    <string name="notifications_policy_reminders">Recordatorios de medicación</string>
+    <string name="notifications_policy_cadence">Cadencia</string>
+    <string name="notifications_policy_cadence_value">%1$d min después de la hora programada</string>
+    <string name="notifications_policy_caregiver">Alertas al cuidador</string>
+    <string name="notifications_policy_pending">Tomas pendientes</string>
+    <string name="notifications_policy_omitted">Tomas omitidas</string>
+    <string name="notifications_policy_summary">Resumen diario</string>
+    <string name="notifications_policy_summary_off">Desactivado</string>
+    <string name="notifications_policy_emergency">Escalamiento de emergencia</string>
+    <string name="notifications_policy_contacts">Contactos de emergencia</string>
+    <string name="notifications_policy_contacts_count">%1$d configurados</string>
+    <string name="notifications_policy_escalation">Escalar si no hay respuesta</string>
+    <string name="notifications_policy_after_minutes">Después de %1$d min</string>
+    <string name="notifications_policy_after_hours">Después de %1$d h</string>
+    <string name="notifications_policy_contact_name">Nombre del contacto</string>
+    <string name="notifications_policy_contact_phone">Teléfono</string>
+    <string name="notifications_policy_remove_contact">Eliminar contacto %1$d</string>
+    <string name="notifications_policy_add_contact">Agregar contacto</string>
+    <string name="notifications_policy_invalid">Revisa los datos. Los tiempos deben aumentar del recordatorio al escalamiento, hasta 1440 minutos. Los contactos requieren nombre y teléfonos distintos de 7 a 15 dígitos.</string>
+    <string name="notifications_policy_save">Guardar</string>
+    <string name="notifications_policy_cancel">Cancelar</string>
+    <string name="notifications_policy_minutes">min</string>
+    <string name="notifications_saved_title">Preferencias guardadas</string>
 </resources>

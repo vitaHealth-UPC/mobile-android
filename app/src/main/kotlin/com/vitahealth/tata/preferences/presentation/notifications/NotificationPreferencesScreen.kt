@@ -14,13 +14,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.requiredWidth
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
@@ -33,6 +35,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -49,9 +52,13 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.vitahealth.tata.R
 import com.vitahealth.tata.preferences.domain.model.ChannelType
+import com.vitahealth.tata.preferences.domain.model.EmergencyContact
 import com.vitahealth.tata.preferences.domain.model.NotificationChannel
+import com.vitahealth.tata.preferences.domain.model.NotificationPolicy
 import com.vitahealth.tata.preferences.domain.model.NotificationPreferences
 import com.vitahealth.tata.preferences.domain.model.QuietHours
+import com.vitahealth.tata.shared.design.components.CaregiverTab
+import com.vitahealth.tata.shared.design.components.CaregiverTabBar
 import com.vitahealth.tata.shared.design.components.TataButton
 import com.vitahealth.tata.shared.design.components.TataButtonStyle
 import com.vitahealth.tata.shared.design.components.TataCard
@@ -77,6 +84,7 @@ fun NotificationPreferencesRoute(
     factory: NotificationPreferencesViewModel.Factory,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
+    onTabSelected: ((CaregiverTab) -> Unit)? = null,
 ) {
     val viewModel: NotificationPreferencesViewModel = viewModel(factory = factory)
     val state by viewModel.state.collectAsState()
@@ -89,7 +97,9 @@ fun NotificationPreferencesRoute(
         onQuietHoursStartChange = viewModel::onQuietHoursStartChange,
         onQuietHoursEndChange = viewModel::onQuietHoursEndChange,
         onChannelChange = viewModel::onChannelChange,
+        onPolicyChange = viewModel::onPolicyChange,
         modifier = modifier,
+        onTabSelected = onTabSelected,
     )
 }
 
@@ -103,66 +113,95 @@ fun NotificationPreferencesScreen(
     onQuietHoursEndChange: (Int, Int) -> Unit,
     onChannelChange: (ChannelType, Boolean) -> Unit,
     modifier: Modifier = Modifier,
+    onPolicyChange: (NotificationPolicy, List<EmergencyContact>) -> Unit = { _, _ -> },
+    onTabSelected: ((CaregiverTab) -> Unit)? = null,
 ) {
-    Column(
-        modifier =
-            modifier
-                .fillMaxSize()
-                .background(TataSurface)
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 22.dp, vertical = 28.dp)
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            val backLabel = stringResource(R.string.accessibility_back)
-            Box(
-                modifier =
-                    Modifier.size(48.dp).clickable(role = Role.Button, onClick = onBack).semantics {
-                        contentDescription = backLabel
-                    },
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(text = "‹", fontSize = 28.sp, color = TataNavy)
+    Scaffold(
+        modifier = modifier,
+        containerColor = TataSurface,
+        bottomBar = {
+            Column {
+                if (state.preferences != null)
+                    state.message?.let {
+                        Box(Modifier.padding(horizontal = 22.dp, vertical = 4.dp)) {
+                            MessageBanner(it, state.messageIsError)
+                        }
+                    }
+                onTabSelected?.let { CaregiverTabBar(CaregiverTab.More, it) }
             }
-            Text(
-                text = stringResource(R.string.notifications_title),
-                fontFamily = FontFamily(Font(com.vitahealth.tata.R.font.tata_serif)),
-                fontSize = 21.sp,
-                lineHeight = 26.sp,
-                color = tataTextColor(),
-            )
-        }
-        Spacer(Modifier.height(16.dp))
+        },
+    ) { padding ->
+        Column(
+            modifier =
+                Modifier.padding(padding)
+                    .fillMaxSize()
+                    .background(TataSurface)
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 22.dp, vertical = 24.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                val backLabel = stringResource(R.string.accessibility_back)
+                Box(
+                    modifier =
+                        Modifier.size(48.dp)
+                            .clickable(role = Role.Button, onClick = onBack)
+                            .semantics { contentDescription = backLabel },
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(text = "‹", fontSize = 28.sp, color = TataNavy)
+                }
+                Text(
+                    text = stringResource(R.string.notifications_title),
+                    fontFamily = FontFamily(Font(com.vitahealth.tata.R.font.tata_serif)),
+                    fontSize = 21.sp,
+                    lineHeight = 26.sp,
+                    color = tataTextColor(),
+                )
+            }
+            Spacer(Modifier.height(12.dp))
 
-        val preferences = state.preferences
-        when {
-            state.isLoading ->
-                TataCard(Modifier.fillMaxWidth(), TataMint) {
-                    Text(stringResource(R.string.notifications_loading), color = tataTextColor())
+            val preferences = state.preferences
+            when {
+                state.isLoading ->
+                    TataCard(Modifier.fillMaxWidth(), TataMint) {
+                        Text(
+                            stringResource(R.string.notifications_loading),
+                            color = tataTextColor(),
+                        )
+                    }
+
+                preferences == null -> {
+                    state.message?.let { MessageBanner(it, state.messageIsError) }
+                    Spacer(Modifier.height(12.dp))
+                    TataButton(
+                        text = stringResource(R.string.notifications_retry),
+                        onClick = onRetry,
+                    )
                 }
 
-            preferences == null -> {
-                state.message?.let { MessageBanner(it, state.messageIsError) }
-                Spacer(Modifier.height(12.dp))
-                TataButton(text = stringResource(R.string.notifications_retry), onClick = onRetry)
-            }
-
-            else -> {
-                QuietHoursCard(
-                    preferences = preferences,
-                    enabled = !state.isSaving,
-                    onEnabledChange = onQuietHoursEnabledChange,
-                    onStartChange = onQuietHoursStartChange,
-                    onEndChange = onQuietHoursEndChange,
-                )
-                Spacer(Modifier.height(20.dp))
-                ChannelsCard(
-                    preferences = preferences,
-                    enabled = !state.isSaving,
-                    onChannelChange = onChannelChange,
-                )
-                state.message?.let {
-                    Spacer(Modifier.height(16.dp))
-                    MessageBanner(it, state.messageIsError)
+                else -> {
+                    preferences.policy?.let { policy ->
+                        NotificationPolicyCards(
+                            policy,
+                            preferences.emergencyContacts,
+                            !state.isSaving,
+                            onPolicyChange,
+                        )
+                        Spacer(Modifier.height(14.dp))
+                    }
+                    QuietHoursCard(
+                        preferences = preferences,
+                        enabled = !state.isSaving,
+                        onEnabledChange = onQuietHoursEnabledChange,
+                        onStartChange = onQuietHoursStartChange,
+                        onEndChange = onQuietHoursEndChange,
+                    )
+                    Spacer(Modifier.height(14.dp))
+                    ChannelsCard(
+                        preferences = preferences,
+                        enabled = !state.isSaving,
+                        onChannelChange = onChannelChange,
+                    )
                 }
             }
         }
@@ -180,7 +219,16 @@ private fun QuietHoursCard(
     val hours = preferences.quietHours
     val context = LocalContext.current
     var editing by rememberSaveable { mutableStateOf(false) }
-    TataCard(modifier = Modifier.fillMaxWidth()) {
+    TataCard(
+        modifier =
+            Modifier.fillMaxWidth()
+                .shadow(
+                    6.dp,
+                    RoundedCornerShape(18.dp),
+                    ambientColor = Color(0x141A2138),
+                    spotColor = Color(0x141A2138),
+                )
+    ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(
                 Modifier.weight(1f).clickable(
@@ -282,7 +330,17 @@ private fun ChannelsCard(
 ) {
     val context = LocalContext.current
     var editing by rememberSaveable { mutableStateOf(false) }
-    TataCard(modifier = Modifier.fillMaxWidth()) {
+    TataCard(
+        modifier =
+            Modifier.fillMaxWidth()
+                .shadow(
+                    6.dp,
+                    RoundedCornerShape(18.dp),
+                    ambientColor = Color(0x141A2138),
+                    spotColor = Color(0x141A2138),
+                )
+                .clickable(enabled = enabled, role = Role.Button) { editing = true }
+    ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             TataSvgIcon(R.raw.notifications_channels, Modifier.size(22.dp))
             Text(
@@ -292,9 +350,12 @@ private fun ChannelsCard(
                 color = tataTextColor(),
                 modifier = Modifier.weight(1f).padding(start = 7.dp),
             )
-            TextButton(onClick = { editing = true }, enabled = enabled) {
-                Text(context.getString(R.string.notifications_edit), fontSize = 11.sp)
-            }
+            Text(
+                context.getString(R.string.notifications_edit),
+                fontSize = 11.sp,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(start = 4.dp),
+            )
         }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
             ChannelType.entries.forEach { type ->
@@ -357,7 +418,7 @@ private fun ChannelsCard(
     }
 }
 
-private data class ChannelTexts(val title: Int, val subtitle: Int, @RawRes val icon: Int)
+private data class ChannelTexts(val title: Int, val subtitle: Int, @param:RawRes val icon: Int)
 
 private fun channelTexts(type: ChannelType): ChannelTexts =
     when (type) {
@@ -401,7 +462,7 @@ private fun IconBadge(@RawRes icon: Int, background: Color) {
 private fun MessageBanner(message: NotificationMessage, isError: Boolean) {
     val title =
         stringResource(
-            if (isError) R.string.accessibility_error_title else R.string.accessibility_saved_title
+            if (isError) R.string.accessibility_error_title else R.string.notifications_saved_title
         )
     val body =
         stringResource(
@@ -414,6 +475,24 @@ private fun MessageBanner(message: NotificationMessage, isError: Boolean) {
                 NotificationMessage.ErrorGeneric -> R.string.accessibility_error_generic
             }
         )
+    if (message == NotificationMessage.Saved) {
+        Column(
+            Modifier.fillMaxWidth()
+                .background(TataMint, RoundedCornerShape(16.dp))
+                .padding(horizontal = 14.dp, vertical = 10.dp),
+            verticalArrangement = Arrangement.spacedBy(2.dp),
+        ) {
+            Text(
+                title,
+                fontSize = 11.sp,
+                lineHeight = 14.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = TataSuccess,
+            )
+            Text(body, fontSize = 8.5.sp, lineHeight = 12.sp, color = tataMutedColor())
+        }
+        return
+    }
     TataCard(
         modifier = Modifier.fillMaxWidth(),
         containerColor = if (isError) TataErrorSurface else TataMint,
