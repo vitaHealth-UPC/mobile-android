@@ -35,6 +35,7 @@ internal class OmissionDependencies(
     private val sessions: SessionStore,
     private val observer: SessionObserver,
     baseUrl: String,
+    private val pushRegistrationEnabled: Boolean,
 ) {
     private val appContext = context.applicationContext
     private val targets = SharedPreferencesPushTargetStore(appContext)
@@ -85,12 +86,14 @@ internal class OmissionDependencies(
 
     fun startRegistration(scope: CoroutineScope) {
         retiredTopics.start(scope)
-        registration.start(scope)
+        if (pushRegistrationEnabled) registration.start(scope)
     }
 
     suspend fun beforeSignOut() = registration.beforeSignOut()
 
-    fun onNewToken(token: String) = registration.onNewToken(token)
+    fun onNewToken(token: String) {
+        if (pushRegistrationEnabled) registration.onNewToken(token)
+    }
 
     fun observeNotificationSession(scope: CoroutineScope, clear: () -> Unit) {
         val cleanup =
