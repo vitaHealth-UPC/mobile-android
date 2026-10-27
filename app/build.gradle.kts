@@ -19,8 +19,8 @@ android {
         applicationId = "com.vitahealth.tata"
         minSdk = 29
         targetSdk = 36
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = 2
+        versionName = "1.1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         val apiBaseUrl = providers.gradleProperty("TATA_API_BASE_URL").orElse("https://web-services-yzxl.onrender.com/").get()
         require(apiBaseUrl.startsWith("http://") || apiBaseUrl.startsWith("https://"))
@@ -43,6 +43,10 @@ android {
             file("google-services.json").exists().toString())
 
         // Optional, verified public support destination; absent means disabled contact (#69).
+        // The academic prototype does not register FCM device tokens by default.
+        val pushRegistrationEnabled = providers.gradleProperty("TATA_PUSH_REGISTRATION_ENABLED")
+            .orElse("false").get().equals("true", ignoreCase = true)
+        buildConfigField("boolean", "PUSH_REGISTRATION_ENABLED", pushRegistrationEnabled.toString())
         val publicContact = providers.gradleProperty("TATA_PUBLIC_CONTACT_URI").orElse("").get()
         require(publicContact.length <= 1024 &&
             Regex("[A-Za-z0-9:/?&=.%+@_#-]*").matches(publicContact))

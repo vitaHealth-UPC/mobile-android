@@ -72,4 +72,4 @@ main
 
 Frames in Figma are UX states, not branch names. Use User Stories for feature/fix branches.
 
-See `docs/architecture/` and `docs/ux/figma-frame-map.md`.
+See `docs/architecture/` and `docs/architecture/figma-frame-map.md`.

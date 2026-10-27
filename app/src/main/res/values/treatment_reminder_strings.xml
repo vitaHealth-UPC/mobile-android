@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="treatment_reminder_lead_label">Anticipación del recordatorio (min)</string>
+    <string name="treatment_reminder_lead_help">Entre 0 y 1440 minutos antes de la toma.</string>
+    <string name="treatment_reminder_lead_summary">recordatorio %1$d min antes</string>
+    <string name="treatment_follow_up_default">Aviso del sistema</string>
+    <string name="treatment_follow_up_summary">aviso +%1$d min</string>
+</resources>

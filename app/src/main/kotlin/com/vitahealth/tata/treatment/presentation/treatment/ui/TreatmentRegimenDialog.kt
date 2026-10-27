@@ -7,7 +7,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.vitahealth.tata.R
 import com.vitahealth.tata.treatment.presentation.treatment.viewmodel.TreatmentLifecycleUiState
 
 /** Native editor seeded from the current regimen, retaining typed input after server failure. */
@@ -15,7 +17,7 @@ import com.vitahealth.tata.treatment.presentation.treatment.viewmodel.TreatmentL
 internal fun TreatmentRegimenDialog(
     state: TreatmentLifecycleUiState,
     onDismiss: () -> Unit,
-    onSave: (String, String, String, String, String) -> Unit,
+    onSave: (String, String, String, String, String, String) -> Unit,
 ) {
     var dose by rememberSaveable(state.treatmentId) { mutableStateOf(state.dosage) }
     var frequency by rememberSaveable(state.treatmentId) { mutableStateOf(state.frequency) }
@@ -28,6 +30,9 @@ internal fun TreatmentRegimenDialog(
             )
         }
     var submitted by remember { mutableStateOf(false) }
+    var lead by rememberSaveable(state.treatmentId) {
+        mutableStateOf(state.reminderLeadMinutes.toString())
+    }
     LaunchedEffect(submitted, state.isLoading, state.errorMessage) {
         if (submitted && !state.isLoading) {
             if (state.errorMessage == null) onDismiss()
@@ -73,6 +78,13 @@ internal fun TreatmentRegimenDialog(
                     supportingText = { Text("Vacío: usar la configuración del sistema.") },
                     enabled = !state.isLoading,
                 )
+                OutlinedTextField(
+                    lead,
+                    { lead = it },
+                    label = { Text(stringResource(R.string.treatment_reminder_lead_label)) },
+                    supportingText = { Text(stringResource(R.string.treatment_reminder_lead_help)) },
+                    enabled = !state.isLoading,
+                )
                 state.errorMessage?.let { Text(it, color = MaterialTheme.colorScheme.error) }
             }
         },
@@ -81,7 +93,7 @@ internal fun TreatmentRegimenDialog(
                 enabled = !state.isLoading,
                 onClick = {
                     submitted = true
-                    onSave(dose, frequency, schedule, instructions, delay)
+                    onSave(dose, frequency, schedule, instructions, delay, lead)
                 },
             ) {
                 Text(if (state.isLoading) "Guardando..." else "Guardar")

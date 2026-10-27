@@ -29,4 +29,5 @@ data class TreatmentLifecycleUiState(
     val regimenSaved: Boolean = false,
     val configurationIncomplete: Boolean = false,
     val medicationInactive: Boolean = false,
+    val reminderLeadMinutes: Int = 0,
 )

@@ -52,7 +52,7 @@ class RoomIntakeLocalStore(private val dao: IntakeDao, owner: SessionOwner) : In
                 ownerKey,
                 command.intakeId,
                 command.channel.name,
-                System.currentTimeMillis(),
+                command.confirmedAt.toEpochMilli(),
             )
         )
 
@@ -62,7 +62,7 @@ class RoomIntakeLocalStore(private val dao: IntakeDao, owner: SessionOwner) : In
             if (channel == null) {
                 dao.rejectPending(ownerKey, row.intakeId, "INVALID_CONFIRMATION_CHANNEL")
             } else {
-                add(ConfirmDoseCommand(row.intakeId, channel))
+                add(ConfirmDoseCommand(row.intakeId, channel, Instant.ofEpochMilli(row.createdAt)))
             }
         }
     }

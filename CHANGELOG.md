@@ -1,10 +1,9 @@
 # Changelog
 
-All notable changes to the native Android product will be documented here.
+## v1.1.0
 
-## Unreleased
-
-### Added
-- Initial multi-module Android scaffold.
-- Nine Bounded Context modules aligned with the EventStorming/C4 terminology.
-- Composition root, shared design/eventing foundations and architecture documentation.
+- Native adult and caregiver workflows in a single Android `:app` module.
+- Nine bounded contexts using DDD/CQRS with Compose and Retrofit.
+- Medication schedules, confirmations, treatment management, inventory and caregiver monitoring.
+- Local synchronization, accessibility preferences, secure sessions and language selection.
+- WAV PCM16 mono 16 kHz voice capture compatible with the backend API.
