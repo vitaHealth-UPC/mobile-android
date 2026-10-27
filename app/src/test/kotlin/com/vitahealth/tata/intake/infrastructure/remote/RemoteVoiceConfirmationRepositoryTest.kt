@@ -2,6 +2,7 @@ package com.vitahealth.tata.intake.infrastructure.remote
 
 import com.vitahealth.tata.intake.application.commands.ConfirmDoseByVoiceCommand
 import com.vitahealth.tata.intake.application.readmodels.VoiceConfirmationStatus
+import com.vitahealth.tata.intake.infrastructure.audio.Pcm16WavEncoder
 import com.vitahealth.tata.shared.common.result.AppResult
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockResponse
@@ -12,8 +13,9 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 class RemoteVoiceConfirmationRepositoryTest {
+    private val recordedWav = Pcm16WavEncoder.encode(ByteArray(320))
     private val command =
-        ConfirmDoseByVoiceCommand("intake-1", "recording".toByteArray(), "audio/mp4", "es-419")
+        ConfirmDoseByVoiceCommand("intake-1", recordedWav.audio, recordedWav.contentType, "es-419")
     private val intake =
         """{"id":"intake-1","treatmentId":"t-1","medicationId":"m-1","olderAdultId":"adult-1","medicationName":"Losartán","dose":"1 comprimido","scheduledAt":"2026-10-08T13:00:00Z","status":"CONFIRMED","confirmedAt":"2026-10-08T13:01:00Z","confirmationChannel":"VOICE"}"""
 
@@ -53,9 +55,11 @@ class RemoteVoiceConfirmationRepositoryTest {
             assertEquals("/api/v1/intakes/intake-1/voice-confirmation?language=es-419", sent.path)
             assertTrue(sent.getHeader("Content-Type")!!.startsWith("multipart/form-data"))
             val body = sent.body.readUtf8()
-            assertTrue(body.contains("name=\"audio\""))
-            assertTrue(body.contains("audio/mp4"))
-            assertTrue(body.contains("recording"))
+            assertTrue(body.contains("name=\"audio\"; filename=\"confirmation.wav\""))
+            assertTrue(body.contains("Content-Type: audio/wav"))
+            assertTrue(body.contains("RIFF"))
+            assertTrue(body.contains("WAVE"))
+            assertTrue(body.contains("data"))
             assertEquals(
                 VoiceConfirmationStatus.CONFIRMED,
                 (result as AppResult.Success).value.status,
