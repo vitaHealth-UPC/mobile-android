@@ -1,3 +1,41 @@
+# Estado de aceptación local: 27-10-2026
+
+La implementación conserva un módulo Gradle :app y los nueve contextos DDD/CQRS.
+El registro visual vigente es docs/ux/figma-visual-validation.md: 70/70 variantes,
+sin pantallas ausentes ni pendientes de comparación proporcional. Los apartados
+posteriores conservan decisiones y gates anteriores; sus pendientes quedan
+superados únicamente cuando una evidencia posterior lo indica expresamente.
+
+| Contexto | Visual | Evidencia funcional local |
+| --- | --- | --- |
+| Identity & Subscription | 11/11 | Registro, sesión y PIN; recuperación Compose-Spring con cambio de contraseña, revocación y replay; asociación social instrumentada; planes y suscripción |
+| Care Link | 4/4 | Vínculos/consentimiento, perfil/contacto persistidos y revocación Compose-Spring; aislamiento por credencial |
+| Treatment Management | 10/10 | Wizard y resultados instrumentados; alta, pauta, activación, pausa/reanudación mediante adaptadores Android-Spring |
+| Intake Execution | 16/16 | Agenda real de tratamiento activado, confirmación repetida idempotente, sincronización/aislamiento/migración y audio con gates separados |
+| Inventory & Replenishment | 3/3 | Pantalla instrumentada; alta10, reposición5 y stock14 tras confirmar dos veces una toma contra Spring |
+| Family Monitoring | 8/8 | Estados/acciones/notas instrumentados; contacto y timeline HTTP; acceso rechazado tras revocación |
+| Adherence Analytics | 6/6 | Consultas reales global/por tratamiento/recomendaciones y rechazo de alcance ajeno; mappers y cálculos con suites propias |
+| Accessibility & Preferences | 7/7 | Persistencia DataStore y sesión; cambios accesibles persistidos en Spring sin alterar notificaciones; escritura ajena rechazada |
+| Omission & Escalation | 1/1 | Registro de dispositivo, retiro de tópicos heredados y navegación; reglas servidor probadas; registro push desactivado por configuración |
+
+La matriz visual incluye además cuatro variantes transversales. No se equipara
+una captura con integración HTTP ni una prueba HTTP con interacción Compose.
+Los recorridos reales y sus instrucciones están en docs/testing/local-backend-contracts.md.
+La autenticación social con cuentas reales, la entrega externa de correo/FCM y
+el despliegue Render quedan fuera de esta aceptación local. No se consideran
+fallos de implementación ni se presentan como servicios externos certificados.
+
+Últimos gates: tata-recovery-compose-spring-final-20261027.log OK1 (23.606s);
+tata-preferences-analytics-contract-20261027.log BUILD SUCCESS (1m17s), con tres
+marcadores de aceptación; regresión Android858JVM sin fallos; recuperación HTTP
+backend3/3. La suite backend integral anterior registró1079tests y CI de main
+aprobado. Los logs se conservan en C:/Users/david/.codex/tmp.
+
+La instrumentación conjunta de landing/planes/audio falló en el cierre de una
+Activity. Las repeticiones aisladas pasaron4/3/1pruebas respectivamente; solo esos
+resultados se consideran aprobados. No se certifica estabilidad conjunta.
+
+---
 ## Estado vigente: 26-10-2026
 
 La matriz `docs/ux/figma-visual-validation.md` registra 70/70 variantes
