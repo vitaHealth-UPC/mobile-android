@@ -17,7 +17,7 @@
     <string name="medications_field_name">Nombre del medicamento</string>
     <string name="medications_field_presentation">Dosis y presentación</string>
     <string name="medications_deactivate">Desactivar medicamento</string>
-    <string name="medications_deactivate_title">¿Desactivar %1$s?</string>
+    <string name="medications_deactivate_title">\u00bfDesactivar %1$s?</string>
     <string name="medications_deactivate_body">No se generarán nuevas tomas. El historial se conserva. Esto no se puede deshacer desde la app.</string>
     <string name="medications_deactivate_confirm">Desactivar</string>
     <string name="medications_history_title">Historial protegido</string>
@@ -35,4 +35,5 @@
     <string name="medications_denied_title">Acceso restringido</string>
     <string name="medications_denied_body">Esta persona no está vinculada a tu cuenta.</string>
     <string name="medications_denied_back">Volver</string>
+    <string name="treatment_manage_regimen">Gestionar pauta</string>
 </resources>

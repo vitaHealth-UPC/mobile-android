@@ -64,12 +64,14 @@ Do not expose DTOs directly to Compose.
 
 PRESENTATION
 Jetpack Compose + ViewModel + StateFlow.
+Use presentation/screens/<flow> for Screen and Route; viewmodel/<flow> for ViewModel and UiState.
+Use presentation/ui for visual components and mappers; presentation/navigation for context navigation.
 One-shot navigation/snackbar/permission actions use explicit UI effects.
 Figma error/success/empty states are normally UiState variants, not new screens.
 
 I18N
-Default resources: English.
-Locale: es-419.
+Default interface: Spanish.
+English is available through the explicit EN language option.
 Do not shrink typography merely to make a translation fit.
 
 ACCESSIBILITY / ADAPTIVE UI

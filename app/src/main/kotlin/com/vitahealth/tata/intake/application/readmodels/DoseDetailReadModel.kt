@@ -1,6 +1,6 @@
 package com.vitahealth.tata.intake.application.readmodels
 
-import com.vitahealth.tata.intake.domain.model.DoseStatus
+import com.vitahealth.tata.intake.domain.model.valueobjects.DoseStatus
 import java.time.Instant
 
 data class DoseDetailReadModel(

@@ -52,4 +52,9 @@
     <string name="inventory_error_medication_inactive">This medication is inactive. Select an active medication.</string>
     <string name="inventory_lot_label">Lot / note</string>
     <string name="inventory_days_short">days</string>
+    <string name="inventory_sign_in">Sign in</string>
+    <string name="inventory_back">Back</string>
+    <string name="inventory_error_session">Your session changed or expired. Sign in to open inventory.</string>
+    <string name="inventory_error_access_denied">You do not have access to inventory for this medication.</string>
+    <string name="inventory_error_invalid_lot">The lot or note can contain up to 200 characters.</string>
 </resources>

@@ -1,6 +1,6 @@
 package com.vitahealth.tata.monitoring.application.commands
 
-import com.vitahealth.tata.monitoring.domain.model.AlertStatus
+import com.vitahealth.tata.monitoring.domain.model.valueobjects.AlertStatus
 
 data class UpdateAlertStatusCommand(
     val caregiverId: String,

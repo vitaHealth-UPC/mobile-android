@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="landing_tagline">Peace of mind for you and your family.</string>
+    <string name="landing_hero_title">Medication care without the complications.</string>
+    <string name="landing_hero_subtitle">Clear reminders and family follow-up when you need it.</string>
+    <string name="landing_continue">Get started</string>
+    <string name="landing_example">Illustration, not patient information</string>
+    <string name="landing_preview_schedule">Your schedule</string>
+    <string name="landing_preview_info">Organize upcoming doses</string>
+    <string name="landing_features">Main features</string>
+    <string name="landing_reminders">Reminders</string>
+    <string name="landing_reminders_description">Accessible schedules and alerts.</string>
+    <string name="landing_family">Family</string>
+    <string name="landing_family_description">Alerts and follow-up for caregivers.</string>
+    <string name="landing_insights">Insights</string>
+    <string name="landing_insights_description">Patterns and recommendations.</string>
+    <string name="landing_for_whom">For older adults and their relatives or caregivers.</string>
+    <string name="landing_trust_description">Tata helps coordinate care and review authorized records. Information depends on confirmed doses.</string>
+    <string name="landing_three_steps">3 steps</string>
+    <string name="landing_three_steps_description">To confirm a dose</string>
+    <string name="landing_two_roles">2 roles</string>
+    <string name="landing_two_roles_description">Older adult and caregiver</string>
+    <string name="landing_view_plans">View plans</string>
+    <string name="landing_back">Back</string>
+    <string name="landing_choose_title">Choose how to begin</string>
+    <string name="landing_choose_subtitle">Clear plans and a direct way to get in touch.</string>
+    <string name="landing_plan_error">Plans could not be loaded. Check your connection and retry.</string>
+    <string name="landing_retry">Retry</string>
+    <string name="landing_essential_description">Reminders, schedules, and accessible dose confirmation.</string>
+    <string name="landing_choose_plan">Choose %1$s</string>
+    <string name="landing_recommended">Recommended</string>
+    <string name="landing_choice_notice">Compare plans here. You can choose and activate one after registering or signing in. No charge is made here.</string>
+    <string name="landing_questions">Questions?</string>
+    <string name="landing_contact_description">Write to us and we\'ll help you get started with Tata.</string>
+    <string name="landing_contact_unavailable">Unavailable</string>
+    <string name="landing_contact">Contact</string>
+    <string name="landing_plan_comparison">What\'s in each plan</string>
+    <string name="landing_tracking">Family monitoring</string>
+    <string name="landing_adherence_insights">Adherence insights</string>
+    <string name="landing_footer">Responsive content for mobile displays and accessible controls.</string>
+</resources>

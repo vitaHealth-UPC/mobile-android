@@ -1,11 +1,13 @@
 package com.vitahealth.tata.preferences.application.handlers
 
 import com.vitahealth.tata.preferences.FakeNotificationPreferencesRepository
-import com.vitahealth.tata.preferences.application.commands.UpdateNotificationPreferencesCommand
 import com.vitahealth.tata.preferences.application.queries.GetNotificationPreferencesQuery
-import com.vitahealth.tata.preferences.domain.model.ChannelType
-import com.vitahealth.tata.preferences.domain.model.NotificationChannel
-import com.vitahealth.tata.preferences.domain.model.QuietHours
+import com.vitahealth.tata.preferences.application.queries.GetNotificationPreferencesQueryHandler
+import com.vitahealth.tata.preferences.application.commands.UpdateNotificationPreferencesCommand
+import com.vitahealth.tata.preferences.application.commands.UpdateNotificationPreferencesCommandHandler
+import com.vitahealth.tata.preferences.domain.model.valueobjects.ChannelType
+import com.vitahealth.tata.preferences.domain.model.valueobjects.NotificationChannel
+import com.vitahealth.tata.preferences.domain.model.valueobjects.QuietHours
 import com.vitahealth.tata.shared.common.result.AppResult
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -18,10 +20,11 @@ class NotificationPreferencesHandlersTest {
     private val get = GetNotificationPreferencesQueryHandler(repository)
     private val update = UpdateNotificationPreferencesCommandHandler(repository)
 
-    private val channels = listOf(
-        NotificationChannel(ChannelType.PUSH, true),
-        NotificationChannel(ChannelType.SMS, false),
-    )
+    private val channels =
+        listOf(
+            NotificationChannel(ChannelType.PUSH, true),
+            NotificationChannel(ChannelType.SMS, false),
+        )
 
     @Test
     fun readingWithABlankUserIsRejected() = runBlocking {
@@ -59,7 +62,8 @@ class NotificationPreferencesHandlersTest {
 
     @Test
     fun quietHoursAndChannelsAreSentTogether() = runBlocking {
-        val result = update(UpdateNotificationPreferencesCommand("user-1", QuietHours.Default, channels))
+        val result =
+            update(UpdateNotificationPreferencesCommand("user-1", QuietHours.Default, channels))
 
         assertTrue(result is AppResult.Success)
         assertEquals(QuietHours.Default, repository.updates.single().quietHours)

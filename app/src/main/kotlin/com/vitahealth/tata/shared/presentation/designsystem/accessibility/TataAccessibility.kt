@@ -1,0 +1,22 @@
+package com.vitahealth.tata.shared.presentation.designsystem.accessibility
+
+import androidx.compose.runtime.staticCompositionLocalOf
+
+/**
+ * Accessibility settings that the design system applies to every screen. It carries no business
+ * rule: `:preferences` decides the values and `:app` injects them.
+ */
+data class TataAccessibility(
+    /** Multiplies the system font scale, so a user's OS-level setting is respected on top of it. */
+    val fontScale: Float = 1f,
+    /** Stronger text, borders and controls. Components read it through [LocalTataAccessibility]. */
+    val highContrast: Boolean = false,
+    /** Non-essential animations and transitions must be skipped or shortened. */
+    val reducedMotion: Boolean = false,
+    /** Roomier line spacing and a stronger weight on every Material text style. */
+    val readingAssistance: Boolean = false,
+    /** Explicit app preference; defaults to the existing light presentation. */
+    val darkTheme: Boolean = false,
+)
+
+val LocalTataAccessibility = staticCompositionLocalOf { TataAccessibility() }

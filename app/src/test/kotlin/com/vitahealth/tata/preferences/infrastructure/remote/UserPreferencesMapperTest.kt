@@ -1,8 +1,8 @@
 package com.vitahealth.tata.preferences.infrastructure.remote
 
-import com.vitahealth.tata.preferences.domain.model.ChannelType
-import com.vitahealth.tata.preferences.domain.model.QuietHours
-import com.vitahealth.tata.preferences.domain.model.TextSizeLevel
+import com.vitahealth.tata.preferences.domain.model.valueobjects.ChannelType
+import com.vitahealth.tata.preferences.domain.model.valueobjects.QuietHours
+import com.vitahealth.tata.preferences.domain.model.valueobjects.TextSizeLevel
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
@@ -25,11 +25,45 @@ class UserPreferencesMapperTest {
             voiceConfirmationEnabled = false,
             quietHours = quietHours,
             notificationChannels = channels,
+            emergencyContacts = emptyList(),
+            notificationPolicy = NotificationPolicyDto(10, 20, 120, 180, "20:00"),
         )
 
     @Test
+    fun missingPolicyIsRejectedInsteadOfHidingItsControls() {
+        assertNull(response().copy(notificationPolicy = null).toDomain("user-1"))
+    }
+
+    @Test
+    fun repeatedChannelsAreRejected() {
+        assertNull(
+            response(channels = listOf(ChannelDto("PUSH", true), ChannelDto("PUSH", false)))
+                .toDomain("user-1")
+        )
+    }
+
+    @Test
+    fun malformedOrLossyTimesAreRejectedInFull() {
+        for (value in
+            listOf(
+                "7:05",
+                "07:5",
+                "07:05:garbage",
+                "07:05:99",
+                "07:05:01",
+                "07:05:00:00",
+                "07:05:00.1",
+                "07:05Z",
+                "07:05 ",
+            )) {
+            assertNull(value, parseTime(value))
+        }
+        assertEquals(7 to 5, parseTime("07:05:00.000"))
+    }
+
+    @Test
     fun aFullResponseIsMappedToTheDomain() {
-        val preferences = response().toDomain("requested")!!
+        val preferences = response().toDomain("user-1")!!
 
         assertEquals("user-1", preferences.userId)
         assertEquals(TextSizeLevel.LARGE, preferences.accessibility.textSize)
@@ -43,48 +77,49 @@ class UserPreferencesMapperTest {
     }
 
     @Test
-    fun theRequestedUserIsUsedWhenTheResponseHasNone() {
-        val preferences = response().copy(userId = null).toDomain("requested")!!
-
-        assertEquals("requested", preferences.userId)
+    fun missingOrDifferentUserIsRejectedInsteadOfBeingInferred() {
+        for (id in listOf(null, "", "other", " user-1 ")) {
+            assertNull(response().copy(userId = id).toDomain("user-1"))
+        }
     }
 
     @Test
     fun noQuietHoursMeansNull() {
-        val preferences = response(quietHours = null).toDomain("u")!!
+        val preferences = response(quietHours = null).toDomain("user-1")!!
 
         assertNull(preferences.notifications.quietHours)
     }
 
     @Test
-    fun aResponseWithoutChannelsFallsBackToTheDefaultChannels() {
-        val preferences = response(quietHours = null, channels = null).toDomain("u")!!
-
-        assertTrue(preferences.notifications.channels.first { it.type == ChannelType.PUSH }.enabled)
+    fun missingChannelsOrContactsAreRejectedInsteadOfInventingDefaults() {
+        assertNull(response(channels = null).toDomain("user-1"))
+        assertNull(response().copy(emergencyContacts = null).toDomain("user-1"))
     }
 
     @Test
     fun anExplicitEmptyChannelListKeepsAllChannelsDisabled() {
-        val preferences = response(quietHours = null, channels = emptyList()).toDomain("u")!!
+        val preferences = response(quietHours = null, channels = emptyList()).toDomain("user-1")!!
         assertTrue(preferences.notifications.channels.isEmpty())
     }
 
     @Test
     fun anUnknownTextSizeIsRejected() {
-        assertNull(response(textSize = "HUGE").toDomain("u"))
-        assertNull(response(textSize = null).toDomain("u"))
+        assertNull(response(textSize = "HUGE").toDomain("user-1"))
+        assertNull(response(textSize = null).toDomain("user-1"))
     }
 
     @Test
     fun anUnknownChannelIsRejected() {
-        assertNull(response(channels = listOf(ChannelDto("CARRIER_PIGEON", true))).toDomain("u"))
+        assertNull(
+            response(channels = listOf(ChannelDto("CARRIER_PIGEON", true))).toDomain("user-1")
+        )
     }
 
     @Test
     fun callPreferenceFromTheBackendKeepsItsEnabledState() {
         for (enabled in listOf(true, false)) {
             val preferences =
-                response(channels = listOf(ChannelDto("CALL", enabled))).toDomain("u")!!
+                response(channels = listOf(ChannelDto("CALL", enabled))).toDomain("user-1")!!
             assertEquals(ChannelType.CALL, preferences.notifications.channels.single().type)
             assertEquals(enabled, preferences.notifications.channels.single().enabled)
         }
@@ -92,8 +127,8 @@ class UserPreferencesMapperTest {
 
     @Test
     fun aBrokenQuietHoursValueIsRejected() {
-        assertNull(response(quietHours = QuietHoursDto("late", "07:00")).toDomain("u"))
-        assertNull(response(quietHours = QuietHoursDto("22:00", "22:00")).toDomain("u"))
+        assertNull(response(quietHours = QuietHoursDto("late", "07:00")).toDomain("user-1"))
+        assertNull(response(quietHours = QuietHoursDto("22:00", "22:00")).toDomain("user-1"))
     }
 
     @Test
@@ -119,13 +154,13 @@ class UserPreferencesMapperTest {
                     notificationPolicy = NotificationPolicyDto(15, 25, 90, 150, "19:30:00"),
                     emergencyContacts = listOf(EmergencyContactDto("Rosa", "+51999123456")),
                 )
-                .toDomain("u")!!
+                .toDomain("user-1")!!
         assertEquals(15, value.notifications.policy!!.reminderMinutes)
         assertEquals(19, value.notifications.policy!!.dailySummaryHour)
         assertEquals(30, value.notifications.policy!!.dailySummaryMinute)
         assertEquals("Rosa", value.notifications.emergencyContacts.single().name)
-        assertNull(response().toDomain("u")!!.notifications.policy)
-        assertTrue(response().toDomain("u")!!.notifications.emergencyContacts.isEmpty())
+        assertNotNull(response().toDomain("user-1")!!.notifications.policy)
+        assertTrue(response().toDomain("user-1")!!.notifications.emergencyContacts.isEmpty())
     }
 
     @Test
@@ -133,7 +168,7 @@ class UserPreferencesMapperTest {
         assertNull(
             response()
                 .copy(notificationPolicy = NotificationPolicyDto(30, 20, 90, 150, null))
-                .toDomain("u")
+                .toDomain("user-1")
         )
         assertNull(
             response()
@@ -144,7 +179,7 @@ class UserPreferencesMapperTest {
                             EmergencyContactDto("B", "51999123456"),
                         )
                 )
-                .toDomain("u")
+                .toDomain("user-1")
         )
     }
 }

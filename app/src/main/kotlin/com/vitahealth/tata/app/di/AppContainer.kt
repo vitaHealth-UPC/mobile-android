@@ -1,564 +1,215 @@
 package com.vitahealth.tata.app.di
 
 import android.content.Context
-import com.vitahealth.tata.analytics.application.AdherenceRecommendationsRepository
-import com.vitahealth.tata.analytics.application.AdherenceSummaryRepository
-import com.vitahealth.tata.analytics.application.handlers.GetAdherenceRecommendationsQueryHandler
-import com.vitahealth.tata.analytics.application.handlers.GetAdherenceSummaryQueryHandler
-import com.vitahealth.tata.analytics.infrastructure.fake.FakeAdherenceRecommendationsRepository
-import com.vitahealth.tata.analytics.infrastructure.fake.FakeAdherenceScenario
-import com.vitahealth.tata.analytics.infrastructure.fake.FakeAdherenceSummaryRepository
-import com.vitahealth.tata.analytics.infrastructure.fake.FakeRecommendationsScenario
-import com.vitahealth.tata.analytics.infrastructure.remote.AnalyticsApiService
-import com.vitahealth.tata.analytics.infrastructure.remote.RemoteAdherenceRecommendationsRepository
-import com.vitahealth.tata.analytics.infrastructure.remote.RemoteAdherenceSummaryRepository
-import com.vitahealth.tata.analytics.presentation.history.AdherenceHistoryViewModel
-import com.vitahealth.tata.analytics.presentation.recommendations.AdherenceRecommendationsViewModel
-import com.vitahealth.tata.carelink.application.handlers.AcceptCareLinkCommandHandler
-import com.vitahealth.tata.carelink.application.handlers.GetOlderAdultProfileQueryHandler
-import com.vitahealth.tata.carelink.application.handlers.RegisterConsentCommandHandler
-import com.vitahealth.tata.carelink.infrastructure.remote.CareLinkApiService
-import com.vitahealth.tata.carelink.infrastructure.remote.RemoteCareLinkRepository
-import com.vitahealth.tata.carelink.presentation.link.CareLinkViewModel
-import com.vitahealth.tata.identity.application.handlers.RegisterCaregiverCommandHandler
-import com.vitahealth.tata.identity.application.handlers.RequestNewVerificationCommandHandler
-import com.vitahealth.tata.identity.application.handlers.VerifyCaregiverEmailCommandHandler
-import com.vitahealth.tata.identity.infrastructure.remote.IdentityApiService
-import com.vitahealth.tata.identity.infrastructure.remote.RemoteIdentityRepository
-import com.vitahealth.tata.identity.presentation.registration.CaregiverRegistrationViewModel
-import com.vitahealth.tata.intake.application.handlers.ConfirmDoseCommandHandler
-import com.vitahealth.tata.omission.application.commands.FollowCaregiverAlertsCommand
-import com.vitahealth.tata.omission.application.commands.FollowDoseRemindersCommand
-import com.vitahealth.tata.omission.application.handlers.FollowCaregiverAlertsCommandHandler
-import com.vitahealth.tata.omission.application.handlers.FollowDoseRemindersCommandHandler
-import com.vitahealth.tata.omission.application.handlers.ResolvePushDestinationQueryHandler
-import com.vitahealth.tata.omission.application.queries.PushDestination
-import com.vitahealth.tata.monitoring.application.queries.GetOpenAlertsQuery
-import com.vitahealth.tata.app.navigation.alertForPush
-import com.vitahealth.tata.omission.infrastructure.push.FirebaseTopicSubscriptions
-import com.vitahealth.tata.omission.infrastructure.push.SharedPreferencesPushTargetStore
-import com.vitahealth.tata.omission.presentation.notifications.OmissionPushIntent
-import com.vitahealth.tata.intake.application.handlers.GetDoseDetailQueryHandler
-import com.vitahealth.tata.intake.application.handlers.GetNextDoseQueryHandler
-import com.vitahealth.tata.intake.infrastructure.local.OfflineFirstDoseConfirmationRepository
-import com.vitahealth.tata.intake.infrastructure.local.OfflineFirstDoseDetailRepository
-import com.vitahealth.tata.intake.infrastructure.local.OfflineFirstIntakeAgendaRepository
-import com.vitahealth.tata.intake.infrastructure.local.OfflineFirstNextDoseRepository
-import com.vitahealth.tata.intake.infrastructure.local.SQLiteIntakeLocalStore
-import com.vitahealth.tata.intake.infrastructure.remote.IntakeApiService
-import com.vitahealth.tata.intake.infrastructure.remote.RemoteDoseConfirmationRepository
-import com.vitahealth.tata.intake.infrastructure.remote.RemoteDoseDetailRepository
-import com.vitahealth.tata.intake.infrastructure.remote.RemoteIntakeAgendaRepository
-import com.vitahealth.tata.intake.infrastructure.remote.RemoteNextDoseRepository
-import com.vitahealth.tata.intake.infrastructure.sync.WorkManagerIntakeSyncScheduler
-import com.vitahealth.tata.intake.presentation.agenda.IntakeAgendaViewModel
-import com.vitahealth.tata.intake.presentation.detail.DoseDetailViewModel
-import com.vitahealth.tata.intake.presentation.home.NextDoseHomeViewModel
-import com.vitahealth.tata.inventory.application.handlers.GetInventoryStockQueryHandler
-import com.vitahealth.tata.monitoring.application.handlers.GetAlertDetailQueryHandler
-import com.vitahealth.tata.monitoring.application.handlers.GetOpenAlertsQueryHandler
-import com.vitahealth.tata.monitoring.application.handlers.GetContactOptionQueryHandler
-import com.vitahealth.tata.monitoring.application.handlers.GetFollowUpNotesQueryHandler
-import com.vitahealth.tata.monitoring.application.handlers.RegisterFollowUpNoteCommandHandler
-import com.vitahealth.tata.monitoring.application.handlers.UpdateAlertStatusCommandHandler
-import com.vitahealth.tata.monitoring.infrastructure.remote.NotesApiService
-import com.vitahealth.tata.monitoring.infrastructure.remote.RemoteContactRepository
-import com.vitahealth.tata.monitoring.infrastructure.remote.RemoteNotesRepository
-import com.vitahealth.tata.monitoring.presentation.notes.NotesViewModel
-import com.vitahealth.tata.monitoring.infrastructure.remote.AlertsApiService
-import com.vitahealth.tata.monitoring.infrastructure.remote.FamilyMonitoringApiService
-import com.vitahealth.tata.monitoring.infrastructure.remote.RemoteAlertsRepository
-import com.vitahealth.tata.monitoring.presentation.alerts.AlertDetailViewModel
-import com.vitahealth.tata.monitoring.presentation.alerts.AlertsViewModel
-import com.vitahealth.tata.inventory.application.handlers.RegisterInitialInventoryCommandHandler
-import com.vitahealth.tata.inventory.application.handlers.RegisterReplenishmentCommandHandler
-import com.vitahealth.tata.inventory.infrastructure.remote.InventoryApiService
-import com.vitahealth.tata.inventory.infrastructure.remote.RemoteInventoryRepository
-import com.vitahealth.tata.inventory.presentation.inventory.InventoryViewModel
-import com.vitahealth.tata.treatment.application.handlers.ChangeTreatmentStatusCommandHandler
-import com.vitahealth.tata.treatment.application.handlers.ConfigureTreatmentCommandHandler
-import com.vitahealth.tata.treatment.application.handlers.CreateTreatmentCommandHandler
-import com.vitahealth.tata.treatment.application.handlers.DeactivateMedicationCommandHandler
-import com.vitahealth.tata.treatment.application.handlers.GetTreatmentDetailQueryHandler
-import com.vitahealth.tata.treatment.application.handlers.ListMedicationsQueryHandler
-import com.vitahealth.tata.treatment.application.handlers.RegisterMedicationCommandHandler
-import com.vitahealth.tata.treatment.application.handlers.SetDoseFrequencyCommandHandler
-import com.vitahealth.tata.treatment.application.handlers.SetReminderPolicyCommandHandler
-import com.vitahealth.tata.treatment.application.handlers.SetScheduleInstructionsCommandHandler
-import com.vitahealth.tata.treatment.application.handlers.UpdateMedicationCommandHandler
-import com.vitahealth.tata.treatment.infrastructure.remote.RemoteTreatmentRepository
-import com.vitahealth.tata.treatment.infrastructure.remote.TreatmentApiService
-import com.vitahealth.tata.treatment.presentation.medication.MedicationManagementViewModel
-import com.vitahealth.tata.treatment.presentation.medication.MedicationRegistrationViewModel
-import com.vitahealth.tata.treatment.presentation.treatment.TreatmentCreationViewModel
-import com.vitahealth.tata.treatment.presentation.treatment.TreatmentDetailViewModel
-import com.vitahealth.tata.treatment.presentation.treatment.TreatmentDoseFrequencyViewModel
-import com.vitahealth.tata.treatment.presentation.treatment.TreatmentLifecycleViewModel
-import com.vitahealth.tata.treatment.presentation.treatment.TreatmentReminderViewModel
-import com.vitahealth.tata.treatment.presentation.treatment.TreatmentScheduleInstructionsViewModel
-import com.vitahealth.tata.preferences.application.handlers.GetNotificationPreferencesQueryHandler
-import com.vitahealth.tata.preferences.application.handlers.ObserveAccessibilityPreferencesQueryHandler
-import com.vitahealth.tata.preferences.application.handlers.SyncUserPreferencesCommandHandler
-import com.vitahealth.tata.preferences.application.handlers.UpdateHighContrastCommandHandler
-import com.vitahealth.tata.preferences.application.handlers.UpdateNotificationPolicyCommandHandler
-import com.vitahealth.tata.preferences.application.handlers.UpdateNotificationPreferencesCommandHandler
-import com.vitahealth.tata.preferences.application.handlers.UpdateReadingAssistanceCommandHandler
-import com.vitahealth.tata.preferences.application.handlers.UpdateReducedMotionCommandHandler
-import com.vitahealth.tata.preferences.application.handlers.UpdateTextSizeCommandHandler
-import com.vitahealth.tata.preferences.application.handlers.UpdateVoiceConfirmationCommandHandler
-import com.vitahealth.tata.preferences.domain.model.AccessibilityPreferences
-import com.vitahealth.tata.preferences.infrastructure.OfflineFirstUserPreferencesRepository
-import com.vitahealth.tata.preferences.infrastructure.local.DataStoreAccessibilityLocalStore
-import com.vitahealth.tata.preferences.infrastructure.remote.PreferencesApiService
-import com.vitahealth.tata.preferences.infrastructure.remote.RemoteNotificationPreferencesRepository
-import com.vitahealth.tata.preferences.infrastructure.remote.RemoteUserPreferences
-import com.vitahealth.tata.preferences.presentation.accessibility.AccessibilityViewModel
-import com.vitahealth.tata.preferences.presentation.notifications.NotificationPreferencesViewModel
+import com.vitahealth.tata.BuildConfig
+import com.vitahealth.tata.analytics.infrastructure.di.AnalyticsDependencies
+import com.vitahealth.tata.app.integration.consentwithdrawal.ConsentWithdrawalIntegration
+import com.vitahealth.tata.app.integration.linkedperson.LinkedPersonIntegration
+import com.vitahealth.tata.app.integration.linkedperson.LinkedPersonViewModel
+import com.vitahealth.tata.app.integration.medicationoverview.MedicationOverviewIntegration
+import com.vitahealth.tata.app.integration.pushnavigation.PushAlertResolver
+import com.vitahealth.tata.app.integration.treatmentadherence.TreatmentAdherenceIntegration
+import com.vitahealth.tata.carelink.infrastructure.di.CareLinkDependencies
+import com.vitahealth.tata.carelink.infrastructure.remote.AuthorizedConsentWithdrawal
+import com.vitahealth.tata.carelink.presentation.consent.ConsentWithdrawalViewModel
+import com.vitahealth.tata.identity.application.ports.RememberedAdultProfileStore
+import com.vitahealth.tata.identity.infrastructure.di.IdentityDependencies
+import com.vitahealth.tata.intake.infrastructure.di.IntakeDependencies
+import com.vitahealth.tata.inventory.infrastructure.di.InventoryDependencies
+import com.vitahealth.tata.monitoring.infrastructure.di.MonitoringDependencies
+import com.vitahealth.tata.omission.application.readmodels.PushDestination
+import com.vitahealth.tata.omission.domain.model.valueobjects.OmissionPush
+import com.vitahealth.tata.omission.infrastructure.di.OmissionDependencies
+import com.vitahealth.tata.preferences.domain.model.valueobjects.AccessibilityPreferences
+import com.vitahealth.tata.preferences.infrastructure.di.PreferencesDependencies
+import com.vitahealth.tata.shared.common.result.AppResult
+import com.vitahealth.tata.shared.infrastructure.network.ApiClientFactory
+import com.vitahealth.tata.shared.infrastructure.security.EncryptedSessionStore
+import com.vitahealth.tata.treatment.infrastructure.di.TreatmentDependencies
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 
-class AppContainer(
-    context: Context,
-    baseUrl: String = com.vitahealth.tata.BuildConfig.API_BASE_URL,
-) {
+/** Owns application-scoped adapters and composes factories for each user flow. */
+class AppContainer(context: Context, private val baseUrl: String = BuildConfig.API_BASE_URL) {
     private val applicationContext = context.applicationContext
-    private val sessions = com.vitahealth.tata.shared.infrastructure.security.EncryptedSessionStore(context)
-    private val httpClient = okhttp3.OkHttpClient.Builder()
-        .connectTimeout(20, java.util.concurrent.TimeUnit.SECONDS)
-        .readTimeout(90, java.util.concurrent.TimeUnit.SECONDS)
-        .callTimeout(110, java.util.concurrent.TimeUnit.SECONDS)
-        .addInterceptor { chain ->
-        val request = chain.request().newBuilder()
-        sessions.accessToken()?.let { request.header("Authorization", "Bearer $it") }
-        chain.proceed(request.build())
-    }.build()
-    private val retrofit: Retrofit = Retrofit.Builder()
-        .baseUrl(baseUrl)
-        .client(httpClient)
-        .addConverterFactory(GsonConverterFactory.create())
-        .build()
+    private val sessions = EncryptedSessionStore(context)
+    private val retrofit: Retrofit = ApiClientFactory.create(baseUrl, sessions::accessToken)
 
-    private val sessionAccessRepository = com.vitahealth.tata.identity.infrastructure.remote.RemoteSessionAccessRepository(retrofit.create(com.vitahealth.tata.identity.infrastructure.remote.SessionApiService::class.java), sessions)
-    val sessionAccessViewModelFactory = com.vitahealth.tata.identity.presentation.access.SessionAccessViewModel.Factory(sessionAccessRepository)
+    private val identity = IdentityDependencies(applicationContext, retrofit, sessions, baseUrl)
+    val rememberedAdultProfiles: RememberedAdultProfileStore = identity.rememberedAdultProfiles
+    val passwordRecovery = identity.passwordRecovery
+    val linkSocialIdentity = identity.linkSocialIdentity
+    val socialCredentials =
+        com.vitahealth.tata.identity.infrastructure.social.FirebaseSocialCredentialLauncher(applicationContext)
+    val sessionAccessViewModelFactory = identity.sessionAccessViewModelFactory
+    val caregiverRegistrationViewModelFactory = identity.caregiverRegistrationViewModelFactory
+    val landingPlansViewModelFactory = identity.landingPlansViewModelFactory
 
-    suspend fun signOut() = sessionAccessRepository.signOut()
+    /** Ends access through the same session shared by all API adapters. */
+    suspend fun signOut(): AppResult<Unit> {
+        val expectedToken = sessions.accessToken()
+        omission.beforeSignOut()
+        if (sessions.accessToken() != expectedToken) {
+            return AppResult.Failure(
+                "La sesión cambió durante el cierre.",
+                code = "SESSION_CHANGED",
+            )
+        }
+        return identity.signOut()
+    }
 
-    private val subscriptionRepository = com.vitahealth.tata.identity.infrastructure.remote.RemoteSubscriptionRepository(
-        retrofit.create(com.vitahealth.tata.identity.infrastructure.remote.SubscriptionApiService::class.java),
-    )
+    fun consentWithdrawalFactory(adultId: String) =
+        ConsentWithdrawalViewModel.Factory(
+            adultId,
+            ConsentWithdrawalIntegration(
+                sessions,
+                AuthorizedConsentWithdrawal(sessions, baseUrl),
+                { omission.beforeSignOut() },
+                { identity.signOut() },
+            ),
+        )
 
+    /** Creates the subscription flow for the selected account. */
     fun planSubscriptionViewModelFactory(accountId: String) =
-        com.vitahealth.tata.identity.presentation.subscription.PlanSubscriptionViewModel.Factory(
-            accountId = accountId,
-            getSubscription = com.vitahealth.tata.identity.application.handlers.GetCurrentSubscriptionQueryHandler(subscriptionRepository),
-            listPlans = com.vitahealth.tata.identity.application.handlers.ListAvailablePlansQueryHandler(subscriptionRepository),
-            changeSubscription = com.vitahealth.tata.identity.application.handlers.ChangeSubscriptionCommandHandler(subscriptionRepository),
+        identity.planSubscriptionViewModelFactory(accountId)
+
+    /** Reads the device-local onboarding completion flag. */
+    fun hasSeenOnboarding(): Boolean = identity.hasSeenOnboarding()
+
+    /** Records onboarding completion through the identity composition. */
+    fun completeOnboarding() = identity.completeOnboarding()
+
+    private val careLink = CareLinkDependencies(retrofit, sessions, baseUrl)
+
+    /** Creates the caregiver's linked-adult selector. */
+    fun caregiverProfilesViewModelFactory(caregiverId: String) =
+        careLink.caregiverProfilesViewModelFactory(caregiverId)
+
+    /** Creates the care linking and consent flow. */
+    fun careLinkViewModelFactory(caregiverId: String) =
+        careLink.careLinkViewModelFactory(caregiverId)
+
+    /** Treatment-owned factories consumed by the application navigation graph. */
+    internal val treatment by lazy {
+        TreatmentDependencies(retrofit) {
+            TreatmentAdherenceIntegration(analytics.treatmentAdherenceRepository())
+        }
+    }
+
+    private val monitoring = MonitoringDependencies(sessions, baseUrl)
+
+    /** Composes the authorized profile, weekly monitoring and treatment catalog for Figma #16. */
+    fun linkedPersonViewModelFactory(caregiverId: String, olderAdultId: String, name: String) =
+        LinkedPersonViewModel.Factory(
+            caregiverId,
+            olderAdultId,
+            name,
+            LinkedPersonIntegration(
+                monitoring.linkedPersonSummaryReader(),
+                monitoring.linkedPersonProfileReader(),
+                treatment.linkedPersonTreatmentsReader(),
+                careLink.linkedPersonLinksReader(caregiverId),
+            ),
+            monitoring.linkedPersonContactReader(),
+            careLink.linkedPersonProfileUpdater(caregiverId),
+            careLink.linkedPersonEmergencyContactUpdater(caregiverId),
         )
 
-    private val onboardingRepository =
-        com.vitahealth.tata.identity.infrastructure.local.SharedPreferencesOnboardingRepository(context)
-    private val getOnboardingStatus =
-        com.vitahealth.tata.identity.application.handlers.GetOnboardingStatusQueryHandler(onboardingRepository)
-    private val completeOnboardingHandler =
-        com.vitahealth.tata.identity.application.handlers.CompleteOnboardingCommandHandler(onboardingRepository)
-
-    /** False on the first launch of the app, so the welcome screen is shown once. */
-    fun hasSeenOnboarding(): Boolean = getOnboardingStatus()
-
-    fun completeOnboarding() = completeOnboardingHandler()
-
-    private val caregiverProfilesRepository = com.vitahealth.tata.carelink.infrastructure.remote.RemoteCaregiverProfilesRepository(retrofit.create(com.vitahealth.tata.carelink.infrastructure.remote.CaregiverProfilesApiService::class.java))
-    fun caregiverProfilesViewModelFactory(caregiverId: String) = com.vitahealth.tata.carelink.presentation.profiles.CaregiverProfilesViewModel.Factory(caregiverId,caregiverProfilesRepository)
-
-    private val treatmentCatalog = com.vitahealth.tata.treatment.infrastructure.remote.RemoteTreatmentCatalogRepository(retrofit.create(TreatmentApiService::class.java))
-    fun treatmentListViewModelFactory(caregiverId: String,olderAdultId: String) = com.vitahealth.tata.treatment.presentation.treatment.TreatmentListViewModel.Factory(caregiverId,olderAdultId,com.vitahealth.tata.treatment.application.handlers.ListTreatmentsQueryHandler(treatmentCatalog))
-
-    private val monitoringRepository = com.vitahealth.tata.monitoring.infrastructure.remote.RemoteFamilyMonitoringRepository(
-        retrofit.create(com.vitahealth.tata.monitoring.infrastructure.remote.FamilyMonitoringApiService::class.java),
-    )
+    /** Creates the monitoring summary for the selected linked adult. */
     fun familySummaryViewModelFactory(caregiverId: String, olderAdultId: String, name: String) =
-        com.vitahealth.tata.monitoring.presentation.summary.FamilySummaryViewModel.Factory(
-            caregiverId, olderAdultId, name, monitoringRepository, GetContactOptionQueryHandler(contactRepository),
-        )
+        monitoring.familySummaryViewModelFactory(caregiverId, olderAdultId, name)
 
-    private val contactRepository = RemoteContactRepository(
-        retrofit.create(com.vitahealth.tata.monitoring.infrastructure.remote.FamilyMonitoringApiService::class.java),
-    )
+    /** Creates the current account's personal notes flow. */
+    fun personalNotesViewModelFactory() = monitoring.personalNotesViewModelFactory()
 
-    private val personalNotesRepository = com.vitahealth.tata.monitoring.infrastructure.remote.RemotePersonalNotesRepository(
-        retrofit.create(com.vitahealth.tata.monitoring.infrastructure.remote.PersonalNotesApiService::class.java))
-    fun personalNotesViewModelFactory() = com.vitahealth.tata.monitoring.presentation.personalnotes.PersonalNotesViewModel.Factory(personalNotesRepository)
+    /** Creates follow-up notes for the selected linked adult. */
+    fun notesViewModelFactory(caregiverId: String, olderAdultId: String) =
+        monitoring.notesViewModelFactory(caregiverId, olderAdultId)
 
-    private val notesRepository = RemoteNotesRepository(retrofit.create(NotesApiService::class.java))
-    fun notesViewModelFactory(caregiverId: String, olderAdultId: String) = NotesViewModel.Factory(
-        caregiverId, olderAdultId,
-        GetFollowUpNotesQueryHandler(notesRepository),
-        RegisterFollowUpNoteCommandHandler(notesRepository),
-    )
-
-    private val alertsRepository = RemoteAlertsRepository(
-        monitoringApi = retrofit.create(FamilyMonitoringApiService::class.java),
-        alertsApi = retrofit.create(AlertsApiService::class.java),
-    )
+    /** Creates the alert list for the selected linked adult. */
     fun alertsViewModelFactory(caregiverId: String, olderAdultId: String) =
-        AlertsViewModel.Factory(caregiverId, olderAdultId, GetOpenAlertsQueryHandler(alertsRepository))
-    fun alertDetailViewModelFactory(caregiverId: String, olderAdultId: String, alertId: Long) =
-        AlertDetailViewModel.Factory(
-            caregiverId, olderAdultId, alertId,
-            GetAlertDetailQueryHandler(alertsRepository),
-            UpdateAlertStatusCommandHandler(alertsRepository),
-            RegisterFollowUpNoteCommandHandler(notesRepository),
-            GetContactOptionQueryHandler(contactRepository),
-        )
+        monitoring.alertsViewModelFactory(caregiverId, olderAdultId)
 
-    // Omission & Escalation push (US-22): FCM topics named after the backend recipients.
-    private val pushTargets = SharedPreferencesPushTargetStore(context)
-    private val pushTopics = FirebaseTopicSubscriptions(context)
-    private val followCaregiverAlertsHandler = FollowCaregiverAlertsCommandHandler(pushTargets, pushTopics)
-    private val followDoseRemindersHandler = FollowDoseRemindersCommandHandler(pushTargets, pushTopics)
-    private val resolvePushDestinationHandler = ResolvePushDestinationQueryHandler(pushTargets)
+    /** Creates the selected alert detail flow. */
+    fun alertDetailViewModelFactory(caregiverId: String, olderAdultId: String, alertId: Long) =
+        monitoring.alertDetailViewModelFactory(caregiverId, olderAdultId, alertId)
+
+    /** Omission owns FCM, device registration, local targets and access policy. */
+    private val omission = OmissionDependencies(applicationContext, sessions, sessions, baseUrl)
+
+    fun canDisplayOmissionPush(push: OmissionPush): Boolean = omission.canDisplay(push)
 
     fun followCaregiverAlerts(caregiverId: String, olderAdultId: String) =
-        followCaregiverAlertsHandler(FollowCaregiverAlertsCommand(caregiverId, olderAdultId))
+        omission.followCaregiver(caregiverId, olderAdultId)
 
     fun followDoseReminders(olderAdultId: String, olderAdultName: String) =
-        followDoseRemindersHandler(FollowDoseRemindersCommand(olderAdultId, olderAdultName))
+        omission.followAdultReminders(olderAdultId, olderAdultName)
 
-    /** Screen to open for an intent that came from an omission notification, or null. */
-    fun pushDestination(kind: String?, olderAdultId: String?, medicationName: String?): PushDestination? =
-        OmissionPushIntent.queryFrom(kind, olderAdultId, medicationName)?.let { resolvePushDestinationHandler(it) }
+    fun pushDestination(
+        kind: String?,
+        olderAdultId: String?,
+        medicationName: String?,
+        intakeId: String? = null,
+    ): PushDestination? = omission.destination(kind, olderAdultId, medicationName, intakeId)
 
-    /** Open alert a caregiver push refers to, read from the recent status (`openAlerts`), or null. */
+    fun canOpenPushDestination(destination: PushDestination): Boolean =
+        omission.canOpen(destination)
+
+    private val pushAlertResolver by lazy { PushAlertResolver(monitoring.getOpenAlerts) }
+
     suspend fun openAlertIdFor(destination: PushDestination.CaregiverAlerts): Long? =
-        when (val result = GetOpenAlertsQueryHandler(alertsRepository)(GetOpenAlertsQuery(destination.caregiverId, destination.olderAdultId))) {
-            is com.vitahealth.tata.shared.common.result.AppResult.Success -> alertForPush(result.value, destination.medicationName)?.id
-            is com.vitahealth.tata.shared.common.result.AppResult.Failure -> null
-        }
+        pushAlertResolver.openAlertIdFor(destination)
 
-    private val identityApi: IdentityApiService = retrofit.create(IdentityApiService::class.java)
-    private val identityRepository = RemoteIdentityRepository(identityApi, sessions)
+    private val preferences =
+        PreferencesDependencies(applicationContext, sessions, sessions, baseUrl)
 
-    private val careLinkApi: CareLinkApiService = retrofit.create(CareLinkApiService::class.java)
-    private val careLinkRepository = RemoteCareLinkRepository(careLinkApi, sessions)
+    /** Per-account application language, available to the activity before navigation. */
+    val languagePreferences = preferences.languagePreferences
 
-    private val treatmentApi: TreatmentApiService = retrofit.create(TreatmentApiService::class.java)
-    private val treatmentRepository = RemoteTreatmentRepository(treatmentApi)
+    fun initialLanguage() = preferences.initialLanguage()
 
-    private val inventoryApi: InventoryApiService = retrofit.create(InventoryApiService::class.java)
-    private val inventoryRepository = RemoteInventoryRepository(inventoryApi)
-    private val preferencesApi: PreferencesApiService = retrofit.create(PreferencesApiService::class.java)
-    private val preferencesRepository = OfflineFirstUserPreferencesRepository(
-        remote = RemoteUserPreferences(preferencesApi),
-        local = DataStoreAccessibilityLocalStore(context),
-    )
+    /** Intake-owned persistence, recovery and screen composition. */
+    internal val intake = IntakeDependencies(applicationContext, sessions, sessions, baseUrl)
 
-    private val notificationPreferencesRepository = RemoteNotificationPreferencesRepository(preferencesApi)
+    /** Resumes intake work after login, session restoration or credential renewal. */
+    fun observeSessionChanges(scope: CoroutineScope) {
+        intake.observeSessionChanges(scope)
+        preferences.startRecovery(scope)
+        omission.startRegistration(scope)
+    }
 
-    private val intakeApi: IntakeApiService = retrofit.create(IntakeApiService::class.java)
-    private val intakeLocalStore = SQLiteIntakeLocalStore(context)
-    private val intakeSyncScheduler = WorkManagerIntakeSyncScheduler(context, baseUrl)
+    fun onPushTokenChanged(token: String) = omission.onNewToken(token)
 
-    private val intakeAgendaRepository = OfflineFirstIntakeAgendaRepository(
-        remote = RemoteIntakeAgendaRepository(intakeApi),
-        local = intakeLocalStore,
-    )
-    private val nextDoseRepository = OfflineFirstNextDoseRepository(
-        remote = RemoteNextDoseRepository(intakeApi),
-        local = intakeLocalStore,
-    )
-    private val doseDetailRepository = OfflineFirstDoseDetailRepository(
-        remote = RemoteDoseDetailRepository(intakeApi),
-        local = intakeLocalStore,
-    )
-    private val doseConfirmationRepository = OfflineFirstDoseConfirmationRepository(
-        remote = RemoteDoseConfirmationRepository(intakeApi),
-        local = intakeLocalStore,
-        syncScheduler = intakeSyncScheduler,
-    )
+    fun observeOmissionNotificationSession(scope: CoroutineScope, clearNotifications: () -> Unit) =
+        omission.observeNotificationSession(scope, clearNotifications)
 
-    init {
-        intakeSyncScheduler.schedule()
+    /** Composition bridge for Treatment catalog plus Intake's next dose. */
+    private val medicationOverview by lazy {
+        MedicationOverviewIntegration(sessions, baseUrl, intake)
     }
 
     fun myMedicationsViewModelFactory(olderAdultId: String) =
-        com.vitahealth.tata.treatment.presentation.medication.MyMedicationsViewModel.Factory(
-            query = com.vitahealth.tata.treatment.application.handlers.GetMyMedicationsQueryHandler(
-                com.vitahealth.tata.treatment.infrastructure.remote.RemoteMyMedicationsRepository(treatmentApi)),
-            nextDoseQuery = {
-                when (val result = nextDoseRepository.getNextDose(olderAdultId)) {
-                    is com.vitahealth.tata.shared.common.result.AppResult.Success -> result.value?.let {
-                        com.vitahealth.tata.treatment.application.readmodels.MedicationNextDose(it.id, it.medicationId, it.scheduledAt)
-                    }
-                    is com.vitahealth.tata.shared.common.result.AppResult.Failure -> null
-                }
-            },
-        )
+        medicationOverview.viewModelFactory(olderAdultId)
 
-    val caregiverRegistrationViewModelFactory = CaregiverRegistrationViewModel.Factory(
-        registerHandler = RegisterCaregiverCommandHandler(identityRepository),
-        verifyHandler = VerifyCaregiverEmailCommandHandler(identityRepository),
-        requestNewVerificationHandler = RequestNewVerificationCommandHandler(identityRepository),
-    )
-
-    fun careLinkViewModelFactory(caregiverId: String) = CareLinkViewModel.Factory(
-        caregiverId = caregiverId,
-        acceptCareLinkHandler = AcceptCareLinkCommandHandler(careLinkRepository),
-        registerConsentHandler = RegisterConsentCommandHandler(careLinkRepository),
-        getOlderAdultHandler = GetOlderAdultProfileQueryHandler(careLinkRepository),
-    )
-
-    fun medicationRegistrationViewModelFactory(
-        caregiverId: String,
-        olderAdultId: String,
-        olderAdultName: String,
-    ) = MedicationRegistrationViewModel.Factory(
-        caregiverId = caregiverId,
-        olderAdultId = olderAdultId,
-        olderAdultName = olderAdultName,
-        registerMedicationHandler = RegisterMedicationCommandHandler(treatmentRepository),
-    )
-
-    fun medicationManagementViewModelFactory(
-        caregiverId: String,
-        olderAdultId: String,
-        olderAdultName: String,
-    ) = MedicationManagementViewModel.Factory(
-        caregiverId = caregiverId,
-        olderAdultId = olderAdultId,
-        olderAdultName = olderAdultName,
-        listMedications = ListMedicationsQueryHandler(treatmentRepository),
-        updateMedication = UpdateMedicationCommandHandler(treatmentRepository),
-        deactivateMedication = DeactivateMedicationCommandHandler(treatmentRepository),
-    )
-
-    fun treatmentCreationViewModelFactory(
-        caregiverId: String,
-        olderAdultId: String,
-        olderAdultName: String,
-        medicationId: String,
-        medicationLabel: String,
-    ) = TreatmentCreationViewModel.Factory(
-        caregiverId = caregiverId,
-        olderAdultId = olderAdultId,
-        olderAdultName = olderAdultName,
-        medicationId = medicationId,
-        medicationLabel = medicationLabel,
-        createTreatmentHandler = CreateTreatmentCommandHandler(treatmentRepository),
-    )
-
-    fun treatmentDoseFrequencyViewModelFactory(
-        caregiverId: String,
-        olderAdultId: String,
-        olderAdultName: String,
-        medicationId: String,
-        medicationLabel: String,
-        treatmentId: String,
-        treatmentName: String,
-    ) = TreatmentDoseFrequencyViewModel.Factory(
-        caregiverId = caregiverId,
-        olderAdultId = olderAdultId,
-        olderAdultName = olderAdultName,
-        medicationId = medicationId,
-        medicationLabel = medicationLabel,
-        treatmentId = treatmentId,
-        treatmentName = treatmentName,
-        handler = SetDoseFrequencyCommandHandler(),
-    )
-
-    fun treatmentScheduleInstructionsViewModelFactory(
-        caregiverId: String,
-        olderAdultId: String,
-        olderAdultName: String,
-        medicationId: String,
-        medicationLabel: String,
-        treatmentId: String,
-        treatmentName: String,
-        dosage: String,
-        frequency: String,
-    ) = TreatmentScheduleInstructionsViewModel.Factory(
-        caregiverId = caregiverId,
-        olderAdultId = olderAdultId,
-        olderAdultName = olderAdultName,
-        medicationId = medicationId,
-        medicationLabel = medicationLabel,
-        treatmentId = treatmentId,
-        treatmentName = treatmentName,
-        dosage = dosage,
-        frequency = frequency,
-        handler = SetScheduleInstructionsCommandHandler(),
-    )
-
-    fun treatmentReminderViewModelFactory(
-        caregiverId: String,
-        olderAdultId: String,
-        olderAdultName: String,
-        medicationId: String,
-        medicationLabel: String,
-        treatmentId: String,
-        treatmentName: String,
-        dosage: String,
-        frequency: String,
-        scheduleText: String,
-        instructions: String,
-    ) = TreatmentReminderViewModel.Factory(
-        caregiverId = caregiverId,
-        olderAdultId = olderAdultId,
-        olderAdultName = olderAdultName,
-        medicationId = medicationId,
-        medicationLabel = medicationLabel,
-        treatmentId = treatmentId,
-        treatmentName = treatmentName,
-        dosage = dosage,
-        frequency = frequency,
-        scheduleText = scheduleText,
-        instructions = instructions,
-        handler = SetReminderPolicyCommandHandler(),
-    )
-
-    fun treatmentLifecycleViewModelFactory(
-        caregiverId: String,
-        olderAdultId: String,
-        olderAdultName: String,
-        medicationId: String,
-        medicationLabel: String,
-        treatmentId: String,
-        treatmentName: String,
-        dosage: String,
-        frequency: String,
-        scheduleText: String,
-        instructions: String,
-        reminderDelayMinutes: Int,
-    ) = TreatmentLifecycleViewModel.Factory(
-        caregiverId = caregiverId,
-        olderAdultId = olderAdultId,
-        olderAdultName = olderAdultName,
-        medicationId = medicationId,
-        medicationLabel = medicationLabel,
-        treatmentId = treatmentId,
-        treatmentName = treatmentName,
-        dosage = dosage,
-        frequency = frequency,
-        scheduleText = scheduleText,
-        instructions = instructions,
-        reminderDelayMinutes = reminderDelayMinutes,
-        configureTreatmentHandler = ConfigureTreatmentCommandHandler(treatmentRepository),
-        changeStatusHandler = ChangeTreatmentStatusCommandHandler(treatmentRepository),
-    )
-
-    fun treatmentDetailViewModelFactory(
-        caregiverId: String,
-        olderAdultName: String,
-        treatmentId: String,
-        medicationLabelHint: String,
-    ) = TreatmentDetailViewModel.Factory(
-        caregiverId = caregiverId,
-        olderAdultName = olderAdultName,
-        treatmentId = treatmentId,
-        medicationLabelHint = medicationLabelHint,
-        handler = GetTreatmentDetailQueryHandler(treatmentRepository),
-    )
-
-    /** Device copy of the accessibility settings; the theme reads it so they apply on every screen. */
+    /** Accessibility state shared with the application theme. */
     val accessibilityPreferences: Flow<AccessibilityPreferences> =
-        ObserveAccessibilityPreferencesQueryHandler(preferencesRepository)()
+        preferences.accessibilityPreferences
 
-    fun accessibilityViewModelFactory(userId: String) = AccessibilityViewModel.Factory(
-        userId = userId,
-        observeAccessibility = ObserveAccessibilityPreferencesQueryHandler(preferencesRepository),
-        updateTextSize = UpdateTextSizeCommandHandler(preferencesRepository),
-        updateHighContrast = UpdateHighContrastCommandHandler(preferencesRepository),
-        updateReducedMotion = UpdateReducedMotionCommandHandler(preferencesRepository),
-        updateVoiceConfirmation = UpdateVoiceConfirmationCommandHandler(preferencesRepository),
-        updateReadingAssistance = UpdateReadingAssistanceCommandHandler(preferencesRepository),
-        syncPreferences = SyncUserPreferencesCommandHandler(preferencesRepository),
-    )
+    /** Creates the account's accessibility settings flow. */
+    fun accessibilityViewModelFactory(userId: String) =
+        preferences.accessibilityViewModelFactory(userId)
 
-    fun notificationPreferencesViewModelFactory(userId: String) = NotificationPreferencesViewModel.Factory(
-        userId = userId,
-        getPreferences = GetNotificationPreferencesQueryHandler(notificationPreferencesRepository),
-        updatePreferences = UpdateNotificationPreferencesCommandHandler(notificationPreferencesRepository),
-        updatePolicy = UpdateNotificationPolicyCommandHandler(notificationPreferencesRepository),
-    )
+    /** Creates the account's notification preferences flow. */
+    fun notificationPreferencesViewModelFactory(userId: String) =
+        preferences.notificationPreferencesViewModelFactory(userId)
 
-    fun intakeAgendaViewModelFactory(
-        olderAdultId: String,
-    ) = IntakeAgendaViewModel.Factory(
-        olderAdultId = olderAdultId,
-        repository = intakeAgendaRepository,
-    )
+    private val inventory = InventoryDependencies(sessions, baseUrl)
 
-    fun nextDoseHomeViewModelFactory(
-        olderAdultId: String,
-        olderAdultName: String,
-    ) = NextDoseHomeViewModel.Factory(
-        olderAdultId = olderAdultId,
-        olderAdultName = olderAdultName,
-        handler = GetNextDoseQueryHandler(nextDoseRepository),
-        progressHandler = com.vitahealth.tata.intake.application.handlers.GetDailyDoseProgressQueryHandler(intakeAgendaRepository),
-    )
+    /** Creates inventory actions scoped to the account opening this screen. */
+    fun inventoryViewModelFactory(medicationId: String, medicationName: String, unit: String) =
+        inventory.inventoryViewModelFactory(medicationId, medicationName, unit)
 
-    fun voiceConfirmationViewModelFactory(intakeId: String) = com.vitahealth.tata.intake.presentation.voice.VoiceConfirmationViewModel.Factory(
-        intakeId,
-        GetDoseDetailQueryHandler(doseDetailRepository),
-        com.vitahealth.tata.intake.application.handlers.ConfirmDoseByVoiceCommandHandler(
-            com.vitahealth.tata.intake.infrastructure.remote.RemoteVoiceConfirmationRepository(retrofit.create(com.vitahealth.tata.intake.infrastructure.remote.VoiceConfirmationApiService::class.java))),
-        com.vitahealth.tata.intake.infrastructure.audio.AndroidVoiceAudioRecorder(applicationContext),
-        GetNextDoseQueryHandler(nextDoseRepository),
-    )
-
-    fun doseDetailViewModelFactory(
-        intakeId: String,
-    ) = DoseDetailViewModel.Factory(
-        intakeId = intakeId,
-        handler = GetDoseDetailQueryHandler(doseDetailRepository),
-        confirmHandler = ConfirmDoseCommandHandler(doseConfirmationRepository),
-        nextDoseHandler = GetNextDoseQueryHandler(nextDoseRepository),
-    )
-
-    fun inventoryViewModelFactory(
-        medicationId: String,
-        medicationName: String,
-        unit: String,
-    ) = InventoryViewModel.Factory(
-        medicationId = medicationId,
-        medicationName = medicationName,
-        unit = unit,
-        getStockHandler = GetInventoryStockQueryHandler(inventoryRepository),
-        registerInitialHandler = RegisterInitialInventoryCommandHandler(inventoryRepository),
-        registerReplenishmentHandler = RegisterReplenishmentCommandHandler(inventoryRepository),
-    )
-    private val analyticsApi: AnalyticsApiService = retrofit.create(AnalyticsApiService::class.java)
-
-    // Con USE_ANALYTICS_BACKEND = false las pantallas usan datos de ejemplo, sin backend.
-    // Escenarios de ejemplo: Content, NoData, EmptyWeek, Error.
-    private val adherenceSummaryRepository: AdherenceSummaryRepository =
-        if (USE_ANALYTICS_BACKEND) {
-            RemoteAdherenceSummaryRepository(analyticsApi)
-        } else {
-            FakeAdherenceSummaryRepository(FakeAdherenceScenario.Content)
-        }
-
-    fun adherenceHistoryViewModelFactory(olderAdultId: String) = AdherenceHistoryViewModel.Factory(
-        olderAdultId = olderAdultId,
-        handler = GetAdherenceSummaryQueryHandler(adherenceSummaryRepository),
-    )
-
-    // Escenarios de ejemplo: Content, InsufficientEvidence, Error.
-    private val adherenceRecommendationsRepository: AdherenceRecommendationsRepository =
-        if (USE_ANALYTICS_BACKEND) {
-            RemoteAdherenceRecommendationsRepository(analyticsApi)
-        } else {
-            FakeAdherenceRecommendationsRepository(FakeRecommendationsScenario.Content)
-        }
-
-    fun adherenceRecommendationsViewModelFactory(olderAdultId: String) = AdherenceRecommendationsViewModel.Factory(
-        olderAdultId = olderAdultId,
-        handler = GetAdherenceRecommendationsQueryHandler(adherenceRecommendationsRepository),
-    )
-
-    private companion object {
-        const val USE_ANALYTICS_BACKEND = true
-    }
-
+    /** Analytics-owned factories for application navigation. */
+    internal val analytics = AnalyticsDependencies(sessions, baseUrl)
 }

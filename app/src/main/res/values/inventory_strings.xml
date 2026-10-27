@@ -52,4 +52,9 @@
     <string name="inventory_error_medication_inactive">Este medicamento está inactivo. Selecciona un medicamento activo.</string>
     <string name="inventory_lot_label">Lote / nota</string>
     <string name="inventory_days_short">días</string>
+    <string name="inventory_sign_in">Iniciar sesión</string>
+    <string name="inventory_back">Volver</string>
+    <string name="inventory_error_session">Tu sesión cambió o venció. Inicia sesión para abrir el inventario.</string>
+    <string name="inventory_error_access_denied">No tienes acceso al inventario de este medicamento.</string>
+    <string name="inventory_error_invalid_lot">El lote o la nota admite hasta 200 caracteres.</string>
 </resources>

@@ -3,13 +3,16 @@ package com.vitahealth.tata.identity.domain.model
 import com.vitahealth.tata.identity.application.essentialPlan
 import com.vitahealth.tata.identity.application.familyPlan
 import com.vitahealth.tata.identity.application.renewalDate
+import com.vitahealth.tata.identity.domain.model.entities.Subscription
+import com.vitahealth.tata.identity.domain.model.valueobjects.PlanCapability
+import com.vitahealth.tata.identity.domain.model.valueobjects.SubscriptionStatus
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
-
 class SubscriptionTest {
-    private val subscription = Subscription("account-1", familyPlan, SubscriptionStatus.ACTIVE, renewalDate)
+    private val subscription =
+        Subscription("account-1", familyPlan, SubscriptionStatus.ACTIVE, renewalDate)
 
     @Test
     fun theCurrentPlanIsRecognisedByItsCode() {
@@ -31,20 +34,29 @@ class SubscriptionTest {
 
         assertTrue(impact.gained.isEmpty())
         assertEquals(
-            setOf(PlanCapability.FAMILY_ALERTS, PlanCapability.FAMILY_MONITORING, PlanCapability.ADHERENCE_INSIGHTS),
+            setOf(
+                PlanCapability.FAMILY_ALERTS,
+                PlanCapability.FAMILY_MONITORING,
+                PlanCapability.ADHERENCE_INSIGHTS,
+            ),
             impact.lost,
         )
     }
 
     @Test
     fun movingToAPlanWithMoreCapabilitiesGainsTheDifference() {
-        val onEssential = Subscription("account-1", essentialPlan, SubscriptionStatus.ACTIVE, renewalDate)
+        val onEssential =
+            Subscription("account-1", essentialPlan, SubscriptionStatus.ACTIVE, renewalDate)
 
         val impact = onEssential.impactOfChangingTo(familyPlan)
 
         assertTrue(impact.lost.isEmpty())
         assertEquals(
-            setOf(PlanCapability.FAMILY_ALERTS, PlanCapability.FAMILY_MONITORING, PlanCapability.ADHERENCE_INSIGHTS),
+            setOf(
+                PlanCapability.FAMILY_ALERTS,
+                PlanCapability.FAMILY_MONITORING,
+                PlanCapability.ADHERENCE_INSIGHTS,
+            ),
             impact.gained,
         )
     }

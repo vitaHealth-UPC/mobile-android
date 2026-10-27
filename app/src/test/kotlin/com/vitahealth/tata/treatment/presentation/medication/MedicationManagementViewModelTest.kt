@@ -1,15 +1,21 @@
 package com.vitahealth.tata.treatment.presentation.medication
 
+import com.vitahealth.tata.treatment.presentation.medication.viewmodel.MedicationDraft
+import com.vitahealth.tata.treatment.presentation.medication.viewmodel.MedicationManagementMessage
+import com.vitahealth.tata.treatment.presentation.medication.viewmodel.MedicationManagementViewModel
+import com.vitahealth.tata.shared.common.result.AppResult
 import com.vitahealth.tata.treatment.application.handlers.Conflict
-import com.vitahealth.tata.treatment.application.handlers.DeactivateMedicationCommandHandler
 import com.vitahealth.tata.treatment.application.handlers.FakeMedicationManagementRepository
-import com.vitahealth.tata.treatment.application.handlers.ListMedicationsQueryHandler
 import com.vitahealth.tata.treatment.application.handlers.Missing
 import com.vitahealth.tata.treatment.application.handlers.NoConnection
 import com.vitahealth.tata.treatment.application.handlers.NotLinked
-import com.vitahealth.tata.treatment.application.handlers.UpdateMedicationCommandHandler
 import com.vitahealth.tata.treatment.application.handlers.losartan
 import com.vitahealth.tata.treatment.application.handlers.metformin
+import com.vitahealth.tata.treatment.application.commands.DeactivateMedicationCommandHandler
+import com.vitahealth.tata.treatment.application.queries.ListMedicationsQueryHandler
+import com.vitahealth.tata.treatment.application.commands.UpdateMedicationCommandHandler
+import com.vitahealth.tata.treatment.domain.model.entities.Medication
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -28,6 +34,72 @@ import org.junit.Test
 class MedicationManagementViewModelTest {
     private val repository = FakeMedicationManagementRepository(listOf(losartan, metformin))
 
+    @Test
+    fun deactivationCancelsTheOldListAndExcludesRefreshWhileSaving() {
+        val model = viewModel()
+        val oldList = CompletableDeferred<AppResult<List<Medication>>>()
+        repository.pendingList = oldList
+        model.load()
+        val pending = CompletableDeferred<AppResult<Medication>>()
+        repository.pendingDeactivation = pending
+        model.onDeactivateRequest(losartan)
+        model.onDeactivateConfirm()
+
+        model.load()
+        model.onDeactivateRequest(losartan)
+        model.onDeactivateConfirm()
+        assertEquals(2, repository.listCalls)
+        assertEquals(listOf(losartan.id), repository.deactivations)
+        assertFalse(model.state.value.isLoading)
+        assertTrue(model.state.value.isSaving)
+
+        pending.complete(AppResult.Success(losartan.copy(active = false)))
+        oldList.complete(AppResult.Success(listOf(losartan, metformin)))
+
+        assertFalse(model.state.value.isSaving)
+        assertFalse(model.state.value.medications.first { it.id == losartan.id }.active)
+        assertEquals(MedicationManagementMessage.Deactivated, model.state.value.message)
+    }
+
+    @Test
+    fun savingExcludesRefreshDuplicateSaveAndDraftChangesAndRetainsDraftOnFailure() {
+        val model = viewModel()
+        val pending = CompletableDeferred<AppResult<Medication>>()
+        repository.pendingUpdate = pending
+        model.onEdit(losartan)
+        model.onDraftNameChange("Losartán actualizado")
+        model.onSaveEdit()
+
+        model.load()
+        model.onDraftNameChange("Otro nombre")
+        model.onDraftPresentationChange("Otra presentación")
+        model.onCancelEdit()
+        model.onSaveEdit()
+        assertEquals(1, repository.listCalls)
+        assertEquals(1, repository.updates.size)
+        assertEquals("Losartán actualizado", model.state.value.draft?.name)
+
+        pending.complete(NoConnection)
+
+        assertFalse(model.state.value.isSaving)
+        assertEquals("Losartán actualizado", model.state.value.draft?.name)
+        assertEquals(MedicationManagementMessage.ErrorOffline, model.state.value.message)
+    }
+
+    @Test
+    fun delayedOldListCannotReplaceTheLatestMedications() {
+        val old = CompletableDeferred<AppResult<List<Medication>>>()
+        repository.pendingList = old
+        val model = viewModel()
+        repository.pendingList = null
+        repository.medications = listOf(losartan.copy(active = false))
+
+        model.load()
+        old.complete(AppResult.Success(listOf(losartan)))
+
+        assertEquals(listOf(losartan.copy(active = false)), model.state.value.medications)
+    }
+
     @Before
     fun setUp() {
         Dispatchers.setMain(UnconfinedTestDispatcher())
@@ -38,14 +110,15 @@ class MedicationManagementViewModelTest {
         Dispatchers.resetMain()
     }
 
-    private fun viewModel() = MedicationManagementViewModel(
-        caregiverId = "caregiver-1",
-        olderAdultId = "adult-1",
-        olderAdultName = "Rosa Vargas",
-        listMedications = ListMedicationsQueryHandler(repository),
-        updateMedication = UpdateMedicationCommandHandler(repository),
-        deactivateMedication = DeactivateMedicationCommandHandler(repository),
-    )
+    private fun viewModel() =
+        MedicationManagementViewModel(
+            caregiverId = "caregiver-1",
+            olderAdultId = "adult-1",
+            olderAdultName = "Rosa Vargas",
+            listMedications = ListMedicationsQueryHandler(repository),
+            updateMedication = UpdateMedicationCommandHandler(repository),
+            deactivateMedication = DeactivateMedicationCommandHandler(repository),
+        )
 
     @Test
     fun loadsTheMedicationsWhenItOpens() {
@@ -86,7 +159,10 @@ class MedicationManagementViewModelTest {
 
         model.onEdit(losartan)
 
-        assertEquals(MedicationDraft("med-1", "Losartán", "50 mg, comprimido"), model.state.value.draft)
+        assertEquals(
+            MedicationDraft("med-1", "Losartán", "50 mg, comprimido"),
+            model.state.value.draft,
+        )
     }
 
     @Test

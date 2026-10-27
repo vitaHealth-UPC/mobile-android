@@ -87,4 +87,11 @@
     <string name="notifications_policy_cancel">Cancel</string>
     <string name="notifications_policy_minutes">min</string>
     <string name="notifications_saved_title">Notification preferences saved</string>
+    <string name="accessibility_contrast_saved_title">High contrast enabled</string>
+    <string name="accessibility_motion_saved_title">Reduced motion</string>
+    <string name="accessibility_reading_saved_title">Reading assistance enabled</string>
+    <string name="accessibility_dark_theme_title">Dark theme</string>
+    <string name="accessibility_dark_theme_subtitle">Reduces screen brightness</string>
+    <string name="accessibility_dark_theme_saved">Dark theme enabled.</string>
+    <string name="accessibility_light_theme_saved">Light theme enabled.</string>
 </resources>

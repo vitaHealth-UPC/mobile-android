@@ -3,7 +3,8 @@ package com.vitahealth.tata.preferences.application.handlers
 import com.vitahealth.tata.preferences.FakeAccessibilityLocalStore
 import com.vitahealth.tata.preferences.FakeUserPreferencesRemote
 import com.vitahealth.tata.preferences.application.commands.UpdateVoiceConfirmationCommand
-import com.vitahealth.tata.preferences.infrastructure.OfflineFirstUserPreferencesRepository
+import com.vitahealth.tata.preferences.application.commands.UpdateVoiceConfirmationCommandHandler
+import com.vitahealth.tata.preferences.infrastructure.sync.OfflineFirstUserPreferencesRepository
 import com.vitahealth.tata.shared.common.result.AppResult
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -12,9 +13,10 @@ import org.junit.Test
 
 class UpdateVoiceConfirmationCommandHandlerTest {
     private val remote = FakeUserPreferencesRemote()
-    private val handler = UpdateVoiceConfirmationCommandHandler(
-        OfflineFirstUserPreferencesRepository(remote, FakeAccessibilityLocalStore()),
-    )
+    private val handler =
+        UpdateVoiceConfirmationCommandHandler(
+            OfflineFirstUserPreferencesRepository(remote, FakeAccessibilityLocalStore())
+        )
 
     @Test
     fun aBlankUserIsRejectedBeforeCallingTheBackend() = runBlocking {

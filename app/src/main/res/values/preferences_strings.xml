@@ -87,4 +87,11 @@
     <string name="notifications_policy_cancel">Cancelar</string>
     <string name="notifications_policy_minutes">min</string>
     <string name="notifications_saved_title">Preferencias guardadas</string>
+    <string name="accessibility_contrast_saved_title">Contraste reforzado activo</string>
+    <string name="accessibility_motion_saved_title">Movimiento reducido</string>
+    <string name="accessibility_reading_saved_title">Ayuda de lectura activa</string>
+    <string name="accessibility_dark_theme_title">Tema oscuro</string>
+    <string name="accessibility_dark_theme_subtitle">Reduce el brillo de la pantalla</string>
+    <string name="accessibility_dark_theme_saved">Tema oscuro activado.</string>
+    <string name="accessibility_light_theme_saved">Tema claro activado.</string>
 </resources>

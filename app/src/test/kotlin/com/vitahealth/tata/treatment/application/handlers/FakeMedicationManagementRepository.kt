@@ -1,21 +1,27 @@
 package com.vitahealth.tata.treatment.application.handlers
 
-import com.vitahealth.tata.treatment.application.MedicationManagementRepository
-import com.vitahealth.tata.treatment.domain.model.Medication
 import com.vitahealth.tata.shared.common.result.AppResult
+import com.vitahealth.tata.treatment.domain.model.entities.Medication
+import com.vitahealth.tata.treatment.domain.repositories.MedicationManagementRepository
+import kotlinx.coroutines.CompletableDeferred
 
 /** An in-memory backend for the medications of one older adult; it can be told to fail. */
-class FakeMedicationManagementRepository(
-    var medications: List<Medication> = emptyList(),
-) : MedicationManagementRepository {
+class FakeMedicationManagementRepository(var medications: List<Medication> = emptyList()) :
+    MedicationManagementRepository {
     var failWith: AppResult.Failure? = null
     var listCalls = 0
+    var pendingUpdate: CompletableDeferred<AppResult<Medication>>? = null
+    var pendingList: CompletableDeferred<AppResult<List<Medication>>>? = null
+    var pendingDeactivation: CompletableDeferred<AppResult<Medication>>? = null
     val updates = mutableListOf<Triple<String, String, String>>()
     val deactivations = mutableListOf<String>()
 
-    override suspend fun listMedications(caregiverId: String, olderAdultId: String): AppResult<List<Medication>> {
+    override suspend fun listMedications(
+        caregiverId: String,
+        olderAdultId: String,
+    ): AppResult<List<Medication>> {
         listCalls++
-        return failWith ?: AppResult.Success(medications)
+        return pendingList?.await() ?: failWith ?: AppResult.Success(medications)
     }
 
     override suspend fun updateMedication(
@@ -25,16 +31,29 @@ class FakeMedicationManagementRepository(
         presentation: String,
     ): AppResult<Medication> {
         updates += Triple(medicationId, name, presentation)
-        failWith?.let { return it }
+        pendingUpdate?.let {
+            return it.await()
+        }
+        failWith?.let {
+            return it
+        }
         val current = medications.first { it.id == medicationId }
         val updated = current.copy(name = name, presentation = presentation)
         medications = medications.map { if (it.id == medicationId) updated else it }
         return AppResult.Success(updated)
     }
 
-    override suspend fun deactivateMedication(caregiverId: String, medicationId: String): AppResult<Medication> {
+    override suspend fun deactivateMedication(
+        caregiverId: String,
+        medicationId: String,
+    ): AppResult<Medication> {
         deactivations += medicationId
-        failWith?.let { return it }
+        pendingDeactivation?.let {
+            return it.await()
+        }
+        failWith?.let {
+            return it
+        }
         val updated = medications.first { it.id == medicationId }.copy(active = false)
         medications = medications.map { if (it.id == medicationId) updated else it }
         return AppResult.Success(updated)

@@ -35,4 +35,5 @@
     <string name="medications_denied_title">Restricted access</string>
     <string name="medications_denied_body">This person is not linked to your account.</string>
     <string name="medications_denied_back">Back</string>
+    <string name="treatment_manage_regimen">Manage regimen</string>
 </resources>

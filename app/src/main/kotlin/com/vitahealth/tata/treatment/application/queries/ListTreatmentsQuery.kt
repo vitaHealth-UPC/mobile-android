@@ -1,2 +1,3 @@
 package com.vitahealth.tata.treatment.application.queries
-data class ListTreatmentsQuery(val caregiverId: String,val olderAdultId: String)
+/** Identifies the caregiver and adult whose treatment catalog is requested. */
+data class ListTreatmentsQuery(val caregiverId: String, val olderAdultId: String)

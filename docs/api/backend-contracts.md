@@ -34,9 +34,9 @@ Base path `/api/v1/inventories`. Inventory is keyed by `medicationId` (a logical
 
 ### Endpoints
 
-- `POST /api/v1/inventories` — register the initial stock (US-40). Body `{ "medicationId": String, "initialQuantity": Int, "replenishmentThreshold": Int }`. `201` returns the inventory resource. Only one inventory may exist per medication, and initial registration requires an existing active medication.
-- `GET /api/v1/inventories/{medicationId}` — remaining stock, threshold, low-stock flag and batches (US-41, US-42). `200` returns the inventory resource; `404` means no inventory is registered yet.
-- `POST /api/v1/inventories/{medicationId}/replenishments` — add a batch and increase stock (US-43). Body `{ "quantity": Int, "lot": String? }`. `201` returns the updated inventory resource.
+- `POST /api/v1/inventories` â€” register the initial stock (US-40). Body `{ "medicationId": String, "initialQuantity": Int, "replenishmentThreshold": Int }`. `201` returns the inventory resource. Only one inventory may exist per medication, and initial registration requires an existing active medication.
+- `GET /api/v1/inventories/{medicationId}` â€” remaining stock, threshold, low-stock flag and batches (US-41, US-42). `200` returns the inventory resource; `404` means no inventory is registered yet.
+- `POST /api/v1/inventories/{medicationId}/replenishments` â€” add a batch and increase stock (US-43). Body `{ "quantity": Int, "lot": String? }`. `201` returns the updated inventory resource.
 
 ### Response shapes
 
@@ -62,13 +62,13 @@ Timestamps are ISO-8601 strings on the wire. The shared Retrofit uses the defaul
 - `registerReplenishment`: `400 -> INVALID_QUANTITY`, `404 -> INVENTORY_NOT_FOUND`, `409 -> CONCURRENT_UPDATE`, other -> `REQUEST_FAILED`.
 - A thrown I/O exception -> `NETWORK_UNAVAILABLE`; malformed responses or unparseable inventory/batch timestamps -> `INVALID_RESPONSE`. Coroutine cancellation propagates to the caller.
 
-Quantity/threshold are validated in the application layer with the `Quantity` (> 0) and `ReorderThreshold` (>= 0) value objects before any request, so invalid input (the "Cantidad inválida" case) never reaches the network. Those app-born failures use the codes `INVALID_QUANTITY`, `INVALID_THRESHOLD` and `INVALID_MEDICATION_REFERENCE`. `GetInventoryStockQueryHandler` passes `INVENTORY_NOT_FOUND` through unchanged; the ViewModel turns it into the "not initialized" state. Each code (backend and app-born) resolves to a localized string in `app/src/main/res/values/inventory_strings.xml` and `app/src/main/res/values-b+es+419/inventory_strings.xml`; the UI never shows the backend `message` directly.
+Quantity/threshold are validated in the application layer with the `Quantity` (> 0) and `ReorderThreshold` (>= 0) value objects before any request, so invalid input (the "Cantidad invÃ¡lida" case) never reaches the network. Those app-born failures use the codes `INVALID_QUANTITY`, `INVALID_THRESHOLD` and `INVALID_MEDICATION_REFERENCE`. `GetInventoryStockQueryHandler` passes `INVENTORY_NOT_FOUND` through unchanged; the ViewModel turns it into the "not initialized" state. Each code (backend and app-born) resolves to a localized string in `app/src/main/res/values/inventory_strings.xml` and `app/src/main/res/values-b+es+419/inventory_strings.xml`; the UI never shows the backend `message` directly.
 
 ### Inventory metadata and coverage
 
 Replenishments accept an optional `lot` (trimmed, maximum 200 characters), which is persisted and returned on the batch. The app presents the Figma "Lote / nota" field and the last replenishment metadata.
 
-`daysRemaining` is computed by the backend as remaining stock divided by scheduled daily intake units, rounded down. The current intake model consumes one unit per scheduled intake. A medication without an active scheduled treatment returns null; the app displays "Sin estimación". Medication name and presentation are supplied from the treatment entry point.
+`daysRemaining` is computed by the backend as remaining stock divided by scheduled daily intake units, rounded down. The current intake model consumes one unit per scheduled intake. A medication without an active scheduled treatment returns null; the app displays "Sin estimaciÃ³n". Medication name and presentation are supplied from the treatment entry point.
 
 ## Accessibility preferences (US-35 and following)
 
@@ -118,20 +118,25 @@ The alert `id` is a numeric `int64` (`Long` in Android), unlike the UUID `String
 `PUT /api/v1/accounts/{accountId}/subscription` takes `{ "planCode": "ESSENTIAL" }` and returns the subscription representation. Choosing the plan the account already has changes nothing. `404 PLAN_NOT_FOUND` for an unknown code and `403 ACCOUNT_NOT_ACTIVE` for an account that is not active.
 ## Omission push (US-22)
 
-There is no REST endpoint for this flow: the backend Omission & Escalation context (TS-05 / TS-06) sends pushes on its own, and the OpenAPI document has no endpoint to register an FCM device token.
+The backend evaluates pending intakes, notification preferences and escalation policy to send reinforced reminders and caregiver alerts.
 
-- When an intake stays unconfirmed, the backend opens an omission case and sends one reinforced reminder to `user-<olderAdultId>`: title "Medication reminder", body "Your <medication> is still pending. Please confirm it when you take it." Quiet hours and the PUSH channel of the notification preferences can suppress it.
-- When the grace period ends (30 minutes by default) without confirmation, the intake becomes omitted and one caregiver alert goes to `caregivers-of-<olderAdultId>`: title "Medication not confirmed", body "<medication> was not confirmed. Please check how they are doing."
-- The message (`PushProviderMessage`) carries only `recipient`, `title` and `body`: no alert id and no data fields.
+`PUT /api/v1/push-devices/{installationId}` registers or rotates an installation using `{ "token": String }`. The installation identifier is a canonical UUID; the nonblank token has a maximum length of 4096 characters. Ownership comes from the authenticated bearer, not from fields supplied by Android. A successful response contains `{ installationId, updatedAt }`. `DELETE /api/v1/push-devices/{installationId}` removes the current session's registration and returns `204`.
 
-The app follows those recipients as FCM topics: the caregiver when the family summary opens, the older adult when the home opens. It shows its own localized text from the topic and the medication in the body. A tapped caregiver alert opens the alert list of that older adult and, on top of it, the detail of its most recent OPEN alert for that medication, read from `openAlerts` of `GET /api/v1/older-adults/{olderAdultId}/status?caregiverId=`, because the push has no alert id. A tapped reminder opens the older adult home. The token registration is behind `DeviceTokenRegistry`, pending until the backend publishes an endpoint. Delivery needs a Firebase project (`app/google-services.json`, not versioned) and a backend provider that publishes to those topics; the deployed backend logs the messages instead of sending them.
+Android persists an installation UUID independently of account credentials. The process-owned coordinator recovers Firebase's current token when a valid session appears and forwards token rotation from `OmissionMessagingService`. Each request captures its session and rejects obsolete results after a credential change. Before sign-out, authenticated removal has a bounded wait; the account session is then ended through Identity. An unconfigured Firebase build does not register a device.
 
-On the home, the "Second reminder" card shows while the next dose is `PENDING` after its scheduled time; the intake resource does not say whether the reminder push went out.
+The direct FCM data payload uses schemaVersion 1 and carries deliveryId, intakeId, olderAdultId, kind, medicationName and scheduledAt. Android validates every required field before displaying localized text. Recipient checks use the current valid session and the remembered caregiver/adult relationship. Delivery retries reuse the notification identity and do not alert again while that notification remains present.
+
+Versioned reminder taps preserve intakeId and open that dose detail. Caregiver taps select an open alert for that exact intake; a missing explicit reference leaves the alert list instead of opening an unrelated alert. Current session access is rechecked before navigation and after alert lookup. Temporary token-fetch or registration failures receive three process-scoped retries after 5, 15 and 60 seconds; authorization and invalid-data failures are not retried.
+
+Clinical push uses authenticated device registration; Android creates no new topic subscriptions. Legacy audiences `user-<olderAdultId>` and `caregivers-of-<olderAdultId>` inferred from persisted targets are retired at process startup through acknowledged Firebase unsubscribe calls, with retry after failures. Targets remain available for navigation and repeated migration after restart. Delivery requires Firebase configuration in Android and a configured backend push provider; the unconfigured backend provider reports failure instead of recording a delivery. HTTP and JVM tests do not demonstrate live FCM delivery or completed retirement on a real installation.
+
+On the home, the second-reminder card derives from the next pending intake and its scheduled time. That presentation does not prove a push was delivered.
+
 ### Alert follow-up status (US-31)
 
 `PUT /api/v1/older-adults/{olderAdultId}/alerts/{alertId}/status?caregiverId=` with body `UpdateAlertStatusResource` `{ "status": "ATTENDED" | "CLOSED" }` returns the updated `AlertSummaryResource` (`200`). The schema enum also lists `OPEN`, but the backend only accepts `ATTENDED` and `CLOSED`, so the app never sends `OPEN`. Errors: `400` status not accepted, `404` follow-up or alert not found, `409` the alert cannot move to that status. No `403` is documented; the app treats one like the reads.
 
-The app offers OPEN → ATTENDED ("Mark as attended"), OPEN or ATTENDED → CLOSED ("Close alert", after a confirmation because a closed alert cannot be reopened) and no action on a CLOSED alert. On `409` it reloads the alert detail and shows its current status. A CLOSED alert leaves `openAlerts`; the list refreshes when it is shown again.
+The app offers OPEN â†’ ATTENDED ("Mark as attended"), OPEN or ATTENDED â†’ CLOSED ("Close alert", after a confirmation because a closed alert cannot be reopened) and no action on a CLOSED alert. On `409` it reloads the alert detail and shows its current status. A CLOSED alert leaves `openAlerts`; the list refreshes when it is shown again.
 
 ## Follow-up notes (US-30)
 
@@ -157,11 +162,11 @@ PHONE opens the dialer with the number typed (`ACTION_DIAL`, no `CALL_PHONE` per
 
 ### Notas personales del adulto
 
-- `GET /api/v1/me/notes`: lista privada, más reciente primero, con `id`, `title`, `text`, `category` y `recordedAt`.
-- `POST /api/v1/me/notes`: cuerpo `{title, text, category}`; categorías `MEDICATION` o `ROUTINE`, título hasta 100 caracteres y texto hasta 1000. Devuelve 201 y la nota persistida.
-- El propietario proviene de la sesión PIN. No se acepta selector de propietario. Las sesiones de cuidador y configuración reciben 403.
-- Las notas de intervención del cuidador conservan `/api/v1/older-adults/{olderAdultId}/notes`; las notas personales no se incorporan a ese historial.
-- Un error de guardado conserva el formulario y sus datos. La lista agrega la respuesta real del servidor y bloquea el doble envío.
+- `GET /api/v1/me/notes`: lista privada, mÃ¡s reciente primero, con `id`, `title`, `text`, `category` y `recordedAt`.
+- `POST /api/v1/me/notes`: cuerpo `{title, text, category}`; categorÃ­as `MEDICATION` o `ROUTINE`, tÃ­tulo hasta 100 caracteres y texto hasta 1000. Devuelve 201 y la nota persistida.
+- El propietario proviene de la sesiÃ³n PIN. No se acepta selector de propietario. Las sesiones de cuidador y configuraciÃ³n reciben 403.
+- Las notas de intervenciÃ³n del cuidador conservan `/api/v1/older-adults/{olderAdultId}/notes`; las notas personales no se incorporan a ese historial.
+- Un error de guardado conserva el formulario y sus datos. La lista agrega la respuesta real del servidor y bloquea el doble envÃ­o.
 
 ### Omission preserved outcome
 
@@ -170,3 +175,130 @@ After `INTAKE_NOT_CONFIRMABLE`, the detail is read again. An `OMITTED` response 
 ### Recorded dose detail
 
 A recorded dose loads the next intake for its older adult and excludes its own ID. When no next intake is available, the schedule card is labeled as the current dose schedule. Clinical indication and recurrence remain unspecified unless supplied by the contract. ES is the resource fallback; the EN prototype uses localized detail resources.
+
+
+## Treatment reminder timing
+
+PUT `/api/v1/treatments/{treatmentId}/regimen` distinguishes two values:
+
+- `reminderLeadMinutes`: 0..1440 minutes before the scheduled intake.
+- `followUpDelayMinutes`: optional 0..1440 minutes after the scheduled intake before it is reported unconfirmed. Null preserves the global server waiting period for older clients/configurations.
+
+Both values persist and are returned in treatment details. Android sends its post-dose setting as `followUpDelayMinutes` and verifies the server receipt before activation. This extended contract remains local until the accumulated backend changes are published.
+
+Intake queries pending candidates through the evaluation time and applies the owning treatment's follow-up delay through the public Treatment ACL. An absent delay uses the command's global cutoff. Already reported or confirmed outcomes are not replayed. This boundary triggers the unconfirmed event; it does not prove notification delivery.
+
+
+### Cronología persistida de alertas
+
+`GET /api/v1/older-adults/{olderAdultId}/alerts/{alertId}/timeline?caregiverId={caregiverId}`
+
+Requiere sesión y vínculo con consentimiento vigente. Devuelve una lista
+`[{"type":"INTAKE_SCHEDULED","occurredAt":"2026-10-26T12:00:00Z"}, ...]`.
+Los tipos disponibles son `INTAKE_SCHEDULED`, `ALERT_GENERATED` y, cuando
+existe un cierre persistido, `ALERT_CLOSED`. No se deduce la entrega de un
+recordatorio a partir del horario. Android lo consume mediante
+`RemoteAlertHistoryReader`. El backend local verifica 401 sin sesión,
+403 sin autorización o con consentimiento revocado y 404 para alerta inexistente.
+Esta evidencia local no confirma que el endpoint esté publicado en Render.
+
+
+### Contraste estático de rutas: 26-10-2026
+
+Las 63 combinaciones únicas de método y ruta declaradas por Retrofit tienen
+contraparte en los controladores del backend normalizado, incluida cronología.
+Esta comparación de código no verifica payloads, llamadas efectivas ni despliegue.
+Hay 14 operaciones adicionales del servidor: salud, autorización y detalle de
+vínculo, retiro de consentimiento por DELETE, detalle de medicamento, contacto
+de emergencia y consultas/consolidaciones analíticas. Su ausencia como declaración
+Retrofit requiere revisar consumidores y alternativas existentes antes de decidir
+si falta una acción de producto; no justifica crear pantallas automáticamente.
+Inventario reproducible local:
+`C:/Users/david/.codex/tmp/tata-contract-route-comparison-corrected-20261026.json`.
+
+
+### Operaciones adicionales: clasificación comprobada
+
+| Operaciones | Clasificación |
+| --- | --- |
+| GET /health y /actuator/health | Diagnóstico del servicio; no requiere pantalla de negocio. |
+| GET care-links/authorization | Autorización explícita; las operaciones protegidas siguen siendo autoridad. |
+| GET care-links/{id} | Detalle: Android recibe evidencia de vínculo en aceptación, consentimiento y lista confirmada. |
+| DELETE care-links/{id}/consent | Conectado al final del inicio del adulto, con confirmación explícita. El rechazo inicial por POST sigue siendo una operación distinta. |
+| GET medications/{id} | Android consulta el catálogo en gestión; comprobar frescura sin añadir consultas redundantes. |
+| GET adherence/insights | Alias de adherence/insight ya consumido. |
+| GET adherence/weekly, patterns, history, recommendations | Consultas por fechas explícitas; Android usa summary e insight por días y zona. No ofrecen selección arbitraria de fechas. |
+| POST adherence/consolidations y GET adherence/consolidations/{id} | Evidencia inmutable; Android consulta proyecciones actuales, sin visor de snapshots. |
+| PUT older-adults/{id}/emergency-contact | Conectado desde Persona vinculada > Editar > Editar contacto de emergencia. Usa un comando propio, credencial capturada y comprobación del recibo. Los contactos de política de notificaciones siguen siendo independientes. |
+
+Salvo salud, las rutas incluyen /api/v1; las de Analytics están bajo
+older-adults/{olderAdultId}. Priorizar retiro de consentimiento y edición de
+contacto. Esta clasificación no certifica que esas acciones estén implementadas.
+
+
+El formulario de contacto exige nombre, relación y teléfono completos, con límites
+160/80/40 equivalentes al servidor. Cancelar no envía cambios. Guardar no modifica
+nombre ni nacimiento del adulto y solo cierra tras recibo válido y recarga. Una
+respuesta posterior a cambio de sesión se descarta; una denegación elimina la ficha
+visible. La verificación contra Render continúa separada de las pruebas locales.
+
+
+### Retiro de consentimiento: contrato Android
+
+`AuthorizedConsentWithdrawal` resuelve `careLinkId` mediante
+`GET /api/v1/sessions/current`, verifica subjectId y rol OLDER_ADULT y después
+solicita `DELETE /api/v1/care-links/{careLinkId}/consent` sin cuerpo.
+Solo acepta 204 como confirmación. Comprueba sesión vigente antes de escribir y
+al recibir el resultado; no borra credenciales ni decide navegación por sí mismo.
+Las pruebas HTTP del contrato pasan en `tata-consent-withdrawal-contract-20261026.log`.
+La confirmación nativa está conectada en el inicio del adulto. El host coordina
+retiro, limpieza del dispositivo y cierre de sesión; los resultados de otra cuenta
+se rechazan. Gate local `tata-consent-withdrawal-final-gate-20261026.log`:
+844 pruebas JVM / 163 suites, cero fallos y errores, producción y AndroidTest
+compilan. Falta verificar persistencia y revocación contra el servidor desplegado.
+
+
+### Integración HTTP con Spring local: 26-10-2026
+
+La comprobación optativa `:app:verifyLocalBackendContracts` ejecuta los adaptadores
+reales de Android contra Spring/JPA y una base H2 nueva, por TCP en localhost.
+Verifica contacto persistido, conservación de datos básicos, cronología, retiro
+con 204, sesión adulta rechazada con 401 y seguimiento del cuidador rechazado con
+403. No utiliza MockWebServer ni respuestas HTTP prefabricadas.
+
+Evidencia: `tata-live-backend-android-contracts-final-20261026.log` en
+`C:/Users/david/.codex/tmp`. Procedimiento y alcance:
+[Integración local](../testing/local-backend-contracts.md).
+Las credenciales pertenecen solo al fixture y se eliminan al cerrar el servidor.
+Esta prueba no verifica Render, PostgreSQL ni el recorrido completo desde Compose.
+
+
+### Identity: opciones visuales y contratos efectivos
+
+| Opción | Implementación actual |
+| --- | --- |
+| Correo y contraseña | SignInCommandHandler y POST /api/v1/sessions. |
+| Crear cuenta | RegisterCaregiverCommandHandler y POST /api/v1/accounts. |
+| Verificar correo y reenviar código | POST /api/v1/accounts/verification y /api/v1/email-verification-requests. |
+| Cuenta demo | Rellenado explícito del formulario; requiere autenticación del servidor. |
+| Google / Facebook | Diálogo informativo; faltan SDK/intercambio de token y contrato de autenticación del backend. |
+| Recuperar contraseña | Diálogo de ayuda; falta solicitud y confirmación de restablecimiento en ambos extremos. |
+
+Actualizar Render permite contrastar los contratos implementados. No implementa
+por sí mismo los proveedores sociales ni el restablecimiento de contraseña.
+
+
+### Recuperación de contraseña: contratos implementados
+
+- POST `/api/v1/password-recovery-requests`, cuerpo `{email}`: 202 sin cuerpo
+  para correo existente, pendiente o inexistente. Solo cuentas activas generan
+  reto y entrega cifrada; reenvíos de la misma cuenta tienen intervalo de 60 s.
+- POST `/api/v1/password-recoveries`, cuerpo `{email,code,newPassword}`: 204
+  sin credenciales al completar. Evidencia inválida usa 400 con
+  `title=INVALID_RECOVERY_CODE`, sin distinguir cuenta inexistente, código usado,
+  vencido o bloqueado. El cambio revoca sesiones de la cuenta.
+
+Android dispone de PasswordRecovery y RemotePasswordRecovery, probados con
+Retrofit/MockWebServer en `tata-android-recovery-contract-20261026.log`.
+El formulario todavía no está conectado. El límite por cuenta no reemplaza
+protección de abuso global o por origen en el despliegue. No se envió correo real.

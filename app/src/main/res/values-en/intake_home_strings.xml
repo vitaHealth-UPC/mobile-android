@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="home_empty_status_title">Schedule up to date</string>
+    <string name="home_empty_status_description">There are no upcoming pending doses.</string>
+</resources>

@@ -95,4 +95,7 @@
     <string name="contact_channel_whatsapp">WhatsApp: %1$s</string>
     <string name="contact_retry">Check contact again</string>
     <string name="contact_no_app">No app on this device can open this contact.</string>
+    <string name="notes_subtitle_person">Follow-up and observations about %1$s.</string>
+    <string name="notes_shared_history">Shared history</string>
+    <string name="notes_shared_history_body">Notes are linked to the person and the caregiver who records them.</string>
 </resources>

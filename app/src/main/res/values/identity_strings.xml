@@ -4,6 +4,7 @@
     <string name="plan_subtitle">Administra las capacidades de tu cuenta</string>
     <string name="plan_back">Volver</string>
     <string name="plan_loading">Cargando tu plan…</string>
+    <string name="plan_sign_in">Iniciar sesión</string>
     <string name="plan_retry">Reintentar</string>
     <string name="plan_header">Plan %1$s</string>
     <string name="plan_price_per_month">%1$s / mes</string>

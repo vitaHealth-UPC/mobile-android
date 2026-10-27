@@ -1,21 +1,26 @@
 package com.vitahealth.tata.identity.application
 
-import com.vitahealth.tata.identity.domain.model.AccountStatus
-import com.vitahealth.tata.identity.domain.model.CaregiverAccount
+import com.vitahealth.tata.identity.domain.model.entities.CaregiverAccount
+import com.vitahealth.tata.identity.domain.model.valueobjects.AccountStatus
+import com.vitahealth.tata.identity.domain.repositories.IdentityRepository
 import com.vitahealth.tata.shared.common.result.AppResult
-
-val pendingAccount = CaregiverAccount("account-1", "Diego", "diego@example.com", AccountStatus.PENDING_VERIFICATION)
+val pendingAccount =
+    CaregiverAccount("account-1", "Diego", "diego@example.com", AccountStatus.PENDING_VERIFICATION)
 val activeAccount = pendingAccount.copy(status = AccountStatus.ACTIVE)
 
 /** A backend that always answers with [result] and remembers what it was asked. */
 class FakeIdentityRepository(
-    var result: AppResult<CaregiverAccount> = AppResult.Success(pendingAccount),
+    var result: AppResult<CaregiverAccount> = AppResult.Success(pendingAccount)
 ) : IdentityRepository {
     val registrations = mutableListOf<Triple<String, String, String>>()
     val verifications = mutableListOf<Pair<String, String>>()
     val newCodeRequests = mutableListOf<String>()
 
-    override suspend fun registerCaregiver(name: String, email: String, password: String): AppResult<CaregiverAccount> {
+    override suspend fun registerCaregiver(
+        name: String,
+        email: String,
+        password: String,
+    ): AppResult<CaregiverAccount> {
         registrations += Triple(name, email, password)
         return result
     }

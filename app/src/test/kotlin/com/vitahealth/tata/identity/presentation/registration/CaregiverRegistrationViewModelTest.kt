@@ -2,10 +2,12 @@ package com.vitahealth.tata.identity.presentation.registration
 
 import com.vitahealth.tata.identity.application.FakeIdentityRepository
 import com.vitahealth.tata.identity.application.activeAccount
+import com.vitahealth.tata.identity.application.commands.RegisterCaregiverCommandHandler
+import com.vitahealth.tata.identity.application.commands.RequestNewVerificationCommandHandler
+import com.vitahealth.tata.identity.application.commands.VerifyCaregiverEmailCommandHandler
 import com.vitahealth.tata.identity.application.failure
-import com.vitahealth.tata.identity.application.handlers.RegisterCaregiverCommandHandler
-import com.vitahealth.tata.identity.application.handlers.RequestNewVerificationCommandHandler
-import com.vitahealth.tata.identity.application.handlers.VerifyCaregiverEmailCommandHandler
+import com.vitahealth.tata.identity.presentation.registration.viewmodel.CaregiverRegistrationViewModel
+import com.vitahealth.tata.identity.presentation.registration.viewmodel.RegistrationStep
 import com.vitahealth.tata.shared.common.result.AppResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -19,7 +21,6 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-
 @OptIn(ExperimentalCoroutinesApi::class)
 class CaregiverRegistrationViewModelTest {
     private val repository = FakeIdentityRepository()
@@ -34,15 +35,17 @@ class CaregiverRegistrationViewModelTest {
         Dispatchers.resetMain()
     }
 
-    private fun viewModel() = CaregiverRegistrationViewModel(
-        registerHandler = RegisterCaregiverCommandHandler(repository),
-        verifyHandler = VerifyCaregiverEmailCommandHandler(repository),
-        requestNewVerificationHandler = RequestNewVerificationCommandHandler(repository),
-    ).also {
-        it.onNameChange("Diego")
-        it.onEmailChange("diego@example.com")
-        it.onPasswordChange("password1")
-    }
+    private fun viewModel() =
+        CaregiverRegistrationViewModel(
+                registerHandler = RegisterCaregiverCommandHandler(repository),
+                verifyHandler = VerifyCaregiverEmailCommandHandler(repository),
+                requestNewVerificationHandler = RequestNewVerificationCommandHandler(repository),
+            )
+            .also {
+                it.onNameChange("Diego")
+                it.onEmailChange("diego@example.com")
+                it.onPasswordChange("password1")
+            }
 
     @Test
     fun aValidRegistrationMovesToTheVerificationStep() {
@@ -75,7 +78,10 @@ class CaregiverRegistrationViewModelTest {
 
         model.createAccount()
 
-        assertEquals("La contraseña debe tener al menos 8 caracteres.", model.state.value.errorMessage)
+        assertEquals(
+            "La contraseña debe tener al menos 8 caracteres.",
+            model.state.value.errorMessage,
+        )
         assertTrue(repository.registrations.isEmpty())
     }
 
@@ -181,7 +187,8 @@ class CaregiverRegistrationViewModelTest {
         model.onVerificationCodeChange("123456")
         repository.result = failure("VERIFICATION_EXPIRED")
         model.verifyEmail()
-        repository.result = AppResult.Success(com.vitahealth.tata.identity.application.pendingAccount)
+        repository.result =
+            AppResult.Success(com.vitahealth.tata.identity.application.pendingAccount)
 
         model.requestNewVerification()
 
@@ -210,7 +217,10 @@ class CaregiverRegistrationViewModelTest {
 
         model.requestNewVerification()
 
-        assertEquals("No encontramos la cuenta asociada a este correo.", model.state.value.errorMessage)
+        assertEquals(
+            "No encontramos la cuenta asociada a este correo.",
+            model.state.value.errorMessage,
+        )
         assertEquals(RegistrationStep.VerificationExpired, model.state.value.step)
     }
 }

@@ -1,21 +1,13 @@
 package com.vitahealth.tata.omission.application.queries
 
-import com.vitahealth.tata.omission.domain.model.OmissionPushKind
+import com.vitahealth.tata.omission.domain.model.valueobjects.OmissionPushKind
 
+/**
+ * References supplied by a notification tap before recipient authorization and route resolution.
+ */
 data class ResolvePushDestinationQuery(
     val kind: OmissionPushKind,
     val olderAdultId: String,
     val medicationName: String? = null,
+    val intakeId: String? = null,
 )
-
-/** Screen a tapped omission notification opens. */
-sealed interface PushDestination {
-    /**
-     * Caregiver alerts of the older adult (US-27). The push carries no alert id: the app opens the list and,
-     * when it finds the open alert of [medicationName], its detail.
-     */
-    data class CaregiverAlerts(val caregiverId: String, val olderAdultId: String, val medicationName: String? = null) : PushDestination
-
-    /** Home of the older adult, where the pending intake can be confirmed. */
-    data class OlderAdultHome(val olderAdultId: String, val olderAdultName: String) : PushDestination
-}

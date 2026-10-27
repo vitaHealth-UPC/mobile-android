@@ -1,0 +1,4 @@
+# Project-specific R8 rules belong here.
+# Android Gradle Plugin combines .keep files from this source set.
+# https://developer.android.com/topic/performance/app-optimization/keep-rules-overview
+# Add narrowly scoped rules only when verified reflection requires them.

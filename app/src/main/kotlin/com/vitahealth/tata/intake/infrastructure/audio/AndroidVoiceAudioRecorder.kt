@@ -2,8 +2,8 @@ package com.vitahealth.tata.intake.infrastructure.audio
 
 import android.content.Context
 import android.media.MediaRecorder
-import com.vitahealth.tata.intake.application.VoiceAudioRecorder
-import com.vitahealth.tata.intake.application.VoiceRecording
+import com.vitahealth.tata.intake.application.inputs.VoiceRecording
+import com.vitahealth.tata.intake.application.ports.VoiceAudioRecorder
 import com.vitahealth.tata.shared.common.result.AppResult
 import java.io.File
 

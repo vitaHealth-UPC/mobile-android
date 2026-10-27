@@ -1,11 +1,6 @@
 package com.vitahealth.tata.treatment.application.commands
 
-enum class TreatmentLifecycleAction {
-    ACTIVATE,
-    PAUSE,
-    RESUME,
-}
-
+/** Requests a lifecycle transition for one caregiver-owned treatment. */
 data class ChangeTreatmentStatusCommand(
     val caregiverId: String,
     val treatmentId: String,

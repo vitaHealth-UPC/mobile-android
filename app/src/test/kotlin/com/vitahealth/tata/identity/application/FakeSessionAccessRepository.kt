@@ -1,9 +1,11 @@
 package com.vitahealth.tata.identity.application
 
+import com.vitahealth.tata.identity.application.ports.SessionAccessRepository
+import com.vitahealth.tata.identity.application.readmodels.SessionSubject
 import com.vitahealth.tata.shared.common.result.AppResult
-
 class FakeSessionAccessRepository : SessionAccessRepository {
-    var result: AppResult<SessionSubject> = AppResult.Success(SessionSubject("caregiver-1", "CAREGIVER"))
+    var result: AppResult<SessionSubject> =
+        AppResult.Success(SessionSubject("caregiver-1", "CAREGIVER"))
     var registerPinResult: AppResult<Unit> = AppResult.Success(Unit)
     val signIns = mutableListOf<Pair<String, String>>()
     val pinSignIns = mutableListOf<Pair<String, String>>()
@@ -16,7 +18,10 @@ class FakeSessionAccessRepository : SessionAccessRepository {
         return result
     }
 
-    override suspend fun signInWithPin(olderAdultId: String, pin: String): AppResult<SessionSubject> {
+    override suspend fun signInWithPin(
+        olderAdultId: String,
+        pin: String,
+    ): AppResult<SessionSubject> {
         pinSignIns += olderAdultId to pin
         return result
     }
