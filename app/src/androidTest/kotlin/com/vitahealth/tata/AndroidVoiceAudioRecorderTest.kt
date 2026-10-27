@@ -15,7 +15,7 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class AndroidVoiceAudioRecorderTest {
 
-    @Test fun capturesMp4AudioAndDeletesThePrivateTemporaryFile() {
+    @Test fun capturesBackendCompatiblePcm16WavWithoutLeavingARecordingFile() {
         val context = ApplicationProvider.getApplicationContext<Context>()
         InstrumentationRegistry.getInstrumentation().uiAutomation.grantRuntimePermission(context.packageName, Manifest.permission.RECORD_AUDIO)
         val before = context.cacheDir.listFiles().orEmpty().filter { it.name.startsWith("intake-voice-") }.map { it.name }.toSet()
@@ -26,9 +26,22 @@ class AndroidVoiceAudioRecorderTest {
             val result = recorder.finish()
             assertTrue("Recorder must return captured audio: $result", result is AppResult.Success)
             val audio = (result as AppResult.Success).value
-            assertEquals("audio/mp4", audio.contentType)
-            assertTrue(audio.audio.size > 8)
-            assertEquals("ftyp", String(audio.audio, 4, 4, Charsets.US_ASCII))
+            assertEquals("audio/wav", audio.contentType)
+            assertTrue(audio.audio.size > 44)
+            assertEquals("RIFF", String(audio.audio, 0, 4, Charsets.US_ASCII))
+            assertEquals("WAVE", String(audio.audio, 8, 4, Charsets.US_ASCII))
+            assertEquals("fmt ", String(audio.audio, 12, 4, Charsets.US_ASCII))
+            assertEquals("data", String(audio.audio, 36, 4, Charsets.US_ASCII))
+            val header = java.nio.ByteBuffer.wrap(audio.audio).order(java.nio.ByteOrder.LITTLE_ENDIAN)
+            assertEquals(audio.audio.size - 8, header.getInt(4))
+            assertEquals(1, header.getShort(20).toInt())
+            assertEquals(1, header.getShort(22).toInt())
+            assertEquals(16000, header.getInt(24))
+            assertEquals(32000, header.getInt(28))
+            assertEquals(2, header.getShort(32).toInt())
+            assertEquals(16, header.getShort(34).toInt())
+            assertEquals(audio.audio.size - 44, header.getInt(40))
+            assertTrue("The recorder must not exceed the eight-second cap", audio.audio.size <= 44 + 16000 * 2 * 8)
         } finally { recorder.cancel() }
         val after = context.cacheDir.listFiles().orEmpty().filter { it.name.startsWith("intake-voice-") }.map { it.name }.toSet()
         assertEquals(before, after)
