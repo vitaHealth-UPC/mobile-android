@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="access_error_pin_locked">Tu PIN está bloqueado temporalmente. Intenta nuevamente en 15 minutos.</string>
+    <string name="access_error_credentials">Los datos de acceso no son correctos. Inténtalo otra vez.</string>
+    <string name="access_error_consent">Verifica tu cuenta y completa la vinculación para continuar.</string>
+    <string name="access_error_network">No hay conexión. Revisa tu red e inténtalo otra vez.</string>
+    <string name="access_error_required_fields">Completa tu correo y contraseña.</string>
+    <string name="access_error_session_changed">La sesión cambió durante el acceso. Vuelve a abrir el inicio de sesión.</string>
+    <string name="access_error_adult_session">Ingresa con la cuenta del adulto mayor para configurar su PIN.</string>
+    <string name="access_error_generic">No pudimos completar el acceso. Inténtalo nuevamente.</string>
+    <string name="access_error_authentication_required">No pudimos validar el acceso. Vuelve a ingresar tus datos.</string>
+    <string name="access_error_social_unavailable">El acceso social no está configurado todavía. Ingresa con tu correo y contraseña.</string>
+    <string name="access_error_social_credential">No se pudo verificar la cuenta externa. Inténtalo nuevamente.</string>
+    <string name="access_error_social_email">El proveedor no verificó tu correo. Vincula tu cuenta desde una sesión Tata.</string>
+    <string name="access_error_social_link">Este correo ya tiene una cuenta Tata. Ingresa con tu contraseña antes de vincular Google o Facebook.</string>
+    <string name="access_error_social_provider">No se pudo completar la conexión con Google o Facebook. Inténtalo nuevamente.</string>
+    <string name="access_social_link_title">Vincular cuenta externa</string>
+    <string name="access_social_link_description">Conecta Google o Facebook con esta cuenta Tata. No se reemplazará tu sesión ni se vincularán otras cuentas por correo.</string>
+    <string name="access_social_link_success">Cuenta vinculada. Ya puedes usar ese proveedor para iniciar sesión.</string>
+    <string name="access_social_link_close">Cerrar</string>
+</resources>

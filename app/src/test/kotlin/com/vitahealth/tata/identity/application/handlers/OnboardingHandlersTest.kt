@@ -1,15 +1,18 @@
 package com.vitahealth.tata.identity.application.handlers
 
-import com.vitahealth.tata.identity.application.OnboardingRepository
+import com.vitahealth.tata.identity.application.commands.CompleteOnboardingCommandHandler
+import com.vitahealth.tata.identity.application.ports.OnboardingRepository
+import com.vitahealth.tata.identity.application.queries.GetOnboardingStatusQueryHandler
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
-
 class OnboardingHandlersTest {
     private class InMemoryOnboarding(var seen: Boolean = false) : OnboardingRepository {
         var writes = 0
+
         override fun hasSeenOnboarding() = seen
+
         override fun markOnboardingSeen() {
             writes++
             seen = true

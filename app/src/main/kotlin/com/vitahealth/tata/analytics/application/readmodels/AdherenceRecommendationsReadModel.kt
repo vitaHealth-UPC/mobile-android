@@ -1,14 +1,11 @@
 package com.vitahealth.tata.analytics.application.readmodels
 
-data class RecommendationReadModel(
-    val title: String,
-    val description: String,
-)
+import com.vitahealth.tata.analytics.domain.model.valueobjects.AdherenceRecommendation
 
+/** Typed insight facts, concentration values and supported recommendation actions. */
 data class AdherenceRecommendationsReadModel(
     val periodDays: Int,
-    val patternTitle: String,
-    val patternSummary: String,
+    val pattern: AdherenceInsightPatternReadModel,
     val concentration: List<List<Float>>,
-    val recommendations: List<RecommendationReadModel>,
+    val recommendations: List<AdherenceRecommendation>,
 )

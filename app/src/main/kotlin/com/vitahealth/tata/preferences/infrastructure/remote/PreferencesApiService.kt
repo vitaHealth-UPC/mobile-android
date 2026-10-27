@@ -6,52 +6,7 @@ import retrofit2.http.GET
 import retrofit2.http.PUT
 import retrofit2.http.Path
 
-data class QuietHoursDto(val start: String, val end: String)
-
-data class ChannelDto(val type: String, val enabled: Boolean)
-
-data class NotificationPolicyDto(
-    val reminderMinutes: Int,
-    val pendingAlertMinutes: Int,
-    val omittedAlertMinutes: Int,
-    val escalationMinutes: Int,
-    val dailySummaryTime: String?,
-)
-
-data class EmergencyContactDto(val name: String, val phone: String)
-
-data class UpdateNotificationPolicyRequest(
-    val policy: NotificationPolicyDto,
-    val contacts: List<EmergencyContactDto>,
-)
-
-data class UserPreferencesResponse(
-    val userId: String?,
-    val textSize: String?,
-    val highContrast: Boolean,
-    val reducedMotion: Boolean,
-    val readingAssistance: Boolean,
-    val voiceConfirmationEnabled: Boolean,
-    val quietHours: QuietHoursDto?,
-    val notificationChannels: List<ChannelDto>?,
-    val notificationPolicy: NotificationPolicyDto? = null,
-    val emergencyContacts: List<EmergencyContactDto>? = null,
-)
-
-data class UpdateTextSizeRequest(val textSize: String)
-
-/**
- * Quiet hours are sent as null to remove them; Gson leaves the field out, which the backend reads
- * as null.
- */
-data class UpdateNotificationPreferencesRequest(
-    val quietHours: QuietHoursDto?,
-    val channels: List<ChannelDto>,
-)
-
-/** Body of every on/off preference endpoint. */
-data class EnabledRequest(val enabled: Boolean)
-
+/** HTTP contract for user accessibility and notification preferences. */
 interface PreferencesApiService {
     @PUT("api/v1/users/{userId}/notification-preferences/policy")
     suspend fun updateNotificationPolicy(
@@ -70,6 +25,12 @@ interface PreferencesApiService {
 
     @PUT("api/v1/users/{userId}/preferences/contrast")
     suspend fun updateHighContrast(
+        @Path("userId") userId: String,
+        @Body request: EnabledRequest,
+    ): Response<UserPreferencesResponse>
+
+    @PUT("api/v1/users/{userId}/preferences/dark-theme")
+    suspend fun updateDarkTheme(
         @Path("userId") userId: String,
         @Body request: EnabledRequest,
     ): Response<UserPreferencesResponse>

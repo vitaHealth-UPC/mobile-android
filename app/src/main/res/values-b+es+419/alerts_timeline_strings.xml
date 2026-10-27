@@ -1,0 +1,21 @@
+<resources>
+    <string name="alerts_filter_upcoming">Próximas</string>
+    <string name="alerts_filter_completed">Completadas</string>
+    <string name="alerts_dose_upcoming">Recordatorio próximo</string>
+    <string name="alerts_dose_confirmed">Toma confirmada</string>
+    <string name="alerts_dose_late">Toma confirmada con retraso</string>
+    <string name="alerts_view_dose">Ver toma en el resumen</string>
+    <string name="alerts_confirmed_badge">Confirmada</string>
+    <string name="alerts_timeline_person">%1$s, %2$s</string>
+    <string name="alerts_no_pending">Sin alertas pendientes</string>
+    <string name="alerts_due_minutes">En %1$d min</string>
+    <string name="alerts_due_hours_minutes">En %1$d h %2$d min</string>
+    <string name="alerts_dose_pending">Toma pendiente</string>
+    <string name="alert_person_summary">Ver resumen</string>
+    <string name="alert_person_age">%1$d años</string>
+    <string name="alert_timeline_title">Línea de tiempo de la alerta</string>
+    <string name="alert_timeline_scheduled">Toma programada</string>
+    <string name="alert_timeline_opened">Alerta generada</string>
+    <string name="alert_timeline_closed">Alerta cerrada</string>
+    <string name="alert_timeline_reinforced_sent">Recordatorio reforzado enviado</string>
+</resources>

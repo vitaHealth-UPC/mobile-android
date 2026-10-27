@@ -1,9 +1,12 @@
 package com.vitahealth.tata.treatment.application.handlers
 
-import com.vitahealth.tata.treatment.application.commands.DeactivateMedicationCommand
-import com.vitahealth.tata.treatment.application.commands.UpdateMedicationCommand
-import com.vitahealth.tata.treatment.application.queries.ListMedicationsQuery
 import com.vitahealth.tata.shared.common.result.AppResult
+import com.vitahealth.tata.treatment.application.commands.DeactivateMedicationCommand
+import com.vitahealth.tata.treatment.application.commands.DeactivateMedicationCommandHandler
+import com.vitahealth.tata.treatment.application.queries.ListMedicationsQuery
+import com.vitahealth.tata.treatment.application.queries.ListMedicationsQueryHandler
+import com.vitahealth.tata.treatment.application.commands.UpdateMedicationCommand
+import com.vitahealth.tata.treatment.application.commands.UpdateMedicationCommandHandler
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -51,7 +54,10 @@ class MedicationManagementHandlersTest {
 
     @Test
     fun updatingTrimsTheValuesBeforeSendingThem() = runBlocking {
-        val result = update(UpdateMedicationCommand(" caregiver-1 ", " med-1 ", " Losartán 100 ", " 100 mg "))
+        val result =
+            update(
+                UpdateMedicationCommand(" caregiver-1 ", " med-1 ", " Losartán 100 ", " 100 mg ")
+            )
 
         assertTrue(result is AppResult.Success)
         assertEquals(Triple("med-1", "Losartán 100", "100 mg"), repository.updates.single())

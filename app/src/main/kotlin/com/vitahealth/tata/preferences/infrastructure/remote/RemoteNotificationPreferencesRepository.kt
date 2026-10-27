@@ -1,16 +1,20 @@
 package com.vitahealth.tata.preferences.infrastructure.remote
 
-import com.vitahealth.tata.preferences.application.NotificationPreferencesRepository
-import com.vitahealth.tata.preferences.domain.model.NotificationPreferences
-import com.vitahealth.tata.preferences.domain.model.QuietHours
+import com.vitahealth.tata.preferences.domain.model.entities.UserPreferences
+import com.vitahealth.tata.preferences.domain.model.valueobjects.EmergencyContact
+import com.vitahealth.tata.preferences.domain.model.valueobjects.NotificationPolicy
+import com.vitahealth.tata.preferences.domain.model.valueobjects.NotificationPreferences
+import com.vitahealth.tata.preferences.domain.model.valueobjects.QuietHours
+import com.vitahealth.tata.preferences.domain.repositories.NotificationPreferencesRepository
 import com.vitahealth.tata.shared.common.result.AppResult
 
+/** Adapts notification settings, delivery policy and emergency recipients to HTTP. */
 class RemoteNotificationPreferencesRepository(private val api: PreferencesApiService) :
     NotificationPreferencesRepository {
     override suspend fun updatePolicy(
         userId: String,
-        policy: com.vitahealth.tata.preferences.domain.model.NotificationPolicy,
-        contacts: List<com.vitahealth.tata.preferences.domain.model.EmergencyContact>,
+        policy: NotificationPolicy,
+        contacts: List<EmergencyContact>,
     ): AppResult<NotificationPreferences> =
         preferencesRequest(userId) {
                 api.updateNotificationPolicy(
@@ -29,7 +33,9 @@ class RemoteNotificationPreferencesRepository(private val api: PreferencesApiSer
                     ),
                 )
             }
-            .notifications()
+            .notifications { received ->
+                received.policy == policy && received.emergencyContacts == contacts
+            }
 
     override suspend fun get(userId: String): AppResult<NotificationPreferences> =
         preferencesRequest(userId) { api.getPreferences(userId) }.notifications()
@@ -47,12 +53,23 @@ class RemoteNotificationPreferencesRepository(private val api: PreferencesApiSer
                     ),
                 )
             }
-            .notifications()
+            .notifications { received ->
+                received.quietHours == preferences.quietHours &&
+                    received.channels.associate { it.type to it.enabled } ==
+                        preferences.channels.associate { it.type to it.enabled }
+            }
 
-    private fun AppResult<com.vitahealth.tata.preferences.domain.model.UserPreferences>
-        .notifications(): AppResult<NotificationPreferences> =
+    private fun AppResult<UserPreferences>.notifications(
+        accepts: (NotificationPreferences) -> Boolean = { true }
+    ): AppResult<NotificationPreferences> =
         when (this) {
-            is AppResult.Success -> AppResult.Success(value.notifications)
+            is AppResult.Success ->
+                if (accepts(value.notifications)) AppResult.Success(value.notifications)
+                else
+                    AppResult.Failure(
+                        "El servidor no confirmó los ajustes solicitados.",
+                        code = "INVALID_PREFERENCES_RESPONSE",
+                    )
             is AppResult.Failure -> this
         }
 

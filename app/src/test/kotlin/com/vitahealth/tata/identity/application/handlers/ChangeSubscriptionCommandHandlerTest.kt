@@ -2,13 +2,13 @@ package com.vitahealth.tata.identity.application.handlers
 
 import com.vitahealth.tata.identity.application.FakeSubscriptionRepository
 import com.vitahealth.tata.identity.application.commands.ChangeSubscriptionCommand
+import com.vitahealth.tata.identity.application.commands.ChangeSubscriptionCommandHandler
 import com.vitahealth.tata.identity.application.essentialPlan
 import com.vitahealth.tata.shared.common.result.AppResult
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
-
 class ChangeSubscriptionCommandHandlerTest {
     private val repository = FakeSubscriptionRepository()
     private val handler = ChangeSubscriptionCommandHandler(repository)

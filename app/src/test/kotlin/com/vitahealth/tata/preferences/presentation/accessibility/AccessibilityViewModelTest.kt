@@ -4,16 +4,19 @@ import com.vitahealth.tata.preferences.FakeAccessibilityLocalStore
 import com.vitahealth.tata.preferences.FakeUserPreferencesRemote
 import com.vitahealth.tata.preferences.NetworkDown
 import com.vitahealth.tata.preferences.RejectedByServer
-import com.vitahealth.tata.preferences.application.handlers.ObserveAccessibilityPreferencesQueryHandler
-import com.vitahealth.tata.preferences.application.handlers.SyncUserPreferencesCommandHandler
-import com.vitahealth.tata.preferences.application.handlers.UpdateHighContrastCommandHandler
-import com.vitahealth.tata.preferences.application.handlers.UpdateReadingAssistanceCommandHandler
-import com.vitahealth.tata.preferences.application.handlers.UpdateReducedMotionCommandHandler
-import com.vitahealth.tata.preferences.application.handlers.UpdateTextSizeCommandHandler
-import com.vitahealth.tata.preferences.application.handlers.UpdateVoiceConfirmationCommandHandler
-import com.vitahealth.tata.preferences.domain.model.AccessibilityPreferences
-import com.vitahealth.tata.preferences.domain.model.TextSizeLevel
-import com.vitahealth.tata.preferences.infrastructure.OfflineFirstUserPreferencesRepository
+import com.vitahealth.tata.preferences.application.commands.SyncUserPreferencesCommandHandler
+import com.vitahealth.tata.preferences.application.commands.UpdateDarkThemeCommandHandler
+import com.vitahealth.tata.preferences.application.commands.UpdateHighContrastCommandHandler
+import com.vitahealth.tata.preferences.application.commands.UpdateReadingAssistanceCommandHandler
+import com.vitahealth.tata.preferences.application.commands.UpdateReducedMotionCommandHandler
+import com.vitahealth.tata.preferences.application.commands.UpdateTextSizeCommandHandler
+import com.vitahealth.tata.preferences.application.commands.UpdateVoiceConfirmationCommandHandler
+import com.vitahealth.tata.preferences.application.queries.ObserveAccessibilityPreferencesQueryHandler
+import com.vitahealth.tata.preferences.domain.model.valueobjects.AccessibilityPreferences
+import com.vitahealth.tata.preferences.domain.model.valueobjects.TextSizeLevel
+import com.vitahealth.tata.preferences.infrastructure.sync.OfflineFirstUserPreferencesRepository
+import com.vitahealth.tata.preferences.presentation.accessibility.viewmodel.AccessibilityMessage
+import com.vitahealth.tata.preferences.presentation.accessibility.viewmodel.AccessibilityViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -22,6 +25,7 @@ import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -47,12 +51,24 @@ class AccessibilityViewModelTest {
             userId = userId,
             observeAccessibility = ObserveAccessibilityPreferencesQueryHandler(repository),
             updateTextSize = UpdateTextSizeCommandHandler(repository),
+            updateDarkTheme = UpdateDarkThemeCommandHandler(repository),
             updateHighContrast = UpdateHighContrastCommandHandler(repository),
             updateReducedMotion = UpdateReducedMotionCommandHandler(repository),
             updateVoiceConfirmation = UpdateVoiceConfirmationCommandHandler(repository),
             updateReadingAssistance = UpdateReadingAssistanceCommandHandler(repository),
             syncPreferences = SyncUserPreferencesCommandHandler(repository),
         )
+    }
+
+    @Test
+    fun darkThemeSavesAndShowsOnlyAcknowledgedFeedback() {
+        val model = viewModel()
+        model.onDarkThemeChange(true)
+        assertTrue(model.state.value.preferences.darkTheme)
+        assertEquals(AccessibilityMessage.DarkThemeSaved, model.state.value.message)
+        model.onDarkThemeChange(false)
+        assertFalse(model.state.value.preferences.darkTheme)
+        assertEquals(AccessibilityMessage.LightThemeSaved, model.state.value.message)
     }
 
     @Test
@@ -262,7 +278,41 @@ class AccessibilityViewModelTest {
     }
 
     private fun FakeAccessibilityLocalStore.setInitialLarge() {
-        kotlinx.coroutines.runBlocking { save(AccessibilityPreferences(textSize = TextSizeLevel.LARGE)) }
+        kotlinx.coroutines.runBlocking {
+            save(AccessibilityPreferences(textSize = TextSizeLevel.LARGE))
+        }
         remote.stored = AccessibilityPreferences(textSize = TextSizeLevel.LARGE)
+    }
+
+    @Test
+    fun returningToScreenSynchronizesAnOfflineEditWithoutLosingItsValue() {
+        val model = viewModel()
+        remote.failWith = NetworkDown
+        model.onHighContrastChange(true)
+        assertTrue(model.state.value.preferences.highContrast)
+        assertEquals(AccessibilityMessage.SavedOffline, model.state.value.message)
+        remote.failWith = null
+        model.refresh()
+        assertTrue(remote.stored.highContrast)
+        assertTrue(model.state.value.preferences.highContrast)
+        assertNull(model.state.value.message)
+    }
+
+    @Test
+    fun failedRetryRetainsOfflineNoticeAndPendingValue() {
+        val model = viewModel()
+        remote.failWith = NetworkDown
+        model.onHighContrastChange(true)
+        model.refresh()
+        assertTrue(model.state.value.preferences.highContrast)
+        assertEquals(AccessibilityMessage.SavedOffline, model.state.value.message)
+    }
+
+    @Test
+    fun successfulRefreshDoesNotEraseAnUnrelatedSaveNotice() {
+        val model = viewModel()
+        model.onHighContrastChange(true)
+        model.refresh()
+        assertEquals(AccessibilityMessage.HighContrastSaved, model.state.value.message)
     }
 }

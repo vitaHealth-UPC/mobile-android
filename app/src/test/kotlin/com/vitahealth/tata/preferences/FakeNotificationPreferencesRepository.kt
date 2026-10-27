@@ -1,7 +1,9 @@
 package com.vitahealth.tata.preferences
 
-import com.vitahealth.tata.preferences.application.NotificationPreferencesRepository
-import com.vitahealth.tata.preferences.domain.model.NotificationPreferences
+import com.vitahealth.tata.preferences.domain.model.valueobjects.EmergencyContact
+import com.vitahealth.tata.preferences.domain.model.valueobjects.NotificationPolicy
+import com.vitahealth.tata.preferences.domain.model.valueobjects.NotificationPreferences
+import com.vitahealth.tata.preferences.domain.repositories.NotificationPreferencesRepository
 import com.vitahealth.tata.shared.common.result.AppResult
 
 class FakeNotificationPreferencesRepository(
@@ -13,8 +15,8 @@ class FakeNotificationPreferencesRepository(
 
     override suspend fun updatePolicy(
         userId: String,
-        policy: com.vitahealth.tata.preferences.domain.model.NotificationPolicy,
-        contacts: List<com.vitahealth.tata.preferences.domain.model.EmergencyContact>,
+        policy: com.vitahealth.tata.preferences.domain.model.valueobjects.NotificationPolicy,
+        contacts: List<com.vitahealth.tata.preferences.domain.model.valueobjects.EmergencyContact>,
     ): AppResult<NotificationPreferences> {
         failWith?.let {
             return it

@@ -1,37 +1,14 @@
 package com.vitahealth.tata.monitoring.infrastructure.remote
 
-import com.vitahealth.tata.monitoring.application.PersonalNotesRepository
-import com.vitahealth.tata.monitoring.domain.model.*
+import com.google.gson.stream.MalformedJsonException
+import com.vitahealth.tata.monitoring.domain.model.valueobjects.PersonalNoteCategory
+import com.vitahealth.tata.monitoring.domain.repositories.PersonalNotesRepository
 import com.vitahealth.tata.shared.common.result.AppResult
 import java.io.IOException
-import java.time.Instant
 import kotlinx.coroutines.CancellationException
 import retrofit2.Response
-import retrofit2.http.*
 
-data class PersonalNoteResponse(
-    val id: Long,
-    val title: String,
-    val text: String,
-    val category: PersonalNoteCategory,
-    val recordedAt: String,
-) {
-    fun toDomain() = PersonalNote(id, title, text, category, Instant.parse(recordedAt))
-}
-
-data class CreatePersonalNoteRequest(
-    val title: String,
-    val text: String,
-    val category: PersonalNoteCategory,
-)
-
-interface PersonalNotesApiService {
-    @GET("api/v1/me/notes") suspend fun list(): Response<List<PersonalNoteResponse>>
-
-    @POST("api/v1/me/notes")
-    suspend fun create(@Body request: CreatePersonalNoteRequest): Response<PersonalNoteResponse>
-}
-
+/** Retrieves and creates personal notes for the authenticated older-adult session. */
 class RemotePersonalNotesRepository(private val api: PersonalNotesApiService) :
     PersonalNotesRepository {
     override suspend fun list() =
@@ -39,13 +16,20 @@ class RemotePersonalNotesRepository(private val api: PersonalNotesApiService) :
 
     override suspend fun create(title: String, text: String, category: PersonalNoteCategory) =
         request { api.create(CreatePersonalNoteRequest(title, text, category)) }
-            .map { it.toDomain() }
+            .map {
+                val note = it.toDomain()
+                require(
+                    note.title == title.trim() &&
+                        note.text == text.trim() &&
+                        note.category == category
+                )
+                note
+            }
 
     private suspend fun <T> request(call: suspend () -> Response<T>): AppResult<T> =
         try {
             val response = call()
-            val body = response.body()
-            if (response.isSuccessful && body != null) AppResult.Success(body)
+            if (response.isSuccessful) AppResult.Success(requireNotNull(response.body()))
             else
                 AppResult.Failure(
                     "",
@@ -58,6 +42,8 @@ class RemotePersonalNotesRepository(private val api: PersonalNotesApiService) :
                 )
         } catch (e: CancellationException) {
             throw e
+        } catch (e: MalformedJsonException) {
+            AppResult.Failure("", e, "INVALID_RESPONSE")
         } catch (e: IOException) {
             AppResult.Failure("", e, "NETWORK_UNAVAILABLE")
         } catch (e: RuntimeException) {

@@ -3,12 +3,7 @@ package com.vitahealth.tata.identity.infrastructure.remote
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.POST
-
-data class RegisterAccountRequest(val name: String, val email: String, val password: String)
-data class VerifyEmailRequest(val email: String, val code: String)
-data class CreateEmailVerificationRequest(val email: String)
-data class AccountResponse(val id: String, val name: String, val email: String, val status: String, val accessToken: String? = null, val expiresAt: String? = null)
-
+/** Account registration and email verification HTTP contract. */
 interface IdentityApiService {
     @POST("api/v1/accounts")
     suspend fun register(@Body request: RegisterAccountRequest): Response<AccountResponse>
@@ -18,6 +13,6 @@ interface IdentityApiService {
 
     @POST("api/v1/email-verification-requests")
     suspend fun requestNewVerification(
-        @Body request: CreateEmailVerificationRequest,
+        @Body request: CreateEmailVerificationRequest
     ): Response<AccountResponse>
 }

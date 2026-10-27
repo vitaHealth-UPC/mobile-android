@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="landing_tagline">Más tranquilidad para ti y tu familia.</string>
+    <string name="landing_hero_title">Cuidar los medicamentos sin complicarte.</string>
+    <string name="landing_hero_subtitle">Recordatorios claros y seguimiento familiar cuando realmente se necesita.</string>
+    <string name="landing_continue">Comenzar</string>
+    <string name="landing_example">Vista ilustrativa, no datos de pacientes</string>
+    <string name="landing_preview_schedule">Tu agenda</string>
+    <string name="landing_preview_info">Organiza las próximas tomas</string>
+    <string name="landing_features">Funciones principales</string>
+    <string name="landing_reminders">Recordatorios</string>
+    <string name="landing_reminders_description">Horarios y avisos accesibles.</string>
+    <string name="landing_family">Familia</string>
+    <string name="landing_family_description">Alertas y seguimiento para cuidadores.</string>
+    <string name="landing_insights">Insights</string>
+    <string name="landing_insights_description">Patrones y recomendaciones.</string>
+    <string name="landing_for_whom">Para adultos mayores y sus familiares o cuidadores.</string>
+    <string name="landing_trust_description">Tata facilita coordinar el cuidado y consultar los registros autorizados. Los datos dependen de las tomas confirmadas.</string>
+    <string name="landing_three_steps">3 pasos</string>
+    <string name="landing_three_steps_description">Para confirmar una toma</string>
+    <string name="landing_two_roles">2 roles</string>
+    <string name="landing_two_roles_description">Adulto mayor y cuidador</string>
+    <string name="landing_view_plans">Ver planes</string>
+    <string name="landing_back">Volver</string>
+    <string name="landing_choose_title">Elige cómo empezar</string>
+    <string name="landing_choose_subtitle">Planes claros y una vía directa de contacto.</string>
+    <string name="landing_plan_error">No pudimos obtener los planes. Comprueba tu conexión e inténtalo de nuevo.</string>
+    <string name="landing_retry">Reintentar</string>
+    <string name="landing_essential_description">Recordatorios, agenda y confirmación accesible.</string>
+    <string name="landing_choose_plan">Elegir %1$s</string>
+    <string name="landing_recommended">Recomendado</string>
+    <string name="landing_choice_notice">Consulta los planes aquí. Podrás elegir y activar uno después de crear o iniciar sesión. No se realiza ningún cobro aquí.</string>
+    <string name="landing_questions">¿Tienes dudas?</string>
+    <string name="landing_contact_description">Escríbenos y te ayudamos a comenzar con Tata.</string>
+    <string name="landing_contact_unavailable">No disponible</string>
+    <string name="landing_contact">Contactar</string>
+    <string name="landing_plan_comparison">Qué incluye cada plan</string>
+    <string name="landing_tracking">Seguimiento familiar</string>
+    <string name="landing_adherence_insights">Insights de adherencia</string>
+    <string name="landing_footer">Contenido adaptable a pantallas móviles y controles accesibles.</string>
+</resources>

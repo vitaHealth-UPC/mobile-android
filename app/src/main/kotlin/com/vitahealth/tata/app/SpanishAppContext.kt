@@ -4,9 +4,12 @@ import android.content.Context
 import android.content.res.Configuration
 import android.os.LocaleList
 
-/** The production prototype is Spanish; English resources remain available for the EN preview. */
-internal fun Context.withSpanishAppLocale(): Context {
+/** Applies the verified account language before an Activity inflates localized resources. */
+internal fun Context.withTataAppLocale(languageTag: String): Context {
     val configuration = Configuration(resources.configuration)
-    configuration.setLocales(LocaleList.forLanguageTags("es-419"))
+    configuration.setLocales(LocaleList.forLanguageTags(languageTag))
     return createConfigurationContext(configuration)
 }
+
+/** Default Spanish experience, also used by deterministic visual test fixtures. */
+internal fun Context.withSpanishAppLocale() = withTataAppLocale("es-419")

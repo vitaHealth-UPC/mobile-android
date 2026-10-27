@@ -1,7 +1,6 @@
 package com.vitahealth.tata.treatment.application.readmodels
 
-import java.time.Instant
-
+/** Combines medication details and administration information for the adult catalog. */
 data class MyMedication(
     val id: String,
     val name: String,
@@ -11,5 +10,3 @@ data class MyMedication(
     val instructions: String,
     val scheduledTimes: List<String>,
 )
-
-data class MedicationNextDose(val intakeId: String, val medicationId: String, val scheduledAt: Instant)

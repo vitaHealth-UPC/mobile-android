@@ -1,12 +1,12 @@
 package com.vitahealth.tata.preferences.domain
 
-import com.vitahealth.tata.preferences.domain.model.AccessibilityPreferences
-import com.vitahealth.tata.preferences.domain.model.QuietHours
-import com.vitahealth.tata.preferences.domain.model.TextSizeLevel
+import com.vitahealth.tata.preferences.domain.model.valueobjects.AccessibilityPreferences
+import com.vitahealth.tata.preferences.domain.model.valueobjects.QuietHours
+import com.vitahealth.tata.preferences.domain.model.valueobjects.TextSizeLevel
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
 import org.junit.Assert.assertThrows
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class AccessibilityPreferencesTest {

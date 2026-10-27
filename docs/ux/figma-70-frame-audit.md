@@ -1,5 +1,7 @@
 # Figma: 70 prototype frames
 
+Historical audit (2026-10-07). Later implementation and visual acceptance results are tracked in [figma-visual-validation.md](figma-visual-validation.md); use that ledger for the current checkpoint.
+
 Source: VitaHealth `jCppvxtSpLpHOrC3ZWUIVC`, section `563:2`. Inventory obtained through Figma MCP. Each frame is a distinct visual and behavioral acceptance case, including error, success, empty and preference variants. Shared composables do not remove the obligation to reproduce every variant.
 
 This combines a source-level contrast with the emulator visual audit below. Compared does not mean visually accepted. Shared implementations can cover several references, and partial compositions can still miss the target screen. No implementation percentage is inferred from Screen.kt counts.

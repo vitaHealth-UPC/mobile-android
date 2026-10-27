@@ -1,12 +1,14 @@
 package com.vitahealth.tata.treatment.application.handlers
 
 import com.vitahealth.tata.shared.common.result.AppResult
-import com.vitahealth.tata.treatment.application.TreatmentLifecycleRepository
 import com.vitahealth.tata.treatment.application.commands.ChangeTreatmentStatusCommand
+import com.vitahealth.tata.treatment.application.commands.ChangeTreatmentStatusCommandHandler
 import com.vitahealth.tata.treatment.application.commands.ConfigureTreatmentCommand
+import com.vitahealth.tata.treatment.application.commands.ConfigureTreatmentCommandHandler
 import com.vitahealth.tata.treatment.application.commands.TreatmentLifecycleAction
-import com.vitahealth.tata.treatment.domain.model.Treatment
-import com.vitahealth.tata.treatment.domain.model.TreatmentStatus
+import com.vitahealth.tata.treatment.domain.model.entities.Treatment
+import com.vitahealth.tata.treatment.domain.model.valueobjects.TreatmentStatus
+import com.vitahealth.tata.treatment.domain.repositories.TreatmentLifecycleRepository
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -19,18 +21,19 @@ class TreatmentLifecycleHandlersTest {
         val repository = FakeLifecycleRepository()
         val handler = ConfigureTreatmentCommandHandler(repository)
 
-        val result = handler(
-            ConfigureTreatmentCommand(
-                caregiverId = "caregiver-1",
-                treatmentId = "treatment-1",
-                medicationId = "med-1",
-                dose = "1 comprimido",
-                frequency = "Cada día",
-                scheduledTimes = listOf("25:99"),
-                instructions = "Con agua",
-                reminderLeadMinutes = 10,
-            ),
-        )
+        val result =
+            handler(
+                ConfigureTreatmentCommand(
+                    caregiverId = "caregiver-1",
+                    treatmentId = "treatment-1",
+                    medicationId = "med-1",
+                    dose = "1 comprimido",
+                    frequency = "Cada día",
+                    scheduledTimes = listOf("25:99"),
+                    instructions = "Con agua",
+                    reminderLeadMinutes = 10,
+                )
+            )
 
         assertTrue(result is AppResult.Failure)
         assertEquals("INVALID_TREATMENT_CONFIGURATION", (result as AppResult.Failure).code)
@@ -42,18 +45,19 @@ class TreatmentLifecycleHandlersTest {
         val repository = FakeLifecycleRepository()
         val handler = ConfigureTreatmentCommandHandler(repository)
 
-        val result = handler(
-            ConfigureTreatmentCommand(
-                caregiverId = " caregiver-1 ",
-                treatmentId = " treatment-1 ",
-                medicationId = " med-1 ",
-                dose = " 1 comprimido ",
-                frequency = " Cada día ",
-                scheduledTimes = listOf("08:00", "20:00", "08:00"),
-                instructions = " Con agua ",
-                reminderLeadMinutes = 10,
-            ),
-        )
+        val result =
+            handler(
+                ConfigureTreatmentCommand(
+                    caregiverId = " caregiver-1 ",
+                    treatmentId = " treatment-1 ",
+                    medicationId = " med-1 ",
+                    dose = " 1 comprimido ",
+                    frequency = " Cada día ",
+                    scheduledTimes = listOf("08:00", "20:00", "08:00"),
+                    instructions = " Con agua ",
+                    reminderLeadMinutes = 10,
+                )
+            )
 
         assertTrue(result is AppResult.Success)
         assertTrue(repository.configureCalled)
@@ -66,13 +70,14 @@ class TreatmentLifecycleHandlersTest {
         val repository = FakeLifecycleRepository()
         val handler = ChangeTreatmentStatusCommandHandler(repository)
 
-        val result = handler(
-            ChangeTreatmentStatusCommand(
-                caregiverId = "caregiver-1",
-                treatmentId = "treatment-1",
-                action = TreatmentLifecycleAction.PAUSE,
-            ),
-        )
+        val result =
+            handler(
+                ChangeTreatmentStatusCommand(
+                    caregiverId = "caregiver-1",
+                    treatmentId = "treatment-1",
+                    action = TreatmentLifecycleAction.PAUSE,
+                )
+            )
 
         assertTrue(result is AppResult.Success)
         assertEquals(TreatmentStatus.PAUSED, (result as AppResult.Success).value.status)
@@ -94,6 +99,7 @@ class TreatmentLifecycleHandlersTest {
             scheduledTimes: List<String>,
             instructions: String,
             reminderLeadMinutes: Int,
+        followUpDelayMinutes: Int?,
         ): AppResult<Treatment> {
             configureCalled = true
             this.scheduledTimes = scheduledTimes
@@ -119,11 +125,12 @@ class TreatmentLifecycleHandlersTest {
             treatmentId: String,
         ): AppResult<Treatment> = AppResult.Success(treatment(TreatmentStatus.ACTIVE))
 
-        private fun treatment(status: TreatmentStatus) = Treatment(
-            id = "treatment-1",
-            olderAdultId = "adult-1",
-            name = "Control de presión",
-            status = status,
-        )
+        private fun treatment(status: TreatmentStatus) =
+            Treatment(
+                id = "treatment-1",
+                olderAdultId = "adult-1",
+                name = "Control de presión",
+                status = status,
+            )
     }
 }

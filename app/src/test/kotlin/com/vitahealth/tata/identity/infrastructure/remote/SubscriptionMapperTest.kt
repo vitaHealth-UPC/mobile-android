@@ -1,13 +1,12 @@
 package com.vitahealth.tata.identity.infrastructure.remote
 
-import com.vitahealth.tata.identity.domain.model.PlanCapability
-import com.vitahealth.tata.identity.domain.model.SubscriptionStatus
+import com.vitahealth.tata.identity.domain.model.valueobjects.PlanCapability
+import com.vitahealth.tata.identity.domain.model.valueobjects.SubscriptionStatus
 import java.math.BigDecimal
 import java.time.Instant
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
-
 class SubscriptionMapperTest {
     private fun plan(
         code: String? = "FAMILY",
@@ -32,7 +31,10 @@ class SubscriptionMapperTest {
         assertEquals("Familiar", mapped.name)
         assertEquals(BigDecimal("19.90"), mapped.monthlyPrice)
         assertEquals("PEN", mapped.currency)
-        assertEquals(setOf(PlanCapability.REMINDERS, PlanCapability.FAMILY_ALERTS), mapped.capabilities)
+        assertEquals(
+            setOf(PlanCapability.REMINDERS, PlanCapability.FAMILY_ALERTS),
+            mapped.capabilities,
+        )
     }
 
     @Test
@@ -44,7 +46,10 @@ class SubscriptionMapperTest {
 
     @Test
     fun aPlanWithoutCapabilitiesHasNone() {
-        assertEquals(emptySet<PlanCapability>(), plan(capabilities = null).toDomain()!!.capabilities)
+        assertEquals(
+            emptySet<PlanCapability>(),
+            plan(capabilities = null).toDomain()!!.capabilities,
+        )
     }
 
     @Test
@@ -65,9 +70,9 @@ class SubscriptionMapperTest {
     }
 
     @Test
-    fun aMissingOrBrokenRenewalDateIsKeptAsNull() {
+    fun aMissingRenewalDateIsAllowedButABrokenDateRejectsTheResponse() {
         assertNull(subscription(renewsAt = null).toDomain()!!.renewsAt)
-        assertNull(subscription(renewsAt = "28 oct").toDomain()!!.renewsAt)
+        assertNull(subscription(renewsAt = "28 oct").toDomain())
     }
 
     @Test

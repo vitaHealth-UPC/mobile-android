@@ -1,24 +1,30 @@
 package com.vitahealth.tata.preferences.infrastructure.remote
 
-import com.vitahealth.tata.preferences.domain.model.AccessibilityPreferences
-import com.vitahealth.tata.preferences.domain.model.ChannelType
-import com.vitahealth.tata.preferences.domain.model.EmergencyContact
-import com.vitahealth.tata.preferences.domain.model.NotificationChannel
-import com.vitahealth.tata.preferences.domain.model.NotificationPolicy
-import com.vitahealth.tata.preferences.domain.model.NotificationPreferences
-import com.vitahealth.tata.preferences.domain.model.QuietHours
-import com.vitahealth.tata.preferences.domain.model.TextSizeLevel
-import com.vitahealth.tata.preferences.domain.model.UserPreferences
+import com.vitahealth.tata.preferences.domain.model.entities.UserPreferences
+import com.vitahealth.tata.preferences.domain.model.valueobjects.AccessibilityPreferences
+import com.vitahealth.tata.preferences.domain.model.valueobjects.ChannelType
+import com.vitahealth.tata.preferences.domain.model.valueobjects.EmergencyContact
+import com.vitahealth.tata.preferences.domain.model.valueobjects.NotificationChannel
+import com.vitahealth.tata.preferences.domain.model.valueobjects.NotificationPolicy
+import com.vitahealth.tata.preferences.domain.model.valueobjects.NotificationPreferences
+import com.vitahealth.tata.preferences.domain.model.valueobjects.QuietHours
+import com.vitahealth.tata.preferences.domain.model.valueobjects.TextSizeLevel
 
 /** Returns null when the response carries a value this app does not know. */
 internal fun UserPreferencesResponse.toDomain(requestedUserId: String): UserPreferences? {
+    if (requestedUserId.isBlank() || userId != requestedUserId) return null
+    val contrast = highContrast ?: return null
+    val motion = reducedMotion ?: return null
+    val reading = readingAssistance ?: return null
+    val voice = voiceConfirmationEnabled ?: return null
     val textSize =
         runCatching { TextSizeLevel.valueOf(textSize.orEmpty()) }.getOrNull() ?: return null
     val channels =
-        notificationChannels.orEmpty().map { dto ->
+        (notificationChannels ?: return null).map { dto ->
             val type = runCatching { ChannelType.valueOf(dto.type) }.getOrNull() ?: return null
-            NotificationChannel(type = type, enabled = dto.enabled)
+            NotificationChannel(type = type, enabled = dto.enabled ?: return null)
         }
+    if (channels.map { it.type }.distinct().size != channels.size) return null
     val quietHours =
         quietHours?.let { dto ->
             val start = parseTime(dto.start) ?: return null
@@ -28,7 +34,7 @@ internal fun UserPreferencesResponse.toDomain(requestedUserId: String): UserPref
         }
 
     val policy =
-        notificationPolicy?.let { dto ->
+        (notificationPolicy ?: return null).let { dto ->
             val time = dto.dailySummaryTime?.let { parseTime(it) ?: return null }
             runCatching {
                     NotificationPolicy(
@@ -43,7 +49,7 @@ internal fun UserPreferencesResponse.toDomain(requestedUserId: String): UserPref
                 .getOrNull() ?: return null
         }
     val contacts =
-        emergencyContacts.orEmpty().map { dto ->
+        (emergencyContacts ?: return null).map { dto ->
             runCatching { EmergencyContact.fromInput(dto.name, dto.phone) }.getOrNull()
                 ?: return null
         }
@@ -53,34 +59,30 @@ internal fun UserPreferencesResponse.toDomain(requestedUserId: String): UserPref
     )
         return null
     return UserPreferences(
-        userId = userId?.takeIf { it.isNotBlank() } ?: requestedUserId,
+        userId = requestedUserId,
         accessibility =
             AccessibilityPreferences(
                 textSize = textSize,
-                highContrast = highContrast,
-                reducedMotion = reducedMotion,
-                readingAssistance = readingAssistance,
-                voiceConfirmation = voiceConfirmationEnabled,
+                highContrast = contrast,
+                darkTheme = darkTheme ?: false,
+                reducedMotion = motion,
+                readingAssistance = reading,
+                voiceConfirmation = voice,
             ),
         notifications =
-            if (notificationChannels == null && quietHours == null) {
-                NotificationPreferences(policy = policy, emergencyContacts = contacts)
-            } else {
-                NotificationPreferences(
-                    quietHours = quietHours,
-                    channels = channels,
-                    policy = policy,
-                    emergencyContacts = contacts,
-                )
-            },
+            NotificationPreferences(
+                quietHours = quietHours,
+                channels = channels,
+                policy = policy,
+                emergencyContacts = contacts,
+            ),
     )
 }
 
-/** Accepts `HH:mm` and `HH:mm:ss`, the two shapes Jackson uses for a time of day. */
+/** Accepts backend minute-precision times without silently discarding nonzero seconds. */
 internal fun parseTime(value: String): Pair<Int, Int>? {
-    val parts = value.split(":")
-    if (parts.size < 2) return null
-    val hour = parts[0].toIntOrNull() ?: return null
-    val minute = parts[1].toIntOrNull() ?: return null
-    return if (hour in 0..23 && minute in 0..59) hour to minute else null
+    val match = minutePrecisionTime.matchEntire(value) ?: return null
+    return match.groupValues[1].toInt() to match.groupValues[2].toInt()
 }
+
+private val minutePrecisionTime = Regex("""([01][0-9]|2[0-3]):([0-5][0-9])(?::00(?:\.0{1,9})?)?""")

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="intake_due_reminder_title">Es hora de tu toma</string>
+    <string name="intake_due_reminder_body">%1$s · Confirma cuando la hayas tomado.</string>
+</resources>

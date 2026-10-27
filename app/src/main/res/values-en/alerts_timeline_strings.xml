@@ -1,0 +1,21 @@
+<resources>
+    <string name="alerts_filter_upcoming">Upcoming</string>
+    <string name="alerts_filter_completed">Completed</string>
+    <string name="alerts_dose_upcoming">Upcoming reminder</string>
+    <string name="alerts_dose_confirmed">Dose confirmed</string>
+    <string name="alerts_dose_late">Dose confirmed late</string>
+    <string name="alerts_view_dose">View dose in summary</string>
+    <string name="alerts_confirmed_badge">Confirmed</string>
+    <string name="alerts_timeline_person">%1$s, %2$s</string>
+    <string name="alerts_no_pending">No pending alerts</string>
+    <string name="alerts_due_minutes">In %1$d min</string>
+    <string name="alerts_due_hours_minutes">In %1$d h %2$d min</string>
+    <string name="alerts_dose_pending">Pending dose</string>
+    <string name="alert_person_summary">View summary</string>
+    <string name="alert_person_age">%1$d years old</string>
+    <string name="alert_timeline_title">Alert timeline</string>
+    <string name="alert_timeline_scheduled">Scheduled dose</string>
+    <string name="alert_timeline_opened">Alert generated</string>
+    <string name="alert_timeline_closed">Alert closed</string>
+    <string name="alert_timeline_reinforced_sent">Reinforced reminder sent</string>
+</resources>

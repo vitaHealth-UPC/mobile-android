@@ -96,4 +96,10 @@
     <string name="contact_channel_whatsapp">WhatsApp: %1$s</string>
     <string name="contact_retry">Volver a consultar el contacto</string>
     <string name="contact_no_app">Ninguna app de este dispositivo puede abrir este contacto.</string>
+    <string name="notes_person_active">Activa</string>
+    <string name="notes_person_link_active">Vínculo activo</string>
+    <string name="notes_person_age_active">%1$d años · vínculo activo</string>
+    <string name="notes_subtitle_person">Seguimiento y observaciones sobre %1$s.</string>
+    <string name="notes_shared_history">Historial compartido</string>
+    <string name="notes_shared_history_body">Las notas quedan asociadas a la persona y al cuidador que las registra.</string>
 </resources>

@@ -3,7 +3,8 @@ package com.vitahealth.tata.preferences.application.handlers
 import com.vitahealth.tata.preferences.FakeAccessibilityLocalStore
 import com.vitahealth.tata.preferences.FakeUserPreferencesRemote
 import com.vitahealth.tata.preferences.application.commands.UpdateReadingAssistanceCommand
-import com.vitahealth.tata.preferences.infrastructure.OfflineFirstUserPreferencesRepository
+import com.vitahealth.tata.preferences.application.commands.UpdateReadingAssistanceCommandHandler
+import com.vitahealth.tata.preferences.infrastructure.sync.OfflineFirstUserPreferencesRepository
 import com.vitahealth.tata.shared.common.result.AppResult
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -12,9 +13,10 @@ import org.junit.Test
 
 class UpdateReadingAssistanceCommandHandlerTest {
     private val remote = FakeUserPreferencesRemote()
-    private val handler = UpdateReadingAssistanceCommandHandler(
-        OfflineFirstUserPreferencesRepository(remote, FakeAccessibilityLocalStore()),
-    )
+    private val handler =
+        UpdateReadingAssistanceCommandHandler(
+            OfflineFirstUserPreferencesRepository(remote, FakeAccessibilityLocalStore())
+        )
 
     @Test
     fun aBlankUserIsRejectedBeforeCallingTheBackend() = runBlocking {

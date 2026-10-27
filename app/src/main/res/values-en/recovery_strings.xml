@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="recovery_title">Recover access</string>
+    <string name="recovery_email">Email address</string>
+    <string name="recovery_code">Six-digit code</string>
+    <string name="recovery_password">New password</string>
+    <string name="recovery_intro">Enter your account email.</string>
+    <string name="recovery_sent">If the email belongs to an active account, you will receive a code.</string>
+    <string name="recovery_complete">Password updated. Sign in with your new password.</string>
+    <string name="recovery_busy">Processing…</string>
+    <string name="recovery_send">Send code</string>
+    <string name="recovery_save">Save password</string>
+    <string name="recovery_return">Return to sign in</string>
+    <string name="recovery_cancel">Cancel</string>
+    <string name="recovery_invalid_code">The code is invalid or is no longer available.</string>
+    <string name="recovery_invalid_email">Enter a valid email.</string>
+    <string name="recovery_invalid_fields">Enter the code and a password with at least eight characters (maximum 72 bytes).</string>
+    <string name="recovery_network">No connection. Try again.</string>
+    <string name="recovery_error">We could not complete recovery. Try again.</string>
+</resources>

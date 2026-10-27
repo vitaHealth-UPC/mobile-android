@@ -1,6 +1,4 @@
 package com.vitahealth.tata.treatment.application.commands
 
-data class SetScheduleInstructionsCommand(
-    val scheduleText: String,
-    val instructions: String,
-)
+/** Carries comma-separated local times and administration instructions. */
+data class SetScheduleInstructionsCommand(val scheduleText: String, val instructions: String)

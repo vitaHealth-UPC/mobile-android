@@ -9,7 +9,7 @@ This file is the implementation traceability map between UX states, User Stories
 | Link & consent, invalid code, consent required | carelink | `CareLinkScreen` + code-entry / awaiting-consent / confirmed / rejected / invalid-code states |
 | Medications, details, add medication, create/manage treatment | treatment | treatment presentation package |
 | Home, weekly schedule, voice confirmation, dose states | intake | intake presentation package |
-| Alerts, alert detail, contact unavailable, note saved, attended | omission | omission presentation package |
+| Alerts, alert detail, contact unavailable, note saved, attended | monitoring | monitoring presentation flows; omission owns push transport |
 | Family summary | monitoring | family monitoring presentation |
 | History, insights, recommendations and empty states | analytics | analytics presentation package |
 | Inventory, invalid quantity, restock registered | inventory | inventory presentation package |
