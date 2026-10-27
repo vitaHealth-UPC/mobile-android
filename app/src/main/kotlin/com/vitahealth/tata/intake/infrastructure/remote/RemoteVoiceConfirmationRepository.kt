@@ -22,7 +22,7 @@ class RemoteVoiceConfirmationRepository(private val api: VoiceConfirmationApiSer
             val audio =
                 MultipartBody.Part.createFormData(
                     "audio",
-                    "confirmation.m4a",
+                    "confirmation.wav",
                     command.audio.toRequestBody(command.contentType.toMediaType()),
                 )
             val response = api.confirm(command.intakeId, audio, command.language)
