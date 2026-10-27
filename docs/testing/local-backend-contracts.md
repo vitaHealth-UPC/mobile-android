@@ -22,6 +22,17 @@ mock controllers or shared team accounts. It is separate from ordinary JVM tests
 
 ## Assertions
 
+- Actual treatment adapters register a medication and draft, configure its regimen
+  and reminders, activate it, then pause and resume it with acknowledged states.
+- Actual inventory adapters initialize ten units and append a five-unit receipt.
+- The adult agenda contains the activated treatment. Confirming one dose twice
+  through the production confirmation adapter leaves fourteen units, proving
+  idempotent consumption across Treatment, Intake and Inventory over HTTP.
+- Accessibility changes persist after a fresh HTTP read without changing the
+  notification policy. The adult session cannot change caregiver preferences.
+- Production analytics adapters accept global and treatment-specific summaries
+  and recommendations for the authorized adult, and reject an unauthorized scope.
+  A successful empty summary remains empty; the probe does not invent metrics.
 - The actual Android command and contact adapter persist name, relationship and phone.
 - A new authorized HTTP read returns those fields and unchanged adult name, birth date and creation evidence.
 - The actual timeline reader accepts the two persisted schedule/open events.
@@ -43,3 +54,30 @@ This proves these contracts against the current local backend. It does not prove
 Render deployment, PostgreSQL behavior, the complete Compose-to-server path,
 FCM delivery or all other bounded contexts. Device UI and session-composition
 checks remain independent evidence.
+
+## Password recovery from Compose (27-10-2026)
+
+Launch the same test host with `-Dtata.probe.recovery=true`. This opt-in mode
+adds an isolated recovery account and its encrypted-mailbox code to the private
+fixture. A test-only primary generator retains one random code for the lifetime
+of that host, so resend timing cannot invalidate the fixture during APK setup.
+Production code generation, password policy and code consumption are unchanged.
+
+Install the debug and AndroidTest APKs, reverse the host's TCP port with adb,
+and push the fixture to the app's external-files directory. Run
+`PasswordRecoveryLiveBackendTest` with instrumentation argument
+`tata.liveContext` pointing to that device file. Only loopback is accepted.
+The test deletes its device fixture in `finally`; signal the host's sibling
+`.done` file and remove the adb reverse after execution.
+
+The native dialog requests recovery through the production anonymous Retrofit
+adapter, submits the code and a new password, then waits for Spring's receipt.
+HTTP assertions prove the prior session receives 401, the old password receives
+401, the new password receives 200 and code reuse receives 400. The UI does not
+close early and returns to access only on the explicit action.
+
+`tata-recovery-compose-spring-final-20261027.log` records **OK (1 test)**,
+23.606 seconds. The earlier attempt failed because a resend replaced the
+fixture's code during APK preparation; it is not counted as a success.
+This check uses real Spring/JPA/H2 over TCP and Compose/Retrofit, with controlled
+test-only code generation. It does not send email or certify an external provider.
