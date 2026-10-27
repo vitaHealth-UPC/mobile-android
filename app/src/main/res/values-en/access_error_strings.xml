@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="access_error_pin_locked">Your PIN is temporarily locked. Try again in 15 minutes.</string>
+    <string name="access_error_credentials">Your sign-in details are incorrect. Try again.</string>
+    <string name="access_error_consent">Verify your account and complete the care link to continue.</string>
+    <string name="access_error_network">No connection. Check your network and try again.</string>
+    <string name="access_error_required_fields">Enter your email and password.</string>
+    <string name="access_error_session_changed">Your session changed during sign-in. Open sign-in again.</string>
+    <string name="access_error_adult_session">Sign in with the older adult account to set up their PIN.</string>
+    <string name="access_error_generic">We could not complete sign-in. Try again.</string>
+    <string name="access_error_authentication_required">We could not authenticate you. Enter your sign-in details again.</string>
+    <string name="access_error_social_unavailable">Social sign-in is not configured yet. Use your email and password.</string>
+    <string name="access_error_social_credential">We could not verify the external account. Try again.</string>
+    <string name="access_error_social_email">The provider did not verify your email. Link from an existing Tata session.</string>
+    <string name="access_error_social_link">This email has a Tata account. Sign in with your password before linking Google or Facebook.</string>
+    <string name="access_error_social_provider">We could not connect to Google or Facebook. Try again.</string>
+    <string name="access_social_link_title">Link external account</string>
+    <string name="access_social_link_description">Connect Google or Facebook to this Tata account. Your session will not change and other accounts are not linked by email.</string>
+    <string name="access_social_link_success">Account linked. You can now sign in with this provider.</string>
+    <string name="access_social_link_close">Close</string>
+</resources>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="recovery_title">Recuperar acceso</string>
+    <string name="recovery_email">Correo electrónico</string>
+    <string name="recovery_code">Código de seis dígitos</string>
+    <string name="recovery_password">Nueva contraseña</string>
+    <string name="recovery_intro">Ingresa el correo de tu cuenta.</string>
+    <string name="recovery_sent">Si el correo corresponde a una cuenta activa, recibirás un código.</string>
+    <string name="recovery_complete">Contraseña actualizada. Ingresa con tu nueva contraseña.</string>
+    <string name="recovery_busy">Procesando…</string>
+    <string name="recovery_send">Enviar código</string>
+    <string name="recovery_save">Guardar contraseña</string>
+    <string name="recovery_return">Volver al acceso</string>
+    <string name="recovery_cancel">Cancelar</string>
+    <string name="recovery_invalid_code">El código no es válido o ya no está disponible.</string>
+    <string name="recovery_invalid_email">Escribe un correo válido.</string>
+    <string name="recovery_invalid_fields">Completa el código y una contraseña de al menos ocho caracteres (máximo 72 bytes).</string>
+    <string name="recovery_network">No hay conexión. Inténtalo otra vez.</string>
+    <string name="recovery_error">No pudimos completar la recuperación. Inténtalo otra vez.</string>
+</resources>

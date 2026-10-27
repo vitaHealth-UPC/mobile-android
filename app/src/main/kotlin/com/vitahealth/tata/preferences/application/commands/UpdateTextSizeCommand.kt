@@ -1,8 +1,5 @@
 package com.vitahealth.tata.preferences.application.commands
 
-import com.vitahealth.tata.preferences.domain.model.TextSizeLevel
+import com.vitahealth.tata.preferences.domain.model.valueobjects.TextSizeLevel
 
-data class UpdateTextSizeCommand(
-    val userId: String,
-    val textSize: TextSizeLevel,
-)
+data class UpdateTextSizeCommand(val userId: String, val textSize: TextSizeLevel)

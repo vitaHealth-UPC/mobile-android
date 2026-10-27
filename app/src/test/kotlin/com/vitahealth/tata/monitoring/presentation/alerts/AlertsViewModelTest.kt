@@ -5,14 +5,27 @@ import com.vitahealth.tata.monitoring.FakeContactRepository
 import com.vitahealth.tata.monitoring.FakeNotesRepository
 import com.vitahealth.tata.monitoring.alert
 import com.vitahealth.tata.monitoring.application.AlertFailureCodes
-import com.vitahealth.tata.monitoring.application.handlers.GetAlertDetailQueryHandler
-import com.vitahealth.tata.monitoring.application.handlers.GetContactOptionQueryHandler
-import com.vitahealth.tata.monitoring.application.handlers.GetOpenAlertsQueryHandler
-import com.vitahealth.tata.monitoring.application.handlers.RegisterFollowUpNoteCommandHandler
-import com.vitahealth.tata.monitoring.application.handlers.UpdateAlertStatusCommandHandler
-import com.vitahealth.tata.monitoring.domain.model.AlertStatus
+import com.vitahealth.tata.monitoring.application.commands.RegisterFollowUpNoteCommandHandler
+import com.vitahealth.tata.monitoring.application.commands.UpdateAlertStatusCommandHandler
+import com.vitahealth.tata.monitoring.application.ports.AlertTimelineReader
+import com.vitahealth.tata.monitoring.application.queries.GetAlertDetailQueryHandler
+import com.vitahealth.tata.monitoring.application.queries.GetAlertTimelineQueryHandler
+import com.vitahealth.tata.monitoring.application.queries.GetContactOptionQueryHandler
+import com.vitahealth.tata.monitoring.application.queries.GetOpenAlertsQueryHandler
+import com.vitahealth.tata.monitoring.application.readmodels.AlertTimeline
+import com.vitahealth.tata.monitoring.application.readmodels.MonitoredDose
+import com.vitahealth.tata.monitoring.domain.model.valueobjects.AlertStatus
 import com.vitahealth.tata.monitoring.failure
+import com.vitahealth.tata.monitoring.presentation.alerts.viewmodel.AlertDetailUiState
+import com.vitahealth.tata.monitoring.presentation.alerts.viewmodel.AlertDetailViewModel
+import com.vitahealth.tata.monitoring.presentation.alerts.viewmodel.AlertFilter
+import com.vitahealth.tata.monitoring.presentation.alerts.viewmodel.AlertsProblem
+import com.vitahealth.tata.monitoring.presentation.alerts.viewmodel.AlertsUiState
+import com.vitahealth.tata.monitoring.presentation.alerts.viewmodel.AlertsViewModel
 import com.vitahealth.tata.shared.common.result.AppResult
+import java.time.Clock
+import java.time.Instant
+import java.time.ZoneId
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import org.junit.Assert.assertEquals
@@ -23,17 +36,66 @@ import org.junit.Test
 class AlertsViewModelTest {
     private val repository = FakeAlertsRepository()
 
-    private fun listModel() = AlertsViewModel("caregiver", "adult", GetOpenAlertsQueryHandler(repository), Dispatchers.Unconfined)
-    private fun detailModel() = AlertDetailViewModel(
-        "caregiver", "adult", 1,
-        GetAlertDetailQueryHandler(repository),
-        UpdateAlertStatusCommandHandler(repository),
-        RegisterFollowUpNoteCommandHandler(FakeNotesRepository()),
-        GetContactOptionQueryHandler(FakeContactRepository()),
-        Dispatchers.Unconfined,
-    )
+    private fun listModel() =
+        AlertsViewModel(
+            "caregiver",
+            "adult",
+            GetOpenAlertsQueryHandler(repository),
+            Dispatchers.Unconfined,
+        )
 
-    @Test fun listStartsLoadingUntilTheReadFinishes() {
+    private fun detailModel() =
+        AlertDetailViewModel(
+            "caregiver",
+            "adult",
+            1,
+            GetAlertDetailQueryHandler(repository),
+            UpdateAlertStatusCommandHandler(repository),
+            RegisterFollowUpNoteCommandHandler(FakeNotesRepository()),
+            GetContactOptionQueryHandler(FakeContactRepository()),
+            Dispatchers.Unconfined,
+        )
+
+    @Test
+    fun filterChangedDuringRefreshIsPreserved() {
+        repository.list =
+            AppResult.Success(listOf(alert(id = 1), alert(id = 2, status = AlertStatus.ATTENDED)))
+        val model = listModel()
+        model.refresh()
+        val gate = CompletableDeferred<Unit>().also { repository.gate = it }
+        model.refresh()
+        model.selectFilter(AlertFilter.COMPLETED)
+        gate.complete(Unit)
+        assertEquals(AlertFilter.COMPLETED, (model.state.value as AlertsUiState.Content).filter)
+        assertEquals(
+            listOf(2L),
+            (model.state.value as AlertsUiState.Content).visibleAlerts.map { it.id },
+        )
+    }
+
+    @Test
+    fun detailRefreshDoesNotCancelAnInFlightStatusChange() {
+        repository.detail = AppResult.Success(alert(id = 1))
+        val model = detailModel()
+        val gate = CompletableDeferred<Unit>().also { repository.gate = it }
+        repository.update = AppResult.Success(alert(id = 1, status = AlertStatus.ATTENDED))
+        model.updateStatus(AlertStatus.ATTENDED)
+        val requests = repository.requests.toList()
+        model.load()
+        assertEquals(requests, repository.requests)
+        assertEquals(
+            AlertStatus.ATTENDED,
+            (model.state.value as AlertDetailUiState.Content).updating,
+        )
+        gate.complete(Unit)
+        assertEquals(
+            AlertStatus.ATTENDED,
+            (model.state.value as AlertDetailUiState.Content).alert.status,
+        )
+    }
+
+    @Test
+    fun listStartsLoadingUntilTheReadFinishes() {
         val gate = CompletableDeferred<Unit>().also { repository.gate = it }
         repository.list = AppResult.Success(listOf(alert()))
         val model = listModel()
@@ -45,8 +107,10 @@ class AlertsViewModelTest {
         assertTrue(model.state.value is AlertsUiState.Content)
     }
 
-    @Test fun listShowsTheAlerts() {
-        repository.list = AppResult.Success(listOf(alert(id = 1), alert(id = 2, status = AlertStatus.ATTENDED)))
+    @Test
+    fun listShowsTheAlerts() {
+        repository.list =
+            AppResult.Success(listOf(alert(id = 1), alert(id = 2, status = AlertStatus.ATTENDED)))
         val model = listModel()
 
         model.refresh()
@@ -56,7 +120,8 @@ class AlertsViewModelTest {
         assertEquals(1, state.pendingCount)
     }
 
-    @Test fun listWithoutAlertsIsEmpty() {
+    @Test
+    fun listWithoutAlertsIsEmpty() {
         repository.list = AppResult.Success(emptyList())
         val model = listModel()
 
@@ -65,14 +130,16 @@ class AlertsViewModelTest {
         assertEquals(AlertsUiState.Empty, model.state.value)
     }
 
-    @Test fun listExplainsEachFailure() {
-        val expected = mapOf(
-            AlertFailureCodes.NETWORK to AlertsProblem.NETWORK,
-            AlertFailureCodes.ACCESS_DENIED to AlertsProblem.ACCESS_DENIED,
-            AlertFailureCodes.NOT_FOUND to AlertsProblem.NOT_FOUND,
-            AlertFailureCodes.REQUEST_FAILED to AlertsProblem.UNKNOWN,
-            AlertFailureCodes.INVALID_RESPONSE to AlertsProblem.UNKNOWN,
-        )
+    @Test
+    fun listExplainsEachFailure() {
+        val expected =
+            mapOf(
+                AlertFailureCodes.NETWORK to AlertsProblem.NETWORK,
+                AlertFailureCodes.ACCESS_DENIED to AlertsProblem.ACCESS_DENIED,
+                AlertFailureCodes.NOT_FOUND to AlertsProblem.NOT_FOUND,
+                AlertFailureCodes.REQUEST_FAILED to AlertsProblem.UNKNOWN,
+                AlertFailureCodes.INVALID_RESPONSE to AlertsProblem.UNKNOWN,
+            )
         expected.forEach { (code, problem) ->
             repository.list = failure(code)
             val model = listModel()
@@ -83,33 +150,44 @@ class AlertsViewModelTest {
         }
     }
 
-    @Test fun filtersPendingAndAttendedAlerts() {
-        repository.list = AppResult.Success(listOf(alert(id = 1), alert(id = 2, status = AlertStatus.ATTENDED)))
+    @Test
+    fun filtersPendingAndAttendedAlerts() {
+        repository.list =
+            AppResult.Success(listOf(alert(id = 1), alert(id = 2, status = AlertStatus.ATTENDED)))
         val model = listModel()
         model.refresh()
 
         model.selectFilter(AlertFilter.PENDING)
-        assertEquals(listOf(1L), (model.state.value as AlertsUiState.Content).visibleAlerts.map { it.id })
+        assertEquals(
+            listOf(1L),
+            (model.state.value as AlertsUiState.Content).visibleAlerts.map { it.id },
+        )
 
-        model.selectFilter(AlertFilter.ATTENDED)
-        assertEquals(listOf(2L), (model.state.value as AlertsUiState.Content).visibleAlerts.map { it.id })
+        model.selectFilter(AlertFilter.COMPLETED)
+        assertEquals(
+            listOf(2L),
+            (model.state.value as AlertsUiState.Content).visibleAlerts.map { it.id },
+        )
     }
 
-    @Test fun refreshKeepsTheChosenFilterAndTheVisibleAlerts() {
-        repository.list = AppResult.Success(listOf(alert(id = 1), alert(id = 2, status = AlertStatus.ATTENDED)))
+    @Test
+    fun refreshKeepsTheChosenFilterAndTheVisibleAlerts() {
+        repository.list =
+            AppResult.Success(listOf(alert(id = 1), alert(id = 2, status = AlertStatus.ATTENDED)))
         val model = listModel()
         model.refresh()
-        model.selectFilter(AlertFilter.ATTENDED)
+        model.selectFilter(AlertFilter.COMPLETED)
         val gate = CompletableDeferred<Unit>().also { repository.gate = it }
 
         model.refresh()
         assertTrue(model.state.value is AlertsUiState.Content)
 
         gate.complete(Unit)
-        assertEquals(AlertFilter.ATTENDED, (model.state.value as AlertsUiState.Content).filter)
+        assertEquals(AlertFilter.COMPLETED, (model.state.value as AlertsUiState.Content).filter)
     }
 
-    @Test fun retryAfterAnErrorShowsTheAlerts() {
+    @Test
+    fun retryAfterAnErrorShowsTheAlerts() {
         repository.list = failure(AlertFailureCodes.NETWORK)
         val model = listModel()
         model.refresh()
@@ -120,13 +198,15 @@ class AlertsViewModelTest {
         assertTrue(model.state.value is AlertsUiState.Content)
     }
 
-    @Test fun detailStartsLoading() {
+    @Test
+    fun detailStartsLoading() {
         repository.gate = CompletableDeferred()
 
         assertEquals(AlertDetailUiState.Loading, detailModel().state.value)
     }
 
-    @Test fun detailShowsTheAlert() {
+    @Test
+    fun detailShowsTheAlert() {
         repository.detail = AppResult.Success(alert(id = 1))
 
         val state = detailModel().state.value
@@ -135,14 +215,61 @@ class AlertsViewModelTest {
         assertEquals("detail:caregiver:adult:1", repository.requests.single())
     }
 
-    @Test fun detailExplainsNotFoundAccessAndNetwork() {
+    @Test
+    fun detailExplainsNotFoundAccessAndNetwork() {
         repository.detail = failure(AlertFailureCodes.NOT_FOUND)
         assertEquals(AlertDetailUiState.Error(AlertsProblem.NOT_FOUND), detailModel().state.value)
 
         repository.detail = failure(AlertFailureCodes.ACCESS_DENIED)
-        assertEquals(AlertDetailUiState.Error(AlertsProblem.ACCESS_DENIED), detailModel().state.value)
+        assertEquals(
+            AlertDetailUiState.Error(AlertsProblem.ACCESS_DENIED),
+            detailModel().state.value,
+        )
 
         repository.detail = failure(AlertFailureCodes.NETWORK)
         assertEquals(AlertDetailUiState.Error(AlertsProblem.NETWORK), detailModel().state.value)
+    }
+
+    @Test
+    fun advancingPresentationTimeRemovesDueDosesWithoutAnotherNetworkRead() {
+        val now = Instant.parse("2026-10-24T15:00:00Z")
+        var reads = 0
+        val reader = AlertTimelineReader { _, _, day, _ ->
+            reads++
+            AppResult.Success(
+                AlertTimeline(
+                    emptyList(),
+                    listOf(
+                        MonitoredDose(
+                            "next",
+                            "med",
+                            "Medication",
+                            "1 tablet",
+                            now.plusSeconds(120),
+                            "PENDING",
+                        )
+                    ),
+                    "Rosa",
+                    day,
+                )
+            )
+        }
+        val model =
+            AlertsViewModel(
+                "caregiver",
+                "adult",
+                GetOpenAlertsQueryHandler(repository),
+                Dispatchers.Unconfined,
+                GetAlertTimelineQueryHandler(reader),
+                Clock.fixed(now, ZoneId.of("UTC")),
+            )
+        model.refresh()
+        model.selectFilter(AlertFilter.UPCOMING)
+        assertEquals(1, (model.state.value as AlertsUiState.Content).visibleDoses.size)
+        model.updateTime(now.plusSeconds(121))
+        val content = model.state.value as AlertsUiState.Content
+        assertEquals(AlertFilter.UPCOMING, content.filter)
+        assertTrue(content.visibleDoses.isEmpty())
+        assertEquals(1, reads)
     }
 }

@@ -3,15 +3,17 @@ package com.vitahealth.tata.identity.application.handlers
 import com.vitahealth.tata.identity.application.FakeIdentityRepository
 import com.vitahealth.tata.identity.application.activeAccount
 import com.vitahealth.tata.identity.application.commands.RegisterCaregiverCommand
+import com.vitahealth.tata.identity.application.commands.RegisterCaregiverCommandHandler
 import com.vitahealth.tata.identity.application.commands.RequestNewVerificationCommand
+import com.vitahealth.tata.identity.application.commands.RequestNewVerificationCommandHandler
 import com.vitahealth.tata.identity.application.commands.VerifyCaregiverEmailCommand
+import com.vitahealth.tata.identity.application.commands.VerifyCaregiverEmailCommandHandler
 import com.vitahealth.tata.identity.application.pendingAccount
 import com.vitahealth.tata.shared.common.result.AppResult
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
-
 class RegistrationHandlersTest {
     private val repository = FakeIdentityRepository()
     private val register = RegisterCaregiverCommandHandler(repository)
@@ -53,7 +55,10 @@ class RegistrationHandlersTest {
     fun theNameAndEmailAreTrimmedButThePasswordIsNotChanged() = runBlocking {
         register(RegisterCaregiverCommand("  Diego Vargas ", " diego@example.com ", " pass word "))
 
-        assertEquals(Triple("Diego Vargas", "diego@example.com", " pass word "), repository.registrations.single())
+        assertEquals(
+            Triple("Diego Vargas", "diego@example.com", " pass word "),
+            repository.registrations.single(),
+        )
     }
 
     @Test

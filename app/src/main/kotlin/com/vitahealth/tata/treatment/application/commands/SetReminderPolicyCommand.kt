@@ -1,5 +1,4 @@
 package com.vitahealth.tata.treatment.application.commands
 
-data class SetReminderPolicyCommand(
-    val followUpDelayMinutes: String,
-)
+/** Carries the entered follow-up interval for reminder policy validation. */
+data class SetReminderPolicyCommand(val followUpDelayMinutes: String)

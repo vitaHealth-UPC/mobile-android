@@ -1,6 +1,6 @@
 package com.vitahealth.tata.identity.infrastructure.remote
 
-import com.vitahealth.tata.identity.domain.model.AccountStatus
+import com.vitahealth.tata.identity.domain.model.valueobjects.AccountStatus
 import com.vitahealth.tata.shared.common.result.AppResult
 import java.io.IOException
 import kotlinx.coroutines.runBlocking
@@ -9,28 +9,35 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
 import retrofit2.Response
-
 class RemoteIdentityRepositoryTest {
     private class Api(var response: () -> Response<AccountResponse>) : IdentityApiService {
         override suspend fun register(request: RegisterAccountRequest) = response()
+
         override suspend fun verify(request: VerifyEmailRequest) = response()
-        override suspend fun requestNewVerification(request: CreateEmailVerificationRequest) = response()
+
+        override suspend fun requestNewVerification(request: CreateEmailVerificationRequest) =
+            response()
     }
 
-    private fun httpError(status: Int) = Response.error<AccountResponse>(status, "{}".toResponseBody())
+    private fun httpError(status: Int) =
+        Response.error<AccountResponse>(status, "{}".toResponseBody())
+
     private fun ok(status: String = "PENDING_VERIFICATION") =
         Response.success(AccountResponse("account-1", "Diego", "diego@example.com", status))
 
     private fun codeFor(status: Int): String? {
         val result = runBlocking {
-            RemoteIdentityRepository(Api { httpError(status) }).registerCaregiver("Diego", "d@e.com", "password1")
+            RemoteIdentityRepository(Api { httpError(status) })
+                .registerCaregiver("Diego", "d@e.com", "password1")
         }
         return (result as? AppResult.Failure)?.code
     }
 
     @Test
     fun aSuccessfulAnswerIsMappedToTheCaregiverAccount() = runBlocking {
-        val result = RemoteIdentityRepository(Api { ok("ACTIVE") }).registerCaregiver("Diego", "d@e.com", "password1")
+        val result =
+            RemoteIdentityRepository(Api { ok("ACTIVE") })
+                .registerCaregiver("Diego", "d@e.com", "password1")
 
         val account = (result as AppResult.Success).value
         assertEquals("account-1", account.id)
@@ -40,10 +47,12 @@ class RemoteIdentityRepositoryTest {
     }
 
     @Test
-    fun anUnknownAccountStatusIsTreatedAsPendingVerification() = runBlocking {
-        val result = RemoteIdentityRepository(Api { ok("SUSPENDED") }).registerCaregiver("Diego", "d@e.com", "password1")
+    fun anUnknownAccountStatusIsRejectedAsInvalidResponse() = runBlocking {
+        val result =
+            RemoteIdentityRepository(Api { ok("SUSPENDED") })
+                .registerCaregiver("Diego", "d@e.com", "password1")
 
-        assertEquals(AccountStatus.PENDING_VERIFICATION, (result as AppResult.Success).value.status)
+        assertEquals("INVALID_RESPONSE", (result as AppResult.Failure).code)
     }
 
     @Test
@@ -59,8 +68,9 @@ class RemoteIdentityRepositoryTest {
 
     @Test
     fun aNetworkErrorIsReportedAsUnavailable() = runBlocking {
-        val result = RemoteIdentityRepository(Api { throw IOException("no route") })
-            .verifyEmail("d@e.com", "123456")
+        val result =
+            RemoteIdentityRepository(Api { throw IOException("no route") })
+                .verifyEmail("d@e.com", "123456")
 
         val failure = result as AppResult.Failure
         assertEquals("NETWORK_UNAVAILABLE", failure.code)
@@ -69,8 +79,9 @@ class RemoteIdentityRepositoryTest {
 
     @Test
     fun anEmptyBodyOnASuccessfulCallIsAFailureNotACrash() = runBlocking {
-        val result = RemoteIdentityRepository(Api { Response.success<AccountResponse>(null) })
-            .requestNewVerification("d@e.com")
+        val result =
+            RemoteIdentityRepository(Api { Response.success<AccountResponse>(null) })
+                .requestNewVerification("d@e.com")
 
         assertEquals("REQUEST_FAILED", (result as AppResult.Failure).code)
         assertNull(result.cause)

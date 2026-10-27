@@ -1,5 +1,4 @@
 package com.vitahealth.tata.carelink.application.queries
 
-data class GetOlderAdultProfileQuery(
-    val olderAdultId: String,
-)
+/** Identifies the older-adult profile to retrieve. */
+data class GetOlderAdultProfileQuery(val olderAdultId: String)

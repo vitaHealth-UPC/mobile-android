@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="intake_due_reminder_title">It\'s time for your dose</string>
+    <string name="intake_due_reminder_body">%1$s · Confirm after taking it.</string>
+</resources>

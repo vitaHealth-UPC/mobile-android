@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="recommendations_title">Recomendaciones</string>
+    <string name="recommendations_subtitle">Basadas en patrones de los últimos %1$d días.</string>
+    <string name="recommendations_insufficient_title">Evidencia insuficiente</string>
+    <string name="recommendations_insufficient_body">Todavía no hay datos suficientes para presentar una recomendación concluyente.</string>
+    <string name="recommendations_back">Volver a historial</string>
+    <string name="recommendations_apply">Aplicar ajustes</string>
+    <string name="recommendations_concentration">Concentración por horario</string>
+</resources>

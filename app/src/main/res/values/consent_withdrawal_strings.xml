@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="consent_withdraw_action">Retirar consentimiento</string>
+    <string name="consent_withdraw_title">¿Retirar consentimiento?</string>
+    <string name="consent_withdraw_explanation">Tu cuidador dejará de consultar tu seguimiento. Se cerrará tu acceso en este dispositivo. Puedes volver a vincularte con un nuevo consentimiento.</string>
+    <string name="consent_withdraw_access_error">La sesión o el vínculo cambió. Vuelve a ingresar para comprobar tu acceso.</string>
+    <string name="consent_withdraw_error">No pudimos confirmar el retiro. Comprueba tu conexión e inténtalo otra vez.</string>
+    <string name="consent_withdraw_busy">Retirando…</string>
+    <string name="consent_withdraw_confirm">Retirar</string>
+    <string name="consent_withdraw_cancel">Cancelar</string>
+</resources>

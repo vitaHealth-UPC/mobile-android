@@ -1,27 +1,27 @@
 package com.vitahealth.tata.inventory.infrastructure.remote
 
-import com.vitahealth.tata.inventory.application.InventoryRepository
-import com.vitahealth.tata.inventory.application.readmodels.InventoryStockReadModel
-import com.vitahealth.tata.inventory.domain.model.InventoryBatch
-import com.vitahealth.tata.inventory.domain.model.StockStatus
-import com.vitahealth.tata.shared.common.result.AppResult
 import com.google.gson.Gson
+import com.google.gson.stream.MalformedJsonException
+import com.vitahealth.tata.inventory.application.ports.InventoryRepository
+import com.vitahealth.tata.inventory.application.readmodels.InventoryStockReadModel
+import com.vitahealth.tata.shared.common.result.AppResult
+import java.io.IOException
+import kotlinx.coroutines.CancellationException
 import retrofit2.Response
-import java.time.Instant
 
 /**
  * Talks to the web-services Inventory API and maps responses into read models.
  *
- * Errors use the stable backend error code, with a fallback per endpoint and HTTP status. Each stable
- * [AppResult.Failure.code] distinguishes inactive medications from duplicate inventory. `message`s are English
- * diagnostics; the presentation layer selects the user-facing text from the `code`.
+ * Errors use the stable backend error code, with a fallback per endpoint and HTTP status. Each
+ * stable [AppResult.Failure.code] distinguishes inactive medications from duplicate inventory.
+ * `message`s are English diagnostics; the presentation layer selects the user-facing text from the
+ * `code`.
  */
-class RemoteInventoryRepository(
-    private val api: InventoryApiService,
-) : InventoryRepository {
+class RemoteInventoryRepository(private val api: InventoryApiService) : InventoryRepository {
 
     override suspend fun getStock(medicationId: String): AppResult<InventoryStockReadModel> =
         request(
+            medicationId = medicationId,
             call = { api.getStock(medicationId) },
             errorFor = { status ->
                 when (status) {
@@ -37,21 +37,24 @@ class RemoteInventoryRepository(
         replenishmentThreshold: Int,
     ): AppResult<InventoryStockReadModel> =
         request(
+            medicationId = medicationId,
             call = {
                 api.registerInitialInventory(
                     RegisterInitialInventoryRequest(
                         medicationId = medicationId,
                         initialQuantity = initialQuantity,
                         replenishmentThreshold = replenishmentThreshold,
-                    ),
+                    )
                 )
             },
             errorFor = { status ->
                 when (status) {
                     400 -> "INVALID_QUANTITY" to "invalid quantity or threshold"
                     404 -> "MEDICATION_NOT_FOUND" to "medication not found"
-                    409 -> "INVENTORY_ALREADY_EXISTS" to "inventory already exists for this medication"
-                    else -> "REQUEST_FAILED" to "could not register initial inventory (HTTP $status)"
+                    409 ->
+                        "INVENTORY_ALREADY_EXISTS" to "inventory already exists for this medication"
+                    else ->
+                        "REQUEST_FAILED" to "could not register initial inventory (HTTP $status)"
                 }
             },
         )
@@ -62,6 +65,7 @@ class RemoteInventoryRepository(
         lot: String?,
     ): AppResult<InventoryStockReadModel> =
         request(
+            medicationId = medicationId,
             call = {
                 api.registerReplenishment(
                     medicationId = medicationId,
@@ -79,73 +83,67 @@ class RemoteInventoryRepository(
         )
 
     private suspend fun request(
+        medicationId: String,
         call: suspend () -> Response<InventoryResponse>,
         errorFor: (Int) -> Pair<String, String>,
     ): AppResult<InventoryStockReadModel> {
         return try {
             val response = call()
             val body = response.body()
-            if (response.isSuccessful && body != null) {
-                toReadModel(body)
+            if (response.isSuccessful) {
+                AppResult.Success(requireNotNull(body).toReadModel(medicationId))
             } else {
                 val (code, message) = errorFor(response.code())
-                val backendCode = runCatching {
-                    response.errorBody()?.charStream()?.use {
-                        Gson().fromJson(it, ErrorEnvelope::class.java)?.code
+                val backendCode =
+                    runCatching {
+                            response.errorBody()?.charStream()?.use {
+                                Gson().fromJson(it, ErrorEnvelope::class.java)?.code
+                            }
+                        }
+                        .getOrNull()
+                        ?.takeIf { it in knownErrorCodes }
+                val resolvedCode =
+                    when (response.code()) {
+                        401 -> "SESSION_REQUIRED"
+                        403 -> "ACCESS_DENIED"
+                        else -> backendCode ?: code
                     }
-                }.getOrNull()?.takeIf { it in knownErrorCodes }
-                AppResult.Failure(message = message, code = backendCode ?: code)
+                AppResult.Failure(message = message, code = resolvedCode)
             }
-        } catch (exception: java.util.concurrent.CancellationException) {
+        } catch (exception: CancellationException) {
             throw exception
-        } catch (exception: java.io.IOException) {
+        } catch (exception: MalformedJsonException) {
+            AppResult.Failure(
+                message = "invalid inventory response",
+                cause = exception,
+                code = "INVALID_RESPONSE",
+            )
+        } catch (exception: IOException) {
             AppResult.Failure(
                 message = "no network connection",
                 cause = exception,
                 code = "NETWORK_UNAVAILABLE",
             )
         } catch (exception: RuntimeException) {
-            AppResult.Failure(message = "invalid inventory response", cause = exception, code = "INVALID_RESPONSE")
-        }
-    }
-
-    private fun toReadModel(body: InventoryResponse): AppResult<InventoryStockReadModel> {
-        val createdAt = parseInstant(body.createdAt)
-        val updatedAt = parseInstant(body.updatedAt)
-        if (createdAt == null || updatedAt == null) {
-            return AppResult.Failure(
-                message = "unparseable inventory timestamps",
+            AppResult.Failure(
+                message = "invalid inventory response",
+                cause = exception,
                 code = "INVALID_RESPONSE",
             )
         }
-
-        val batches = body.batches.map { dto ->
-            val registeredAt = parseInstant(dto.registeredAt)
-                ?: return AppResult.Failure(message = "unparseable batch timestamp", code = "INVALID_RESPONSE")
-            InventoryBatch(id = dto.id, quantity = dto.quantity, registeredAt = registeredAt, lot = dto.lot)
-        }
-
-        return AppResult.Success(
-            InventoryStockReadModel(
-                medicationId = body.medicationId,
-                remainingStock = body.remainingStock,
-                replenishmentThreshold = body.replenishmentThreshold,
-                status = StockStatus.fromLowStockFlag(body.lowStock),
-                batches = batches,
-                createdAt = createdAt,
-                updatedAt = updatedAt,
-                daysRemaining = body.daysRemaining,
-            ),
-        )
     }
 
     private data class ErrorEnvelope(val code: String?)
-    private val knownErrorCodes = setOf(
-        "MEDICATION_NOT_FOUND", "MEDICATION_INACTIVE", "INVENTORY_NOT_FOUND",
-        "INVENTORY_ALREADY_EXISTS", "INVALID_QUANTITY", "INSUFFICIENT_STOCK",
-        "CONCURRENT_UPDATE", "VALIDATION_ERROR",
-    )
 
-    private fun parseInstant(raw: String): Instant? =
-        runCatching { Instant.parse(raw) }.getOrNull()
+    private val knownErrorCodes =
+        setOf(
+            "MEDICATION_NOT_FOUND",
+            "MEDICATION_INACTIVE",
+            "INVENTORY_NOT_FOUND",
+            "INVENTORY_ALREADY_EXISTS",
+            "INVALID_QUANTITY",
+            "INSUFFICIENT_STOCK",
+            "CONCURRENT_UPDATE",
+            "VALIDATION_ERROR",
+        )
 }

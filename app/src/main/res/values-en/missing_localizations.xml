@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Previously untranslated default resources used in the adult home and navigation. -->
+    <string name="adult_tab_agenda">Schedule</string>
+    <string name="adult_tab_home">Home</string>
+    <string name="adult_tab_medications">Medications</string>
+    <string name="adult_tab_more">More</string>
+    <string name="adult_tab_notes">Notes</string>
+    <string name="agenda_tip_body">Taking medications at the same time helps build a routine.</string>
+    <string name="agenda_tip_title">Tip of the day</string>
+    <string name="app_name">Tata</string>
+    <string name="home_agenda_subtitle">Full schedule</string>
+    <string name="home_agenda_title">View all\nmy doses</string>
+    <string name="home_completed">Completed doses</string>
+    <string name="home_dismiss_tip">Dismiss tip of the day</string>
+    <string name="home_empty_description">There are no upcoming scheduled doses.</string>
+    <string name="home_empty_title">No upcoming dose</string>
+    <string name="home_error_title">We could not load your next dose</string>
+    <string name="home_in_hours">In %1$d h</string>
+    <string name="home_in_minutes">In %1$d min</string>
+    <string name="home_loading">Checking your schedule?</string>
+    <string name="home_next_dose">Next dose</string>
+    <string name="home_progress_done">Great! You completed your doses!</string>
+    <string name="home_progress_empty">No scheduled doses</string>
+    <string name="home_progress_encouragement">Every dose matters</string>
+    <string name="home_progress_in_progress">You are doing well!</string>
+    <string name="home_progress_title">Today\'s progress</string>
+    <string name="home_progress_unavailable">Check your schedule</string>
+    <string name="home_retry">Retry</string>
+    <string name="home_switch_account">Switch account</string>
+    <string name="home_tab_agenda">Schedule</string>
+    <string name="home_tab_start">Home</string>
+    <string name="home_tip_description">Take your medications with water at the same time every day.</string>
+    <string name="home_tip_title">Tip of the day</string>
+    <string name="home_today">Today</string>
+    <string name="home_voice_subtitle">Quick and easy</string>
+    <string name="home_voice_title">Confirm\nby voice</string>
+    <string name="notes_person_active">Active</string>
+    <string name="notes_person_age_active">%1$d years old ? active link</string>
+    <string name="notes_person_link_active">Active link</string>
+</resources>

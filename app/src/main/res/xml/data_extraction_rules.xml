@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Credentials, profiles, push destinations, pending preferences and medical queues stay local. -->
+<data-extraction-rules>
+    <cloud-backup>
+        <include domain="sharedpref" path="tata_onboarding.xml" />
+    </cloud-backup>
+    <device-transfer>
+        <include domain="sharedpref" path="tata_onboarding.xml" />
+    </device-transfer>
+</data-extraction-rules>

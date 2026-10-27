@@ -1,9 +1,9 @@
 package com.vitahealth.tata.identity.presentation.subscription
 
+import com.vitahealth.tata.identity.presentation.subscription.mappers.formatPlanPrice
 import java.math.BigDecimal
 import org.junit.Assert.assertEquals
 import org.junit.Test
-
 class PlanPriceFormatTest {
     @Test
     fun solesAreShownWithTheSolSign() {

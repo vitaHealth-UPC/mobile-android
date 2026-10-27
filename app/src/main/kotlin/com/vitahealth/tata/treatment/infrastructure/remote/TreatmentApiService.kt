@@ -5,59 +5,10 @@ import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
-import retrofit2.http.Query
 import retrofit2.http.Path
+import retrofit2.http.Query
 
-data class RegisterMedicationRequest(
-    val caregiverId: String,
-    val name: String,
-    val presentation: String,
-)
-
-data class MedicationResponse(
-    val id: String,
-    val olderAdultId: String,
-    val name: String,
-    val presentation: String,
-    val active: Boolean,
-)
-
-data class UpdateMedicationRequest(
-    val caregiverId: String,
-    val name: String,
-    val presentation: String,
-)
-
-data class CreateTreatmentRequest(
-    val caregiverId: String,
-    val name: String,
-)
-
-data class ConfigureTreatmentRequest(
-    val caregiverId: String,
-    val medicationId: String,
-    val dose: String,
-    val frequency: String,
-    val scheduledTimes: List<String>,
-    val instructions: String,
-    val reminderLeadMinutes: Int,
-)
-
-data class TreatmentResponse(
-    val id: String,
-    val olderAdultId: String,
-    val name: String,
-    val status: String,
-    val medicationId: String?,
-    val dose: String?,
-    val frequency: String?,
-    val scheduledTimes: List<String>?,
-    val instructions: String?,
-    val reminderLeadMinutes: Int?,
-)
-
-data class MyMedicationResponse(val medication: MedicationResponse, val treatments: List<TreatmentResponse>)
-
+/** Retrofit endpoints for medication management and treatment lifecycle operations. */
 interface TreatmentApiService {
     @GET("api/v1/me/medications")
     suspend fun getMyMedications(): Response<List<MyMedicationResponse>>
@@ -86,6 +37,12 @@ interface TreatmentApiService {
         @Query("caregiverId") caregiverId: String,
     ): Response<MedicationResponse>
 
+    @POST("api/v1/medications/{medicationId}/reactivation")
+    suspend fun reactivateMedication(
+        @Path("medicationId") medicationId: String,
+        @Query("caregiverId") caregiverId: String,
+    ): Response<MedicationResponse>
+
     @POST("api/v1/older-adults/{olderAdultId}/treatments")
     suspend fun createTreatment(
         @Path("olderAdultId") olderAdultId: String,
@@ -93,7 +50,10 @@ interface TreatmentApiService {
     ): Response<TreatmentResponse>
 
     @GET("api/v1/older-adults/{olderAdultId}/treatments")
-    suspend fun listTreatments(@Path("olderAdultId") olderAdultId: String,@Query("caregiverId") caregiverId: String): Response<List<TreatmentResponse>>
+    suspend fun listTreatments(
+        @Path("olderAdultId") olderAdultId: String,
+        @Query("caregiverId") caregiverId: String,
+    ): Response<List<TreatmentResponse>>
 
     @PUT("api/v1/treatments/{treatmentId}/regimen")
     suspend fun configureTreatment(

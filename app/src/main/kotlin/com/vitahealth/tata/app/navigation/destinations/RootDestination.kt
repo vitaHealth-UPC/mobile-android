@@ -1,0 +1,459 @@
+package com.vitahealth.tata.app.navigation.destinations
+
+import android.net.Uri
+
+/** Defines encoded route contracts shared by navigation graphs and notification destinations. */
+sealed interface RootDestination {
+    val route: String
+
+    data object VoiceConfirmation : RootDestination {
+        override val route = "voice-confirmation/{intakeId}"
+
+        fun createRoute(intakeId: String) = "voice-confirmation/" + Uri.encode(intakeId)
+    }
+
+    data object TreatmentList : RootDestination {
+        override val route = "treatment-list/{caregiverId}/{olderAdultId}/{olderAdultName}"
+
+        fun createRoute(caregiver: String, adult: String, name: String) =
+            "treatment-list/${Uri.encode(caregiver)}/${Uri.encode(adult)}/${Uri.encode(name)}"
+    }
+
+    data object CaregiverProfiles : RootDestination {
+        override val route = "caregiver-profiles/{caregiverId}"
+
+        fun createRoute(id: String) = "caregiver-profiles/${Uri.encode(id)}"
+    }
+
+    data object SessionAccess : RootDestination {
+        override val route = "session-access"
+    }
+
+    data object PinAccess : RootDestination {
+        override val route = "pin-access/{olderAdultId}/{olderAdultName}/{setup}"
+
+        fun createRoute(id: String, name: String, setup: Boolean) =
+            "pin-access/${Uri.encode(id)}/${Uri.encode(name)}/$setup"
+    }
+
+    data object FamilySummary : RootDestination {
+        override val route = "family-summary/{caregiverId}/{olderAdultId}/{olderAdultName}"
+
+        fun createRoute(caregiverId: String, olderAdultId: String, olderAdultName: String) =
+            "family-summary/" +
+                Uri.encode(caregiverId) +
+                "/" +
+                Uri.encode(olderAdultId) +
+                "/" +
+                Uri.encode(olderAdultName)
+    }
+
+    data object LinkedPerson : RootDestination {
+        override val route = "linked-person/{caregiverId}/{olderAdultId}/{olderAdultName}"
+
+        fun createRoute(caregiverId: String, olderAdultId: String, olderAdultName: String) =
+            "linked-person/" + Uri.encode(caregiverId) + "/" +
+                Uri.encode(olderAdultId) + "/" + Uri.encode(olderAdultName)
+    }
+
+    data object Alerts : RootDestination {
+        override val route = "alerts/{caregiverId}/{olderAdultId}"
+
+        fun createRoute(caregiverId: String, olderAdultId: String) =
+            "alerts/" + Uri.encode(caregiverId) + "/" + Uri.encode(olderAdultId)
+    }
+
+    data object Notes : RootDestination {
+        override val route = "notes/{caregiverId}/{olderAdultId}"
+
+        fun createRoute(caregiverId: String, olderAdultId: String) =
+            "notes/" + Uri.encode(caregiverId) + "/" + Uri.encode(olderAdultId)
+    }
+
+    data object AlertDetail : RootDestination {
+        override val route = "alert-detail/{caregiverId}/{olderAdultId}/{alertId}"
+
+        fun createRoute(caregiverId: String, olderAdultId: String, alertId: Long) =
+            "alert-detail/" +
+                Uri.encode(caregiverId) +
+                "/" +
+                Uri.encode(olderAdultId) +
+                "/" +
+                alertId
+    }
+
+    data object PlanSubscription : RootDestination {
+        const val accountIdArgument = "accountId"
+        override val route = "plan-subscription/{$accountIdArgument}"
+
+        fun createRoute(accountId: String) = "plan-subscription/" + Uri.encode(accountId)
+    }
+
+    data object MyMedications : RootDestination {
+        override val route = "my-medications/{olderAdultId}"
+
+        fun createRoute(olderAdultId: String) = "my-medications/" + Uri.encode(olderAdultId)
+    }
+
+    data object IntakeAgenda : RootDestination {
+        const val olderAdultIdArgument = "olderAdultId"
+        override val route = "intake-agenda/{$olderAdultIdArgument}"
+
+        fun createRoute(olderAdultId: String) = "intake-agenda/" + Uri.encode(olderAdultId)
+    }
+
+    data object LandingValue : RootDestination {
+        override val route = "landing-value"
+    }
+
+    data object LandingPlans : RootDestination {
+        override val route = "landing-plans"
+    }
+
+    data object Onboarding : RootDestination {
+        override val route: String = "onboarding"
+    }
+
+    data object CaregiverRegistration : RootDestination {
+        override val route: String = "caregiver-registration"
+    }
+
+    data object CareLink : RootDestination {
+        const val caregiverIdArgument = "caregiverId"
+        override val route: String =
+            "care-link/{$caregiverIdArgument}?code={code}&previewAdult={previewAdult}"
+
+        fun createRoute(caregiverId: String, code: String = "", previewAdult: String = ""): String =
+            "care-link/" +
+                Uri.encode(caregiverId) +
+                "?code=" +
+                Uri.encode(code) +
+                "&previewAdult=" +
+                Uri.encode(previewAdult)
+    }
+
+    data object MedicationRegistration : RootDestination {
+        const val caregiverIdArgument = "caregiverId"
+        const val olderAdultIdArgument = "olderAdultId"
+        const val olderAdultNameArgument = "olderAdultName"
+
+        override val route: String =
+            "medication-registration/{$caregiverIdArgument}/{$olderAdultIdArgument}/{$olderAdultNameArgument}"
+
+        fun createRoute(caregiverId: String, olderAdultId: String, olderAdultName: String): String =
+            "medication-registration/" +
+                Uri.encode(caregiverId) +
+                "/" +
+                Uri.encode(olderAdultId) +
+                "/" +
+                Uri.encode(olderAdultName)
+    }
+
+    data object MedicationManagement : RootDestination {
+        const val caregiverIdArgument = "caregiverId"
+        const val olderAdultIdArgument = "olderAdultId"
+        const val olderAdultNameArgument = "olderAdultName"
+        const val deactivateMedicationIdArgument = "deactivateMedicationId"
+
+        override val route: String =
+            "medication-management/{$caregiverIdArgument}/{$olderAdultIdArgument}/{$olderAdultNameArgument}" +
+                "?$deactivateMedicationIdArgument={$deactivateMedicationIdArgument}"
+
+        fun createRoute(
+            caregiverId: String,
+            olderAdultId: String,
+            olderAdultName: String,
+            deactivateMedicationId: String? = null,
+        ): String =
+            "medication-management/" +
+                Uri.encode(caregiverId) +
+                "/" +
+                Uri.encode(olderAdultId) +
+                "/" +
+                Uri.encode(olderAdultName) +
+                (deactivateMedicationId?.takeIf(String::isNotBlank)?.let {
+                    "?$deactivateMedicationIdArgument=" + Uri.encode(it)
+                } ?: "")
+    }
+
+    data object TreatmentCreation : RootDestination {
+        const val caregiverIdArgument = "caregiverId"
+        const val olderAdultIdArgument = "olderAdultId"
+        const val olderAdultNameArgument = "olderAdultName"
+        const val medicationIdArgument = "medicationId"
+        const val medicationLabelArgument = "medicationLabel"
+
+        override val route: String =
+            "treatment-creation/{$caregiverIdArgument}/{$olderAdultIdArgument}/{$olderAdultNameArgument}/" +
+                "{$medicationIdArgument}/{$medicationLabelArgument}"
+
+        fun createRoute(
+            caregiverId: String,
+            olderAdultId: String,
+            olderAdultName: String,
+            medicationId: String,
+            medicationLabel: String,
+        ): String =
+            "treatment-creation/" +
+                Uri.encode(caregiverId) +
+                "/" +
+                Uri.encode(olderAdultId) +
+                "/" +
+                Uri.encode(olderAdultName) +
+                "/" +
+                Uri.encode(medicationId) +
+                "/" +
+                Uri.encode(medicationLabel)
+    }
+
+    data object TreatmentDoseFrequency : RootDestination {
+        const val caregiverIdArgument = "caregiverId"
+        const val olderAdultIdArgument = "olderAdultId"
+        const val olderAdultNameArgument = "olderAdultName"
+        const val medicationIdArgument = "medicationId"
+        const val medicationLabelArgument = "medicationLabel"
+        const val treatmentIdArgument = "treatmentId"
+        const val treatmentNameArgument = "treatmentName"
+
+        override val route: String =
+            "treatment-dose-frequency/{$caregiverIdArgument}/{$olderAdultIdArgument}/{$olderAdultNameArgument}/" +
+                "{$medicationIdArgument}/{$medicationLabelArgument}/{$treatmentIdArgument}/{$treatmentNameArgument}"
+
+        fun createRoute(
+            caregiverId: String,
+            olderAdultId: String,
+            olderAdultName: String,
+            medicationId: String,
+            medicationLabel: String,
+            treatmentId: String,
+            treatmentName: String,
+        ): String =
+            "treatment-dose-frequency/" +
+                Uri.encode(caregiverId) +
+                "/" +
+                Uri.encode(olderAdultId) +
+                "/" +
+                Uri.encode(olderAdultName) +
+                "/" +
+                Uri.encode(medicationId) +
+                "/" +
+                Uri.encode(medicationLabel) +
+                "/" +
+                Uri.encode(treatmentId) +
+                "/" +
+                Uri.encode(treatmentName)
+    }
+
+    data object TreatmentScheduleInstructions : RootDestination {
+        const val caregiverIdArgument = "caregiverId"
+        const val olderAdultIdArgument = "olderAdultId"
+        const val olderAdultNameArgument = "olderAdultName"
+        const val medicationIdArgument = "medicationId"
+        const val medicationLabelArgument = "medicationLabel"
+        const val treatmentIdArgument = "treatmentId"
+        const val treatmentNameArgument = "treatmentName"
+        const val dosageArgument = "dosage"
+        const val frequencyArgument = "frequency"
+
+        override val route: String =
+            "treatment-schedule/{$caregiverIdArgument}/{$olderAdultIdArgument}/{$olderAdultNameArgument}/" +
+                "{$medicationIdArgument}/{$medicationLabelArgument}/{$treatmentIdArgument}/{$treatmentNameArgument}/" +
+                "{$dosageArgument}/{$frequencyArgument}"
+
+        fun createRoute(
+            caregiverId: String,
+            olderAdultId: String,
+            olderAdultName: String,
+            medicationId: String,
+            medicationLabel: String,
+            treatmentId: String,
+            treatmentName: String,
+            dosage: String,
+            frequency: String,
+        ): String =
+            "treatment-schedule/" +
+                Uri.encode(caregiverId) +
+                "/" +
+                Uri.encode(olderAdultId) +
+                "/" +
+                Uri.encode(olderAdultName) +
+                "/" +
+                Uri.encode(medicationId) +
+                "/" +
+                Uri.encode(medicationLabel) +
+                "/" +
+                Uri.encode(treatmentId) +
+                "/" +
+                Uri.encode(treatmentName) +
+                "/" +
+                Uri.encode(dosage) +
+                "/" +
+                Uri.encode(frequency)
+    }
+
+    data object TreatmentReminders : RootDestination {
+        const val caregiverIdArgument = "caregiverId"
+        const val olderAdultIdArgument = "olderAdultId"
+        const val olderAdultNameArgument = "olderAdultName"
+        const val medicationIdArgument = "medicationId"
+        const val medicationLabelArgument = "medicationLabel"
+        const val treatmentIdArgument = "treatmentId"
+        const val treatmentNameArgument = "treatmentName"
+        const val dosageArgument = "dosage"
+        const val frequencyArgument = "frequency"
+        const val scheduleTextArgument = "scheduleText"
+        const val instructionsArgument = "instructions"
+
+        override val route: String =
+            "treatment-reminders/{$caregiverIdArgument}/{$olderAdultIdArgument}/{$olderAdultNameArgument}/" +
+                "{$medicationIdArgument}/{$medicationLabelArgument}/{$treatmentIdArgument}/{$treatmentNameArgument}/" +
+                "{$dosageArgument}/{$frequencyArgument}/{$scheduleTextArgument}/{$instructionsArgument}"
+
+        fun createRoute(
+            caregiverId: String,
+            olderAdultId: String,
+            olderAdultName: String,
+            medicationId: String,
+            medicationLabel: String,
+            treatmentId: String,
+            treatmentName: String,
+            dosage: String,
+            frequency: String,
+            scheduleText: String,
+            instructions: String,
+        ): String =
+            "treatment-reminders/" +
+                Uri.encode(caregiverId) +
+                "/" +
+                Uri.encode(olderAdultId) +
+                "/" +
+                Uri.encode(olderAdultName) +
+                "/" +
+                Uri.encode(medicationId) +
+                "/" +
+                Uri.encode(medicationLabel) +
+                "/" +
+                Uri.encode(treatmentId) +
+                "/" +
+                Uri.encode(treatmentName) +
+                "/" +
+                Uri.encode(dosage) +
+                "/" +
+                Uri.encode(frequency) +
+                "/" +
+                Uri.encode(scheduleText) +
+                "/" +
+                Uri.encode(instructions.ifBlank { " " })
+    }
+
+    data object TreatmentLifecycle : RootDestination {
+        const val caregiverIdArgument = "caregiverId"
+        const val olderAdultIdArgument = "olderAdultId"
+        const val olderAdultNameArgument = "olderAdultName"
+        const val medicationIdArgument = "medicationId"
+        const val medicationLabelArgument = "medicationLabel"
+        const val treatmentIdArgument = "treatmentId"
+        const val treatmentNameArgument = "treatmentName"
+        const val dosageArgument = "dosage"
+        const val frequencyArgument = "frequency"
+        const val scheduleTextArgument = "scheduleText"
+        const val instructionsArgument = "instructions"
+        const val reminderDelayArgument = "reminderDelay"
+        const val initialStatusArgument = "initialStatus"
+
+        override val route: String =
+            "treatment-lifecycle/{$caregiverIdArgument}/{$olderAdultIdArgument}/{$olderAdultNameArgument}/" +
+                "{$medicationIdArgument}/{$medicationLabelArgument}/{$treatmentIdArgument}/{$treatmentNameArgument}/" +
+                "{$dosageArgument}/{$frequencyArgument}/{$scheduleTextArgument}/{$instructionsArgument}/{$reminderDelayArgument}?$initialStatusArgument={$initialStatusArgument}"
+
+        fun createRoute(
+            caregiverId: String,
+            olderAdultId: String,
+            olderAdultName: String,
+            medicationId: String,
+            medicationLabel: String,
+            treatmentId: String,
+            treatmentName: String,
+            dosage: String,
+            frequency: String,
+            scheduleText: String,
+            instructions: String,
+            reminderDelay: Int,
+            initialStatus: String = "DRAFT",
+        ): String =
+            "treatment-lifecycle/" +
+                Uri.encode(caregiverId) +
+                "/" +
+                Uri.encode(olderAdultId) +
+                "/" +
+                Uri.encode(olderAdultName) +
+                "/" +
+                Uri.encode(medicationId) +
+                "/" +
+                Uri.encode(medicationLabel) +
+                "/" +
+                Uri.encode(treatmentId) +
+                "/" +
+                Uri.encode(treatmentName) +
+                "/" +
+                Uri.encode(dosage) +
+                "/" +
+                Uri.encode(frequency) +
+                "/" +
+                Uri.encode(scheduleText) +
+                "/" +
+                Uri.encode(instructions.ifBlank { " " }) +
+                "/" +
+                reminderDelay.toString() +
+                if (initialStatus == "DRAFT") "" else "?initialStatus=" + Uri.encode(initialStatus)
+    }
+
+    data object TreatmentDetail : RootDestination {
+        const val caregiverIdArgument = "caregiverId"
+        const val olderAdultNameArgument = "olderAdultName"
+        const val treatmentIdArgument = "treatmentId"
+        const val medicationLabelHintArgument = "medicationLabelHint"
+
+        override val route: String =
+            "treatment-detail/{$caregiverIdArgument}/{$olderAdultNameArgument}/{$treatmentIdArgument}/{$medicationLabelHintArgument}"
+
+        fun createRoute(
+            caregiverId: String,
+            olderAdultName: String,
+            treatmentId: String,
+            medicationLabelHint: String,
+        ): String =
+            "treatment-detail/" +
+                Uri.encode(caregiverId) +
+                "/" +
+                Uri.encode(olderAdultName) +
+                "/" +
+                Uri.encode(treatmentId) +
+                "/" +
+                Uri.encode(medicationLabelHint.ifBlank { " " })
+    }
+
+    data object NextDoseHome : RootDestination {
+        const val olderAdultIdArgument = "olderAdultId"
+        const val olderAdultNameArgument = "olderAdultName"
+
+        override val route: String =
+            "older-adult-home/{$olderAdultIdArgument}/{$olderAdultNameArgument}"
+
+        fun createRoute(olderAdultId: String, olderAdultName: String): String =
+            "older-adult-home/" + Uri.encode(olderAdultId) + "/" + Uri.encode(olderAdultName)
+    }
+
+    data object DoseDetail : RootDestination {
+        const val intakeIdArgument = "intakeId"
+        override val route: String = "dose-detail/{$intakeIdArgument}"
+
+        fun createRoute(intakeId: String): String = "dose-detail/" + Uri.encode(intakeId)
+    }
+
+    data object PersonalNotes : RootDestination {
+        override val route = "personal-notes/{olderAdultId}"
+
+        fun createRoute(olderAdultId: String) = "personal-notes/" + Uri.encode(olderAdultId)
+    }
+}

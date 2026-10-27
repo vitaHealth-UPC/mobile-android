@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="accessibility_language_title">Idioma</string>
+    <string name="accessibility_language_subtitle">Idioma de la aplicación</string>
+    <string name="accessibility_language_saved">Idioma actualizado</string>
+</resources>

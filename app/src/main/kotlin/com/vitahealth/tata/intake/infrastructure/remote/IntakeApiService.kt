@@ -2,28 +2,12 @@ package com.vitahealth.tata.intake.infrastructure.remote
 
 import retrofit2.Response
 import retrofit2.http.Body
-import retrofit2.http.POST
 import retrofit2.http.GET
+import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
 
-data class IntakeResponse(
-    val id: String,
-    val treatmentId: String,
-    val medicationId: String,
-    val olderAdultId: String,
-    val medicationName: String,
-    val dose: String,
-    val instructions: String?,
-    val scheduledAt: String,
-    val status: String,
-    val confirmedAt: String? = null,
-    val confirmationChannel: String? = null,
-    val alreadyConfirmed: Boolean = false,
-)
-
-data class ConfirmIntakeRequest(val channel: String)
-
+/** Queries intake schedules and submits explicit dose confirmations. */
 interface IntakeApiService {
     @GET("api/v1/older-adults/{olderAdultId}/intakes/agenda")
     suspend fun getAgenda(
@@ -39,12 +23,8 @@ interface IntakeApiService {
     ): Response<IntakeResponse>
 
     @GET("api/v1/older-adults/{olderAdultId}/intakes/next")
-    suspend fun getNextDose(
-        @Path("olderAdultId") olderAdultId: String,
-    ): Response<IntakeResponse>
+    suspend fun getNextDose(@Path("olderAdultId") olderAdultId: String): Response<IntakeResponse>
 
     @GET("api/v1/intakes/{intakeId}")
-    suspend fun getDoseDetail(
-        @Path("intakeId") intakeId: String,
-    ): Response<IntakeResponse>
+    suspend fun getDoseDetail(@Path("intakeId") intakeId: String): Response<IntakeResponse>
 }

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="consent_withdraw_action">Withdraw consent</string>
+    <string name="consent_withdraw_title">Withdraw consent?</string>
+    <string name="consent_withdraw_explanation">Your caregiver will no longer access your monitoring. You will be signed out on this device. You can link again with new consent.</string>
+    <string name="consent_withdraw_access_error">Your session or care link changed. Sign in again to check your access.</string>
+    <string name="consent_withdraw_error">We could not confirm withdrawal. Check your connection and try again.</string>
+    <string name="consent_withdraw_busy">Withdrawing…</string>
+    <string name="consent_withdraw_confirm">Withdraw</string>
+    <string name="consent_withdraw_cancel">Cancel</string>
+</resources>

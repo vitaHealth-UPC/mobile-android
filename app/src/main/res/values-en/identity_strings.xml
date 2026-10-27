@@ -4,6 +4,7 @@
     <string name="plan_subtitle">Manage what your account can do</string>
     <string name="plan_back">Back</string>
     <string name="plan_loading">Loading your plan…</string>
+    <string name="plan_sign_in">Sign in</string>
     <string name="plan_retry">Try again</string>
     <string name="plan_header">%1$s plan</string>
     <string name="plan_price_per_month">%1$s / month</string>

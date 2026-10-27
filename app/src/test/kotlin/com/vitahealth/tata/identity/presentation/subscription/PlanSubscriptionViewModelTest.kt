@@ -2,12 +2,22 @@ package com.vitahealth.tata.identity.presentation.subscription
 
 import com.vitahealth.tata.identity.application.FakeSubscriptionRepository
 import com.vitahealth.tata.identity.application.NoConnection
+import com.vitahealth.tata.identity.application.commands.ChangeSubscriptionCommandHandler
 import com.vitahealth.tata.identity.application.essentialPlan
 import com.vitahealth.tata.identity.application.familyPlan
-import com.vitahealth.tata.identity.application.handlers.ChangeSubscriptionCommandHandler
-import com.vitahealth.tata.identity.application.handlers.GetCurrentSubscriptionQueryHandler
-import com.vitahealth.tata.identity.application.handlers.ListAvailablePlansQueryHandler
+import com.vitahealth.tata.identity.application.queries.GetCurrentSubscriptionQueryHandler
+import com.vitahealth.tata.identity.application.queries.ListAvailablePlansQueryHandler
+import com.vitahealth.tata.identity.domain.model.entities.Subscription
+import com.vitahealth.tata.identity.domain.model.valueobjects.SubscriptionStatus
+import com.vitahealth.tata.identity.domain.repositories.SubscriptionRepository
+import com.vitahealth.tata.identity.presentation.subscription.viewmodel.PlanChangeMessage
+import com.vitahealth.tata.identity.presentation.subscription.viewmodel.PlanMessage
+import com.vitahealth.tata.identity.presentation.subscription.viewmodel.PlanSubscriptionViewModel
 import com.vitahealth.tata.shared.common.result.AppResult
+import kotlin.coroutines.Continuation
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -36,12 +46,13 @@ class PlanSubscriptionViewModelTest {
         Dispatchers.resetMain()
     }
 
-    private fun viewModel() = PlanSubscriptionViewModel(
-        accountId = "account-1",
-        getSubscription = GetCurrentSubscriptionQueryHandler(repository),
-        listPlans = ListAvailablePlansQueryHandler(repository),
-        changeSubscription = ChangeSubscriptionCommandHandler(repository),
-    )
+    private fun viewModel() =
+        PlanSubscriptionViewModel(
+            accountId = "account-1",
+            getSubscription = GetCurrentSubscriptionQueryHandler(repository),
+            listPlans = ListAvailablePlansQueryHandler(repository),
+            changeSubscription = ChangeSubscriptionCommandHandler(repository),
+        )
 
     @Test
     fun showsTheCurrentPlanAndEveryAvailablePlanWhenItOpens() {
@@ -223,7 +234,8 @@ class PlanSubscriptionViewModelTest {
 
         model.onChangeConfirm()
 
-        assertEquals(PlanChangeMessage.ErrorAccount, model.state.value.changeMessage)
+        assertEquals(PlanMessage.ErrorAccount, model.state.value.message)
+        assertNull(model.state.value.subscription)
     }
 
     @Test
@@ -237,5 +249,152 @@ class PlanSubscriptionViewModelTest {
         model.onSelectPlan(familyPlan)
 
         assertNull(model.state.value.changeMessage)
+    }
+
+    @Test
+    fun failedCatalogReloadClearsPriorPlanAndDisablesStaleChange() {
+        val backing = FakeSubscriptionRepository()
+        var failCatalog = false
+        val remote = object : SubscriptionRepository by backing {
+            override suspend fun listPlans() =
+                if (failCatalog) NoConnection else backing.listPlans()
+        }
+        val model = PlanSubscriptionViewModel(
+            "account-1",
+            GetCurrentSubscriptionQueryHandler(remote),
+            ListAvailablePlansQueryHandler(remote),
+            ChangeSubscriptionCommandHandler(remote),
+        )
+        model.onSelectPlan(essentialPlan)
+        model.onChangeRequest()
+        failCatalog = true
+        model.load()
+
+        assertEquals(PlanMessage.ErrorOffline, model.state.value.message)
+        assertNull(model.state.value.subscription)
+        assertTrue(model.state.value.plans.isEmpty())
+        assertNull(model.state.value.selectedPlan)
+        assertNull(model.state.value.confirming)
+        model.onChangeRequest()
+        model.onChangeConfirm()
+        assertTrue(backing.changes.isEmpty())
+    }
+
+    @Test
+    fun selectionMustBelongToTheLatestAuthorizedCatalog() {
+        val backing = FakeSubscriptionRepository()
+        var available = listOf(essentialPlan, familyPlan)
+        val remote = object : SubscriptionRepository by backing {
+            override suspend fun listPlans() = AppResult.Success(available)
+        }
+        val model = PlanSubscriptionViewModel(
+            "account-1",
+            GetCurrentSubscriptionQueryHandler(remote),
+            ListAvailablePlansQueryHandler(remote),
+            ChangeSubscriptionCommandHandler(remote),
+        )
+        model.onSelectPlan(essentialPlan.copy(code = "FOREIGN"))
+        assertNull(model.state.value.selectedPlan)
+        model.onSelectPlan(essentialPlan)
+        assertEquals(essentialPlan, model.state.value.selectedPlan)
+
+        available = listOf(familyPlan)
+        model.load()
+        assertNull(model.state.value.selectedPlan)
+        model.onChangeRequest()
+        assertNull(model.state.value.confirming)
+        assertTrue(backing.changes.isEmpty())
+    }
+
+    @Test
+    fun confirmingAPlanChangeCancelsAnOlderReload() {
+        val delayed = CompletableDeferred<Subscription>()
+        var reads = 0
+        var reloadCancelled = false
+        val backing = FakeSubscriptionRepository()
+        val remote =
+            object : SubscriptionRepository by backing {
+                override suspend fun currentSubscription(
+                    accountId: String
+                ): AppResult<Subscription> {
+                    reads++
+                    if (reads == 1) return backing.currentSubscription(accountId)
+                    return try {
+                        AppResult.Success(delayed.await())
+                    } finally {
+                        reloadCancelled = true
+                    }
+                }
+            }
+        val model =
+            PlanSubscriptionViewModel(
+                "account-1",
+                GetCurrentSubscriptionQueryHandler(remote),
+                ListAvailablePlansQueryHandler(remote),
+                ChangeSubscriptionCommandHandler(remote),
+            )
+        model.onSelectPlan(essentialPlan)
+        model.onChangeRequest()
+        model.load()
+        assertTrue(model.state.value.isLoading)
+
+        model.onChangeConfirm()
+
+        assertTrue(reloadCancelled)
+        assertFalse(model.state.value.isLoading)
+        assertEquals(essentialPlan, model.state.value.subscription?.plan)
+        delayed.complete(Subscription("account-1", familyPlan, SubscriptionStatus.ACTIVE, null))
+        assertEquals(essentialPlan, model.state.value.subscription?.plan)
+    }
+
+    @Test
+    fun deniedReloadClearsPreviouslyLoadedPlanAndSelection() {
+        listOf("UNAUTHENTICATED", "SESSION_CHANGED", "ACCOUNT_ACCESS_DENIED").forEach { code ->
+            repository.failWith = null
+            val model = viewModel()
+            model.onSelectPlan(essentialPlan)
+            model.onChangeRequest()
+            repository.failWith = AppResult.Failure("", code = code)
+            model.load()
+            assertNull(model.state.value.subscription)
+            assertTrue(model.state.value.plans.isEmpty())
+            assertNull(model.state.value.selectedPlan)
+            assertNull(model.state.value.confirming)
+            assertEquals(PlanMessage.ErrorSession, model.state.value.message)
+        }
+    }
+
+    @Test
+    fun nonCooperativeReloadCannotOverwriteAConfirmedPlanChange() {
+        var pending: Continuation<AppResult<Subscription>>? = null
+        var reads = 0
+        val backing = FakeSubscriptionRepository()
+        val remote =
+            object : SubscriptionRepository by backing {
+                override suspend fun currentSubscription(
+                    accountId: String
+                ): AppResult<Subscription> {
+                    if (++reads == 1) return backing.currentSubscription(accountId)
+                    return suspendCoroutine { pending = it }
+                }
+            }
+        val model =
+            PlanSubscriptionViewModel(
+                "account-1",
+                GetCurrentSubscriptionQueryHandler(remote),
+                ListAvailablePlansQueryHandler(remote),
+                ChangeSubscriptionCommandHandler(remote),
+            )
+        model.onSelectPlan(essentialPlan)
+        model.onChangeRequest()
+        model.load()
+        model.onChangeConfirm()
+        pending!!.resume(
+            AppResult.Success(
+                Subscription("account-1", familyPlan, SubscriptionStatus.ACTIVE, null)
+            )
+        )
+        assertEquals(essentialPlan, model.state.value.subscription?.plan)
+        assertEquals(PlanChangeMessage.Updated, model.state.value.changeMessage)
     }
 }

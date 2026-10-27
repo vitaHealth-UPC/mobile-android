@@ -1,14 +1,24 @@
 package com.vitahealth.tata.intake.presentation.voice
 
-import com.vitahealth.tata.intake.application.*
 import com.vitahealth.tata.intake.application.commands.ConfirmDoseByVoiceCommand
+import com.vitahealth.tata.intake.application.commands.ConfirmDoseByVoiceCommandHandler
 import com.vitahealth.tata.intake.application.handlers.*
+import com.vitahealth.tata.intake.application.inputs.VoiceRecording
+import com.vitahealth.tata.intake.application.ports.DoseDetailRepository
+import com.vitahealth.tata.intake.application.ports.NextDoseRepository
+import com.vitahealth.tata.intake.application.ports.VoiceAudioRecorder
+import com.vitahealth.tata.intake.application.ports.VoiceConfirmationRepository
+import com.vitahealth.tata.intake.application.queries.GetDoseDetailQueryHandler
+import com.vitahealth.tata.intake.application.queries.GetNextDoseQueryHandler
 import com.vitahealth.tata.intake.application.readmodels.*
-import com.vitahealth.tata.intake.domain.model.DoseStatus
-import com.vitahealth.tata.intake.presentation.detail.ConfirmationOutcome
+import com.vitahealth.tata.intake.domain.model.valueobjects.DoseStatus
+import com.vitahealth.tata.intake.presentation.detail.viewmodel.ConfirmationOutcome
+import com.vitahealth.tata.intake.presentation.voice.viewmodel.VoiceConfirmationViewModel
+import com.vitahealth.tata.intake.presentation.voice.viewmodel.VoicePhase
 import com.vitahealth.tata.shared.common.result.AppResult
 import java.time.Instant
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.*
 import org.junit.Test
@@ -46,6 +56,8 @@ class VoiceConfirmationViewModelTest {
     private fun model(
         recorder: Recorder,
         answer: VoiceConfirmationReadModel,
+        gate: kotlinx.coroutines.CompletableDeferred<Unit>? = null,
+        onProviderFinished: () -> Unit = {},
     ): VoiceConfirmationViewModel {
         val details =
             object : DoseDetailRepository {
@@ -53,8 +65,16 @@ class VoiceConfirmationViewModelTest {
             }
         val voices =
             object : VoiceConfirmationRepository {
-                override suspend fun confirm(command: ConfirmDoseByVoiceCommand) =
-                    AppResult.Success(answer)
+                override suspend fun confirm(
+                    command: ConfirmDoseByVoiceCommand
+                ): AppResult<VoiceConfirmationReadModel> {
+                    try {
+                        gate?.await()
+                        return AppResult.Success(answer)
+                    } finally {
+                        onProviderFinished()
+                    }
+                }
             }
         val next =
             object : NextDoseRepository {
@@ -131,5 +151,37 @@ class VoiceConfirmationViewModelTest {
         )
         assertEquals(saved.confirmedAt, model.state.value.confirmation!!.dose.confirmedAt)
         model.cancelRecording()
+    }
+
+    @Test
+    fun cancelledAttemptCannotPublishDelayedProviderSuccess() = runBlocking {
+        val recorder = Recorder()
+        val gate = kotlinx.coroutines.CompletableDeferred<Unit>()
+        var providerFinished = false
+        val saved =
+            dose.copy(
+                status = DoseStatus.CONFIRMED,
+                confirmedAt = Instant.parse("2026-10-08T13:01:00Z"),
+            )
+        val model =
+            model(
+                recorder,
+                VoiceConfirmationReadModel(VoiceConfirmationStatus.CONFIRMED, saved),
+                gate,
+                onProviderFinished = { providerFinished = true },
+            )
+        model.start("es-419")
+        val operation =
+            kotlinx.coroutines.CoroutineScope(Dispatchers.Unconfined).launch {
+                model.finish("es-419")
+            }
+        assertEquals(VoicePhase.PROCESSING, model.state.value.phase)
+        model.cancelRecording()
+        assertTrue(providerFinished)
+        assertTrue(operation.isCancelled)
+        gate.complete(Unit)
+        operation.join()
+        assertEquals(VoicePhase.READY, model.state.value.phase)
+        assertNull(model.state.value.confirmation)
     }
 }
