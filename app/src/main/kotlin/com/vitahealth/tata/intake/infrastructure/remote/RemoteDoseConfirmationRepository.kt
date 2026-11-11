@@ -4,6 +4,7 @@ import com.vitahealth.tata.intake.application.commands.ConfirmDoseCommand
 import com.vitahealth.tata.intake.application.ports.DoseConfirmationRepository
 import com.vitahealth.tata.intake.application.readmodels.DoseDetailReadModel
 import com.vitahealth.tata.intake.domain.model.valueobjects.DoseStatus
+import com.vitahealth.tata.intake.domain.model.valueobjects.ConfirmationChannel
 import com.vitahealth.tata.shared.common.result.AppResult
 
 /** Accepts only an acknowledged outcome for the intake submitted by the caller. */
@@ -12,7 +13,13 @@ class RemoteDoseConfirmationRepository(private val api: IntakeApiService) :
     override suspend fun confirm(command: ConfirmDoseCommand): AppResult<DoseDetailReadModel> =
         try {
             val response =
-                api.confirmDose(command.intakeId, ConfirmIntakeRequest(command.channel.name))
+                api.confirmDose(
+                    command.intakeId,
+                    ConfirmIntakeRequest(
+                        command.channel.name,
+                        command.confirmedAt.toString().takeIf { command.channel == ConfirmationChannel.TOUCH },
+                    ),
+                )
             val body = response.body()
             if (response.isSuccessful) {
                 if (body == null || body.id != command.intakeId) invalidIntakeResponse()

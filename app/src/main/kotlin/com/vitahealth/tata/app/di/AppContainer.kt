@@ -136,7 +136,9 @@ class AppContainer(context: Context, private val baseUrl: String = BuildConfig.A
         monitoring.alertDetailViewModelFactory(caregiverId, olderAdultId, alertId)
 
     /** Omission owns FCM, device registration, local targets and access policy. */
-    private val omission = OmissionDependencies(applicationContext, sessions, sessions, baseUrl)
+    private val omission = OmissionDependencies(
+        applicationContext, sessions, sessions, baseUrl, BuildConfig.PUSH_REGISTRATION_ENABLED,
+    )
 
     fun canDisplayOmissionPush(push: OmissionPush): Boolean = omission.canDisplay(push)
 
