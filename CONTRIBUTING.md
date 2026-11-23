@@ -26,3 +26,11 @@ chore: configure room dependencies
 3. Presentation must not instantiate Retrofit services or DAOs.
 4. Commands and Queries belong to the Application layer.
 5. DTOs, Room entities and UI models must remain separate from domain models.
+
+## Testing
+
+Run the Android build and tests using the Gradle wrapper:
+
+```bash
+./gradlew :app:assembleDebug :app:testDebugUnitTest :app:assembleDebugAndroidTest
+```

@@ -667,6 +667,7 @@ class TreatmentLifecycleViewModelTest {
     @Test
     fun editingPausedRegimenPreservesServerLeadAndDoesNotResumeTreatment() {
         val calls = mutableListOf<String>()
+        var expectedLead = 7
         val repository =
             Proxy.newProxyInstance(
                 TreatmentLifecycleRepository::class.java.classLoader,
@@ -674,7 +675,7 @@ class TreatmentLifecycleViewModelTest {
             ) { _, method, args ->
                 calls += method.name
                 assertEquals("configureTreatment", method.name)
-                assertEquals(7, args[7])
+                assertEquals(expectedLead, args[7])
                 assertEquals(25, args[8])
                 AppResult.Success(
                     Treatment("treatment", "adult", "Control", TreatmentStatus.PAUSED)
@@ -724,8 +725,19 @@ class TreatmentLifecycleViewModelTest {
         assertEquals("2 tabletas", model.state.value.dosage)
         assertEquals(25, model.state.value.reminderDelayMinutes)
         assertEquals(true, model.state.value.regimenSaved)
+        assertEquals(7, model.state.value.reminderLeadMinutes)
+        expectedLead = 15
+        model.editRegimen("2 tabletas", "Diaria", "09:00", "Con agua", "25", "15")
+        assertEquals(15, model.state.value.reminderLeadMinutes)
+        assertEquals(TreatmentStatus.PAUSED, model.state.value.status)
+        assertEquals(listOf("configureTreatment", "configureTreatment"), calls)
+        for (invalidLead in listOf("", "-1", "1441", "not-a-number")) {
+            model.editRegimen("2 tabletas", "Diaria", "09:00", "Con agua", "25", invalidLead)
+            assertEquals(false, model.state.value.regimenSaved)
+            assertEquals(2, calls.size)
+        }
         model.editRegimen("2 tabletas", "Diaria", "09:00", "Con agua", "invalid")
         assertEquals(false, model.state.value.regimenSaved)
-        assertEquals(listOf("configureTreatment"), calls)
+        assertEquals(listOf("configureTreatment", "configureTreatment"), calls)
     }
 }

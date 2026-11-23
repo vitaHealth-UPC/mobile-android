@@ -25,6 +25,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -249,9 +250,17 @@ private fun ManageTreatment(
         )
         Text(
             listOf(
+                    state.reminderLeadMinutes.takeIf { it > 0 }?.let {
+                        stringResource(R.string.treatment_reminder_lead_summary, it)
+                    },
                     state.instructions.takeIf(String::isNotBlank),
-                    if (state.usesDefaultFollowUp) "Recordatorio del sistema"
-                    else "Recordatorio +${state.reminderDelayMinutes} min",
+                    if (state.usesDefaultFollowUp)
+                        stringResource(R.string.treatment_follow_up_default)
+                    else
+                        stringResource(
+                            R.string.treatment_follow_up_summary,
+                            state.reminderDelayMinutes,
+                        ),
                 )
                 .filterNotNull()
                 .joinToString(", "),

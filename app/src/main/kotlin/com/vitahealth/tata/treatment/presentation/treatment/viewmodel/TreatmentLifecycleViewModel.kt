@@ -200,6 +200,7 @@ class TreatmentLifecycleViewModel(
                     scheduleText = detail.scheduledTimes.joinToString(","),
                     instructions = detail.instructions,
                     reminderDelayMinutes = detail.followUpDelayMinutes ?: 0,
+                    reminderLeadMinutes = detail.reminderLeadMinutes ?: 0,
                     usesDefaultFollowUp = detail.followUpDelayMinutes == null,
                     isLoading = false,
                     isRefreshingManagement = false,
@@ -305,6 +306,7 @@ class TreatmentLifecycleViewModel(
         schedule: String,
         instructions: String,
         delay: String,
+        lead: String? = null,
     ) {
         val current = _state.value
         if (
@@ -315,6 +317,16 @@ class TreatmentLifecycleViewModel(
         )
             return
         val minutes = delay.trim().toIntOrNull()
+        val requestedLead = lead?.trim()?.toIntOrNull()
+        if (lead != null && (requestedLead == null || requestedLead !in 0..1440)) {
+            _state.update {
+                it.copy(
+                    errorMessage = "Usa una anticipación entre 0 y 1440 minutos.",
+                    regimenSaved = false,
+                )
+            }
+            return
+        }
         if ((delay.isNotBlank() && minutes == null) || (minutes != null && minutes !in 0..1440)) {
             _state.update {
                 it.copy(errorMessage = "Usa un plazo entre 0 y 1440 minutos.", regimenSaved = false)
@@ -346,7 +358,7 @@ class TreatmentLifecycleViewModel(
                 }
                 return@launch
             }
-            val leadMinutes = latest.value.reminderLeadMinutes ?: 0
+            val leadMinutes = requestedLead ?: latest.value.reminderLeadMinutes ?: 0
             val result =
                 configureTreatmentHandler(
                     ConfigureTreatmentCommand(
@@ -371,6 +383,7 @@ class TreatmentLifecycleViewModel(
                             scheduleText = schedule.trim(),
                             instructions = instructions.trim(),
                             reminderDelayMinutes = minutes ?: 0,
+                            reminderLeadMinutes = leadMinutes,
                             usesDefaultFollowUp = minutes == null,
                             regimenSaved = true,
                             status = result.value.status,

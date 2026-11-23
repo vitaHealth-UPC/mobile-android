@@ -8,7 +8,7 @@ import com.vitahealth.tata.R
 /**
  * Inter 4.001 from the existing licensed family, using genuine font masters.
  *
- * The standard face retains Codex's original subset. Additional weights share the
+ * The standard face uses the bundled font subset. Additional weights share the
  * same font version and optical size, avoiding synthetic weight interpolation.
  */
 val TataInterFontFamily =

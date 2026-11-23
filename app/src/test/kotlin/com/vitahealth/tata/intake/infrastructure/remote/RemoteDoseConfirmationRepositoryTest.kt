@@ -35,10 +35,23 @@ class RemoteDoseConfirmationRepositoryTest {
             RemoteDoseConfirmationRepository(api)
                 .confirm(ConfirmDoseCommand("intake-1", ConfirmationChannel.VOICE))
         assertEquals("VOICE", api.request?.channel)
+        assertNull(api.request?.confirmedAt)
         assertEquals("intake-1", api.id)
         val dose = (result as AppResult.Success).value
         assertEquals(DoseStatus.LATE, dose.status)
         assertEquals(Instant.parse("2026-10-06T13:02:00Z"), dose.confirmedAt)
+    }
+
+    @Test
+    fun touchReplaySendsTheOriginalActionInstant() = runBlocking {
+        val api = FakeApi(Response.success(confirmed))
+        val action = Instant.parse("2026-10-06T13:00:00Z")
+        val command = ConfirmDoseCommand("intake-1", ConfirmationChannel.TOUCH, action)
+        val repository = RemoteDoseConfirmationRepository(api)
+        repository.confirm(command)
+        assertEquals(action.toString(), api.request?.confirmedAt)
+        repository.confirm(command)
+        assertEquals(action.toString(), api.request?.confirmedAt)
     }
 
     @Test

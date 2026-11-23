@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="treatment_reminder_lead_label">Reminder lead time (min)</string>
+    <string name="treatment_reminder_lead_help">Between 0 and 1440 minutes before the dose.</string>
+    <string name="treatment_reminder_lead_summary">reminder %1$d min before</string>
+    <string name="treatment_follow_up_default">System follow-up</string>
+    <string name="treatment_follow_up_summary">follow-up +%1$d min</string>
+</resources>

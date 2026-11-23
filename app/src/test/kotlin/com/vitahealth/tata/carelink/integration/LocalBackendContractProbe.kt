@@ -38,6 +38,12 @@ object LocalBackendContractProbe {
             )
         val retrofit = ApiClientFactory.create(baseUrl) { store.accessToken() }
         try {
+            ClinicalJourneyContractProbe.verify(
+                retrofit,
+                ApiClientFactory.create(baseUrl) { context.getProperty("adultToken") },
+                caregiver,
+                adult,
+            )
             val profileApi = retrofit.create(CareLinkApiService::class.java)
             val before = profileApi.getOlderAdult(adult)
             check(before.code() == 200) { "Authorized profile read failed: HTTP ${before.code()}" }
